@@ -544,7 +544,7 @@ function renderPills() {
     const count = profile ? profile[size].length : 0;
     return `
       <button class="pill ${size === state.size ? 'on' : ''}" data-size="${size}">
-        <i class="swatch" style="--c:${SIZE_COLOR[size]}"></i>
+        <img class="art" src="${SIZE_IMG[size]}" alt="">
         ${size.toUpperCase()}
         ${count > 0 ? `<span class="n">${count}</span>` : ''}
       </button>`;
@@ -600,7 +600,7 @@ function renderCombos() {
           <div style="min-width:0">
             <div class="combo-chips">
               ${notableMarkup}
-              <span class="chip ${SIZE_TAG_CLASS[combo.size]}">#${combo.size}</span>
+              <span class="chip ${SIZE_TAG_CLASS[combo.size]}"><img class="art tiny" src="${SIZE_IMG[combo.size]}" alt="">#${combo.size}</span>
             </div>
             <div class="combo-sub">${meta}</div>
           </div>
@@ -738,7 +738,7 @@ function renderMeta() {
       <div class="mc-main">
         <div class="mc-title" title="${esc(c.label)}">${esc(c.label)}</div>
         <div class="mc-sub">
-          <span class="size-tag" style="--c:${SIZE_COLOR[c.size]}">${c.size.toUpperCase()}</span>
+          <span class="size-tag" style="--c:${SIZE_COLOR[c.size]}"><img class="art tiny" src="${SIZE_IMG[c.size]}" alt="">${c.size.toUpperCase()}</span>
           <span>${c.buildCount} builds</span>
           <span>·</span>
           <span class="skills" title="${esc(c.skills.join(', '))}">${esc(c.skills.join(' · ') || '—')}</span>

@@ -135,12 +135,18 @@ with Segoe UI Semibold for headings, matching what the site renders as on Window
 
 #### Artwork
 
-Icons are inline SVG (no icon font, no network). Cluster jewels and the logo are generated for
-this project. Ascendancy and class portraits in `preview/assets/asc/` and
-`Resources/Images/asc_*.png` are extracted from [Path of
-Building](https://github.com/PathOfBuildingCommunity/PathOfBuilding) — the art itself belongs to
-Grinding Gear Games and is used here the same way poe.ninja uses it, as identification for a
-free, non-commercial fan tool. Replace or drop them if that is a problem for your use.
+Icons are inline SVG (no icon font, no network). The logo is generated for this project.
+Everything else is real Path of Exile art, so the cluster jewels and class portraits look
+exactly like the game's own inventory icons:
+
+* cluster jewel icons (`preview/assets/cluster_*.png`, `Resources/Images/cluster_*.png`) come
+  from [ExileCraft](https://github.com/jmduea/ExileCraft) (MIT);
+* ascendancy and class portraits (`preview/assets/asc/`, `Resources/Images/asc_*.png`) come from
+  [Path of Building](https://github.com/PathOfBuildingCommunity/PathOfBuilding) (GPL-3.0).
+
+The art itself belongs to Grinding Gear Games and is used here the way poe.ninja uses it, as
+identification for a free, non-commercial fan tool. Replace or drop it if that is a problem for
+your use.
 
 ---
 

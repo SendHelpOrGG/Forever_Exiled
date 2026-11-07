@@ -54,9 +54,17 @@ public sealed partial class PillItem : ObservableObject
         Label = label;
         _countText = countText;
         Command = new RelayCommand(() => onSelected(this));
+        // only the cluster-size pills carry item art
+        SizeImage = Enum.TryParse<ClusterSize>(key, ignoreCase: true, out var size)
+            ? Palette.ImageForClusterSize(size)
+            : string.Empty;
     }
 
     public string Key { get; }
+
+    public string SizeImage { get; }
+
+    public bool HasSizeImage => SizeImage.Length > 0;
 
     public string Label { get; }
 

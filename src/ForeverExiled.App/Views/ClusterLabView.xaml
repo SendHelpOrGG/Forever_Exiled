@@ -189,6 +189,11 @@
                                         <TapGestureRecognizer Command="{Binding Command}" />
                                     </Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
+                                        <Image Source="{Binding SizeImage}"
+                                               WidthRequest="16" HeightRequest="16"
+                                               Aspect="AspectFit"
+                                               IsVisible="{Binding HasSizeImage}"
+                                               VerticalOptions="Center" />
                                         <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
                                         <Label Text="{Binding CountText}" Style="{StaticResource PillCount}" IsVisible="{Binding HasCount}" />
                                     </HorizontalStackLayout>

@@ -696,3 +696,10 @@ input[type="range"]::-moz-range-thumb {
   .table-head .th:nth-child(3), .table-head .th:nth-child(4),
   .trow > :nth-child(3), .trow > :nth-child(4) { display: none; }
 }
+
+/* cluster jewel art inside pills and chips */
+img.art { width: 17px; height: 17px; object-fit: contain; flex: none; }
+img.art.tiny { width: 13px; height: 13px; margin-right: 4px; }
+.pill img.art { margin-right: 1px; }
+.chip img.art.tiny, .size-tag img.art.tiny { display: inline-block; vertical-align: -3px; }
+.size-tag { display: inline-flex; align-items: center; }

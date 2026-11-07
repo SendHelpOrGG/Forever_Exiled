@@ -81,5 +81,5 @@ This folder is a design aid, not part of the shipped application and not referen
 | Path | What it is |
 | --- | --- |
 | `assets/logo.png` | Project mark (generated). |
-| `assets/cluster_{large,medium,small}.png` | Cluster jewel tiles (generated, transparent). |
+| `assets/cluster_{large,medium,small}.png` | Real in-game cluster jewel icons (transparent), so pills and combo cards match the item art. Art from ExileCraft / Grinding Gear Games. |
 | `assets/asc/<class>.jpg` | Ascendancy and base-class portraits, shown next to every class name. Art from Path of Building / Grinding Gear Games. |
