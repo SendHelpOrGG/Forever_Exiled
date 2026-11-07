@@ -155,7 +155,32 @@ craftofexile.com reads - built into `preview/assets/notable_weights.json` by
 `tools/build_notable_weights.py` and compiled into `Theming/NotableWeights.g.cs` by
 `tools/sync_notable_weights.py`. Notables are only ever shown with the weight of the pool their
 own jewel rolls from; the demo snapshot is regenerated so every jewel sits on a real base with
-its notables drawn from that base's pool.
+its notables drawn from that base's pool. Each notable also prints the game's **mod tags**
+(`fire`, `ailment`, `elemental damage`...) - the tags fossils, harvest and influences key off.
+
+### Crafting options
+
+Because the weights are known, the app can say what a jewel costs to craft. Picking a
+combination in the lab prices it in the "Crafting" card: the three cheapest routes, each with
+the expected number of tries and the currency that goes into them.
+
+| Route | Assumption | Currency per attempt |
+| --- | --- | --- |
+| Alt + Aug | magic jewel: one prefix + one suffix | 1 Alt + ½ Aug |
+| Chaos Orb | rare jewel: two prefixes + two suffixes (three of a type when the jewel needs it) | 1 Chaos |
+| Harvest Reforge | same pool odds as a chaos roll | 1 reforge |
+| Fossil (3-socket) | odds treat the fossils as neutral | 1 resonator + 3 fossils |
+| Alt → Regal | alt to the first notable, then one regal per cycle for the second | alts + 1 regal |
+
+Tries are `1 / chance`, where a notable's chance is its weight over its own affix pool and a
+route's chance is the joint probability of every notable landing in its slots. Costs are tries
+times the price of one attempt; prices live in `preview/assets/currency_costs.json` for the
+preview and `Theming/CurrencyPrices.cs` for the app. **They are hand-maintained placeholders, not
+live prices** - edit them for your league.
+
+Two honest limits: fossils are priced but not weighted (the game's fossil table is not in the
+bundled data, so fossil rows assume the fossils neither boost nor block anything), and a rare
+roll is modelled as up to three prefixes/suffixes rather than the full affix distribution.
 
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI

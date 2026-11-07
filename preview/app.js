@@ -72,6 +72,11 @@ const fmt = {
     return t + '%';
   },
   count(v) { return Number(v).toLocaleString('en-US'); },
+  chaos(v) {
+    if (!Number.isFinite(v) || v <= 0) return '–';
+    if (v >= 1000) return trimNum(v / 1000) + 'K c';
+    return (v >= 100 ? Math.round(v) : parseFloat(v.toFixed(1))) + ' c';
+  },
 };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
@@ -326,6 +331,8 @@ const state = {
   query: '',
   sort: 'dps',
   selectedSkill: null,
+  combos: [],
+  selectedCombo: 0,
   size: 'Medium',
   floor: 1,
   metaSize: 'all',
@@ -391,6 +398,23 @@ async function loadNotableText() {
 }
 
 let notableWeights = null;
+let currencyCosts = null;
+
+async function loadCurrencyCosts() {
+  try {
+    const response = await fetch('assets/currency_costs.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    const data = await response.json();
+    currencyCosts = data;
+  } catch {
+    currencyCosts = null;
+  }
+}
+
+function priceOf(key) {
+  const table = currencyCosts && currencyCosts.currency ? currencyCosts.currency : null;
+  return table && typeof table[key] === 'number' ? table[key] : 0;
+}
 
 async function loadNotableWeights() {
   try {
@@ -421,12 +445,20 @@ function poolInfo(tag, size) {
   const category = notableWeights.categories[tag];
   if (!category) return null;
 
-  return {
-    tag,
-    label: category.label,
-    total: category.totals[size] || category.totals[Object.keys(category.totals)[0]] || 0,
-    count: category.notables.length,
-  };
+  // prefix and suffix slots roll from separate pools, so a notable is weighed
+  // against its own affix type
+  const totals = {};
+  for (const kind of ['Prefix', 'Suffix']) {
+    const slot = category.pools ? category.pools[kind] : null;
+    totals[kind] = slot ? (slot.total[size] || 0) : 0;
+  }
+
+  return { tag, label: category.label, size, totals, count: category.notables.length };
+}
+
+function poolTotalFor(pool, name) {
+  if (!pool) return 0;
+  return pool.totals[notableType(name)] || 0;
 }
 
 /* weight of one notable inside a pool, and the chance of rolling it */
@@ -456,10 +488,11 @@ function notablePool(name, size) {
 function weightLine(name, pool) {
   if (!pool) return '';
   const weight = notableWeight(name, pool.tag);
-  if (!weight) return '';
-  const chance = pool.total ? (weight * 100) / pool.total : 0;
+  const total = poolTotalFor(pool, name);
+  if (!weight || !total) return '';
+  const chance = (weight * 100) / total;
   const pct = chance >= 10 ? chance.toFixed(0) : chance.toFixed(1);
-  return `<span class="item-weight" title="${esc(pool.label)} pool · ${fmt.count(weight)} of ${fmt.count(pool.total)} weight">${fmt.count(weight)}<i>${pct}%</i></span>`;
+  return `<span class="item-weight" title="${esc(pool.label)} pool · ${fmt.count(weight)} of ${fmt.count(total)} weight">${fmt.count(weight)}<i>${pct}%</i></span>`;
 }
 
 function notableLines(name) {
@@ -687,7 +720,9 @@ function itemTipHtml(combo) {
   }
   const pool = poolInfo(poolFor(item.size ? item : combo), (item.size || combo.size));
   if (pool) {
-    mods.push(`<div class="item-pool" title="the pool this base rolls its notables from">${esc(pool.label)} pool · ${pool.count} notables · ${fmt.count(pool.total)} weight</div>`);
+    const split = [pool.totals.Prefix ? `${fmt.count(pool.totals.Prefix)} prefix` : '',
+      pool.totals.Suffix ? `${fmt.count(pool.totals.Suffix)} suffix` : ''].filter(Boolean).join(' / ');
+    mods.push(`<div class="item-pool" title="the pools this base rolls from">${esc(pool.label)} pool · ${pool.count} notables${split ? ' · ' + split + ' weight' : ''}</div>`);
   }
 
   for (const notable of combo.notables || []) {
@@ -698,6 +733,12 @@ function itemTipHtml(combo) {
       if (lines.reminder && lines.reminder.length) {
         mods.push(`<div class="item-reminder">${lines.reminder.map((line) => esc(line)).join('<br>')}</div>`);
       }
+    }
+
+    // the mod tags the game uses to gate this notable (fossils, harvest, influences)
+    const tags = notableTags(notable);
+    if (tags.length) {
+      mods.push(`<div class="item-tags">${tags.map((tag) => `<span class="item-tag">${esc(tag.replace(/_/g, ' '))}</span>`).join('')}</div>`);
     }
   }
   for (const small of item.smallGrants || []) mods.push(`<div class="item-mod">${esc(small)}</div>`);
@@ -852,6 +893,9 @@ function renderCombos() {
   const combos = profile ? profile[state.size] : [];
   if (!combos.length) {
     $('comboHint').textContent = '';
+    state.combos = [];
+    state.selectedCombo = 0;
+    renderCraftCard();
     const sampled = profile ? profile.sampledBuilds : 0;
     host.innerHTML = sampled > 0
       ? emptyState(`No ${state.size} clusters`,
@@ -867,6 +911,7 @@ function renderCombos() {
 
   host.innerHTML = combos.slice(0, 10).map((combo, i) => {
     const rank = i + 1;
+    const index = i;
     const share = max > 0 ? (combo.buildCount * 100) / max : 0;
     const notableMarkup = (combo.notables.length ? combo.notables : [combo.label])
       .map((n) => `<span class="notable">${esc(n)}</span>`)
@@ -879,7 +924,8 @@ function renderCombos() {
     ].filter(Boolean).join('<span class="dot"></span>');
 
     return `
-      <article class="combo ${rank === 1 ? 'leader' : ''}">
+      <article class="combo ${rank === 1 ? 'leader' : ''} ${index === state.selectedCombo ? 'on' : ''}"
+               data-index="${index}" role="button" tabindex="0">
         <div class="combo-art">
           <img src="${SIZE_IMG[combo.size]}" alt="">
           <span class="rank">${String(rank).padStart(2, '0')}</span>
@@ -915,7 +961,11 @@ function renderCombos() {
       </article>`;
   }).join('');
 
+  state.combos = combos.slice(0, 10);
+  if (state.selectedCombo >= state.combos.length) state.selectedCombo = 0;
+
   bindItemTips('#comboList .combo-art', combos.slice(0, 10));
+  renderCraftCard();
 }
 
 function emptyState(title, message, withButton) {
@@ -982,6 +1032,192 @@ function renderGlobalRail() {
       <div class="stat-row"><span class="k">Jewels catalogued</span><span class="v">${fmt.count(g.jewelsCatalogued)}</span></div>
       <div class="stat-row"><span class="k">Ladder builds</span><span class="v">${fmt.count(g.totalBuildsInLeague)}</span></div>
     </div>`;
+}
+
+/* ─────────────────────── crafting estimates ───────────────────────
+   Odds come straight from the spawn weights: a base rolls its affixes from one
+   prefix pool and one suffix pool, so the chance of a notable is its weight
+   divided by its pool. Costs are those odds times the price of one attempt. */
+
+const MAGIC_SLOTS = 1;   // magic cluster jewel: one prefix + one suffix
+const RARE_SLOTS = 2;    // rare cluster jewel: two prefixes + two suffixes
+
+function notableType(name) {
+  const entry = notableWeights && notableWeights.notables[String(name || '').trim().toLowerCase()];
+  return entry ? entry.type : '';
+}
+
+function notableTags(name) {
+  const entry = notableWeights && notableWeights.notables[String(name || '').trim().toLowerCase()];
+  return entry && entry.tags ? entry.tags : [];
+}
+
+/* Probability that all of `weights` show up within `slots` draws of their pool
+   (inclusion-exclusion, draws treated as independent). */
+function presenceChance(weights, total, slots) {
+  if (!weights.length) return 1;
+  if (!total) return 0;
+  const q = weights.map((w) => w / total);
+  // P(all present) = sum over subsets T of (-1)^|T| * P(none of T present)
+  let chance = 1;
+  for (let mask = 1; mask < 1 << q.length; mask += 1) {
+    let sum = 0;
+    let bits = 0;
+    for (let i = 0; i < q.length; i += 1) {
+      if (mask & (1 << i)) {
+        sum += q[i];
+        bits += 1;
+      }
+    }
+    const term = Math.pow(Math.max(0, 1 - sum), slots);
+    chance += bits % 2 ? -term : term;
+  }
+  return Math.max(0, Math.min(1, chance));
+}
+
+function craftTarget(combo) {
+  const tag = poolFor(combo);
+  if (!tag) return null;
+  const category = notableWeights.categories[tag];
+  if (!category) return null;
+
+  const targets = (combo.notables || []).map((name) => ({
+    name,
+    weight: notableWeight(name, tag) || 0,
+    type: notableType(name),
+  }));
+
+  return {
+    tag,
+    label: category.label,
+    size: combo.size,
+    targets,
+    prefixTotal: (category.pools.Prefix && category.pools.Prefix.total[combo.size]) || 0,
+    suffixTotal: (category.pools.Suffix && category.pools.Suffix.total[combo.size]) || 0,
+  };
+}
+
+/* The routes craftofexile ranks: each returns { tries, currency[], chaos }. */
+function craftRoutes(combo) {
+  const target = craftTarget(combo);
+  if (!target || !target.targets.length) return { target, routes: [] };
+
+  const prefix = target.targets.filter((t) => t.type === 'Prefix');
+  const suffix = target.targets.filter((t) => t.type === 'Suffix');
+  const unknown = target.targets.filter((t) => !t.weight || !t.type);
+  const routes = [];
+
+  const cost = (entries) => entries.reduce((sum, e) => sum + e.qty * priceOf(e.key), 0);
+  const currency = (entries) => entries.filter((e) => e.qty > 0).map((e) => ({ ...e, qty: Math.ceil(e.qty) }));
+
+  // 1. Alteration + Augmentation on a magic jewel
+  if (!unknown.length && prefix.length <= MAGIC_SLOTS && suffix.length <= MAGIC_SLOTS) {
+    const p = presenceChance(prefix.map((t) => t.weight), target.prefixTotal, MAGIC_SLOTS)
+      * presenceChance(suffix.map((t) => t.weight), target.suffixTotal, MAGIC_SLOTS);
+    if (p > 0) {
+      const tries = Math.ceil(1 / p);
+      const entries = currency([{ key: 'alteration', label: 'Alt', qty: tries },
+        { key: 'augmentation', label: 'Aug', qty: tries * 0.5 }]);
+      routes.push({ key: 'alt', name: 'Alt + Aug', note: 'magic jewel, 1 prefix + 1 suffix', tries, currency: entries, chaos: cost(entries) });
+    }
+  }
+
+  // 2-4. anything that rerolls a rare jewel: chaos, harvest, a 3-fossil resonator
+  // a rare can roll up to three affixes of a type; combos that need three are priced
+  // against that, and the note says so
+  const rarePrefixSlots = Math.min(3, Math.max(RARE_SLOTS, prefix.length));
+  const rareSuffixSlots = Math.min(3, Math.max(RARE_SLOTS, suffix.length));
+  const rareChance = presenceChance(prefix.map((t) => t.weight), target.prefixTotal, rarePrefixSlots)
+    * presenceChance(suffix.map((t) => t.weight), target.suffixTotal, rareSuffixSlots);
+  const rareNote = `rare jewel, ${rarePrefixSlots} prefix${rarePrefixSlots === 1 ? '' : 'es'} + ${rareSuffixSlots} suffix${rareSuffixSlots === 1 ? '' : 'es'}`;
+
+  if (rareChance > 0) {
+    const tries = Math.ceil(1 / rareChance);
+
+    const chaosEntries = currency([{ key: 'chaos', label: 'Chaos', qty: tries }]);
+    routes.push({ key: 'chaos', name: 'Chaos Orb', note: rareNote,
+      tries, currency: chaosEntries, chaos: cost(chaosEntries) });
+
+    const harvestEntries = currency([{ key: 'harvest_reforge', label: 'Reforge', qty: tries }]);
+    routes.push({ key: 'harvest', name: 'Harvest Reforge', note: 'reforge rare, same pool odds',
+      tries, currency: harvestEntries, chaos: cost(harvestEntries) });
+
+    const fossilEntries = currency([{ key: 'resonator', label: 'Resonator', qty: tries },
+      { key: 'fossil', label: 'Fossil', qty: tries * 3 }]);
+    routes.push({ key: 'fossil', name: 'Fossil (3-socket)', note: 'odds treat fossils as neutral',
+      tries, currency: fossilEntries, chaos: cost(fossilEntries) });
+  }
+
+  // 3. Alt to one notable, then Regal hoping for the other
+  if (!unknown.length && target.targets.length === 2) {
+    const [first, second] = target.targets;
+    const firstTotal = first.type === 'Prefix' ? target.prefixTotal : target.suffixTotal;
+    const secondTotal = second.type === 'Prefix' ? target.prefixTotal : target.suffixTotal;
+    const pFirst = firstTotal ? first.weight / firstTotal : 0;
+    const remaining = secondTotal - (second.type === first.type ? first.weight : 0);
+    // the regal adds one affix: half of the time it is the other type
+    const pRegal = remaining > 0 ? (second.type === first.type ? 0.5 : 1) * second.weight / remaining : 0;
+
+    if (pFirst > 0 && pRegal > 0) {
+      const regals = Math.ceil(1 / pRegal);
+      const alts = Math.ceil(regals * (1 / pFirst));
+      const entries = currency([{ key: 'alteration', label: 'Alt', qty: alts },
+        { key: 'augmentation', label: 'Aug', qty: alts * 0.5 },
+        { key: 'regal', label: 'Regal', qty: regals }]);
+      routes.push({ key: 'altregal', name: 'Alt → Regal', note: 'magic hit, then 1 regal per cycle', tries: regals, currency: entries, chaos: cost(entries) });
+    }
+  }
+
+  routes.sort((a, b) => a.chaos - b.chaos);
+  return { target, routes };
+}
+
+function fmtQty(value) {
+  return fmt.count(Math.max(1, Math.round(value)));
+}
+
+function renderCraftCard() {
+  const host = $('craftCard');
+  const combo = selectedCombo();
+
+  if (!combo) {
+    host.innerHTML = `${panel('Crafting')}
+      <div class="panel-body"><span class="cap">Select a combination to price the ways to craft it.</span></div>`;
+    return;
+  }
+
+  const { target, routes } = craftRoutes(combo);
+  const cheapest = routes.length ? routes[0].chaos : 0;
+
+  host.innerHTML = `
+    ${panel('Crafting', '<span class="cap">expected cost</span>')}
+    <div class="panel-body">
+      <div class="craft-target" title="${esc(combo.label)}">
+        <img src="${SIZE_IMG[combo.size]}" alt="">${esc(combo.label)}
+      </div>
+      ${routes.length ? routes.slice(0, 3).map((route, i) => `
+        <div class="craft-route ${i === 0 ? 'best' : ''}">
+          <div class="craft-head">
+            <b>${esc(route.name)}</b>
+            <span class="craft-tries">1 in ${fmtQty(route.tries)} tries</span>
+          </div>
+          <div class="craft-cost">
+            <span class="craft-list">${route.currency.map((e) => `${fmtQty(e.qty)} ${esc(e.label)}`).join(' · ')}</span>
+            <b>${esc(fmt.chaos(route.chaos))}</b>
+          </div>
+          <div class="bar"><i style="width:${cheapest ? (cheapest * 100) / route.chaos : 0}%;background:${i === 0 ? 'var(--green)' : 'var(--text-3)'}"></i></div>
+          <div class="craft-sub">${esc(route.note)}</div>
+        </div>`).join('') : '<div class="craft-empty">No route modelled: these notables do not all roll from this base’s pool.</div>'}
+      <div class="craft-note">
+        Odds from the game's spawn weights for ${esc(target ? target.label : 'this base')} ·
+        prices are placeholders in <code>assets/currency_costs.json</code>.
+      </div>
+    </div>`;
+}
+
+function selectedCombo() {
+  const combos = state.combos || [];
+  return combos[state.selectedCombo] || combos[0] || null;
 }
 
 function renderSizeCard() {
@@ -1086,8 +1322,9 @@ function renderMeta() {
             ${(() => {
               const pool = notablePool(n.name, n.size);
               const weight = pool ? notableWeight(n.name, pool.tag) : null;
-              if (!weight) return '';
-              const chance = pool.total ? (weight * 100) / pool.total : 0;
+              const total = poolTotalFor(pool, n.name);
+              if (!weight || !total) return '';
+              const chance = (weight * 100) / total;
               return `<div class="notable-meta">${esc(pool.label)} pool · weight ${fmt.count(weight)} · ${chance >= 10 ? chance.toFixed(0) : chance.toFixed(1)}% of pool</div>`;
             })()}
           </div>
@@ -1219,6 +1456,7 @@ function renderAll() {
 function setSize(size) {
   if (!SIZES.includes(size)) return;
   state.size = size;
+  state.selectedCombo = 0;
   renderPills();
   renderHero();
   renderCombos();
@@ -1229,6 +1467,7 @@ function setSize(size) {
 
 function selectSkill(name) {
   state.selectedSkill = name;
+  state.selectedCombo = 0;
   renderSkillRail();
   renderHero();
   renderPills();
@@ -1349,7 +1588,16 @@ function wire() {
   });
 
   $('comboList').addEventListener('click', (e) => {
-    if (e.target.closest('[data-analyze]')) simulateAnalyze();
+    if (e.target.closest('[data-analyze]')) {
+      simulateAnalyze();
+      return;
+    }
+
+    const card = e.target.closest('.combo');
+    if (card && card.dataset.index != null) {
+      state.selectedCombo = Number(card.dataset.index);
+      renderCombos();
+    }
   });
 
   $('analyzeBtn').addEventListener('click', simulateAnalyze);
@@ -1482,6 +1730,7 @@ async function boot() {
   await loadGemIndex();
   await loadNotableText();
   await loadNotableWeights();
+  await loadCurrencyCosts();
 
   state.snapshot = snapshot;
   state.floor = snapshot.minPopularityPercent || 1;

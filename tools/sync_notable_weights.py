@@ -71,8 +71,24 @@ def main() -> int:
     lines.append('    private static readonly Dictionary<string, int> PoolTotals = new(StringComparer.OrdinalIgnoreCase)')
     lines.append("    {")
     for tag, category in sorted(categories.items()):
-        for size, total in sorted(category["totals"].items()):
-            lines.append(f"        [{cs_text(f'{tag}|{size}')}] = {total},")
+        for kind, slot in sorted(category.get("pools", {}).items()):
+            for size, total in sorted(slot["total"].items()):
+                lines.append(f"        [{cs_text(f'{tag}|{size}|{kind}')}] = {total},")
+    lines.append("    };")
+    lines.append("")
+
+    lines.append('    private static readonly Dictionary<string, string> Types = new(StringComparer.OrdinalIgnoreCase)')
+    lines.append("    {")
+    for key, entry in sorted(notables.items()):
+        lines.append(f"        [{cs_text(key)}] = {cs_text(entry.get('type', ''))},")
+    lines.append("    };")
+    lines.append("")
+
+    lines.append('    private static readonly Dictionary<string, string[]> Tags = new(StringComparer.OrdinalIgnoreCase)')
+    lines.append("    {")
+    for key, entry in sorted(notables.items()):
+        tags = ", ".join(cs_text(t) for t in entry.get("tags", []))
+        lines.append(f"        [{cs_text(key)}] = new[] {{ {tags} }},")
     lines.append("    };")
     lines.append("")
 
@@ -155,15 +171,26 @@ def main() -> int:
     public static int PoolNotables(string? tag) =>
         tag is not null && PoolCounts.TryGetValue(tag, out var count) ? count : 0;
 
-    public static int PoolTotal(string? tag, string? size)
+    /// <summary>Weight of one affix pool ("Prefix"/"Suffix") for a size.</summary>
+    public static int PoolTotal(string? tag, string? size, string? kind)
     {
         if (tag is null)
         {
             return 0;
         }
 
-        return PoolTotals.TryGetValue(tag + "|" + (size ?? string.Empty), out var total) ? total : 0;
+        return PoolTotals.TryGetValue(tag + "|" + (size ?? string.Empty) + "|" + (kind ?? string.Empty), out var total)
+            ? total
+            : 0;
     }
+
+    /// <summary>Prefix or Suffix - the slot a notable occupies.</summary>
+    public static string TypeFor(string? notable) =>
+        notable is not null && Types.TryGetValue(notable.Trim(), out var type) ? type : string.Empty;
+
+    /// <summary>The game's mod tags for a notable (fossils, harvest and influences key off these).</summary>
+    public static string[] TagsFor(string? notable) =>
+        notable is not null && Tags.TryGetValue(notable.Trim(), out var tags) ? tags : Array.Empty<string>();
 
     public static int WeightFor(string? notable, string? tag)
     {
@@ -174,7 +201,7 @@ def main() -> int:
     /// <summary>Chance of rolling this notable, as a percentage of its base's pool.</summary>
     public static double ChancePercent(string? notable, string? tag, string? size)
     {
-        var total = PoolTotal(tag, size);
+        var total = PoolTotal(tag, size, TypeFor(notable));
         return total <= 0 ? 0 : WeightFor(notable, tag) * 100.0 / total;
     }
 

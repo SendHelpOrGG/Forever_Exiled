@@ -1,0 +1,16 @@
+{
+  "note": "Chaos-equivalent prices for the crafting estimates. Hand-maintained placeholders, NOT live prices - edit them to match your league.",
+  "updated": "2026-11-07",
+  "source": "placeholder",
+  "currency": {
+    "chaos": 1.0,
+    "alteration": 0.12,
+    "augmentation": 0.08,
+    "regal": 0.6,
+    "alchemy": 0.5,
+    "scouring": 0.4,
+    "harvest_reforge": 3.0,
+    "resonator": 1.2,
+    "fossil": 1.5
+  }
+}

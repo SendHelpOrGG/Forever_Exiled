@@ -215,6 +215,24 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="CraftRoute" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}" />
+        <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="10,9" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="3" />
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsBest}" Value="True">
+                <Setter Property="Stroke" Value="{StaticResource AccentBrush}" />
+                <Setter Property="Background" Value="{StaticResource AccentTintBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="SizeRowCard" TargetType="Border">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Stroke" Value="Transparent" />

@@ -74,6 +74,9 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Per-size adoption of the selected skill, shown in the rail card.</summary>
     public ObservableCollection<SizeAdoptionItem> SizeAdoption { get; } = new();
 
+    /// <summary>Crafting routes for the combination selected in the list.</summary>
+    public ObservableCollection<CraftRouteItem> CraftRoutes { get; } = new();
+
     public ObservableCollection<PillItem> SortPills { get; }
 
     public ObservableCollection<PillItem> DepthPills { get; } = new();
@@ -202,6 +205,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _sizeAdoptionHeaderText = string.Empty;
+
+    [ObservableProperty]
+    private string _craftTargetText = string.Empty;
 
     [ObservableProperty]
     private bool _hasCombos;

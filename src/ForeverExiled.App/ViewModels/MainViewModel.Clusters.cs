@@ -127,6 +127,7 @@ public partial class MainViewModel
         SelectedSkillSampleText = string.Empty;
         CanAnalyze = false;
         Combos.Clear();
+        SelectCraftCombo(null);
         HasCombos = false;
         ShowComboEmptyState = true;
         ComboEmptyTitle = "Nothing matches that filter";
@@ -148,8 +149,11 @@ public partial class MainViewModel
         var rank = 1;
         foreach (var combo in combos.Take(10))
         {
-            Combos.Add(new ComboItem(combo, rank++, profile?.SampledBuilds ?? 0, maxBuilds, showSkills: false));
+            Combos.Add(new ComboItem(combo, rank++, profile?.SampledBuilds ?? 0, maxBuilds, showSkills: false, SelectCraftCombo));
         }
+
+        // the first combination is priced until another one is picked
+        SelectCraftCombo(Combos.FirstOrDefault());
 
         HasCombos = Combos.Count > 0;
         ShowComboEmptyState = !HasCombos;
@@ -204,6 +208,27 @@ public partial class MainViewModel
             var count = profile?.ForSize(size).Count ?? 0;
             pill.CountText = count > 0 ? count.ToString() : string.Empty;
             pill.IsSelected = size == CurrentSize;
+        }
+    }
+
+    private void SelectCraftCombo(ComboItem? item)
+    {
+        foreach (var combo in Combos)
+        {
+            combo.IsCrafted = ReferenceEquals(combo, item);
+        }
+
+        CraftRoutes.Clear();
+        CraftTargetText = item is null ? "No combination selected" : item.Label;
+
+        if (item is null)
+        {
+            return;
+        }
+
+        foreach (var route in CraftingMath.Routes(item.Combo))
+        {
+            CraftRoutes.Add(route);
         }
     }
 

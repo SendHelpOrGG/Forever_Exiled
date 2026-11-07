@@ -38,12 +38,14 @@ const snapshot = JSON.parse(read('data/demo-snapshot.json'));
 const gemIndex = JSON.parse(read('assets/gems/index.json'));
 const notables = JSON.parse(read('assets/notables.json'));
 const weights = JSON.parse(read('assets/notable_weights.json'));
+const costs = JSON.parse(read('assets/currency_costs.json'));
 window.fetch = (url) => Promise.resolve({
   ok: true,
   json: async () => {
     const target = String(url);
     if (target.includes('gems/index.json')) return gemIndex;
     if (target.includes('notable_weights.json')) return weights;
+    if (target.includes('currency_costs.json')) return costs;
     if (target.includes('notables.json')) return notables;
     return snapshot;
   },
@@ -134,13 +136,16 @@ setTimeout(() => {
     !!tip && qa('.item-tip .item-mod-desc').length > 0,
     tip ? (qa('.item-tip .item-mod-desc')[0] || {}).textContent : 'missing');
   check('item card names the cluster base pool',
-    /pool · \d+ notables · [\d,]+ weight/.test(txt('.item-tip .item-pool')),
+    /pool · \d+ notables · [\d,]+ (prefix|suffix)/.test(txt('.item-tip .item-pool')),
     txt('.item-tip .item-pool'));
   const notableMods = qa('.item-tip .item-mod').filter((n) => /^1 Added Passive Skill is /.test(n.textContent.trim()));
   const weightBadges = qa('.item-tip .item-weight');
   check('every notable on the card carries its weight',
     notableMods.length > 0 && weightBadges.length === notableMods.length,
     `${weightBadges.length} weights for ${notableMods.length} notables`);
+  check('notables list the mod tags the game gates them with',
+    qa('.item-tip .item-tag').length > 0 && !/\s/.test(q('.item-tip .item-tag').textContent.trim().split(' ')[0] || ''),
+    qa('.item-tip .item-tag').map((n) => n.textContent).join(', '));
   check('the weight badge also gives the odds of rolling it',
     weightBadges.every((n) => /\d+\s*\d+(\.\d+)?%/.test(n.textContent.replace(/\s+/g, ' ').trim())),
     weightBadges.map((n) => n.textContent.trim()).join(' | '));
@@ -194,6 +199,39 @@ setTimeout(() => {
   click(largeRow);
   check('clicking a size row ranks that size', txt('#comboHeader').includes('LARGE'), txt('#comboHeader'));
   click(qa('#mixCard .size-row').find((r) => r.querySelector('b').textContent === 'Medium'));
+
+  /* ── crafting: expected tries and currency per route ── */
+  const craftCard = q('#craftCard');
+  const routeRows = qa('#craftCard .craft-route');
+  check('crafting card prices the selected jewel', routeRows.length > 0,
+    txt('#craftCard .craft-target'));
+  check('every route states the number of tries',
+    routeRows.every((r) => /1 in [\d,]+ tries/.test(r.textContent)),
+    routeRows.map((r) => (r.querySelector('.craft-tries') || {}).textContent).join(' | '));
+  check('every route lists the currency it spends',
+    routeRows.every((r) => /\d[\d,]* (Chaos|Alt|Aug|Regal|Reforge|Resonator|Fossil)/.test(r.textContent)),
+    routeRows.map((r) => (r.querySelector('.craft-list') || {}).textContent).join(' | '));
+  const routeCosts = routeRows.map((r) => parseFloat(r.querySelector('.craft-cost b').textContent.replace(/[^\d.]/g, '')));
+  check('routes are ranked cheapest first', routeCosts.every((c, i) => i === 0 || c >= routeCosts[i - 1]),
+    routeCosts.join(' <= '));
+  check('at most the three best routes are shown', routeRows.length <= 3, routeRows.length + ' routes');
+
+  const firstTries = parseInt(qa('#craftCard .craft-tries')[0].textContent.replace(/[^\d]/g, ''), 10);
+  const firstChaos = parseFloat(qa('#craftCard .craft-cost b')[0].textContent.replace(/[^\d.]/g, ''));
+  check('cost follows the price table, not a guess',
+    firstChaos > 0 && firstTries > 0 && firstChaos <= firstTries * 100,
+    `${firstTries} tries → ${firstChaos}c`);
+
+  const otherCombo = qa('#comboList .combo')[1];
+  const beforeTarget = txt('#craftCard .craft-target');
+  click(otherCombo);
+  check('selecting another combination re-prices the card',
+    txt('#craftCard .craft-target') !== beforeTarget,
+    beforeTarget + ' → ' + txt('#craftCard .craft-target'));
+  check('the selected combination is highlighted',
+    qa('#comboList .combo.on').length === 1 && q('#comboList .combo.on').dataset.index === '1',
+    qa('#comboList .combo.on').length + ' highlighted');
+  click(qa('#comboList .combo')[0]);
 
   /* ── weights must be complete: every demo jewel rolls a real pool ── */
   const norm = (t) => String(t).toLowerCase().replace(/[\d.]+%?/g, ' ').replace(/\s+/g, ' ').trim();

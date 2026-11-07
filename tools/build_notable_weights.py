@@ -51,9 +51,15 @@ def parse_numbers(raw: str) -> list[int]:
     return [int(v.strip()) for v in raw.split(",") if v.strip()]
 
 
-def build_notables(path: Path) -> tuple[dict, dict]:
+def build_notables(path: Path) -> tuple[dict, dict, dict]:
+    """Every cluster mod that rolls from a base pool: notables plus the small-passive grants.
+
+    Weights decide the odds of a given notable coming up, so the pools have to contain
+    everything that competes for the same affix slot - not just the notables.
+    """
     notables: dict[str, dict] = {}
     tag_totals: dict[str, dict[str, int]] = {}
+    pool_meta: dict[str, dict] = {}
 
     for line in path.read_text(encoding="utf-8").splitlines():
         head = ENTRY.match(line)
@@ -61,48 +67,53 @@ def build_notables(path: Path) -> tuple[dict, dict]:
             continue
         mod_id, body = head.group(1), head.group(2)
 
-        # notables ship as either prefix "Notable" mods or "of Significance" suffixes
         text = TEXT.match(body)
         if not text:
             continue
-        matched = NOTABLE_TEXT.match(text.group(3).strip())
-        if not matched:
-            continue
-        name = matched.group(1).strip()
+        kind, affix, mod_text = text.group(1), text.group(2), text.group(3).strip()
 
-        fields = dict(CONST.findall(body))
         arrays = {k: v for k, v in ARRAY.findall(body)}
-
         keys = parse_list(arrays.get("weightKey", ""))
         values = parse_numbers(arrays.get("weightVal", ""))
         weights = {k: v for k, v in zip(keys, values) if v > 0 and k != "default"}
+        if not weights:
+            continue
 
         mult_keys = parse_list(arrays.get("weightMultiplierKey", ""))
         mult_values = parse_numbers(arrays.get("weightMultiplierVal", ""))
         multipliers = dict(zip(mult_keys, mult_values))
-
-        # a size is available when its expansion_jewel_* multiplier is not zero
         sizes = [label for key, label in SIZES.items() if multipliers.get(key, 100) > 0]
 
-        level = NUMBER.search(body)
+        for tag, weight in weights.items():
+            bucket = tag_totals.setdefault(tag, {})
+            meta = pool_meta.setdefault(tag, {}).setdefault(kind, {"total": {}})
+            for size in sizes:
+                bucket[size] = bucket.get(size, 0) + weight
+                meta["total"][size] = meta["total"].get(size, 0) + weight
+
+            meta["total"][""] = meta["total"].get("", 0) + weight
+
+        notable = NOTABLE_TEXT.match(mod_text)
+        if not notable:
+            continue
+
+        levels = NUMBER.search(body)
+        tags = parse_list(arrays.get("modTags", ""))
+        name = notable.group(1).strip()
         notables[name.lower()] = {
             "id": mod_id,
             "name": name,
-            "level": int(level.group(2)) if level else 0,
-            "group": fields.get("group", ""),
+            "type": kind,
+            "level": int(levels.group(2)) if levels else 0,
+            "tags": tags,
             "weights": weights,
             "sizes": sizes,
         }
 
-        for tag, weight in weights.items():
-            bucket = tag_totals.setdefault(tag, {})
-            for size in sizes:
-                bucket[size] = bucket.get(size, 0) + weight
-
-    return notables, tag_totals
+    return notables, tag_totals, pool_meta
 
 
-def build_categories(path: Path, notables: dict, tag_totals: dict) -> tuple[dict, dict]:
+def build_categories(path: Path, notables: dict, tag_totals: dict, pool_meta: dict) -> tuple[dict, dict]:
     """Read the [tag] blocks that sit under each jewel size in ClusterJewels.lua.
 
     A tag block only appears under the size it belongs to (projectile damage lives
@@ -139,10 +150,20 @@ def build_categories(path: Path, notables: dict, tag_totals: dict) -> tuple[dict
                 "sizes": [],
                 "grants": {},
                 "totals": {},
+                "pools": {},
                 "notables": sorted(
                     (n["name"] for n in notables.values() if n["weights"].get(current)),
                     key=str.lower),
             })
+
+            # prefix and suffix slots draw from separate pools, so keep them apart:
+            # a magic jewel can only hold one notable of each type
+            for kind, meta in pool_meta.get(current, {}).items():
+                slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0})
+
+            for kind, meta in pool_meta.get(current, {}).items():
+                slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0})
+                slot["total"][size] = meta["total"].get(size, 0)
 
             if size and size not in entry["sizes"]:
                 entry["sizes"].append(size)
@@ -162,6 +183,11 @@ def build_categories(path: Path, notables: dict, tag_totals: dict) -> tuple[dict
 
         body.append(line)
 
+    for tag, entry in categories.items():
+        for kind in list(entry["pools"]):
+            entry["pools"][kind]["count"] = sum(
+                1 for n in notables.values() if n["weights"].get(tag) and n["type"] == kind)
+
     order = {"Large": 0, "Medium": 1, "Small": 2}
     for entry in categories.values():
         entry["sizes"].sort(key=lambda s: order.get(s, 9))
@@ -173,8 +199,8 @@ def main() -> int:
     mods_path = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/ModJewelCluster.lua")
     jewels_path = Path(sys.argv[2] if len(sys.argv) > 2 else "/tmp/ClusterJewels.lua")
 
-    notables, tag_totals = build_notables(mods_path)
-    categories, grants = build_categories(jewels_path, notables, tag_totals)
+    notables, tag_totals, pool_meta = build_notables(mods_path)
+    categories, grants = build_categories(jewels_path, notables, tag_totals, pool_meta)
 
     payload = {
         "source": "Path of Building game data (ModJewelCluster.lua + ClusterJewels.lua)",

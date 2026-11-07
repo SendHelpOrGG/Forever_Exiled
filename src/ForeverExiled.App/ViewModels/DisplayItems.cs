@@ -217,10 +217,11 @@ public sealed partial class SkillCardItem : ObservableObject
 }
 
 /// <summary>A ranked cluster-jewel combination card.</summary>
-public sealed class ComboItem
+public sealed partial class ComboItem : ObservableObject
 {
-    public ComboItem(ClusterCombo combo, int rank, int sampleSize, int maxBuildCount, bool showSkills)
+    public ComboItem(ClusterCombo combo, int rank, int sampleSize, int maxBuildCount, bool showSkills, Action<ComboItem>? onSelected = null)
     {
+        Combo = combo;
         Rank = rank;
         RankText = rank.ToString("00");
         Label = combo.Label;
@@ -248,7 +249,11 @@ public sealed class ComboItem
         Chips = combo.Notables.Count > 0
             ? combo.Notables.Select(n => new ChipItem(n)).ToList()
             : new List<ChipItem> { new(combo.Label) };
+
+        Command = new RelayCommand(() => onSelected?.Invoke(this));
     }
+
+    public ClusterCombo Combo { get; }
 
     public int Rank { get; }
 
@@ -300,6 +305,12 @@ public sealed class ComboItem
 
     public bool IsLeader { get; }
 
+    public RelayCommand Command { get; }
+
+    /// <summary>The combination the crafting card is currently priced for.</summary>
+    [ObservableProperty]
+    private bool _isCrafted;
+
     /// <summary>
     /// The item card for the hover tooltip: the jewel as the game/site presents it
     /// (name, base type, passives, mods, item level, flags) plus the analysis figures.
@@ -349,21 +360,35 @@ public sealed class ComboItem
             mods.Add("Added Small Passive Skills have " + combo.EffectPercent + "% increased Effect");
         }
 
-        // the pool this base rolls from, then how heavy each notable is inside it
-        var pool = NotableWeights.PoolFor(combo.Size.ToString(), combo.GrantType);
-        var poolTotal = NotableWeights.PoolTotal(pool, combo.Size.ToString());
-        if (pool is not null && poolTotal > 0)
+        // the pools this base rolls from, then how heavy each notable is inside its own
+        var size = combo.Size.ToString();
+        var pool = NotableWeights.PoolFor(size, combo.GrantType);
+        var prefixTotal = NotableWeights.PoolTotal(pool, size, "Prefix");
+        var suffixTotal = NotableWeights.PoolTotal(pool, size, "Suffix");
+        if (pool is not null && (prefixTotal > 0 || suffixTotal > 0))
         {
-            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables · {poolTotal:N0} weight");
+            var split = string.Join(" / ", new[]
+            {
+                prefixTotal > 0 ? $"{prefixTotal:N0} prefix" : string.Empty,
+                suffixTotal > 0 ? $"{suffixTotal:N0} suffix" : string.Empty,
+            }.Where(part => part.Length > 0));
+
+            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables · {split} weight");
         }
 
         foreach (var notable in combo.Notables)
         {
             var weight = NotableWeights.WeightFor(notable, pool);
-            var chance = NotableWeights.ChancePercent(notable, pool, combo.Size.ToString());
+            var chance = NotableWeights.ChancePercent(notable, pool, size);
             var suffix = weight > 0 ? $"    ({weight:N0} weight · {chance:0.#}% of pool)" : string.Empty;
 
             mods.Add("1 Added Passive Skill is " + notable + suffix);
+
+            var tags = NotableWeights.TagsFor(notable);
+            if (tags.Length > 0)
+            {
+                mods.Add("    tags: " + string.Join(", ", tags.Select(tag => tag.Replace('_', ' '))));
+            }
             foreach (var stat in NotableText.StatsFor(notable))
             {
                 mods.Add("    " + stat);
