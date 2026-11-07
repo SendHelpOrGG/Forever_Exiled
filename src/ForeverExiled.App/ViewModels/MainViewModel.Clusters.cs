@@ -225,6 +225,8 @@ public partial class MainViewModel
         {
             CraftTargetText = "No combination selected";
             CraftLevelText = string.Empty;
+            CraftPoolText = string.Empty;
+            CraftEndgameText = string.Empty;
             return;
         }
 
@@ -236,6 +238,24 @@ public partial class MainViewModel
         var level = CraftingMath.MinimumItemLevel(item.Combo);
         CraftTargetText = item.Label;
         CraftLevelText = $"needs iLvl {level} · priced on an iLvl {level} base";
+
+        var size = item.Combo.Size.ToString();
+        var tag = NotableWeights.PoolFor(size, item.Combo.GrantType);
+        var prefixTotal = NotableWeights.PoolTotal(tag, size, "Prefix", level);
+        var suffixTotal = NotableWeights.PoolTotal(tag, size, "Suffix", level);
+        CraftPoolText = prefixTotal + suffixTotal > 0
+            ? $"{NotableWeights.PoolLabel(tag)} pool at iLvl {level}: {prefixTotal:N0} prefix / {suffixTotal:N0} suffix weight"
+            : string.Empty;
+
+        // an iLvl 86 base rolls a bigger pool, so the same craft is harder - and that is the
+        // number every other calculator shows, because that is the base people buy
+        const int endgameLevel = 86;
+        var endgame = level < endgameLevel ? CraftingMath.Routes(item.Combo, endgameLevel) : Array.Empty<CraftRouteItem>();
+        // other calculators price an iLvl 84+ base and lead with alt -> regal
+        var sameRoute = endgame.FirstOrDefault(route => route.Name == "Alt → Regal") ?? endgame.FirstOrDefault();
+        CraftEndgameText = sameRoute is null
+            ? string.Empty
+            : $"{sameRoute.Name} on an iLvl {endgameLevel} base ≈ {CraftRouteItem.ChaosLabel(sameRoute.Chaos)}";
 
         foreach (var route in CraftingMath.Routes(item.Combo))
         {

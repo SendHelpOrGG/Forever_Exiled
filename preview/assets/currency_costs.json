@@ -1,16 +1,17 @@
 {
-  "note": "Chaos-equivalent prices for the crafting estimates. Hand-maintained placeholders, NOT live prices - edit them to match your league.",
+  "note": "Chaos-equivalent prices for the crafting card. Edit them to match your league. The defaults follow the league craftofexile.com priced its cluster-jewel methods in, where an Orb of Augmentation is worth about a chaos.",
   "updated": "2026-11-07",
   "source": "placeholder",
   "currency": {
     "chaos": 1.0,
-    "alteration": 0.12,
-    "augmentation": 0.08,
-    "regal": 0.6,
-    "alchemy": 0.5,
-    "scouring": 0.4,
+    "alteration": 0.18,
+    "augmentation": 1.0,
+    "regal": 1.0,
+    "alchemy": 1.0,
+    "scouring": 1.0,
     "harvest_reforge": 3.0,
     "resonator": 1.2,
-    "fossil": 1.5
+    "fossil": 1.5,
+    "transmutation": 1.0
   }
 }

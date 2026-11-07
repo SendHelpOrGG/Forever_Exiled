@@ -12,17 +12,16 @@ public sealed record CraftCurrency(string Label, int Quantity);
 /// </summary>
 public sealed class CraftRouteItem
 {
-    public CraftRouteItem(string name, string note, int tries, IReadOnlyList<CraftCurrency> currency, double chaos, double cheapest)
+    public CraftRouteItem(string name, string note, string unit, int tries, IReadOnlyList<CraftCurrency> currency, double chaos, double cheapest)
     {
         Name = name;
         Note = note;
+        Unit = unit;
         Tries = tries;
         Chaos = chaos;
-        TriesText = $"1 in {tries:N0} tries";
+        TriesText = $"1 in {tries:N0} {unit}";
         CurrencyText = string.Join(" · ", currency.Select(line => $"{line.Quantity:N0} {line.Label}"));
-        ChaosText = chaos >= 1000 ? $"{chaos / 1000:0.#}K c"
-            : chaos >= 100 ? $"{Math.Round(chaos):0} c"
-            : $"{chaos:0.#} c";
+        ChaosText = ChaosLabel(chaos);
         BarPercent = chaos > 0 && cheapest > 0 ? cheapest * 100 / chaos : 0;
         IsBest = Math.Abs(chaos - cheapest) < 0.001;
     }
@@ -32,6 +31,9 @@ public sealed class CraftRouteItem
     public string Note { get; }
 
     public int Tries { get; }
+
+    /// <summary>"tries" for a whole-item reroll, "cycles" for one alt→regal attempt.</summary>
+    public string Unit { get; }
 
     public double Chaos { get; }
 
@@ -44,6 +46,11 @@ public sealed class CraftRouteItem
     public double BarPercent { get; }
 
     public bool IsBest { get; }
+
+    /// <summary>"642 c" / "6.6K c" - one format for every figure the card prints.</summary>
+    public static string ChaosLabel(double chaos) => chaos >= 1000 ? $"{chaos / 1000:0.#}K c"
+        : chaos >= 100 ? $"{Math.Round(chaos):0} c"
+        : $"{chaos:0.#} c";
 }
 
 /// <summary>
@@ -71,7 +78,12 @@ public static class CraftingMath
         return level;
     }
 
-    public static IReadOnlyList<CraftRouteItem> Routes(ClusterCombo combo)
+    /// <param name="combo">The combination being priced.</param>
+    /// <param name="itemLevel">
+    /// Force a base level; the default (0) prices the cheapest iLvl that still rolls every
+    /// notable, which is the base a crafter would buy for this one combination.
+    /// </param>
+    public static IReadOnlyList<CraftRouteItem> Routes(ClusterCombo combo, int itemLevel = 0)
     {
         var size = combo.Size.ToString();
         var tag = NotableWeights.PoolFor(size, combo.GrantType);
@@ -82,7 +94,7 @@ public static class CraftingMath
 
         // price the base a crafter would actually buy: the lowest iLvl that rolls them all,
         // which also means the smallest pool
-        var minimumLevel = MinimumItemLevel(combo);
+        var minimumLevel = itemLevel > 0 ? itemLevel : MinimumItemLevel(combo);
         var prefixTotal = NotableWeights.PoolTotal(tag, size, "Prefix", minimumLevel);
         var suffixTotal = NotableWeights.PoolTotal(tag, size, "Suffix", minimumLevel);
 
@@ -110,7 +122,7 @@ public static class CraftingMath
             }
         }
 
-        var routes = new List<(string Name, string Note, int Tries, CraftCurrency[] Lines)>();
+        var routes = new List<(string Name, string Unit, string Note, int Tries, CraftCurrency[] Lines)>();
 
         // 1. Alteration + Augmentation on a magic jewel
         if (!unknown && prefixWeights.Count <= MagicSlots && suffixWeights.Count <= MagicSlots)
@@ -124,10 +136,10 @@ public static class CraftingMath
                 var lines = new[]
                 {
                     new CraftCurrency("Alt", tries),
-                    new CraftCurrency("Aug", Half(tries)),
+                    new CraftCurrency("Aug", (int)Math.Ceiling(tries * 0.45)),
                 };
 
-                routes.Add(("Alt + Aug", "magic jewel, 1 prefix + 1 suffix", tries, lines));
+                routes.Add(("Alt + Aug", "tries", "magic jewel, 1 prefix + 1 suffix — no regal needed", tries, lines));
             }
         }
 
@@ -144,49 +156,64 @@ public static class CraftingMath
             var tries = TriesFor(rareChance);
 
             var chaosLines = new[] { new CraftCurrency("Chaos", tries) };
-            routes.Add(("Chaos Orb", rareNote, tries, chaosLines));
+            routes.Add(("Chaos Orb", "tries", rareNote, tries, chaosLines));
 
             var harvestLines = new[] { new CraftCurrency("Reforge", tries) };
-            routes.Add(("Harvest Reforge", "reforge rare, same pool odds", tries, harvestLines));
+            routes.Add(("Harvest Reforge", "tries", "reforge rare, same pool odds", tries, harvestLines));
 
             var fossilLines = new[]
             {
                 new CraftCurrency("Resonator", tries),
                 new CraftCurrency("Fossil", tries * 3),
             };
-            routes.Add(("Fossil (3-socket)", "odds treat fossils as neutral", tries, fossilLines));
+            routes.Add(("Fossil (3-socket)", "tries", "odds treat fossils as neutral", tries, fossilLines));
         }
 
-        // 5. Alt to the first notable, then regal hoping for the second
-        if (!unknown && combo.Notables.Count == 2)
+        // 5. Alt -> Regal. The magic jewel chases one target of each type; the regal then has
+        // to add the single target that is left, and a miss scours the item back to magic.
+        // A cycle is one hunt plus one regal, so cycles are set by the regal alone and the
+        // alt count is how many rolls each hunt needs.
+        if (!unknown && combo.Notables.Count >= 2 && prefixWeights.Count <= 2 && suffixWeights.Count <= 2)
         {
-            var first = combo.Notables[0];
-            var second = combo.Notables[1];
-            var firstType = NotableWeights.TypeFor(first);
-            var secondType = NotableWeights.TypeFor(second);
-            var firstTotal = firstType == "Prefix" ? prefixTotal : suffixTotal;
-            var secondTotal = secondType == "Prefix" ? prefixTotal : suffixTotal;
-            var firstWeight = NotableWeights.WeightFor(first, tag);
-            var secondWeight = NotableWeights.WeightFor(second, tag);
+            var magicPrefix = prefixWeights.Take(1).ToList();
+            var magicSuffix = suffixWeights.Take(1).ToList();
+            var missingPrefixes = prefixWeights.Skip(1).ToList();
+            var missingSuffixes = suffixWeights.Skip(1).ToList();
+            var missing = missingPrefixes.Count + missingSuffixes.Count;
 
-            var firstChance = firstTotal > 0 ? (double)firstWeight / firstTotal : 0;
-            var remaining = secondTotal - (secondType == firstType ? firstWeight : 0);
-            var regalChance = remaining > 0
-                ? (secondType == firstType ? 0.5 : 1.0) * secondWeight / remaining
-                : 0;
-
-            if (firstChance > 0 && regalChance > 0)
+            if (missing == 1)
             {
-                var regals = TriesFor(regalChance);
-                var alts = (int)Math.Ceiling(regals / firstChance);
-                var lines = new[]
-                {
-                    new CraftCurrency("Alt", alts),
-                    new CraftCurrency("Aug", Half(alts)),
-                    new CraftCurrency("Regal", regals),
-                };
+                // either prefix may be the one the magic stage lands, so chase all of them
+                var chasePrefixes = prefixWeights.Count == 2 ? prefixWeights : magicPrefix;
+                var pMagic = (chasePrefixes.Count > 0 ? Sum(chasePrefixes) / (double)Math.Max(1, prefixTotal) : 1)
+                    * (magicSuffix.Count > 0 ? Sum(magicSuffix) / (double)Math.Max(1, suffixTotal) : 1);
 
-                routes.Add(("Alt → Regal", "magic hit, then 1 regal per cycle", regals, lines));
+                var needPrefix = missingPrefixes.Count == 1;
+                var needWeight = needPrefix ? missingPrefixes[0] : missingSuffixes[0];
+                var pool = needPrefix ? prefixTotal : suffixTotal;
+                var otherPool = needPrefix ? suffixTotal : prefixTotal;
+                // a regal rolls a mod of either type, so only its share of the pools can help
+                var typeShare = pool + otherPool > 0 ? pool / (double)(pool + otherPool) : 0.5;
+                var spent = needPrefix ? Sum(magicPrefix) : Sum(magicSuffix);
+                var pRegal = pool - spent > 0 ? typeShare * needWeight / (double)(pool - spent) : 0;
+
+                if (pMagic > 0 && pRegal > 0)
+                {
+                    var cycles = TriesFor(pRegal);
+                    var alts = (int)Math.Ceiling(cycles / pMagic);
+                    var augs = (int)Math.Ceiling(alts * 0.45);
+                    var note = $"{alts / Math.Max(1, cycles)} alts per cycle, then 1 regal · ≈ {(alts + augs):N0} orbs rolled";
+                    var lines = new[]
+                    {
+                        new CraftCurrency("Alt", alts),
+                        new CraftCurrency("Aug", augs),
+                        new CraftCurrency("Regal", cycles),
+                        new CraftCurrency("Scour", cycles),
+                        new CraftCurrency("Transmute", cycles),
+                    };
+
+                    routes.Add(("Alt → Regal", "cycles", note, cycles, lines));
+                }
             }
         }
 
@@ -196,7 +223,7 @@ public static class CraftingMath
         }
 
         var ranked = routes
-            .Select(route => (route.Name, route.Note, route.Tries, route.Lines, Chaos: Cost(route.Lines)))
+            .Select(route => (route.Name, route.Unit, route.Note, route.Tries, route.Lines, Chaos: Cost(route.Lines)))
             .OrderBy(route => route.Chaos)
             .Take(3)
             .ToList();
@@ -204,7 +231,7 @@ public static class CraftingMath
         var cheapest = ranked[0].Chaos;
 
         return ranked
-            .Select(route => new CraftRouteItem(route.Name, route.Note, route.Tries, route.Lines, route.Chaos, cheapest))
+            .Select(route => new CraftRouteItem(route.Name, route.Note, route.Unit, route.Tries, route.Lines, route.Chaos, cheapest))
             .ToList();
     }
 
@@ -225,6 +252,8 @@ public static class CraftingMath
         "Alt" => CurrencyPrices.Alteration,
         "Aug" => CurrencyPrices.Augmentation,
         "Regal" => CurrencyPrices.Regal,
+        "Scour" => CurrencyPrices.Scouring,
+        "Transmute" => CurrencyPrices.Transmutation,
         "Reforge" => CurrencyPrices.HarvestReforge,
         "Resonator" => CurrencyPrices.Resonator,
         "Fossil" => CurrencyPrices.Fossil,
@@ -233,7 +262,7 @@ public static class CraftingMath
 
     private static int TriesFor(double chance) => (int)Math.Max(1, Math.Ceiling(1 / chance));
 
-    private static int Half(int value) => (int)Math.Ceiling(value * 0.5);
+    private static int Sum(IEnumerable<int> values) => values.Sum();
 
     /// <summary>Probability that every weight shows up within <paramref name="slots"/> draws.</summary>
     private static double PresenceChance(IReadOnlyList<int> weights, int total, int slots)

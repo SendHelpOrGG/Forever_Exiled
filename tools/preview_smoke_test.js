@@ -138,7 +138,10 @@ setTimeout(() => {
     !!tip && qa('.item-tip .item-mod-desc').length > 0,
     tip ? (qa('.item-tip .item-mod-desc')[0] || {}).textContent : 'missing');
   check('item card names the cluster base pool',
-    /pool · \d+ notables · [\d,]+ (prefix|suffix)/.test(txt('.item-tip .item-pool')),
+    /pool · \d+ notables( \+ \d+ small-passive mods)? · [\d,]+ (prefix|suffix)/.test(txt('.item-tip .item-pool')),
+    txt('.item-tip .item-pool'));
+  check('the pool counts the generic small-passive mods, not just the notables',
+    /\+ \d+ small-passive mods/.test(txt('.item-tip .item-pool')),
     txt('.item-tip .item-pool'));
   const notableMods = qa('.item-tip .item-mod').filter((n) => /^1 Added Passive Skill is /.test(n.textContent.trim()));
   const weightBadges = qa('.item-tip .item-weight');
@@ -227,8 +230,15 @@ setTimeout(() => {
   check('crafting card prices the selected jewel', routeRows.length > 0,
     txt('#craftCard .craft-target'));
   check('every route states the number of tries',
-    routeRows.every((r) => /1 in [\d,]+ tries/.test(r.textContent)),
+    routeRows.every((r) => /1 in [\d,]+ (tries|cycles)/.test(r.textContent)),
     routeRows.map((r) => (r.querySelector('.craft-tries') || {}).textContent).join(' | '));
+  check('the alt to regal route counts cycles, not magic rolls',
+    routeRows.filter((r) => /Alt → Regal/.test(r.textContent)).every((r) => /1 in [\d,]+ cycles/.test(r.textContent)),
+    routeRows.map((r) => (r.querySelector('.craft-tries') || {}).textContent).join(' | '));
+  check('alt to regal only appears when a magic jewel can hold all but one target',
+    routeRows.filter((r) => /Alt → Regal/.test(r.textContent))
+      .every((r) => /Scour/.test(r.textContent) && /Transmute/.test(r.textContent)),
+    routeRows.filter((r) => /Alt → Regal/.test(r.textContent)).map((r) => r.textContent.replace(/\s+/g, ' ').slice(0, 80)).join(' | ') || 'no alt to regal route on this combo');
   check('every route lists the currency it spends',
     routeRows.every((r) => /\d[\d,]* (Chaos|Alt|Aug|Regal|Reforge|Resonator|Fossil)/.test(r.textContent)),
     routeRows.map((r) => (r.querySelector('.craft-list') || {}).textContent).join(' | '));
@@ -271,6 +281,31 @@ setTimeout(() => {
   check('a lower item level shrinks the pool', !!gatedPoints && gatedPoints.length > 1
       && gatedPoints[0][1] < gatedPoints[gatedPoints.length - 1][1],
     gatedPoints ? `${gatedPoints[0][1]} at iLvl ${gatedPoints[0][0]} → ${gatedPoints[gatedPoints.length - 1][1]} at iLvl ${gatedPoints[gatedPoints.length - 1][0]}` : 'missing');
+
+  // the pool must count the generic small-passive mods, not just the notables: without them
+  // a specific notable looks ~2.4x more likely than craftofexile.com says it is
+  const pooledSlots = Object.values(weights.categories)
+    .flatMap((c) => Object.values(c.pools || {}).map((slot) => ({ slot, cat: c })));
+  const withGenerics = pooledSlots.filter(({ slot }) => Object.values(slot.total.generic || {}).some((w) => w > 0));
+  check('pools include the generic small-passive mods that share the affix slot',
+    withGenerics.length > 0, `${withGenerics.length} of ${pooledSlots.length} pools carry generic weight`);
+  check('the pool total is the tag weight plus the generic weight',
+    pooledSlots.every(({ slot }) => Object.entries(slot.total)
+      .filter(([size, value]) => size !== 'tag' && size !== 'generic' && typeof value === 'number')
+      .every(([size, value]) => value === (slot.total.tag[size] || 0) + (slot.total.generic[size] || 0))),
+    pooledSlots.length + ' pools checked');
+  check('a notable is well under 2% of its own pool at endgame item level',
+    (() => {
+      const sample = weights.categories['affliction_fire_damage_over_time_multiplier'];
+      const points = sample.pools.Prefix.levels.Medium;
+      const total = points[points.length - 1][1];
+      return 137 / total < 0.02 && total > 12000;
+    })(),
+    (() => {
+      const sample = weights.categories['affliction_fire_damage_over_time_multiplier'];
+      const points = sample.pools.Prefix.levels.Medium;
+      return `137 of ${points[points.length - 1][1]} prefix weight = ${(137 / points[points.length - 1][1] * 100).toFixed(2)}%`;
+    })());
 
   const firstTries = parseInt(qa('#craftCard .craft-tries')[0].textContent.replace(/[^\d]/g, ''), 10);
   const firstChaos = parseFloat(qa('#craftCard .craft-cost b')[0].textContent.replace(/[^\d.]/g, ''));

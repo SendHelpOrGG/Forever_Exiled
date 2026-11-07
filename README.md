@@ -148,8 +148,15 @@ though Windows draws the chrome.
 Every notable also carries its **spawn weight**. A cluster jewel base ("12% increased Fire
 Damage", "10% increased Projectile Damage") rolls its notables from one pool, and each notable
 has a weight inside that pool - so the card prints the pool ("Fire Damage over Time pool · 18
-notables · 5,995 weight") and, next to each notable, its weight and the odds of rolling it
-(Exposure Therapy 733 · 12%, Cooked Alive 137 · 2.3%). The numbers come from the game's mod data
+notables + 51 small-passive mods · 13,195 prefix / 14,150 suffix weight at iLvl 86") and, next to
+each notable, its weight and the odds of rolling it (Exposure Therapy 733 · 5.6%, Cooked Alive
+137 · 1.0%).
+
+The pool is **not just the notables**. The generic small-passive grants every cluster jewel can
+roll ("Added Small Passive Skills also grant: +3 to maximum Life") compete for the same affix
+slot, and they carry most of the weight: 7,200 of that 13,195 prefix pool on a medium base. Leave
+them out and a specific notable looks 2.4x more likely than it is, which is the difference
+between an alt→regal chain costing 4.6K chaos and the 6.6K craftofexile.com reports. The numbers come from the game's mod data
 via Path of Building's `ModJewelCluster.lua` + `ClusterJewels.lua` - the same `spawn_weights`
 craftofexile.com reads - built into `preview/assets/notable_weights.json` by
 `tools/build_notable_weights.py` and compiled into `Theming/NotableWeights.g.cs` by
@@ -175,7 +182,7 @@ the expected number of tries and the currency that goes into them.
 | Chaos Orb | rare jewel: two prefixes + two suffixes (three of a type when the jewel needs it) | 1 Chaos |
 | Harvest Reforge | same pool odds as a chaos roll | 1 reforge |
 | Fossil (3-socket) | odds treat the fossils as neutral | 1 resonator + 3 fossils |
-| Alt → Regal | alt to the first notable, then one regal per cycle for the second | alts + 1 regal |
+| Alt → Regal | the magic jewel chases one target of each type, the regal must add the last one | alts + ½ alts of Aug + 1 Regal + 1 Scour + 1 Transmute per cycle |
 
 A jewel can only roll a notable once its item level reaches the notable's level, so the card
 names the **minimum iLvl** for the combination (the highest level among its notables) and prices
@@ -184,15 +191,36 @@ pool: an iLvl 68 base cannot roll the notables that need 75, so the same combina
 hit than on the iLvl 86 one already in the build. The item card weighs its notables at the
 actual item's own level instead, and says so ("at iLvl 86").
 
-Tries are `1 / chance`, where a notable's chance is its weight over its own affix pool and a
-route's chance is the joint probability of every notable landing in its slots. Costs are tries
-times the price of one attempt; prices live in `preview/assets/currency_costs.json` for the
-preview and `Theming/CurrencyPrices.cs` for the app. **They are hand-maintained placeholders, not
-live prices** - edit them for your league.
+A route's chance is the joint probability of every notable landing in the slots the item
+actually has: a magic jewel holds one prefix and one suffix, a rare one up to three of each. That
+distinction matters most for Alt → Regal, which cannot put two notables of the same type on a
+magic jewel - the magic stage lands one, and the regal has to land the other, or the cycle scours
+back and starts again. What a cycle costs is therefore a burst of alts, a 45% share of augments,
+one regal, one scouring and one transmutation, and the card reports **cycles** for that route
+while `1 in N tries` is kept for the routes that reroll a whole item. Costs are counts times the
+price of one attempt; prices live in `preview/assets/currency_costs.json` for the preview and
+`Theming/CurrencyPrices.cs` for the app. **They are hand-maintained placeholders, not live
+prices** - edit them for your league. The defaults follow the league craftofexile.com priced its
+methods in (alteration 0.18 c, augmentation, regal, transmutation and scouring 1 c each), because
+augment-heavy routes only look expensive next to realistic prices.
+
+Because the level sets the pool, the card gives two figures: the **minimum iLvl** base (cheapest
+legal base, smallest pool) and the same craft on an **iLvl 86** base, which is the base most
+crafters buy and the level other calculators use. For Cooked Alive + Wasting Affliction on a
+medium Fire Damage over Time base:
+
+| | iLvl 68 base (card headline) | iLvl 86 base | craftofexile.com |
+| --- | --- | --- | --- |
+| per-slot chance | 1.21% | 1.04% | 0.978% |
+| Alt → Regal cycles | 159 | 198 | 204 |
+| Orbs of Alteration | 6,586 | 9,536 | 10,239 |
+| Orbs of Augmentation | 2,964 | 4,291 | 4,179 |
+| total chaos | 4.6K c | 6.6K c | 6,635 c |
 
 Two honest limits: fossils are priced but not weighted (the game's fossil table is not in the
 bundled data, so fossil rows assume the fossils neither boost nor block anything), and a rare
-roll is modelled as up to three prefixes/suffixes rather than the full affix distribution.
+roll is modelled as two prefixes + two suffixes, widening to three when a combination needs
+three of a type, rather than the full affix distribution.
 
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI

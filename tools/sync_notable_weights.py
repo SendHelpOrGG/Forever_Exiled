@@ -73,6 +73,9 @@ def main() -> int:
     for tag, category in sorted(categories.items()):
         for kind, slot in sorted(category.get("pools", {}).items()):
             for size, total in sorted(slot["total"].items()):
+                # the totals block also carries the tag/generic split; only sizes are numbers
+                if not isinstance(total, int):
+                    continue
                 lines.append(f"        [{cs_text(f'{tag}|{size}|{kind}')}] = {total},")
     lines.append("    };")
     lines.append("")
@@ -84,6 +87,15 @@ def main() -> int:
             for size, points in sorted(slot.get("levels", {}).items()):
                 packed = "|".join(f"{level}:{weight}" for level, weight in points)
                 lines.append(f"        [{cs_text(f'{tag}|{size}|{kind}')}] = {cs_text(packed)},")
+    lines.append("    };")
+    lines.append("")
+
+    lines.append('    private static readonly Dictionary<string, int> PoolModCounts = new(StringComparer.OrdinalIgnoreCase)')
+    lines.append("    {")
+    for tag, category in sorted(categories.items()):
+        for kind, slot in sorted(category.get("pools", {}).items()):
+            count = slot.get("count", 0) + slot.get("genericCount", 0)
+            lines.append(f"        [{cs_text(f'{tag}|{kind}')}] = {count},")
     lines.append("    };")
     lines.append("")
 
@@ -187,6 +199,15 @@ def main() -> int:
 
     public static int PoolNotables(string? tag) =>
         tag is not null && PoolCounts.TryGetValue(tag, out var count) ? count : 0;
+
+    /// <summary>
+    /// How many mods compete for one affix slot: the base tag's notables plus the generic
+    /// small-passive grants that roll on every cluster jewel of that size.
+    /// </summary>
+    public static int PoolMods(string? tag, string? kind) =>
+        tag is not null && kind is not null && PoolModCounts.TryGetValue(tag + "|" + kind, out var count)
+            ? count
+            : 0;
 
     /// <summary>Weight of one affix pool ("Prefix"/"Suffix") for a size.</summary>
     public static int PoolTotal(string? tag, string? size, string? kind) =>

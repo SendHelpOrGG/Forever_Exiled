@@ -8,6 +8,20 @@ These are the same numbers craftofexile.com reads out of the game files: every
 cluster notable has a weight per cluster-jewel base tag, and the chance of rolling
 it is its weight divided by the weight of the whole pool for that base.
 
+A pool is more than the notables. Two other kinds of mod compete for the same prefix
+or suffix slot:
+
+  * the notables of the base tag ("1 Added Passive Skill is ..."), and
+  * the generic small-passive grants that roll on every cluster jewel of a size
+    ("Added Small Passive Skills also grant: +3 to maximum Life"). Those are keyed by
+    the size (expansion_jewel_medium) rather than by a tag, so they apply to every
+    base of that size and have to be added to every tag's pool.
+
+Leaving the generic mods out is the difference between a specific notable being a
+2.3% and a 1.2% roll on a medium cluster, which is the difference between ~85 and
+~200 alt->regal attempts. craftofexile.com on the same base (fire over time, item
+level 84+) reports 0.978% per slot; tag + generic at iLvl 86 gives 1.04% here.
+
     gh api repos/PathOfBuildingCommunity/PathOfBuilding/contents/src/Data/ModJewelCluster.lua \
         -H "Accept: application/vnd.github.raw" > /tmp/ModJewelCluster.lua
     gh api repos/PathOfBuildingCommunity/PathOfBuilding/contents/src/Data/ClusterJewels.lua \
@@ -63,6 +77,8 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
     # level -> weight, so a pool can be measured at an item level: a mod only
     # competes for a slot once the base's iLvl reaches its level
     pool_levels: dict[str, dict[str, dict[str, list]]] = {}
+    # kind -> size -> [(level, weight)] for the mods that are keyed by size only
+    generic_levels: dict[str, dict[str, list]] = {}
 
     for line in path.read_text(encoding="utf-8").splitlines():
         head = ENTRY.match(line)
@@ -91,6 +107,12 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
         level = int(levels_match.group(2)) if levels_match else 1
 
         for tag, weight in weights.items():
+            # a size key ("expansion_jewel_medium") is not a base tag: that mod rolls on
+            # every cluster jewel of that size, whichever enchant it carries
+            if tag in SIZES:
+                generic_levels.setdefault(kind, {}).setdefault(SIZES[tag], []).append((level, weight))
+                continue
+
             bucket = tag_totals.setdefault(tag, {})
             meta = pool_meta.setdefault(tag, {}).setdefault(kind, {"total": {}})
             for size in sizes:
@@ -116,10 +138,17 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
             "sizes": sizes,
         }
 
-    return notables, tag_totals, pool_meta, pool_levels
+    return notables, tag_totals, pool_meta, pool_levels, generic_levels
 
 
-def build_categories(path: Path, notables: dict, tag_totals: dict, pool_meta: dict, pool_levels: dict) -> tuple[dict, dict]:
+def build_categories(
+    path: Path,
+    notables: dict,
+    tag_totals: dict,
+    pool_meta: dict,
+    pool_levels: dict,
+    generic_levels: dict,
+) -> tuple[dict, dict]:
     """Read the [tag] blocks that sit under each jewel size in ClusterJewels.lua.
 
     A tag block only appears under the size it belongs to (projectile damage lives
@@ -169,19 +198,27 @@ def build_categories(path: Path, notables: dict, tag_totals: dict, pool_meta: di
 
             for kind, meta in pool_meta.get(current, {}).items():
                 slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0, "levels": {}})
-                slot["total"][size] = meta["total"].get(size, 0)
+                tagged = pool_levels.get(current, {}).get(kind, {}).get(size, [])
+                generic = generic_levels.get(kind, {}).get(size, [])
+                slot["total"].setdefault("tag", {})[size] = meta["total"].get(size, 0)
+                slot["total"].setdefault("generic", {})[size] = sum(w for _, w in generic)
+                slot["total"][size] = meta["total"].get(size, 0) + sum(w for _, w in generic)
 
                 # cumulative weight by item level: [[level, weight at or below it], ...]
-                entries = sorted(pool_levels.get(current, {}).get(kind, {}).get(size, []))
+                # both kinds of mod compete for the slot, so they share one curve
                 cumulative: list[list[int]] = []
                 running = 0
-                for mod_level, weight in entries:
+                for mod_level, weight in sorted(tagged + generic):
                     running += weight
                     if cumulative and cumulative[-1][0] == mod_level:
                         cumulative[-1][1] = running
                     else:
                         cumulative.append([mod_level, running])
                 slot["levels"][size] = cumulative
+
+            for kind in entry["pools"]:
+                pool = entry["pools"][kind]
+                pool["genericCount"] = len(generic_levels.get(kind, {}).get(size, []))
 
             if size and size not in entry["sizes"]:
                 entry["sizes"].append(size)
@@ -217,13 +254,18 @@ def main() -> int:
     mods_path = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/ModJewelCluster.lua")
     jewels_path = Path(sys.argv[2] if len(sys.argv) > 2 else "/tmp/ClusterJewels.lua")
 
-    notables, tag_totals, pool_meta, pool_levels = build_notables(mods_path)
-    categories, grants = build_categories(jewels_path, notables, tag_totals, pool_meta, pool_levels)
+    notables, tag_totals, pool_meta, pool_levels, generic_levels = build_notables(mods_path)
+    categories, grants = build_categories(
+        jewels_path, notables, tag_totals, pool_meta, pool_levels, generic_levels)
 
     payload = {
         "source": "Path of Building game data (ModJewelCluster.lua + ClusterJewels.lua)",
         "generated": date.today().isoformat(),
-        "note": "Chance of a notable = its weight / the total weight of the pool for that base tag.",
+        "note": (
+            "Chance of a notable = its weight / the weight of every mod that competes for the same "
+            "affix slot on that base: the base tag's notables plus the generic small-passive "
+            "grants that roll on any cluster jewel of that size."
+        ),
         "categories": categories,
         "grants": grants,
         "notables": dict(sorted(notables.items())),

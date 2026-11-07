@@ -429,7 +429,12 @@ public sealed partial class ComboItem : ObservableObject
             }.Where(part => part.Length > 0));
 
             var levelText = itemLevel > 0 ? $" at iLvl {itemLevel}" : string.Empty;
-            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables · {split} weight{levelText}");
+            // the pool is the notables *plus* the generic small-passive grants: both compete
+            // for the same affix slot, so leaving the generic mods out doubles the odds
+            var generic = NotableWeights.PoolMods(pool, "Prefix") + NotableWeights.PoolMods(pool, "Suffix")
+                - (2 * NotableWeights.PoolNotables(pool));
+            var genericText = generic > 0 ? $" + {generic} small-passive mods" : string.Empty;
+            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables{genericText} · {split} weight{levelText}");
         }
 
         foreach (var notable in combo.Notables)

@@ -215,6 +215,14 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _craftLevelText = string.Empty;
 
+    /// <summary>The pool the odds are measured against, so the numbers can be checked.</summary>
+    [ObservableProperty]
+    private string _craftPoolText = string.Empty;
+
+    /// <summary>What the same craft costs on an iLvl 86 base, the level other calculators price.</summary>
+    [ObservableProperty]
+    private string _craftEndgameText = string.Empty;
+
     [ObservableProperty]
     private bool _hasCombos;
 

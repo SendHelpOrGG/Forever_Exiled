@@ -507,7 +507,14 @@ function poolInfo(tag, size, iLvl) {
     totals[kind] = poolTotalAt(category.pools ? category.pools[kind] : null, size, iLvl);
   }
 
-  return { tag, label: category.label, size, ilvl: iLvl || 0, totals, count: category.notables.length };
+  // how many mods compete for each slot: the tag's notables plus the generic grants
+  const generic = {};
+  for (const kind of ['Prefix', 'Suffix']) {
+    const slot = category.pools ? category.pools[kind] : null;
+    generic[kind] = slot && slot.genericCount ? slot.genericCount : 0;
+  }
+
+  return { tag, label: category.label, size, ilvl: iLvl || 0, totals, generic, count: category.notables.length };
 }
 
 function notableLevel(name) {
@@ -782,7 +789,11 @@ function itemTipHtml(combo) {
     const split = [pool.totals.Prefix ? `${fmt.count(pool.totals.Prefix)} prefix` : '',
       pool.totals.Suffix ? `${fmt.count(pool.totals.Suffix)} suffix` : ''].filter(Boolean).join(' / ');
     const levelText = item.itemLevel ? ` at iLvl ${item.itemLevel}` : '';
-    mods.push(`<div class="item-pool" title="the pools this base rolls from">${esc(pool.label)} pool · ${pool.count} notables${split ? ' · ' + split + ' weight' + levelText : ''}</div>`);
+    // the pool is the notables *plus* the generic small-passive grants: both compete for
+    // the same affix slot, so leaving the generic mods out doubles every notable's odds
+    const generic = (pool.generic.Prefix || 0) + (pool.generic.Suffix || 0);
+    const genericText = generic ? ` + ${generic} small-passive mods` : '';
+    mods.push(`<div class="item-pool" title="the pools this base rolls from">${esc(pool.label)} pool · ${pool.count} notables${genericText}${split ? ' · ' + split + ' weight' + levelText : ''}</div>`);
   }
 
   for (const notable of combo.notables || []) {
@@ -1100,7 +1111,8 @@ function renderGlobalRail() {
    divided by its pool. Costs are those odds times the price of one attempt. */
 
 const MAGIC_SLOTS = 1;   // magic cluster jewel: one prefix + one suffix
-const RARE_SLOTS = 2;    // rare cluster jewel: two prefixes + two suffixes
+const RARE_SLOTS = 2;    // a rare jewel is priced as two prefixes + two suffixes
+const RARE_CAP = 3;      // ... and a cluster jewel can hold three of a type if a combo needs it
 
 function notableType(name) {
   const entry = notableWeights && notableWeights.notables[String(name || '').trim().toLowerCase()];
@@ -1135,7 +1147,7 @@ function presenceChance(weights, total, slots) {
   return Math.max(0, Math.min(1, chance));
 }
 
-function craftTarget(combo) {
+function craftTarget(combo, levelOverride) {
   const tag = poolFor(combo);
   if (!tag) return null;
   const category = notableWeights.categories[tag];
@@ -1147,8 +1159,11 @@ function craftTarget(combo) {
     type: notableType(name),
   }));
 
-  // the cheapest base that can still roll every notable in the combination
-  const minimumLevel = targets.reduce((level, target) => Math.max(level, notableLevel(target.name)), 1);
+  // the cheapest base that can still roll every notable in the combination - unless the
+  // caller asks for a specific item level (an iLvl 86 base rolls a bigger pool, so it is
+  // harder and dearer than the iLvl 68 that just barely fits)
+  const minimumLevel = levelOverride
+    || targets.reduce((level, target) => Math.max(level, notableLevel(target.name)), 1);
   const unavailable = targets.filter((target) => notableLevel(target.name) > minimumLevel);
 
   return {
@@ -1163,9 +1178,15 @@ function craftTarget(combo) {
   };
 }
 
-/* The routes craftofexile ranks: each returns { tries, currency[], chaos }. */
-function craftRoutes(combo) {
-  const target = craftTarget(combo);
+/* The routes craftofexile ranks, each as { tries, unit, currency[], chaos }.
+
+   A magic jewel holds one prefix and one suffix, so it can never carry two notables of
+   the same type. A rare one holds up to three of each kind. Every route therefore has to
+   say which item it rolls and how many mods it can land, or the odds come out fantasy:
+   an alt->regal "cycle" only becomes worthwhile when the regal quietly turns the magic
+   jewel into a rare and lands the second mod. */
+function craftRoutes(combo, levelOverride) {
+  const target = craftTarget(combo, levelOverride);
   if (!target || !target.targets.length) return { target, routes: [] };
 
   const prefix = target.targets.filter((t) => t.type === 'Prefix');
@@ -1176,23 +1197,23 @@ function craftRoutes(combo) {
   const cost = (entries) => entries.reduce((sum, e) => sum + e.qty * priceOf(e.key), 0);
   const currency = (entries) => entries.filter((e) => e.qty > 0).map((e) => ({ ...e, qty: Math.ceil(e.qty) }));
 
-  // 1. Alteration + Augmentation on a magic jewel
-  if (!unknown.length && prefix.length <= MAGIC_SLOTS && suffix.length <= MAGIC_SLOTS) {
+  // 1. Alteration + Augmentation on a magic jewel: one prefix and one suffix slot
+  if (!unknown.length && prefix.length <= MAGIC_SLOTS && suffix.length <= MAGIC_SLOTS && target.targets.length >= 1) {
     const p = presenceChance(prefix.map((t) => t.weight), target.prefixTotal, MAGIC_SLOTS)
       * presenceChance(suffix.map((t) => t.weight), target.suffixTotal, MAGIC_SLOTS);
     if (p > 0) {
       const tries = Math.ceil(1 / p);
       const entries = currency([{ key: 'alteration', label: 'Alt', qty: tries },
-        { key: 'augmentation', label: 'Aug', qty: tries * 0.5 }]);
-      routes.push({ key: 'alt', name: 'Alt + Aug', note: 'magic jewel, 1 prefix + 1 suffix', tries, currency: entries, chaos: cost(entries) });
+        { key: 'augmentation', label: 'Aug', qty: tries * 0.45 }]);
+      routes.push({ key: 'alt', name: 'Alt + Aug', unit: 'tries',
+        note: 'magic jewel, 1 prefix + 1 suffix — no regal needed',
+        tries, currency: entries, chaos: cost(entries) });
     }
   }
 
   // 2-4. anything that rerolls a rare jewel: chaos, harvest, a 3-fossil resonator
-  // a rare can roll up to three affixes of a type; combos that need three are priced
-  // against that, and the note says so
-  const rarePrefixSlots = Math.min(3, Math.max(RARE_SLOTS, prefix.length));
-  const rareSuffixSlots = Math.min(3, Math.max(RARE_SLOTS, suffix.length));
+  const rarePrefixSlots = Math.min(RARE_CAP, Math.max(RARE_SLOTS, prefix.length));
+  const rareSuffixSlots = Math.min(RARE_CAP, Math.max(RARE_SLOTS, suffix.length));
   const rareChance = presenceChance(prefix.map((t) => t.weight), target.prefixTotal, rarePrefixSlots)
     * presenceChance(suffix.map((t) => t.weight), target.suffixTotal, rareSuffixSlots);
   const rareNote = `rare jewel, ${rarePrefixSlots} prefix${rarePrefixSlots === 1 ? '' : 'es'} + ${rareSuffixSlots} suffix${rareSuffixSlots === 1 ? '' : 'es'}`;
@@ -1201,41 +1222,76 @@ function craftRoutes(combo) {
     const tries = Math.ceil(1 / rareChance);
 
     const chaosEntries = currency([{ key: 'chaos', label: 'Chaos', qty: tries }]);
-    routes.push({ key: 'chaos', name: 'Chaos Orb', note: rareNote,
+    routes.push({ key: 'chaos', name: 'Chaos Orb', unit: 'tries', note: rareNote,
       tries, currency: chaosEntries, chaos: cost(chaosEntries) });
 
     const harvestEntries = currency([{ key: 'harvest_reforge', label: 'Reforge', qty: tries }]);
-    routes.push({ key: 'harvest', name: 'Harvest Reforge', note: 'reforge rare, same pool odds',
+    routes.push({ key: 'harvest', name: 'Harvest Reforge', unit: 'tries', note: 'reforge rare, same pool odds',
       tries, currency: harvestEntries, chaos: cost(harvestEntries) });
 
     const fossilEntries = currency([{ key: 'resonator', label: 'Resonator', qty: tries },
       { key: 'fossil', label: 'Fossil', qty: tries * 3 }]);
-    routes.push({ key: 'fossil', name: 'Fossil (3-socket)', note: 'odds treat fossils as neutral',
+    routes.push({ key: 'fossil', name: 'Fossil (3-socket)', unit: 'tries', note: 'odds treat fossils as neutral',
       tries, currency: fossilEntries, chaos: cost(fossilEntries) });
   }
 
-  // 3. Alt to one notable, then Regal hoping for the other
-  if (!unknown.length && target.targets.length === 2) {
-    const [first, second] = target.targets;
-    const firstTotal = first.type === 'Prefix' ? target.prefixTotal : target.suffixTotal;
-    const secondTotal = second.type === 'Prefix' ? target.prefixTotal : target.suffixTotal;
-    const pFirst = firstTotal ? first.weight / firstTotal : 0;
-    const remaining = secondTotal - (second.type === first.type ? first.weight : 0);
-    // the regal adds one affix: half of the time it is the other type
-    const pRegal = remaining > 0 ? (second.type === first.type ? 0.5 : 1) * second.weight / remaining : 0;
-
-    if (pFirst > 0 && pRegal > 0) {
-      const regals = Math.ceil(1 / pRegal);
-      const alts = Math.ceil(regals * (1 / pFirst));
-      const entries = currency([{ key: 'alteration', label: 'Alt', qty: alts },
-        { key: 'augmentation', label: 'Aug', qty: alts * 0.5 },
-        { key: 'regal', label: 'Regal', qty: regals }]);
-      routes.push({ key: 'altregal', name: 'Alt → Regal', note: 'magic hit, then 1 regal per cycle', tries: regals, currency: entries, chaos: cost(entries) });
+  /* 5. Alt -> Regal. The magic jewel chases what fits in one slot of each type; the regal
+     then has to add the one target that is left, and the cycle scours back if it misses.
+     Only combos where the magic stage can hold all but one target can be crafted this way. */
+  if (!unknown.length) {
+    const cycle = altRegalCycle(target);
+    if (cycle) {
+      const { pMagic, pRegal } = cycle;
+      // a cycle is one magic-stage hunt plus exactly one regal, so the number of cycles
+      // is set by the regal alone; the alt count is how many rolls each hunt needs
+      const cycles = Math.ceil(1 / pRegal);
+      const alts = cycles * (1 / pMagic);
+      const entries = currency([
+        { key: 'alteration', label: 'Alt', qty: alts },
+        { key: 'augmentation', label: 'Aug', qty: alts * 0.45 },
+        { key: 'regal', label: 'Regal', qty: cycles },
+        { key: 'scouring', label: 'Scour', qty: cycles },
+        { key: 'transmutation', label: 'Transmute', qty: cycles },
+      ]);
+      routes.push({ key: 'altregal', name: 'Alt → Regal', unit: 'cycles',
+        note: `${fmtQty(alts / cycles)} alts per cycle, then 1 regal · ≈ ${fmtQty(alts + alts * 0.45)} orbs rolled`,
+        tries: cycles, currency: entries, chaos: cost(entries) });
     }
   }
 
   routes.sort((a, b) => a.chaos - b.chaos);
   return { target, routes };
+}
+
+/* What a magic jewel can hold, and what the regal then has to deliver. */
+function altRegalCycle(target) {
+  const prefix = target.targets.filter((t) => t.type === 'Prefix');
+  const suffix = target.targets.filter((t) => t.type === 'Suffix');
+  if (target.targets.length < 2) return null;               // one mod: alt + aug is enough
+  if (prefix.length > 2 || suffix.length > 2) return null;  // two mods cannot carry three notables
+
+  // the magic stage takes one placeholder of each type, then the regal adds the last target
+  const magicPrefix = prefix.slice(0, 1);
+  const magicSuffix = suffix.slice(0, 1);
+  const missing = target.targets.filter((t) => !magicPrefix.includes(t) && !magicSuffix.includes(t));
+  if (missing.length !== 1) return null;
+
+  const accept = (list, total) => (total > 0 ? list.reduce((sum, t) => sum + t.weight, 0) / total : 0);
+
+  // either prefix may be the one the magic stage lands, so chase both
+  const pMagic = (prefix.length ? accept(prefix.length === 2 ? prefix : magicPrefix, target.prefixTotal) : 1)
+    * (suffix.length ? accept(magicSuffix, target.suffixTotal) : 1);
+
+  const need = missing[0];
+  const pool = need.type === 'Prefix' ? target.prefixTotal : target.suffixTotal;
+  const other = need.type === 'Prefix' ? target.suffixTotal : target.prefixTotal;
+  // a regal picks a mod of either type, so only its share of the pool can be a prefix
+  const typeShare = pool + other > 0 ? pool / (pool + other) : 0.5;
+  // if the magic stage landed the other notable, that mod is gone from the pool
+  const spent = need.type === 'Prefix' ? magicPrefix.reduce((s, t) => s + t.weight, 0) : magicSuffix.reduce((s, t) => s + t.weight, 0);
+  const pRegal = pool > spent ? typeShare * (need.weight / (pool - spent)) : 0;
+
+  return pMagic > 0 && pRegal > 0 ? { pMagic, pRegal } : null;
 }
 
 function fmtQty(value) {
@@ -1253,6 +1309,17 @@ function renderCraftCard() {
   }
 
   const { target, routes } = craftRoutes(combo);
+
+  // what the same craft costs on the iLvl 86 base most crafters actually buy: a bigger pool
+  // means worse odds, so this is the number another calculator will show
+  const ENDGAME_LEVEL = 86;
+  const endgameRoutes = target && target.minimumLevel < ENDGAME_LEVEL
+    ? craftRoutes(combo, ENDGAME_LEVEL).routes
+    : [];
+  // other calculators price an iLvl 84+ base, and their headline method is alt -> regal,
+  // so compare that route on the bigger base when it exists
+  const endgameSame = endgameRoutes.find((r) => r.key === 'altregal') || endgameRoutes[0];
+  const endgameChaos = endgameSame ? endgameSame.chaos : 0;
   // the tags the target notables are gated by, in the order they appear
   const targetTags = [...new Set((combo.notables || []).flatMap((name) => notableTags(name)))];
   const cheapest = routes.length ? routes[0].chaos : 0;
@@ -1269,7 +1336,7 @@ function renderCraftCard() {
         <div class="craft-route ${i === 0 ? 'best' : ''}">
           <div class="craft-head">
             <b>${esc(route.name)}</b>
-            <span class="craft-tries">1 in ${fmtQty(route.tries)} tries</span>
+            <span class="craft-tries">1 in ${fmtQty(route.tries)} ${esc(route.unit || 'tries')}</span>
           </div>
           <div class="craft-cost">
             <span class="craft-list">${route.currency.map((e) => `${fmtQty(e.qty)} ${esc(e.label)}`).join(' · ')}</span>
@@ -1279,8 +1346,9 @@ function renderCraftCard() {
           <div class="craft-sub">${esc(route.note)}</div>
         </div>`).join('') : '<div class="craft-empty">No route modelled: these notables do not all roll from this base’s pool.</div>'}
       <div class="craft-note">
-        Odds from the game's spawn weights for ${esc(target ? target.label : 'this base')} at that
-        item level · prices are placeholders in <code>assets/currency_costs.json</code>.
+        ${target ? `${esc(target.label)} pool at iLvl ${target.minimumLevel}: ${fmt.count(target.prefixTotal)} prefix / ${fmt.count(target.suffixTotal)} suffix weight` : 'No pool for this base'}
+        ${endgameChaos ? `· ${esc(endgameSame.name)} on an iLvl ${ENDGAME_LEVEL} base ≈ ${esc(fmt.chaos(endgameChaos))}` : ''}
+        · prices are placeholders in <code>assets/currency_costs.json</code>.
       </div>
     </div>`;
 }
