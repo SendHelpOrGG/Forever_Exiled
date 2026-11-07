@@ -46,3 +46,6 @@ Thumbs.db
 ## Local snapshots (the app caches under %LOCALAPPDATA%, never in the repo)
 snapshot-*.json
 forever-exiled-clusters-*.csv
+
+## Local reference screenshots (not distributed)
+image-search/

@@ -327,7 +327,7 @@ function isSynthetic() {
 
 function classTextOf(skill) {
   const top = (skill.classes || [])[0];
-  if (!top) return '–';
+  if (!top) return '—';
   return top.percent > 0.5 ? `${top.name} · ${fmt.pct(top.percent, 0)}` : top.name;
 }
 
@@ -351,23 +351,34 @@ function setStatus(text) {
   $('statusText').textContent = text;
 }
 
+const SIZE_TAG_CLASS = { Large: 'tag-orange', Medium: 'tag-blue', Small: 'tag-purple' };
+
 /* ─────────────────────────── header / shell ─────────────────────────── */
 
 function renderShell() {
   const snap = state.snapshot;
   const synthetic = isSynthetic();
+  const g = state.analysis.global;
 
   $('leagueName').textContent = snap.leagueName;
-  $('snapshotText').textContent = synthetic ? 'demo — not the live ladder' : 'snapshot ' + snap.snapshotVersion;
+  $('snapshotText').textContent = synthetic ? 'demo' : snap.snapshotVersion;
   $('setSnapshot').textContent = snap.snapshotVersion;
   $('setSynthetic').textContent = synthetic ? 'yes — generated, not scraped' : 'no — crawled from poe.ninja';
 
-  const sourceLabel = synthetic ? 'SYNTHETIC SAMPLE' : 'LIVE LADDER';
-  el('#sourceTag .src-label').textContent = sourceLabel;
+  const sourceTag = $('sourceTag');
+  sourceTag.classList.toggle('tag-orange', synthetic);
+  sourceTag.classList.toggle('tag-green', !synthetic);
+  el('#sourceTag .src-label').textContent = synthetic ? 'SYNTHETIC SAMPLE' : 'LIVE LADDER';
   const setLabel = el('#view-settings .src-tag .src-label');
-  if (setLabel) setLabel.textContent = sourceLabel;
+  if (setLabel) {
+    setLabel.textContent = synthetic ? 'SYNTHETIC SAMPLE' : 'LIVE LADDER';
+    const setTag = setLabel.closest('.src-tag');
+    if (setTag) {
+      setTag.classList.toggle('tag-orange', synthetic);
+      setTag.classList.toggle('tag-green', !synthetic);
+    }
+  }
 
-  // Banner: the bundled snapshot is invented, so say it where nobody can miss it.
   const notice = $('notice');
   notice.hidden = !synthetic;
   if (synthetic) {
@@ -381,11 +392,15 @@ function renderShell() {
     ? 'synced ' + state.lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : (synthetic ? 'never synced' : 'cached snapshot');
 
-  const g = state.analysis.global;
+  $('labSub').innerHTML =
+    `<b>${esc(snap.leagueName)}</b> · ${state.analysis.skills.length} skills above ` +
+    `${esc(state.floor.toFixed(1))}% · ${fmt.count(g.charactersSampled)} characters sampled · ` +
+    `${fmt.count(g.jewelsCatalogued)} cluster jewels`;
+
   $('statusCounts').textContent =
     `${state.analysis.skills.length} skills · ${g.charactersSampled} characters · ${fmt.count(g.jewelsCatalogued)} jewels`;
 
-  $('generatedAt').textContent = new Date(snap.generatedAt).toLocaleDateString([], {
+  $('generatedAt').textContent = 'generated ' + new Date(snap.generatedAt).toLocaleDateString([], {
     day: '2-digit', month: 'short', year: 'numeric',
   });
 
@@ -426,11 +441,11 @@ function renderSkillRail() {
         <i class="accent"></i>
         <span>
           <div class="skill-name">${esc(skill.name)}</div>
-          <div class="skill-sub">${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))} ladder</div>
+          <div class="skill-sub">${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))} of ladder</div>
         </span>
         <span class="skill-side">
           <div class="skill-dps">${esc(fmt.dps(skill.averageDps))}</div>
-          <div class="skill-cap">AVG DPS</div>
+          <div class="skill-cap">avg dps</div>
         </span>
       </button>`;
   }).join('') || `<div class="empty"><h3>No match</h3><p>Try another skill, class or damage type.</p></div>`;
@@ -453,10 +468,11 @@ function renderHero() {
 
   if (!stat) {
     host.innerHTML = `
-      <div>
-        <div class="hero-top"><span class="hero-dot" style="--c:#6B7787"></span><span class="micro">NO SKILL SELECTED</span></div>
+      <div class="slot lg"><svg class="ic lg" style="color:var(--text-3)"><use href="#i-gem"/></svg></div>
+      <div class="hero-main">
+        <div class="hero-eyebrow"><span class="micro">No skill selected</span></div>
         <div class="hero-name">Pick a main skill</div>
-        <div class="hero-chips"><span class="chip">The rail is sorted by average DPS</span></div>
+        <div class="hero-chips"><span class="chip">Rail sorted by average DPS</span></div>
       </div>`;
     return;
   }
@@ -469,27 +485,29 @@ function renderHero() {
       : 'no ladder rows';
 
   host.innerHTML = `
-    <div>
-      <div class="hero-top">
-        <span class="hero-dot" style="--c:${accent}"></span>
+    <div class="slot lg" style="border-color:${SIZE_COLOR[state.size]}55">
+      <img src="${SIZE_IMG[state.size]}" alt="">
+    </div>
+    <div class="hero-main">
+      <div class="hero-eyebrow">
+        <i style="width:5px;height:5px;border-radius:50%;background:${accent};display:inline-block"></i>
         <span class="micro">${esc(String(stat.damageType || '').toUpperCase())}</span>
-        <span class="cap">·</span>
-        <span class="cap">${esc(classTextOf(stat))}</span>
+        <span class="cap">· ${esc(classTextOf(stat))}</span>
       </div>
       <div class="hero-name">${esc(stat.name)}</div>
       <div class="hero-chips">
-        <span class="chip"><svg class="ic sm"><use href="#i-ladder"/></svg>${esc(fmt.count(stat.buildCount))} builds</span>
-        <span class="chip">${esc(fmt.pct(stat.popularityPercent))} of ladder</span>
-        <span class="chip">${esc(sampleText)}</span>
+        <span class="chip"><svg class="ic sm"><use href="#i-user"/></svg>${esc(fmt.count(stat.buildCount))} builds</span>
+        <span class="chip"><svg class="ic sm"><use href="#i-meta"/></svg>${esc(fmt.pct(stat.popularityPercent))} of ladder</span>
+        <span class="chip"><svg class="ic sm"><use href="#i-gem"/></svg>${esc(sampleText)}</span>
       </div>
     </div>
     <div class="hero-stats">
       <div class="hero-stat">
-        <span class="micro">AVG DPS</span>
-        <div class="v gold">${esc(fmt.dps(stat.averageDps))}</div>
+        <div class="k">AVG DPS</div>
+        <div class="v green">${esc(fmt.dps(stat.averageDps))}</div>
       </div>
       <div class="hero-stat">
-        <span class="micro">PEAK</span>
+        <div class="k">PEAK</div>
         <div class="v">${esc(fmt.dps(stat.peakDps))}</div>
       </div>
     </div>`;
@@ -516,7 +534,6 @@ function renderCombos() {
   $('comboHeader').textContent = `${state.size} combinations`.toUpperCase();
 
   if (!stat) {
-    $('comboHeader').textContent = `${state.size} clusters`.toUpperCase();
     $('comboHint').textContent = '';
     host.innerHTML = emptyState('Nothing matches that filter', 'Try a different skill, class or damage type.', false);
     return;
@@ -528,22 +545,23 @@ function renderCombos() {
     const sampled = profile ? profile.sampledBuilds : 0;
     host.innerHTML = sampled > 0
       ? emptyState(`No ${state.size} clusters`,
-          `None of the ${sampled} sampled ${state.size === 'Small' ? 'builds run a small cluster jewel' : state.size.toLowerCase() === 'large' ? 'builds run a large cluster jewel' : 'builds run a medium cluster jewel'}.`,
-          false)
+          `None of the ${sampled} sampled builds run a ${state.size.toLowerCase()} cluster jewel.`, false)
       : emptyState('Not sampled yet',
           'Analyze this skill to pull its top builds and cluster jewels from poe.ninja.', true);
     return;
   }
 
-  $('comboHint').textContent = 'Ranked by how many sampled builds run the combination';
+  $('comboHint').textContent = `Ranked by how many sampled builds run the combination`;
   const max = comboMax(combos);
   const denominator = profile ? profile.sampledBuilds : 0;
 
   host.innerHTML = combos.slice(0, 10).map((combo, i) => {
     const rank = i + 1;
     const share = max > 0 ? (combo.buildCount * 100) / max : 0;
-    const chips = (combo.notables.length ? combo.notables : [combo.label])
-      .map((n) => `<span class="chip gold">${esc(n)}</span>`).join('');
+    const notableMarkup = (combo.notables.length ? combo.notables : [combo.label])
+      .map((n) => `<span class="notable">${esc(n)}</span>`)
+      .join('<span class="cap">+</span>');
+
     const meta = [
       combo.grantType ? `<span class="grant">${esc(combo.grantType)}</span>` : '',
       combo.passivesLabel ? `<span>${esc(combo.passivesLabel)}</span>` : '',
@@ -555,7 +573,10 @@ function renderCombos() {
         <div class="combo-head">
           <div class="rank">${String(rank).padStart(2, '0')}</div>
           <div style="min-width:0">
-            <div class="combo-chips">${chips}</div>
+            <div class="combo-chips">
+              ${notableMarkup}
+              <span class="chip ${SIZE_TAG_CLASS[combo.size]}">#${combo.size}</span>
+            </div>
             <div class="combo-sub">${meta}</div>
           </div>
           <div class="combo-side">
@@ -563,14 +584,15 @@ function renderCombos() {
             <span class="cap">${combo.buildCount} of ${denominator} builds</span>
           </div>
         </div>
-        <div class="bar combo-bar"><i style="width:${share.toFixed(1)}%;background:linear-gradient(90deg,${SIZE_COLOR[state.size]}55,${SIZE_COLOR[state.size]})"></i></div>
+        <div class="bar combo-bar"><i style="width:${share.toFixed(1)}%"></i></div>
         <div class="combo-foot">
           <span class="anchor" title="${esc(combo.topBuildAccount)}">
             <svg class="ic sm"><use href="#i-anchor"/></svg>
             <b>${esc(combo.topBuildName || 'unknown')}</b>
-            <span>· ${esc(combo.topBuildClass || '–')}</span>
+            <span>· ${esc(combo.topBuildClass || '—')}</span>
           </span>
           <span class="dpsline">
+            <svg class="ic sm bolt"><use href="#i-bolt"/></svg>
             <b>${esc(fmt.dps(combo.averageDps))}</b><span class="cap">avg</span>
             <b class="peak">${esc(fmt.dps(combo.peakDps))}</b><span class="cap">peak</span>
           </span>
@@ -586,9 +608,13 @@ function emptyState(title, message, withButton) {
         <img src="assets/cluster_medium.png" alt="">
         <h3>${esc(title)}</h3>
         <p>${esc(message)}</p>
-        ${withButton ? `<button class="btn primary" data-analyze><svg class="ic"><use href="#i-bolt"/></svg>ANALYZE BUILDS</button>` : ''}
+        ${withButton ? `<button class="btn primary" data-analyze><svg class="ic sm"><use href="#i-bolt"/></svg>ANALYZE BUILDS</button>` : ''}
       </div>
     </div>`;
+}
+
+function panel(title, extra = '') {
+  return `<div class="panel-head"><span class="section-title">${title}</span>${extra}</div>`;
 }
 
 function renderGlobalRail() {
@@ -596,51 +622,57 @@ function renderGlobalRail() {
   const leader = g.leaderCombo;
 
   $('globalLeader').innerHTML = leader ? `
-    <div class="leader-top">
-      <span class="micro">GLOBAL LEADER · ${leader.size.toUpperCase()}</span>
-      <svg class="ic sm" style="color:var(--gold)"><use href="#i-crown"/></svg>
-    </div>
-    <div class="leader-body">
-      <img src="${SIZE_IMG[leader.size]}" alt="">
-      <div style="min-width:0">
-        <div class="leader-name">${esc(leader.label)}</div>
-        <div class="leader-sub">${leader.buildCount} builds · ${esc(fmt.pct(leader.percentOfBuilds))} of sample · ${esc(fmt.dps(leader.averageDps))} avg DPS</div>
+    ${panel('Global leader', '<svg class="ic sm" style="color:var(--green)"><use href="#i-crown"/></svg>')}
+    <div class="panel-body">
+      <div class="leader-top">
+        <div class="slot"><img src="${SIZE_IMG[leader.size]}" alt=""></div>
+        <div style="min-width:0">
+          <div class="leader-name">${esc(leader.label)}</div>
+          <div class="leader-sub">${leader.size} cluster jewel · ${leader.buildCount} builds · ${esc(fmt.pct(leader.percentOfBuilds))} of sample</div>
+        </div>
       </div>
-    </div>
-    <div class="bar" style="margin-bottom:9px"><i style="width:${leader.percentOfBuilds.toFixed(1)}%"></i></div>
-    <div class="leader-anchor">
-      <svg class="ic sm"><use href="#i-anchor"/></svg>
-      <b>${esc(leader.topBuildName || 'unknown')}</b>
-      <span>· ${esc(leader.topBuildClass || '–')}</span>
+      <div class="bar"><i style="width:${leader.percentOfBuilds.toFixed(1)}%"></i></div>
+      <div class="leader-anchor">
+        <svg class="ic sm"><use href="#i-anchor"/></svg>
+        <b>${esc(leader.topBuildName || 'unknown')}</b>
+        <span>· ${esc(leader.topBuildClass || '—')} · ${esc(fmt.dps(leader.peakDps))} peak</span>
+      </div>
     </div>` : `
-    <div class="leader-top"><span class="micro">GLOBAL LEADER</span></div>
-    <div class="cap" style="margin-top:8px">No cluster jewels in the sample.</div>`;
+    ${panel('Global leader')}
+    <div class="panel-body"><span class="cap">No cluster jewels in this snapshot.</span></div>`;
 
   $('mixCard').innerHTML = `
-    <div class="head-row"><span class="micro">JEWEL MIX</span><span class="cap">of ${g.charactersSampled} builds</span></div>
-    ${g.sizeMix.map((m) => `
-      <div class="mix-row">
-        <i class="swatch" style="--c:${SIZE_COLOR[m.size]}"></i>
-        <span class="mix-name">${m.size}</span>
-        <span class="bar"><i style="width:${m.percent.toFixed(1)}%;background:${SIZE_COLOR[m.size]}"></i></span>
-        <span class="mix-val">${esc(fmt.pct(m.percent, 0))}</span>
-      </div>`).join('')}`;
+    ${panel('Jewel mix', `<span class="cap">${g.charactersSampled} builds</span>`)}
+    <div class="panel-body">
+      ${g.sizeMix.map((m) => `
+        <div class="mix-row">
+          <i class="swatch" style="--c:${SIZE_COLOR[m.size]}"></i>
+          <span class="mix-name">${m.size}</span>
+          <span class="bar"><i style="width:${m.percent.toFixed(1)}%;background:${SIZE_COLOR[m.size]}"></i></span>
+          <span class="mix-val">${esc(fmt.pct(m.percent, 0))}</span>
+        </div>`).join('')}
+    </div>`;
 
   const top = g.topDpsBuilds.slice(0, 5);
   $('dpsCard').innerHTML = `
-    <div class="head-row"><span class="micro">PEAK CHARACTERS</span><span class="cap">${esc(fmt.dps(top[0] ? top[0].dps : 0))} best</span></div>
-    ${top.map((b, i) => `
-      <div class="mini-row">
-        <span class="mini-rank">${String(i + 1).padStart(2, '0')}</span>
-        <span class="mini-name" title="${esc(b.name)} · ${esc(b.mainSkill)}">${esc(b.name)}</span>
-        <span class="mini-val">${esc(fmt.dps(b.dps))}</span>
-      </div>`).join('')}`;
+    ${panel('Peak characters', `<span class="cap">${esc(fmt.dps(top[0] ? top[0].dps : 0))} best</span>`)}
+    <div class="panel-body">
+      ${top.map((b, i) => `
+        <div class="mini-row">
+          <span class="mini-rank">${String(i + 1).padStart(2, '0')}</span>
+          <span class="mini-name" title="${esc(b.name)} · ${esc(b.mainSkill)}">${esc(b.name)}</span>
+          <span class="mini-val">${esc(fmt.dps(b.dps))}</span>
+        </div>`).join('')}
+    </div>`;
 
   $('coverageCard').innerHTML = `
-    <div class="cov-row"><span class="micro">COVERAGE</span><b>${esc(fmt.pct(g.coveragePercent, 0))}</b></div>
-    <div class="bar"><i style="width:${g.coveragePercent.toFixed(1)}%"></i></div>
-    <div class="cov-row"><span class="cap">Combinations found</span><b>${fmt.count(g.combosFound)}</b></div>
-    <div class="cov-row"><span class="cap">Jewels catalogued</span><b>${fmt.count(g.jewelsCatalogued)}</b></div>`;
+    ${panel('Snapshot')}
+    <div class="panel-body">
+      <div class="stat-row"><span class="k">Coverage</span><span class="v green">${esc(fmt.pct(g.coveragePercent, 0))}</span></div>
+      <div class="stat-row"><span class="k">Combinations found</span><span class="v">${fmt.count(g.combosFound)}</span></div>
+      <div class="stat-row"><span class="k">Jewels catalogued</span><span class="v">${fmt.count(g.jewelsCatalogued)}</span></div>
+      <div class="stat-row"><span class="k">Ladder builds</span><span class="v">${fmt.count(g.totalBuildsInLeague)}</span></div>
+    </div>`;
 }
 
 /* ─────────────────────────── meta page ─────────────────────────── */
@@ -649,24 +681,24 @@ function renderMeta() {
   const g = state.analysis.global;
   const snap = state.snapshot;
 
-  $('metaSub').textContent = isSynthetic()
-    ? `${snap.leagueName} · synthetic demo snapshot · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}% · numbers illustrate the analysis, they are not the ladder`
-    : `${snap.leagueName} · snapshot ${snap.snapshotVersion} · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}%`;
+  $('metaSub').innerHTML = isSynthetic()
+    ? `<b>${esc(snap.leagueName)}</b> · synthetic demo snapshot · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}% · numbers illustrate the analysis`
+    : `<b>${esc(snap.leagueName)}</b> · snapshot ${esc(snap.snapshotVersion)} · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}%`;
 
   const tiles = [
-    ['LADDER BUILDS', fmt.count(g.totalBuildsInLeague),
-      isSynthetic() ? 'demo figure' : `${snap.leagueName} league`, false],
-    ['SKILLS TRACKED', fmt.count(g.skillsTracked), `above ${state.floor.toFixed(1)}% popularity`, true],
-    ['CHARACTERS SAMPLED', fmt.count(g.charactersSampled), 'cluster data read', false],
-    ['JEWELS CATALOGUED', fmt.count(g.jewelsCatalogued), `${fmt.count(g.combosFound)} distinct combos`, false],
-    ['COVERAGE', fmt.pct(g.coveragePercent, 0), 'of tracked skills sampled', true],
-    ['TOP COMBO', String(g.leaderCombo ? g.leaderCombo.buildCount : 0), g.leaderCombo ? `${g.leaderCombo.size} · ${fmt.pct(g.leaderCombo.percentOfBuilds)}` : '—', true],
+    ['Ladder builds', fmt.count(g.totalBuildsInLeague), isSynthetic() ? 'demo figure' : `${snap.leagueName} ladder`, ''],
+    ['Skills tracked', fmt.count(g.skillsTracked), `above ${state.floor.toFixed(1)}%`, 'green'],
+    ['Characters sampled', fmt.count(g.charactersSampled), 'cluster data read', ''],
+    ['Jewels catalogued', fmt.count(g.jewelsCatalogued), `${fmt.count(g.combosFound)} distinct combos`, ''],
+    ['Coverage', fmt.pct(g.coveragePercent, 0), 'of tracked skills sampled', 'green'],
+    ['Top combo', String(g.leaderCombo ? g.leaderCombo.buildCount : 0),
+      g.leaderCombo ? `${g.leaderCombo.size} · ${fmt.pct(g.leaderCombo.percentOfBuilds)}` : '—', 'blue'],
   ];
 
-  $('metaTiles').innerHTML = tiles.map(([label, value, sub, gold]) => `
+  $('metaTiles').innerHTML = tiles.map(([label, value, sub, tone]) => `
     <div class="tile">
       <span class="micro">${esc(label)}</span>
-      <div class="v ${gold ? 'gold' : ''}">${esc(value)}</div>
+      <div class="v ${tone}">${esc(value)}</div>
       <div class="sub">${esc(sub)}</div>
     </div>`).join('');
 
@@ -679,14 +711,12 @@ function renderMeta() {
     <div class="meta-combo">
       <span class="mc-rank">${String(i + 1).padStart(2, '0')}</span>
       <div class="mc-main">
-        <div class="mc-title">${esc(c.label)}</div>
+        <div class="mc-title" title="${esc(c.label)}">${esc(c.label)}</div>
         <div class="mc-sub">
           <span class="size-tag" style="--c:${SIZE_COLOR[c.size]}">${c.size.toUpperCase()}</span>
           <span>${c.buildCount} builds</span>
           <span>·</span>
           <span class="skills" title="${esc(c.skills.join(', '))}">${esc(c.skills.join(' · ') || '—')}</span>
-          <span>·</span>
-          <span>${esc(c.topBuildName || '')}</span>
         </div>
         <div class="bar mc-bar"><i style="width:${max ? (c.buildCount * 100 / max).toFixed(1) : 0}%;background:${SIZE_COLOR[c.size]}"></i></div>
       </div>
@@ -698,42 +728,48 @@ function renderMeta() {
 
   const notables = g.topNotables.slice(0, 9);
   $('notablesCard').innerHTML = `
-    <div class="head-row"><span class="micro">MOST USED NOTABLES</span><span class="cap">share of builds</span></div>
-    ${notables.map((n) => `
-      <div class="notable-row">
-        <div>
-          <div class="notable-name" title="${esc(n.name)} — ${n.size} cluster">
-            <i class="dot" style="--c:${SIZE_COLOR[n.size]}"></i>${esc(n.name)}
+    ${panel('Most used notables', '<span class="cap">share of builds</span>')}
+    <div class="panel-body">
+      ${notables.map((n) => `
+        <div class="notable-row">
+          <div>
+            <div class="notable-name" title="${esc(n.name)} — ${n.size} cluster">
+              <i class="dot" style="--c:${SIZE_COLOR[n.size]}"></i>${esc(n.name)}
+            </div>
+            <div class="bar notable-bar"><i style="width:${n.percent.toFixed(1)}%;background:${SIZE_COLOR[n.size]}"></i></div>
           </div>
-          <div class="bar notable-bar"><i style="width:${n.percent.toFixed(1)}%;background:${SIZE_COLOR[n.size]}"></i></div>
-        </div>
-        <div class="notable-val">${esc(fmt.pct(n.percent, 0))}</div>
-      </div>`).join('')}`;
+          <div class="notable-val">${esc(fmt.pct(n.percent, 0))}</div>
+        </div>`).join('')}
+    </div>`;
 
   const leaders = state.analysis.skills.slice(0, 6);
   const maxDps = leaders.reduce((m, s) => Math.max(m, s.averageDps), 0);
   $('skillLeadersCard').innerHTML = `
-    <div class="head-row"><span class="micro">DPS LEADERS</span><span class="cap">avg per skill</span></div>
-    ${leaders.map((s) => `
-      <div class="mini-row" style="grid-template-columns:18px minmax(0,1fr) auto">
-        <span class="mini-rank">${esc(fmt.pct(s.popularityPercent, 0))}</span>
-        <span class="mini-name" title="${esc(s.name)}">${esc(s.name)}</span>
-        <span class="mini-val">${esc(fmt.dps(s.averageDps))}</span>
-      </div>
-      <div class="bar" style="margin:-2px 0 4px"><i style="width:${maxDps ? (s.averageDps * 100 / maxDps).toFixed(1) : 0}%"></i></div>`).join('')}`;
+    ${panel('DPS leaders', '<span class="cap">avg per skill</span>')}
+    <div class="panel-body">
+      ${leaders.map((s) => `
+        <div class="mini-row" style="grid-template-columns:34px minmax(0,1fr) auto">
+          <span class="mini-rank">${esc(fmt.pct(s.popularityPercent, 0))}</span>
+          <span class="mini-name" title="${esc(s.name)}">${esc(s.name)}</span>
+          <span class="mini-val">${esc(fmt.dps(s.averageDps))}</span>
+        </div>
+        <div class="bar" style="margin:-1px 0 5px"><i style="width:${maxDps ? (s.averageDps * 100 / maxDps).toFixed(1) : 0}%"></i></div>`).join('')}
+    </div>`;
 
   const builds = g.topDpsBuilds.slice(0, 8);
   $('topBuildsCard').innerHTML = `
-    <div class="head-row"><span class="micro">HIGHEST DPS BUILDS</span><span class="cap">${esc(fmt.dps(builds[0] ? builds[0].dps : 0))} peak</span></div>
-    ${builds.map((b, i) => `
-      <div class="build-row">
-        <span class="build-rank">${String(i + 1).padStart(2, '0')}</span>
-        <div style="min-width:0">
-          <div class="build-name">${esc(b.name)}</div>
-          <div class="build-sub">${esc(b.className)} · ${esc(b.mainSkill)}</div>
-        </div>
-        <span class="build-dps">${esc(fmt.dps(b.dps))}</span>
-      </div>`).join('')}`;
+    ${panel('Highest DPS builds', `<span class="cap">${esc(fmt.dps(builds[0] ? builds[0].dps : 0))} peak</span>`)}
+    <div class="panel-body">
+      ${builds.map((b, i) => `
+        <div class="build-row">
+          <span class="build-rank">${String(i + 1).padStart(2, '0')}</span>
+          <div style="min-width:0">
+            <div class="build-name">${esc(b.name)}</div>
+            <div class="build-sub">${esc(b.className)} · ${esc(b.mainSkill)}</div>
+          </div>
+          <span class="build-dps">${esc(fmt.dps(b.dps))}</span>
+        </div>`).join('')}
+    </div>`;
 }
 
 /* ─────────────────────────── ladder page ─────────────────────────── */
@@ -760,8 +796,9 @@ function renderLadder() {
     return dir * ((av || 0) - (bv || 0));
   });
 
-  $('ladderSub').textContent =
-    `${fmt.count(rows.length)} of ${fmt.count(all.length)} builds · sorted by ${key === 'clusterJewelCount' ? 'cluster count' : key}`;
+  $('ladderSub').innerHTML =
+    `<b>${fmt.count(rows.length)}</b> of ${fmt.count(all.length)} builds · sorted by ` +
+    `${key === 'clusterJewelCount' ? 'cluster count' : key}`;
 
   $('ladderBody').innerHTML = rows.map((b) => {
     const rank = all.indexOf(b) + 1;
@@ -770,10 +807,10 @@ function renderLadder() {
       <div class="trow ${rank <= 3 ? 'top' : ''}">
         <span class="rk">${String(rank).padStart(2, '0')}</span>
         <span class="nm"><i class="accent" style="--c:${accent}"></i><b title="${esc(b.account)}">${esc(b.name)}</b></span>
-        <span class="cls">${esc(b.className || '–')}</span>
-        <span class="skl" title="${esc(b.mainSkill)}">${esc(b.mainSkill || '–')}</span>
+        <span class="cls">${esc(b.className || '—')}</span>
+        <span class="skl" title="${esc(b.mainSkill)}">${esc(b.mainSkill || '—')}</span>
         <span class="dps">${esc(fmt.dps(b.dps))}</span>
-        <span class="cl ${b.clusterJewelCount ? '' : 'zero'}">${b.clusterJewelCount ? b.clusterJewelCount : '–'}</span>
+        <span class="cl ${b.clusterJewelCount ? '' : 'zero'}">${b.clusterJewelCount ? b.clusterJewelCount : '—'}</span>
       </div>`;
   }).join('') || `<div class="empty"><h3>No builds</h3><p>Nothing matches that filter.</p></div>`;
 
@@ -806,7 +843,7 @@ function renderSettings() {
     `${fmt.count(total)} builds ${isSynthetic() ? 'in the demo' : 'in league'} · ${tracked} of ${totalSkills} skills above the floor`;
 
   const err = $('lastError');
-  if (err && !err.textContent.trim()) err.textContent = 'none — sample snapshot loaded cleanly';
+  if (err && !err.textContent.trim()) err.textContent = 'none — snapshot loaded cleanly';
 }
 
 /* ─────────────────────────── master render ─────────────────────────── */
@@ -823,18 +860,6 @@ function renderAll() {
   renderSettings();
 }
 
-function reanalyze({ keepSkill = true } = {}) {
-  const previous = keepSkill ? state.selectedSkill : null;
-  state.analysis = analyze(state.snapshot, state.floor);
-
-  const stillValid = previous && state.analysis.skills.some((s) => s.name === previous);
-  state.selectedSkill = stillValid
-    ? previous
-    : (visibleSkills()[0] ? visibleSkills()[0].name : null);
-
-  renderAll();
-}
-
 function selectSkill(name) {
   state.selectedSkill = name;
   renderSkillRail();
@@ -842,7 +867,9 @@ function selectSkill(name) {
   renderPills();
   renderCombos();
   const stat = selectedSkillStat();
-  if (stat) setStatus(`${stat.name} — ${state.analysis.profiles.get(stat.name).sampledBuilds} sampled builds, ${state.size.toLowerCase()} combinations ranked`);
+  if (stat) {
+    setStatus(`${stat.name} — ${state.analysis.profiles.get(stat.name).sampledBuilds} sampled builds, ${state.size.toLowerCase()} combinations ranked`);
+  }
 }
 
 function setTab(tab) {
@@ -947,6 +974,7 @@ function wire() {
     if (!pill) return;
     state.size = pill.dataset.size;
     renderPills();
+    renderHero();
     renderCombos();
   });
 
@@ -959,18 +987,14 @@ function wire() {
   $('syncBtn').addEventListener('click', simulateSync);
   $('metaResync').addEventListener('click', simulateSync);
 
-  document.querySelectorAll('[data-sync]').forEach((btn) => {
-    btn.addEventListener('click', simulateSync);
-  });
-
+  document.querySelectorAll('[data-sync]').forEach((btn) => btn.addEventListener('click', simulateSync));
   document.querySelectorAll('[data-toast]').forEach((btn) => {
     btn.addEventListener('click', () => toast(btn.dataset.toast));
   });
-
   document.querySelectorAll('[data-export]').forEach((btn) => {
     btn.addEventListener('click', () => {
       downloadCsv();
-      toast('CSV exported from the sample snapshot (preview download).');
+      toast('CSV exported from the snapshot (preview download).');
     });
   });
 
@@ -1017,14 +1041,12 @@ function wire() {
 
   $('paceSel').addEventListener('change', (e) => {
     state.settings.pacing = Number(e.target.value);
-    setStatus(`Character request pacing set to ${state.settings.pacing} s`);
+    setStatus(`Character pacing set to ${state.settings.pacing} s`);
   });
 
   $('leagueSel').addEventListener('change', (e) => {
-    state.settings.league = e.target.value;
-    toast('Preview build: only the bundled Allflame sample is available locally.');
+    toast('Preview build: only the bundled sample is available locally.');
     e.target.value = 'Allflame (current)';
-    state.settings.league = 'Allflame (current)';
   });
 
   document.addEventListener('keydown', (e) => {

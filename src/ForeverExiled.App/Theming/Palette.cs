@@ -9,24 +9,24 @@ namespace ForeverExiled.App.Theming;
 /// </summary>
 public static class Palette
 {
-    public static readonly Color Bg = Color.FromArgb("#0B0E13");
-    public static readonly Color Surface = Color.FromArgb("#12161D");
-    public static readonly Color SurfaceAlt = Color.FromArgb("#171C24");
-    public static readonly Color SurfaceRaised = Color.FromArgb("#1C2230");
-    public static readonly Color Border = Color.FromArgb("#232B36");
-    public static readonly Color TextPrimary = Color.FromArgb("#EAEFF6");
-    public static readonly Color TextSecondary = Color.FromArgb("#9DA9B8");
-    public static readonly Color TextMuted = Color.FromArgb("#6B7787");
-    public static readonly Color Gold = Color.FromArgb("#E4C078");
-    public static readonly Color GoldDeep = Color.FromArgb("#C49A4F");
-    public static readonly Color Success = Color.FromArgb("#5FB98C");
-    public static readonly Color Warning = Color.FromArgb("#E0A24A");
-    public static readonly Color Danger = Color.FromArgb("#D96C6C");
+    public static readonly Color Bg = Color.FromArgb("#0D1319");
+    public static readonly Color Surface = Color.FromArgb("#161E27");
+    public static readonly Color SurfaceAlt = Color.FromArgb("#1B242E");
+    public static readonly Color SurfaceRaised = Color.FromArgb("#222D38");
+    public static readonly Color Border = Color.FromArgb("#26313D");
+    public static readonly Color TextPrimary = Color.FromArgb("#E7ECF2");
+    public static readonly Color TextSecondary = Color.FromArgb("#A2AEBB");
+    public static readonly Color TextMuted = Color.FromArgb("#6C7A89");
+    public static readonly Color Accent = Color.FromArgb("#3FAE7A");
+    public static readonly Color AccentDeep = Color.FromArgb("#2F8B60");
+    public static readonly Color Success = Color.FromArgb("#3FAE7A");
+    public static readonly Color Warning = Color.FromArgb("#D59D40");
+    public static readonly Color Danger = Color.FromArgb("#E0605E");
 
-    public static readonly Color Cold = Color.FromArgb("#69B7E8");
+    public static readonly Color Cold = Color.FromArgb("#6CB8E8");
     public static readonly Color Fire = Color.FromArgb("#E8794A");
     public static readonly Color Lightning = Color.FromArgb("#E7C55E");
-    public static readonly Color Chaos = Color.FromArgb("#AE7BE0");
+    public static readonly Color Chaos = Color.FromArgb("#A17FE0");
     public static readonly Color Physical = Color.FromArgb("#B6BEC8");
     public static readonly Color Minion = Color.FromArgb("#74C6A2");
 
@@ -42,9 +42,9 @@ public static class Palette
 
     public static Color ForClusterSize(ClusterSize size) => size switch
     {
-        ClusterSize.Large => Color.FromArgb("#E2794F"),
-        ClusterSize.Medium => Color.FromArgb("#59C2CE"),
-        ClusterSize.Small => Color.FromArgb("#A98BE8"),
+        ClusterSize.Large => Color.FromArgb("#D59D40"),
+        ClusterSize.Medium => Color.FromArgb("#4A90E2"),
+        ClusterSize.Small => Color.FromArgb("#A17FE0"),
         _ => TextMuted,
     };
 

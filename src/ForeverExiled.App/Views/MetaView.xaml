@@ -68,7 +68,7 @@
                 <VerticalStackLayout Spacing="10">
                     <Grid ColumnDefinitions="*,Auto">
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Gold}" FontSize="11" />
+                            <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Accent}" FontSize="11" />
                             <Label Text="MOST POPULAR CLUSTER COMBINATIONS" Style="{StaticResource Micro}" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                         <Label Grid.Column="1"
@@ -88,7 +88,7 @@
                                         Padding="12,9">
                                     <Grid ColumnDefinitions="26,Auto,*,Auto" ColumnSpacing="10">
                                         <Label Text="{Binding RankText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="12"
                                                TextColor="{StaticResource TextFaint}"
                                                VerticalOptions="Center"
@@ -115,9 +115,9 @@
 
                                         <VerticalStackLayout Grid.Column="3" Spacing="0" HorizontalOptions="End" VerticalOptions="Center">
                                             <Label Text="{Binding PercentText}"
-                                                   FontFamily="Bahnschrift"
+                                                   FontFamily="Segoe UI Semibold"
                                                    FontSize="16"
-                                                   TextColor="{StaticResource Gold}"
+                                                   TextColor="{StaticResource Accent}"
                                                    HorizontalTextAlignment="End" />
                                             <Label Text="{Binding BuildsText}"
                                                    Style="{StaticResource Caption}"
@@ -150,7 +150,7 @@
                                           RowSpacing="4" ColumnSpacing="8">
                                         <Label Grid.Row="0" Grid.Column="0"
                                                Text="{Binding RankText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="12"
                                                TextColor="{StaticResource TextFaint}"
                                                VerticalOptions="Center" />
@@ -162,9 +162,9 @@
 
                                         <Label Grid.Row="0" Grid.Column="2"
                                                Text="{Binding PrimaryText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="13.5"
-                                               TextColor="{StaticResource Gold}"
+                                               TextColor="{StaticResource Accent}"
                                                HorizontalTextAlignment="End" />
 
                                         <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
@@ -217,7 +217,7 @@
                                                    Text="{Binding PrimaryText}"
                                                    Style="{StaticResource Caption}"
                                                    FontSize="9.5"
-                                                   TextColor="{StaticResource GoldDeep}" />
+                                                   TextColor="{StaticResource AccentDeep}" />
                                             <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HeightRequest="3">
                                                 <Border BackgroundColor="{StaticResource SurfaceRaised}"
                                                         StrokeThickness="0"
@@ -248,7 +248,7 @@
                                     <DataTemplate>
                                         <Grid ColumnDefinitions="20,*,Auto" ColumnSpacing="8">
                                             <Label Text="{Binding RankText}"
-                                                   FontFamily="Bahnschrift"
+                                                   FontFamily="Segoe UI Semibold"
                                                    FontSize="11"
                                                    TextColor="{StaticResource TextFaint}"
                                                    VerticalOptions="Center" />
@@ -258,9 +258,9 @@
                                             </VerticalStackLayout>
                                             <Label Grid.Column="2"
                                                    Text="{Binding DpsText}"
-                                                   FontFamily="Bahnschrift"
+                                                   FontFamily="Segoe UI Semibold"
                                                    FontSize="12.5"
-                                                   TextColor="{StaticResource Gold}"
+                                                   TextColor="{StaticResource Accent}"
                                                    VerticalOptions="Center"
                                                    HorizontalTextAlignment="End" />
                                         </Grid>

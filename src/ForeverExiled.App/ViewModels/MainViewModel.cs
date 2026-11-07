@@ -40,10 +40,10 @@ public partial class MainViewModel : ObservableObject
 
         NavItems = new ObservableCollection<NavItem>
         {
-            new("\uE80F", string.Empty, "META", AppTab.Meta, SelectTab),
-            new(string.Empty, "cluster_medium.png", "CLUSTERS", AppTab.Clusters, SelectTab),
-            new("\uE8FD", string.Empty, "LADDER", AppTab.Ladder, SelectTab),
-            new("\uE713", string.Empty, "SETTINGS", AppTab.Settings, SelectTab),
+            new("\uE80F", string.Empty, "Meta", AppTab.Meta, SelectTab),
+            new(string.Empty, "cluster_medium.png", "Clusters", AppTab.Clusters, SelectTab),
+            new("\uE8FD", string.Empty, "Ladder", AppTab.Ladder, SelectTab),
+            new("\uE713", string.Empty, "Settings", AppTab.Settings, SelectTab),
         };
 
         SizePills = new ObservableCollection<PillItem>

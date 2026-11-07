@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ForeverExiled.App.Views.ClusterLabView">
 
-    <Grid ColumnDefinitions="348,*,332" ColumnSpacing="12" Padding="12">
+    <Grid ColumnDefinitions="292,*,300" ColumnSpacing="12" Padding="12">
 
         <!-- ========================= Main skill rail ========================= -->
         <Border Grid.Column="0" Style="{StaticResource CardFlush}">
@@ -63,7 +63,7 @@
 
                                         <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
                                                Text="{Binding RankText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="14"
                                                TextColor="{StaticResource TextFaint}"
                                                VerticalOptions="Start"
@@ -77,9 +77,9 @@
 
                                         <Label Grid.Row="0" Grid.Column="2"
                                                Text="{Binding DpsText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="15"
-                                               TextColor="{StaticResource Gold}"
+                                               TextColor="{StaticResource Accent}"
                                                HorizontalTextAlignment="End"
                                                VerticalOptions="Center" />
 
@@ -158,7 +158,7 @@
                         <HorizontalStackLayout Grid.Column="1" Spacing="20" VerticalOptions="Start">
                             <VerticalStackLayout Spacing="0">
                                 <Label Text="AVG DPS" Style="{StaticResource Micro}" HorizontalTextAlignment="End" />
-                                <Label Text="{Binding SelectedSkillAverageDps}" Style="{StaticResource StatValueGold}" FontSize="24" HorizontalTextAlignment="End" />
+                                <Label Text="{Binding SelectedSkillAverageDps}" Style="{StaticResource StatValueAccent}" FontSize="24" HorizontalTextAlignment="End" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Spacing="0">
                                 <Label Text="PEAK" Style="{StaticResource Micro}" HorizontalTextAlignment="End" />
@@ -219,7 +219,7 @@
                                             StrokeThickness="1"
                                             StrokeShape="RoundRectangle 9">
                                         <Label Text="{Binding RankText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="13"
                                                TextColor="{StaticResource TextMuted}"
                                                HorizontalTextAlignment="Center"
@@ -230,7 +230,7 @@
                                         <FlexLayout Direction="Row" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Chips}">
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Style="{StaticResource ChipGold}" Margin="0,0,5,5">
+                                                    <Border Style="{StaticResource ChipAccent}" Margin="0,0,5,5">
                                                         <Label Text="{Binding Label}"
                                                                Style="{StaticResource ChipLabel}"
                                                                TextColor="{StaticResource TextPrimary}"
@@ -247,8 +247,8 @@
                                             <Label Text="{Binding PassivesText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
                                             <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
                                             <Label Text="{Binding BuildsText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
-                                            <Border Style="{StaticResource ChipGold}" Padding="6,1" IsVisible="{Binding HasEffect}">
-                                                <Label Text="{Binding EffectText}" Style="{StaticResource ChipLabel}" FontSize="9" TextColor="{StaticResource Gold}" />
+                                            <Border Style="{StaticResource ChipAccent}" Padding="6,1" IsVisible="{Binding HasEffect}">
+                                                <Label Text="{Binding EffectText}" Style="{StaticResource ChipLabel}" FontSize="9" TextColor="{StaticResource Accent}" />
                                             </Border>
                                         </HorizontalStackLayout>
 
@@ -261,9 +261,9 @@
 
                                     <VerticalStackLayout Grid.Row="0" Grid.Column="2" Spacing="0" HorizontalOptions="End">
                                         <Label Text="{Binding PercentText}"
-                                               FontFamily="Bahnschrift"
+                                               FontFamily="Segoe UI Semibold"
                                                FontSize="20"
-                                               TextColor="{StaticResource Gold}"
+                                               TextColor="{StaticResource Accent}"
                                                HorizontalTextAlignment="End" />
                                         <Label Text="{Binding PercentCaption}"
                                                Style="{StaticResource Caption}"
@@ -289,7 +289,7 @@
                                         <Label Text="{Binding TopBuildText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
                                         <Label Text="{Binding TopBuildClassText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource TextFaint}" VerticalOptions="Center" />
                                         <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
-                                        <Label Text="{Binding AverageDpsText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource GoldDeep}" VerticalOptions="Center" />
+                                        <Label Text="{Binding AverageDpsText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource AccentDeep}" VerticalOptions="Center" />
                                     </HorizontalStackLayout>
                                 </Grid>
                             </Border>
@@ -326,15 +326,15 @@
                     <VerticalStackLayout Spacing="8">
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="GLOBAL LEADER" Style="{StaticResource Micro}" VerticalOptions="Center" />
-                            <Label Grid.Column="1" Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Gold}" FontSize="10" />
+                            <Label Grid.Column="1" Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Accent}" FontSize="10" />
                         </Grid>
                         <Label Text="{Binding GlobalLeaderLabel}" Style="{StaticResource BodyStrong}" FontSize="13" LineBreakMode="WordWrap" MaxLines="2" />
                         <HorizontalStackLayout Spacing="8">
-                            <Label Text="{Binding GlobalLeaderValue}" FontFamily="Bahnschrift" FontSize="26" TextColor="{StaticResource Gold}" />
+                            <Label Text="{Binding GlobalLeaderValue}" FontFamily="Segoe UI Semibold" FontSize="26" TextColor="{StaticResource Accent}" />
                             <Label Text="{Binding GlobalLeaderCaption}" Style="{StaticResource Caption}" VerticalOptions="End" Margin="0,0,0,5" LineBreakMode="WordWrap" MaxLines="2" />
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Spacing="5">
-                            <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" FontSize="9" TextColor="{StaticResource GoldDeep}" VerticalOptions="Center" />
+                            <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" FontSize="9" TextColor="{StaticResource AccentDeep}" VerticalOptions="Center" />
                             <Label Text="{Binding GlobalLeaderBuild}" Style="{StaticResource Caption}" FontSize="9.5" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>

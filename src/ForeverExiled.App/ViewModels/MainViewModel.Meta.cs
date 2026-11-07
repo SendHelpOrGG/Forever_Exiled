@@ -19,7 +19,7 @@ public partial class MainViewModel
             IsSampleData
                 ? "generated demo — not the live ladder"
                 : _snapshot.LeagueName.Length > 0 ? _snapshot.LeagueName + " ladder" : string.Empty,
-            Palette.Gold));
+            Palette.Accent));
 
         StatCards.Add(new StatCardItem(
             "\uE8FD",

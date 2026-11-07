@@ -5,33 +5,61 @@
              x:Class="ForeverExiled.App.Views.MainPage"
              BackgroundColor="{StaticResource BgDeep}">
 
-    <Grid RowDefinitions="64,*,Auto" ColumnDefinitions="84,*">
+    <Grid RowDefinitions="52,*,Auto">
 
         <!-- ============================== Header ============================== -->
-        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+        <Grid Grid.Row="0"
               Background="{StaticResource HeaderGradient}"
-              ColumnDefinitions="Auto,*,Auto"
-              ColumnSpacing="18"
-              Padding="18,0">
+              ColumnDefinitions="Auto,Auto,*,Auto"
+              ColumnSpacing="14"
+              Padding="14,0">
 
-            <HorizontalStackLayout Grid.Column="0" Spacing="11" VerticalOptions="Center">
-                <Image Source="logo.png" WidthRequest="30" HeightRequest="30" Aspect="AspectFit" VerticalOptions="Center" />
-                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                    <Label Text="FOREVER EXILED"
-                           FontFamily="Bahnschrift"
-                           FontSize="15"
-                           CharacterSpacing="3.4"
-                           TextColor="{StaticResource Gold}" />
-                    <Label Text="PoE 1 CLUSTER META" Style="{StaticResource Micro}" />
-                </VerticalStackLayout>
+            <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center" Margin="0,0,6,0">
+                <Image Source="logo.png" WidthRequest="24" HeightRequest="24" Aspect="AspectFit" VerticalOptions="Center" />
+                <Label Text="forever exiled"
+                       FontFamily="Segoe UI Semibold"
+                       FontSize="15"
+                       CharacterSpacing="0"
+                       TextColor="{StaticResource TextPrimary}"
+                       VerticalOptions="Center" />
             </HorizontalStackLayout>
 
-            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+            <!-- tab bar — mirrors the poe.ninja site header -->
+            <HorizontalStackLayout Grid.Column="1"
+                                   Spacing="2"
+                                   VerticalOptions="Center"
+                                   BindableLayout.ItemsSource="{Binding NavItems}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource NavTile}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Command}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Image Source="{Binding Image}"
+                                       WidthRequest="14"
+                                       HeightRequest="14"
+                                       Aspect="AspectFit"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding HasImage}" />
+                                <Label Text="{Binding Glyph}"
+                                       Style="{StaticResource NavGlyph}"
+                                       FontSize="13"
+                                       IsVisible="{Binding HasGlyph}"
+                                       VerticalOptions="Center" />
+                                <Label Text="{Binding Caption}" Style="{StaticResource NavCaption}" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
                 <Border BackgroundColor="{StaticResource SurfaceAlt}"
                         Stroke="{StaticResource Border}"
                         StrokeThickness="1"
-                        StrokeShape="RoundRectangle 9"
-                        Padding="10,6">
+                        StrokeShape="RoundRectangle 3"
+                        Padding="8,4">
                     <HorizontalStackLayout Spacing="6">
                         <Label Text="&#xE774;" Style="{StaticResource GlyphSmall}" FontSize="11" />
                         <Label Text="{Binding LeagueName}" Style="{StaticResource BodyStrong}" VerticalOptions="Center" />
@@ -43,8 +71,8 @@
                 <Border BackgroundColor="{StaticResource SurfaceSunken}"
                         Stroke="{Binding DataSourceColor}"
                         StrokeThickness="1"
-                        StrokeShape="RoundRectangle 9"
-                        Padding="9,6">
+                        StrokeShape="RoundRectangle 3"
+                        Padding="7,4">
                     <HorizontalStackLayout Spacing="6">
                         <Border WidthRequest="6" HeightRequest="6" StrokeThickness="0"
                                 BackgroundColor="{Binding DataSourceColor}"
@@ -60,7 +88,7 @@
                 </Border>
             </HorizontalStackLayout>
 
-            <HorizontalStackLayout Grid.Column="2" Spacing="12" VerticalOptions="Center">
+            <HorizontalStackLayout Grid.Column="3" Spacing="10" VerticalOptions="Center">
                 <Label Text="{Binding LastSyncText}" Style="{StaticResource Caption}" VerticalOptions="Center" />
                 <Button Text="SYNC"
                         Style="{StaticResource PrimaryButton}"
@@ -69,39 +97,8 @@
             </HorizontalStackLayout>
         </Grid>
 
-        <!-- ============================ Nav rail ============================= -->
-        <VerticalStackLayout Grid.Row="1" Grid.Column="0"
-                             Padding="10,12"
-                             Spacing="6"
-                             BackgroundColor="{StaticResource Bg}"
-                             BindableLayout.ItemsSource="{Binding NavItems}">
-            <BindableLayout.ItemTemplate>
-                <DataTemplate>
-                    <Border Style="{StaticResource NavTile}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Command}" />
-                        </Border.GestureRecognizers>
-                        <VerticalStackLayout Spacing="4">
-                            <Grid HeightRequest="22">
-                                <Image Source="{Binding Image}"
-                                       WidthRequest="22"
-                                       HeightRequest="22"
-                                       Aspect="AspectFit"
-                                       HorizontalOptions="Center"
-                                       IsVisible="{Binding HasImage}" />
-                                <Label Text="{Binding Glyph}"
-                                       Style="{StaticResource NavGlyph}"
-                                       IsVisible="{Binding HasGlyph}" />
-                            </Grid>
-                            <Label Text="{Binding Caption}" Style="{StaticResource NavCaption}" />
-                        </VerticalStackLayout>
-                    </Border>
-                </DataTemplate>
-            </BindableLayout.ItemTemplate>
-        </VerticalStackLayout>
-
         <!-- ============================= Content ============================= -->
-        <Grid Grid.Row="1" Grid.Column="1" BackgroundColor="{StaticResource BgDeep}">
+        <Grid Grid.Row="1" BackgroundColor="{StaticResource Bg}">
 
             <views:ClusterLabView IsVisible="{Binding IsClustersActive}" />
             <views:MetaView IsVisible="{Binding IsMetaActive}" />
@@ -118,7 +115,7 @@
                     <VerticalStackLayout Spacing="14">
                         <HorizontalStackLayout Spacing="10">
                             <ActivityIndicator IsRunning="{Binding IsBusy}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
-                            <Label Text="{Binding BusyTitle}" Style="{StaticResource H2}" TextColor="{StaticResource Gold}" VerticalOptions="Center" />
+                            <Label Text="{Binding BusyTitle}" Style="{StaticResource H2}" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                         <Label Text="{Binding BusyMessage}" Style="{StaticResource Body}" MaxLines="2" LineBreakMode="WordWrap" />
                         <ProgressBar Progress="{Binding BusyFraction}" />
@@ -135,7 +132,7 @@
         </Grid>
 
         <!-- ============================ Status bar =========================== -->
-        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" RowDefinitions="1,32" BackgroundColor="{StaticResource Bg}">
+        <Grid Grid.Row="2" RowDefinitions="1,26" BackgroundColor="{StaticResource Bg}">
             <BoxView Grid.Row="0" Color="{StaticResource BorderSoft}" />
             <Grid Grid.Row="1" Padding="18,0" ColumnDefinitions="*,Auto">
                 <HorizontalStackLayout Spacing="7" VerticalOptions="Center">

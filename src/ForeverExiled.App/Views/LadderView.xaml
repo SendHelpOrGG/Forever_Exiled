@@ -55,7 +55,7 @@
                                       ColumnSpacing="10"
                                       Padding="8,7">
                                     <Label Text="{Binding RankText}"
-                                           FontFamily="Bahnschrift"
+                                           FontFamily="Segoe UI Semibold"
                                            FontSize="11"
                                            TextColor="{StaticResource TextFaint}"
                                            VerticalOptions="Center" />
@@ -70,9 +70,9 @@
                                     <Label Grid.Column="2" Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="10.5" VerticalOptions="Center" />
                                     <Label Grid.Column="3" Text="{Binding SkillText}" Style="{StaticResource Body}" FontSize="11" VerticalOptions="Center" />
                                     <Label Grid.Column="4" Text="{Binding DpsText}"
-                                           FontFamily="Bahnschrift"
+                                           FontFamily="Segoe UI Semibold"
                                            FontSize="12.5"
-                                           TextColor="{StaticResource Gold}"
+                                           TextColor="{StaticResource Accent}"
                                            HorizontalTextAlignment="End"
                                            VerticalOptions="Center" />
                                     <Label Grid.Column="5" Text="{Binding ClusterText}"

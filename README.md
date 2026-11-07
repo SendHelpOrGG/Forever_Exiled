@@ -120,6 +120,19 @@ synthetic demo snapshot and carries an unmissable banner saying so; drop a real 
 `preview/data/live-snapshot.json` and the banner disappears. See
 [`preview/README.md`](preview/README.md) for the real-vs-simulated breakdown.
 
+### Visual language
+
+The UI deliberately reuses poe.ninja's own look so it feels like part of the site rather than
+a fan tool bolted onto it: slate-grey panels on a near-black background, a single green accent
+for selection and primary actions, a horizontal tab bar across the top, hairline 1px borders,
+3-4px corner radii, compact 26-32px rows and right-aligned tabular numbers. Path of Exile's
+own rarity colours are used where they carry meaning (mod text in magic blue, unique items in
+orange), and cluster jewels use tile-framed icons instead of text labels.
+
+Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
+preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI
+with Segoe UI Semibold for headings, matching what the site renders as on Windows.
+
 ---
 
 ## How the data pipeline works

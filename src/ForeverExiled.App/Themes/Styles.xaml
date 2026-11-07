@@ -13,7 +13,7 @@
 
     <Style x:Key="Micro" TargetType="Label">
         <Setter Property="FontSize" Value="9.5" />
-        <Setter Property="CharacterSpacing" Value="1.6" />
+        <Setter Property="CharacterSpacing" Value="1.1" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="TextColor" Value="{StaticResource TextMuted}" />
     </Style>
@@ -35,39 +35,39 @@
     </Style>
 
     <Style x:Key="Title" TargetType="Label">
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
     <Style x:Key="H2" TargetType="Label">
-        <Setter Property="FontFamily" Value="Bahnschrift" />
-        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontFamily" Value="Segoe UI Semibold" />
+        <Setter Property="FontSize" Value="15" />
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
     </Style>
 
     <Style x:Key="H1" TargetType="Label">
-        <Setter Property="FontFamily" Value="Bahnschrift" />
-        <Setter Property="FontSize" Value="23" />
+        <Setter Property="FontFamily" Value="Segoe UI Semibold" />
+        <Setter Property="FontSize" Value="24" />
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
     </Style>
 
     <Style x:Key="Hero" TargetType="Label">
-        <Setter Property="FontFamily" Value="Bahnschrift" />
-        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontFamily" Value="Segoe UI Semibold" />
+        <Setter Property="FontSize" Value="22" />
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
     </Style>
 
     <Style x:Key="StatValue" TargetType="Label">
-        <Setter Property="FontFamily" Value="Bahnschrift" />
-        <Setter Property="FontSize" Value="19" />
+        <Setter Property="FontFamily" Value="Segoe UI Semibold" />
+        <Setter Property="FontSize" Value="17" />
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
     </Style>
 
-    <Style x:Key="StatValueGold" TargetType="Label">
-        <Setter Property="FontFamily" Value="Bahnschrift" />
-        <Setter Property="FontSize" Value="19" />
-        <Setter Property="TextColor" Value="{StaticResource Gold}" />
+    <Style x:Key="StatValueAccent" TargetType="Label">
+        <Setter Property="FontFamily" Value="Segoe UI Semibold" />
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="TextColor" Value="{StaticResource Accent}" />
     </Style>
 
     <Style x:Key="Glyph" TargetType="Label">
@@ -82,8 +82,8 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
-    <Style x:Key="GlyphGold" TargetType="Label" BasedOn="{StaticResource Glyph}">
-        <Setter Property="TextColor" Value="{StaticResource Gold}" />
+    <Style x:Key="GlyphAccent" TargetType="Label" BasedOn="{StaticResource Glyph}">
+        <Setter Property="TextColor" Value="{StaticResource Accent}" />
     </Style>
 
     <!-- ============================== Cards =============================== -->
@@ -92,10 +92,10 @@
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="16" />
+        <Setter Property="Padding" Value="12" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="14" />
+                <RoundRectangle CornerRadius="4" />
             </Setter.Value>
         </Setter>
     </Style>
@@ -107,17 +107,17 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="14" />
+                <RoundRectangle CornerRadius="4" />
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style x:Key="CardSunken" TargetType="Border" BasedOn="{StaticResource Card}">
         <Setter Property="Background" Value="{StaticResource SurfaceSunkenBrush}" />
-        <Setter Property="Padding" Value="12" />
+        <Setter Property="Padding" Value="10" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="10" />
+                <RoundRectangle CornerRadius="4" />
             </Setter.Value>
         </Setter>
     </Style>
@@ -126,10 +126,10 @@
         <Setter Property="Background" Value="{StaticResource SurfaceSunkenBrush}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="Padding" Value="10,7" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="10" />
+                <RoundRectangle CornerRadius="4" />
             </Setter.Value>
         </Setter>
     </Style>
@@ -140,10 +140,10 @@
         <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="Padding" Value="7,2" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="7" />
+                <RoundRectangle CornerRadius="3" />
             </Setter.Value>
         </Setter>
     </Style>
@@ -154,9 +154,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style x:Key="ChipGold" TargetType="Border" BasedOn="{StaticResource Chip}">
-        <Setter Property="Background" Value="{StaticResource GoldTintBrush}" />
-        <Setter Property="Stroke" Value="{StaticResource GoldDim}" />
+    <!-- Notable names use Path of Exile's mod-text colour, as on the site -->
+    <Style x:Key="ChipAccent" TargetType="Border" BasedOn="{StaticResource Chip}">
+        <Setter Property="Background" Value="{StaticResource PoeMagicTintBrush}" />
+        <Setter Property="Stroke" Value="{StaticResource PoeMagicDimBrush}" />
     </Style>
 
     <!-- ========================= Selectable pills ========================= -->
@@ -165,16 +166,16 @@
         <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="Padding" Value="9,4" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="9" />
+                <RoundRectangle CornerRadius="3" />
             </Setter.Value>
         </Setter>
         <Style.Triggers>
             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="Background" Value="{StaticResource GoldTintBrush}" />
-                <Setter Property="Stroke" Value="{StaticResource GoldBrush}" />
+                <Setter Property="Background" Value="{StaticResource AccentTintBrush}" />
+                <Setter Property="Stroke" Value="{StaticResource AccentBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -185,7 +186,7 @@
         <Setter Property="VerticalOptions" Value="Center" />
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="TextColor" Value="{StaticResource Gold}" />
+                <Setter Property="TextColor" Value="{StaticResource Accent}" />
                 <Setter Property="FontAttributes" Value="Bold" />
             </DataTrigger>
         </Style.Triggers>
@@ -197,7 +198,7 @@
         <Setter Property="VerticalOptions" Value="Center" />
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="TextColor" Value="{StaticResource GoldDeep}" />
+                <Setter Property="TextColor" Value="{StaticResource AccentDeep}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -207,29 +208,31 @@
     <Style x:Key="NavTile" TargetType="Border">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Stroke" Value="Transparent" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="0,9" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="11" />
+                <RoundRectangle CornerRadius="3" />
             </Setter.Value>
         </Setter>
         <Style.Triggers>
             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="Background" Value="{StaticResource GoldTintBrush}" />
-                <Setter Property="Stroke" Value="{StaticResource GoldDim}" />
+                <Setter Property="Background" Value="{StaticResource AccentTintBrush}" />
+                <Setter Property="Stroke" Value="{StaticResource AccentDim}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="NavCaption" TargetType="Label">
-        <Setter Property="FontSize" Value="9" />
-        <Setter Property="CharacterSpacing" Value="0.8" />
-        <Setter Property="TextColor" Value="{StaticResource TextMuted}" />
-        <Setter Property="HorizontalTextAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="CharacterSpacing" Value="0" />
+        <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="VerticalOptions" Value="Center" />
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="TextColor" Value="{StaticResource Gold}" />
+                <Setter Property="TextColor" Value="{StaticResource Accent}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -239,7 +242,7 @@
         <Setter Property="HorizontalTextAlignment" Value="Center" />
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="TextColor" Value="{StaticResource Gold}" />
+                <Setter Property="TextColor" Value="{StaticResource Accent}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -249,17 +252,17 @@
     <Style x:Key="SkillRow" TargetType="Border">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Stroke" Value="Transparent" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="10,9" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="8,6" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="11" />
+                <RoundRectangle CornerRadius="3" />
             </Setter.Value>
         </Setter>
         <Style.Triggers>
             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                <Setter Property="Background" Value="{StaticResource GoldTintBrush}" />
-                <Setter Property="Stroke" Value="{StaticResource GoldDim}" />
+                <Setter Property="Background" Value="{StaticResource AccentTintBrush}" />
+                <Setter Property="Stroke" Value="{StaticResource AccentDim}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -273,8 +276,8 @@
         <Setter Property="BackgroundColor" Value="{StaticResource SurfaceAlt}" />
         <Setter Property="BorderColor" Value="{StaticResource Border}" />
         <Setter Property="BorderWidth" Value="1" />
-        <Setter Property="CornerRadius" Value="9" />
-        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="12,6" />
         <Setter Property="MinimumHeightRequest" Value="34" />
     </Style>
 
@@ -282,11 +285,11 @@
         <Setter Property="FontFamily" Value="Segoe UI" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="TextColor" Value="#1A1409" />
-        <Setter Property="BackgroundColor" Value="{StaticResource Gold}" />
+        <Setter Property="TextColor" Value="#EAFBF2" />
+        <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
         <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="CornerRadius" Value="9" />
-        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="14,7" />
         <Setter Property="MinimumHeightRequest" Value="36" />
     </Style>
 
@@ -297,8 +300,8 @@
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="BorderColor" Value="{StaticResource Border}" />
         <Setter Property="BorderWidth" Value="1" />
-        <Setter Property="CornerRadius" Value="9" />
-        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="11,6" />
         <Setter Property="MinimumHeightRequest" Value="32" />
     </Style>
 
@@ -309,10 +312,10 @@
         <Setter Property="BackgroundColor" Value="{StaticResource SurfaceAlt}" />
         <Setter Property="BorderColor" Value="{StaticResource Border}" />
         <Setter Property="BorderWidth" Value="1" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="CornerRadius" Value="3" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="WidthRequest" Value="34" />
-        <Setter Property="HeightRequest" Value="34" />
+        <Setter Property="WidthRequest" Value="30" />
+        <Setter Property="HeightRequest" Value="30" />
     </Style>
 
     <Style TargetType="Entry">
@@ -330,13 +333,13 @@
     </Style>
 
     <Style TargetType="ProgressBar">
-        <Setter Property="ProgressColor" Value="{StaticResource Gold}" />
+        <Setter Property="ProgressColor" Value="{StaticResource Accent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}" />
         <Setter Property="HeightRequest" Value="4" />
     </Style>
 
     <Style TargetType="ActivityIndicator">
-        <Setter Property="Color" Value="{StaticResource Gold}" />
+        <Setter Property="Color" Value="{StaticResource Accent}" />
     </Style>
 
     <Style TargetType="ScrollView">
