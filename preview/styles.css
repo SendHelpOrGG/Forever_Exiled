@@ -610,6 +610,9 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .notable-name .dot { display: inline-block; width: 2px; height: 9px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
 .notable-val { font-size: 13.5px; color: var(--text-3); text-align: right; font-variant-numeric: tabular-nums; }
 .notable-bar { height: 2px; margin-top: 3px; }
+.notable-meta {
+  font-size: 12px; color: var(--text-3); margin-top: 4px; font-variant-numeric: tabular-nums;
+}
 
 .build-row {
   display: grid; grid-template-columns: 18px 40px minmax(0, 1fr) auto; gap: 10px;
@@ -822,6 +825,16 @@ img.art.tiny { width: 13px; height: 13px; margin-right: 4px; }
 
 .item-tip .item-props { color: #7f7f7f; }
 .item-tip .item-mods { color: #8888ff; }
+.item-tip .item-mod { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.item-tip .item-mod > span:first-child { min-width: 0; }
+.item-tip .item-weight {
+  flex: none; color: #6f7a86; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.item-tip .item-weight i { font-style: normal; color: #5a6470; margin-left: 6px; }
+.item-tip .item-pool {
+  color: #7b8794; font-size: 13px; letter-spacing: .02em;
+  margin: 3px 0 6px; padding-top: 5px; border-top: 1px dotted rgba(136,136,255,.22);
+}
 .item-tip .item-mods .item-mod + .item-mod { margin-top: 1px; }
 .item-tip .item-mod-desc {
   color: #8f9aa6; font-size: 14.5px; line-height: 1.4;

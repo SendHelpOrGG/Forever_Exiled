@@ -37,11 +37,13 @@ const { document } = window;
 const snapshot = JSON.parse(read('data/demo-snapshot.json'));
 const gemIndex = JSON.parse(read('assets/gems/index.json'));
 const notables = JSON.parse(read('assets/notables.json'));
+const weights = JSON.parse(read('assets/notable_weights.json'));
 window.fetch = (url) => Promise.resolve({
   ok: true,
   json: async () => {
     const target = String(url);
     if (target.includes('gems/index.json')) return gemIndex;
+    if (target.includes('notable_weights.json')) return weights;
     if (target.includes('notables.json')) return notables;
     return snapshot;
   },
@@ -131,6 +133,17 @@ setTimeout(() => {
   check('item card explains what the notables do',
     !!tip && qa('.item-tip .item-mod-desc').length > 0,
     tip ? (qa('.item-tip .item-mod-desc')[0] || {}).textContent : 'missing');
+  check('item card names the cluster base pool',
+    /pool · \d+ notables · [\d,]+ weight/.test(txt('.item-tip .item-pool')),
+    txt('.item-tip .item-pool'));
+  const notableMods = qa('.item-tip .item-mod').filter((n) => /^1 Added Passive Skill is /.test(n.textContent.trim()));
+  const weightBadges = qa('.item-tip .item-weight');
+  check('every notable on the card carries its weight',
+    notableMods.length > 0 && weightBadges.length === notableMods.length,
+    `${weightBadges.length} weights for ${notableMods.length} notables`);
+  check('the weight badge also gives the odds of rolling it',
+    weightBadges.every((n) => /\d+\s*\d+(\.\d+)?%/.test(n.textContent.replace(/\s+/g, ' ').trim())),
+    weightBadges.map((n) => n.textContent.trim()).join(' | '));
   check('item card no longer repeats the analysis figures',
     !!tip && !/Share of sample|Average DPS/.test(tip.textContent));
   const snapshotNotables = [...new Set(snapshot.characters.flatMap((c) =>
@@ -181,6 +194,39 @@ setTimeout(() => {
   click(largeRow);
   check('clicking a size row ranks that size', txt('#comboHeader').includes('LARGE'), txt('#comboHeader'));
   click(qa('#mixCard .size-row').find((r) => r.querySelector('b').textContent === 'Medium'));
+
+  /* ── weights must be complete: every demo jewel rolls a real pool ── */
+  const norm = (t) => String(t).toLowerCase().replace(/[\d.]+%?/g, ' ').replace(/\s+/g, ' ').trim();
+  const poolFor = (j) => {
+    const grant = String(j.grantType || '').trim().toLowerCase();
+    const size = String(j.size || '').toLowerCase();
+    if (!grant) return null;
+    return weights.grants[`${size}|${grant}`] || weights.grants[`any|${grant}`]
+      || weights.grants[`${size}~${norm(grant)}`] || weights.grants[`any~${norm(grant)}`] || null;
+  };
+  const weightOf = (name, tag) => {
+    const entry = weights.notables[String(name).toLowerCase()];
+    return entry && tag ? entry.weights[tag] : undefined;
+  };
+
+  const allJewels = snapshot.characters.flatMap((c) => c.clusterJewels || []);
+  const poolMisses = allJewels.filter((j) => !poolFor(j));
+  check('every jewel base resolves to a cluster pool', poolMisses.length === 0,
+    poolMisses.length
+      ? poolMisses.slice(0, 3).map((j) => j.size + ' / ' + j.grantType).join(', ')
+      : `${allJewels.length} jewels mapped`);
+  const orphans = allJewels.flatMap((j) => {
+    const tag = poolFor(j);
+    return (j.notables || []).filter((n) => !weightOf(n, tag)).map((n) => `${n} (${j.grantType})`);
+  });
+  check("every notable is weighted inside its jewel's pool", orphans.length === 0,
+    orphans.length ? orphans.slice(0, 3).join(', ') : 'all weighted');
+  // a handful of legacy bases still exist in the jewel data but have no notables this league,
+  // so only pools that actually have weight are expected to look like the game's ~6000
+  const totals = Object.values(weights.categories).flatMap((c) => Object.values(c.totals)).filter((t) => t > 0);
+  check('pool weights look like the game\'s ~6000 pools',
+    totals.length > 0 && totals.every((t) => t >= 1000 && t <= 8000),
+    totals.length + ' pools, ' + Math.min(...totals) + '–' + Math.max(...totals) + ' weight');
 
   /* ── search ── */
   type(q('#skillSearch'), 'cold');

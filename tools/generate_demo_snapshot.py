@@ -14,6 +14,10 @@ marked (league name "Allflame (demo)", snapshotVersion "demo-...", source "sampl
 synthetic true) so both the app and the preview label it as a demo everywhere it shows.
 
 Real data only arrives through Sync, which writes a normal cached snapshot.
+
+Every jewel is rewritten against preview/assets/notable_weights.json so its base is a
+real cluster base and all of its notables roll from that base's pool - run
+tools/build_notable_weights.py first if that file is missing.
 """
 from __future__ import annotations
 
@@ -133,6 +137,88 @@ ARCHETYPES = {
         ],
     },
 }
+
+# ------------------------------------------------------- real cluster pools
+# preview/assets/notable_weights.json comes from the game's mod data (see
+# tools/build_notable_weights.py). Every jewel is rewritten so that its base is a
+# real cluster base and all of its notables come from that base's pool - otherwise
+# the weights shown in the UI would not belong to the jewel they are printed on.
+
+WEIGHTS_PATH = ROOT / "preview" / "assets" / "notable_weights.json"
+WEIGHTS = json.loads(WEIGHTS_PATH.read_text(encoding="utf-8"))
+CATEGORIES = WEIGHTS["categories"]
+NOTABLES = WEIGHTS["notables"]
+
+# fallback pool when none of an entry's notables belongs to a valid base
+DEFAULT_POOL = {
+    ("cold-projectile", "Large"): "affliction_cold_damage",
+    ("cold-projectile", "Medium"): "affliction_projectile_damage",
+    ("cold-projectile", "Small"): "affliction_maximum_life",
+    ("fire-melee", "Large"): "affliction_fire_damage",
+    ("fire-melee", "Medium"): "affliction_fire_damage_over_time_multiplier",
+    ("fire-melee", "Small"): "affliction_maximum_life",
+    ("chaos-dot", "Large"): "affliction_chaos_damage",
+    ("chaos-dot", "Medium"): "affliction_chaos_damage_over_time_multiplier",
+    ("chaos-dot", "Small"): "affliction_maximum_life",
+    ("physical-impale", "Large"): "affliction_physical_damage",
+    ("physical-impale", "Medium"): "affliction_physical_damage_over_time_multiplier",
+    ("physical-impale", "Small"): "affliction_maximum_life",
+    ("lightning", "Large"): "affliction_lightning_damage",
+    ("lightning", "Medium"): "affliction_critical_chance",
+    ("lightning", "Small"): "affliction_maximum_life",
+    ("minion", "Large"): "affliction_minion_damage",
+    ("minion", "Medium"): "affliction_minion_life",
+    ("minion", "Small"): "affliction_maximum_life",
+}
+
+
+def pool_members(tag: str) -> list[str]:
+    """Pool members, heaviest weight first - the order a substitute is drawn from."""
+    members = [(NOTABLES[n.lower()]["weights"][tag], n) for n in CATEGORIES[tag]["notables"]]
+    return [name for _w, name in sorted(members, reverse=True)]
+
+
+def pick_pool(archetype: str, size: str, names: list[str]) -> str:
+    """The base whose pool explains most of the notables on this jewel."""
+    best, best_hits = None, 0
+    for tag, category in CATEGORIES.items():
+        if size not in category["sizes"]:
+            continue
+        hits = sum(1 for n in names if n in category["notables"])
+        if hits > best_hits:
+            best, best_hits = tag, hits
+
+    return best or DEFAULT_POOL[(archetype, size)]
+
+
+def repair_names(names: list[str], tag: str) -> list[str]:
+    """Swap notables the pool cannot roll for the pool's next-heaviest names."""
+    pool = pool_members(tag)
+    known = set(CATEGORIES[tag]["notables"])
+    used: list[str] = []
+    for name in names:
+        if name in known and name not in used:
+            used.append(name)
+            continue
+        replacement = next((c for c in pool if c not in used and c not in names), None)
+        used.append(replacement or pool[0])
+    return used
+
+
+def align_archetypes() -> None:
+    for archetype, sizes in ARCHETYPES.items():
+        for key, specs in sizes.items():
+            size = key.capitalize()
+            for index, (csv, _grant, passives, weight, effect) in enumerate(specs):
+                names = [n.strip() for n in csv.split(",") if n.strip()]
+                if names == ["Voices"]:
+                    continue
+                tag = pick_pool(archetype, size, names)
+                fixed = repair_names(names, tag)
+                specs[index] = (",".join(fixed), CATEGORIES[tag]["grants"][size], passives, weight, effect)
+
+
+align_archetypes()
 
 # name, popularity %, average dps, peak dps, archetype, class weights
 SKILLS = [

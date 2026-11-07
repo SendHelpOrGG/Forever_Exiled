@@ -349,9 +349,21 @@ public sealed class ComboItem
             mods.Add("Added Small Passive Skills have " + combo.EffectPercent + "% increased Effect");
         }
 
+        // the pool this base rolls from, then how heavy each notable is inside it
+        var pool = NotableWeights.PoolFor(combo.Size.ToString(), combo.GrantType);
+        var poolTotal = NotableWeights.PoolTotal(pool, combo.Size.ToString());
+        if (pool is not null && poolTotal > 0)
+        {
+            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables · {poolTotal:N0} weight");
+        }
+
         foreach (var notable in combo.Notables)
         {
-            mods.Add("1 Added Passive Skill is " + notable);
+            var weight = NotableWeights.WeightFor(notable, pool);
+            var chance = NotableWeights.ChancePercent(notable, pool, combo.Size.ToString());
+            var suffix = weight > 0 ? $"    ({weight:N0} weight · {chance:0.#}% of pool)" : string.Empty;
+
+            mods.Add("1 Added Passive Skill is " + notable + suffix);
             foreach (var stat in NotableText.StatsFor(notable))
             {
                 mods.Add("    " + stat);

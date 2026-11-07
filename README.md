@@ -145,6 +145,18 @@ as HTML positioned against the cursor; the app compiles the same text through
 `Theming/NotableText.g.cs` and shows it via MAUI's `ToolTipProperties`, so content matches even
 though Windows draws the chrome.
 
+Every notable also carries its **spawn weight**. A cluster jewel base ("12% increased Fire
+Damage", "10% increased Projectile Damage") rolls its notables from one pool, and each notable
+has a weight inside that pool - so the card prints the pool ("Fire Damage over Time pool · 18
+notables · 5,995 weight") and, next to each notable, its weight and the odds of rolling it
+(Exposure Therapy 733 · 12%, Cooked Alive 137 · 2.3%). The numbers come from the game's mod data
+via Path of Building's `ModJewelCluster.lua` + `ClusterJewels.lua` - the same `spawn_weights`
+craftofexile.com reads - built into `preview/assets/notable_weights.json` by
+`tools/build_notable_weights.py` and compiled into `Theming/NotableWeights.g.cs` by
+`tools/sync_notable_weights.py`. Notables are only ever shown with the weight of the pool their
+own jewel rolls from; the demo snapshot is regenerated so every jewel sits on a real base with
+its notables drawn from that base's pool.
+
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI
 with Segoe UI Semibold for headings, matching what the site renders as on Windows.
@@ -249,6 +261,12 @@ issues commands; the views contain no logic beyond bindings.
 `python3 tools/sync_notable_text.py` compiles the notable descriptions in
 `preview/assets/notables.json` into `Theming/NotableText.g.cs`; the JSON itself is extracted
 from a Path of Building tree file by `tools/build_notable_text.py`.
+
+`python3 tools/build_notable_weights.py ModJewelCluster.lua ClusterJewels.lua` extracts every
+cluster notable's spawn weight per cluster base tag into `preview/assets/notable_weights.json`
+(300 notables, 54 bases, pool totals around 6,000 each), and `tools/sync_notable_weights.py`
+compiles that into `Theming/NotableWeights.g.cs`. Both Lua files come from the Path of Building
+repository (`src/Data/`), which is generated from the game's own mod data.
 
 `python3 tools/sync_gem_art.py` rebuilds everything derived from the gem art: the preview's
 `assets/gems/index.json` (so the browser knows which gems have art before asking for a 404),

@@ -203,7 +203,7 @@
                             <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TopNotables}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnDefinitions="22,*,Auto" RowDefinitions="Auto,Auto"
+                                        <Grid ColumnDefinitions="22,*,Auto" RowDefinitions="Auto,Auto,Auto"
                                               RowSpacing="3" ColumnSpacing="8">
                                             <Image Grid.Row="0" Grid.Column="0"
                                                    Source="{Binding Image}"
@@ -229,6 +229,11 @@
                                                         HorizontalOptions="Start"
                                                         WidthRequest="{Binding BarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=230}" />
                                             </Grid>
+                                            <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                                   Text="{Binding SecondaryText}"
+                                                   Style="{StaticResource Caption}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource TextMuted}" />
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>

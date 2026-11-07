@@ -390,6 +390,78 @@ async function loadNotableText() {
   }
 }
 
+let notableWeights = null;
+
+async function loadNotableWeights() {
+  try {
+    const response = await fetch('assets/notable_weights.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    notableWeights = await response.json();
+  } catch {
+    notableWeights = null;
+  }
+}
+
+/* The pool a cluster jewel rolls its notables from, keyed by its base enchant. */
+function poolFor(jewel) {
+  if (!notableWeights || !jewel) return null;
+  const grant = String(jewel.grantType || '').trim().toLowerCase();
+  if (!grant) return null;
+
+  const size = String(jewel.size || '').toLowerCase();
+  const normalised = grant.replace(/[\d.]+%?/g, ' ').replace(/\s+/g, ' ').trim();
+  const grants = notableWeights.grants;
+
+  return grants[`${size}|${grant}`] || grants[`any|${grant}`]
+    || grants[`${size}~${normalised}`] || grants[`any~${normalised}`] || null;
+}
+
+function poolInfo(tag, size) {
+  if (!notableWeights || !tag) return null;
+  const category = notableWeights.categories[tag];
+  if (!category) return null;
+
+  return {
+    tag,
+    label: category.label,
+    total: category.totals[size] || category.totals[Object.keys(category.totals)[0]] || 0,
+    count: category.notables.length,
+  };
+}
+
+/* weight of one notable inside a pool, and the chance of rolling it */
+function notableWeight(name, tag) {
+  if (!notableWeights || !tag) return null;
+  const entry = notableWeights.notables[String(name || '').trim().toLowerCase()];
+  const weight = entry && entry.weights ? entry.weights[tag] : 0;
+  return weight ? weight : null;
+}
+
+/* The pool a notable belongs to when we only know its size and name. */
+function notablePool(name, size) {
+  if (!notableWeights) return null;
+  const entry = notableWeights.notables[String(name || '').trim().toLowerCase()];
+  if (!entry || !entry.weights) return null;
+
+  let best = null;
+  for (const [tag, weight] of Object.entries(entry.weights)) {
+    const category = notableWeights.categories[tag];
+    if (!category || (size && !category.sizes.includes(size))) continue;
+    if (!best || weight > best.weight) best = { tag, weight };
+  }
+
+  return best ? poolInfo(best.tag, size) : null;
+}
+
+function weightLine(name, pool) {
+  if (!pool) return '';
+  const weight = notableWeight(name, pool.tag);
+  if (!weight) return '';
+  const chance = pool.total ? (weight * 100) / pool.total : 0;
+  const pct = chance >= 10 ? chance.toFixed(0) : chance.toFixed(1);
+  return `<span class="item-weight" title="${esc(pool.label)} pool · ${fmt.count(weight)} of ${fmt.count(pool.total)} weight">${fmt.count(weight)}<i>${pct}%</i></span>`;
+}
+
 function notableLines(name) {
   const entry = notableText[String(name || '').trim().toLowerCase()];
   return entry ? entry : null;
@@ -613,8 +685,13 @@ function itemTipHtml(combo) {
   if (combo.effectPercent > 0) {
     mods.push(`<div class="item-mod">Added Small Passive Skills have ${combo.effectPercent}% increased Effect</div>`);
   }
+  const pool = poolInfo(poolFor(item.size ? item : combo), (item.size || combo.size));
+  if (pool) {
+    mods.push(`<div class="item-pool" title="the pool this base rolls its notables from">${esc(pool.label)} pool · ${pool.count} notables · ${fmt.count(pool.total)} weight</div>`);
+  }
+
   for (const notable of combo.notables || []) {
-    mods.push(`<div class="item-mod">1 Added Passive Skill is ${esc(notable)}</div>`);
+    mods.push(`<div class="item-mod"><span>1 Added Passive Skill is ${esc(notable)}</span>${weightLine(notable, pool)}</div>`);
     const lines = notableLines(notable);
     if (lines) {
       mods.push(`<div class="item-mod-desc">${(lines.stats || []).map((line) => esc(line)).join('<br>')}</div>`);
@@ -1006,6 +1083,13 @@ function renderMeta() {
               <i class="dot" style="--c:${SIZE_COLOR[n.size]}"></i>${esc(n.name)}
             </div>
             <div class="bar notable-bar"><i style="width:${n.percent.toFixed(1)}%;background:${SIZE_COLOR[n.size]}"></i></div>
+            ${(() => {
+              const pool = notablePool(n.name, n.size);
+              const weight = pool ? notableWeight(n.name, pool.tag) : null;
+              if (!weight) return '';
+              const chance = pool.total ? (weight * 100) / pool.total : 0;
+              return `<div class="notable-meta">${esc(pool.label)} pool · weight ${fmt.count(weight)} · ${chance >= 10 ? chance.toFixed(0) : chance.toFixed(1)}% of pool</div>`;
+            })()}
           </div>
           <div class="notable-val">${esc(fmt.pct(n.percent, 0))}</div>
         </div>`).join('')}
@@ -1397,6 +1481,7 @@ async function boot() {
 
   await loadGemIndex();
   await loadNotableText();
+  await loadNotableWeights();
 
   state.snapshot = snapshot;
   state.floor = snapshot.minPopularityPercent || 1;

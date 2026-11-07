@@ -67,11 +67,17 @@ public partial class MainViewModel
         var maxNotable = global.TopNotables.Count > 0 ? global.TopNotables[0].Count : 0;
         foreach (var notable in global.TopNotables.Take(8))
         {
+            var pool = NotableWeights.BestPoolFor(notable.Name, notable.Size.ToString());
+            var weight = NotableWeights.WeightFor(notable.Name, pool);
+            var weightText = weight > 0
+                ? $"{NotableWeights.PoolLabel(pool)} pool · weight {weight:N0}"
+                : DpsFormatter.Percent(notable.Percent) + " of sample";
+
             TopNotables.Add(new LeaderItem(
                 string.Empty,
                 notable.Name,
                 notable.Count + " builds",
-                DpsFormatter.Percent(notable.Percent) + " of sample",
+                weightText,
                 maxNotable > 0 ? notable.Count * 100d / maxNotable : 0,
                 Palette.ForClusterSize(notable.Size),
                 Palette.ImageForClusterSize(notable.Size)));
