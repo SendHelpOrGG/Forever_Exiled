@@ -517,11 +517,34 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
-.mix-row { display: grid; grid-template-columns: 8px 46px minmax(0, 1fr) 38px; gap: 8px; align-items: center; margin-bottom: 7px; }
-.mix-row:last-child { margin-bottom: 0; }
-.mix-row .swatch { width: 8px; height: 8px; border-radius: 1px; background: var(--c); }
-.mix-name { font-size: 14.5px; color: var(--text-2); }
-.mix-val { font-size: 14.5px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+.size-row {
+  display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 11px; align-items: start;
+  width: 100%; text-align: left; background: transparent; border: 0;
+  border-left: 2px solid transparent; border-radius: var(--r-sm);
+  padding: 8px 8px 8px 7px; margin: 0 0 2px -7px; cursor: pointer; font: inherit; color: inherit;
+}
+.size-row:hover { background: var(--panel-2); }
+.size-row.on { background: var(--panel-2); border-left-color: var(--green); }
+.size-row:disabled { opacity: .5; cursor: default; }
+.size-row:disabled:hover { background: transparent; }
+.size-art { width: 30px; height: 30px; object-fit: contain; margin-top: 1px; }
+.size-main { display: block; min-width: 0; }
+.size-head { display: flex; align-items: baseline; gap: 8px; }
+.size-head b { font-size: 15.5px; font-weight: 600; }
+.size-head .cap { white-space: nowrap; }
+.size-pct {
+  margin-left: auto; font-size: 15.5px; font-weight: 600;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+.size-row .bar { display: block; height: 4px; margin: 6px 0 5px; }
+.size-top {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; font-size: 13px; line-height: 1.35; color: var(--poe-magic);
+}
+.size-note {
+  font-size: 12px; line-height: 1.45; color: var(--text-3);
+  margin: 8px 0 0; padding-top: 8px; border-top: 1px solid rgba(38,49,61,.7);
+}
 
 .mini-row {
   display: grid; grid-template-columns: 16px 24px minmax(0, 1fr) auto; gap: 8px;

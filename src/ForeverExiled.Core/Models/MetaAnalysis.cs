@@ -95,6 +95,12 @@ public sealed class SkillClusterProfile
 
     public List<ClusterCombo> Small { get; set; } = new();
 
+    /// <summary>
+    /// How many of the sampled builds run at least one jewel of each size. The three
+    /// shares overlap (a build can run a Large and a Medium), so they never sum to 100%.
+    /// </summary>
+    public List<SizeShare> SizeMix { get; set; } = new();
+
     public DateTimeOffset AnalyzedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public bool HasData => Large.Count > 0 || Medium.Count > 0 || Small.Count > 0;

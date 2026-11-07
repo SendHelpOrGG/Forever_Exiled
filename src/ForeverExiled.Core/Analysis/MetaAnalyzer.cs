@@ -56,6 +56,7 @@ public sealed class MetaAnalyzer
             Large = BuildCombos(builds, ClusterSize.Large, builds.Count, includeSkills: false),
             Medium = BuildCombos(builds, ClusterSize.Medium, builds.Count, includeSkills: false),
             Small = BuildCombos(builds, ClusterSize.Small, builds.Count, includeSkills: false),
+            SizeMix = BuildSizeMix(builds),
             AnalyzedAt = DateTimeOffset.UtcNow,
         };
     }

@@ -142,6 +142,7 @@ public partial class MainViewModel
         var combos = profile?.ForSize(CurrentSize) ?? new List<ClusterCombo>();
 
         RefreshSizePills(profile);
+        RebuildSizeAdoption(profile);
 
         var maxBuilds = combos.Count > 0 ? combos.Max(c => c.BuildCount) : 0;
         var rank = 1;
@@ -204,6 +205,43 @@ public partial class MainViewModel
             pill.CountText = count > 0 ? count.ToString() : string.Empty;
             pill.IsSelected = size == CurrentSize;
         }
+    }
+
+    private void RebuildSizeAdoption(SkillClusterProfile? profile)
+    {
+        SizeAdoption.Clear();
+
+        var total = profile?.SampledBuilds ?? 0;
+        foreach (var size in new[] { ClusterSize.Large, ClusterSize.Medium, ClusterSize.Small })
+        {
+            var share = profile?.SizeMix.FirstOrDefault(s => s.Size == size);
+            var item = new SizeAdoptionItem(size, share?.Count ?? 0, total, profile?.Best(size), SelectSizeAdoption)
+            {
+                IsSelected = size == CurrentSize,
+            };
+
+            SizeAdoption.Add(item);
+        }
+
+        SizeAdoptionHeaderText = total > 0
+            ? $"{total} build{(total == 1 ? string.Empty : "s")}"
+            : "no builds sampled";
+    }
+
+    private void SelectSizeAdoption(SizeAdoptionItem item)
+    {
+        if (!item.IsSelectable)
+        {
+            return;
+        }
+
+        CurrentSize = item.Size;
+        foreach (var pill in SizePills)
+        {
+            pill.IsSelected = string.Equals(pill.Key, item.Size.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        RebuildCombos();
     }
 
     private void SelectSizePill(PillItem pill)

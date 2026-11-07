@@ -71,6 +71,9 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<PillItem> SizePills { get; }
 
+    /// <summary>Per-size adoption of the selected skill, shown in the rail card.</summary>
+    public ObservableCollection<SizeAdoptionItem> SizeAdoption { get; } = new();
+
     public ObservableCollection<PillItem> SortPills { get; }
 
     public ObservableCollection<PillItem> DepthPills { get; } = new();
@@ -196,6 +199,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _comboHintText = string.Empty;
+
+    [ObservableProperty]
+    private string _sizeAdoptionHeaderText = string.Empty;
 
     [ObservableProperty]
     private bool _hasCombos;

@@ -187,14 +187,34 @@ function buildProfile(skill, builds) {
   const pending = (skill.topBuilds || [])
     .filter((b) => !sampledKeys.has(`${b.account}/${b.name}`.toLowerCase())).length;
 
+  const combosBySize = {
+    Large: buildCombos(builds, 'Large', builds.length, false),
+    Medium: buildCombos(builds, 'Medium', builds.length, false),
+    Small: buildCombos(builds, 'Small', builds.length, false),
+  };
+
   return {
     skill: skill.name,
     sampledBuilds: builds.length,
     pendingBuilds: pending,
     topBuilds: (skill.topBuilds || []).length,
-    Large: buildCombos(builds, 'Large', builds.length, false),
-    Medium: buildCombos(builds, 'Medium', builds.length, false),
-    Small: buildCombos(builds, 'Small', builds.length, false),
+    Large: combosBySize.Large,
+    Medium: combosBySize.Medium,
+    Small: combosBySize.Small,
+    // how many of this skill's builds run at least one jewel of each size,
+    // plus the combination that size leads to - the answer to "which size do I take?"
+    sizes: SIZES.map((size) => {
+      const adopters = builds.filter(
+        (b) => (b.clusterJewels || []).some((j) => j.size === size)).length;
+      return {
+        size,
+        adopters,
+        total: builds.length,
+        percent: builds.length ? (adopters * 100) / builds.length : 0,
+        combos: combosBySize[size].length,
+        top: combosBySize[size][0] || null,
+      };
+    }),
   };
 }
 
@@ -863,17 +883,6 @@ function renderGlobalRail() {
 
   if (leader) bindItemTips('#globalLeader .leader-top .slot', [leader]);
 
-  $('mixCard').innerHTML = `
-    ${panel('Jewel mix', `<span class="cap">${g.charactersSampled} builds</span>`)}
-    <div class="panel-body">
-      ${g.sizeMix.map((m) => `
-        <div class="mix-row">
-          <i class="swatch" style="--c:${SIZE_COLOR[m.size]}"></i>
-          <span class="mix-name">${m.size}</span>
-          <span class="bar"><i style="width:${m.percent.toFixed(1)}%;background:${SIZE_COLOR[m.size]}"></i></span>
-          <span class="mix-val">${esc(fmt.pct(m.percent, 0))}</span>
-        </div>`).join('')}
-    </div>`;
 
   const top = g.topDpsBuilds.slice(0, 5);
   $('dpsCard').innerHTML = `
@@ -895,6 +904,38 @@ function renderGlobalRail() {
       <div class="stat-row"><span class="k">Combinations found</span><span class="v">${fmt.count(g.combosFound)}</span></div>
       <div class="stat-row"><span class="k">Jewels catalogued</span><span class="v">${fmt.count(g.jewelsCatalogued)}</span></div>
       <div class="stat-row"><span class="k">Ladder builds</span><span class="v">${fmt.count(g.totalBuildsInLeague)}</span></div>
+    </div>`;
+}
+
+function renderSizeCard() {
+  const host = $('mixCard');
+  const profile = selectedProfile();
+
+  if (!profile || !profile.sampledBuilds) {
+    host.innerHTML = `${panel('Cluster sizes')}
+      <div class="panel-body"><span class="cap">No sampled builds for this skill yet.</span></div>`;
+    return;
+  }
+
+  const total = profile.sampledBuilds;
+  host.innerHTML = `
+    ${panel('Cluster sizes', `<span class="cap">${total} build${total === 1 ? '' : 's'}</span>`)}
+    <div class="panel-body">
+      ${profile.sizes.map((s) => `
+        <button class="size-row ${s.size === state.size ? 'on' : ''}" data-size="${s.size}"
+                ${s.adopters ? '' : 'disabled'}>
+          <img class="size-art" src="${SIZE_IMG[s.size]}" alt="">
+          <span class="size-main">
+            <span class="size-head">
+              <b>${s.size}</b>
+              <span class="cap">${s.adopters} of ${s.total}</span>
+              <span class="size-pct">${esc(fmt.pct(s.percent, 0))}</span>
+            </span>
+            <span class="bar"><i style="width:${s.percent.toFixed(1)}%;background:${SIZE_COLOR[s.size]}"></i></span>
+            <span class="size-top" title="${s.top ? esc(s.top.label) : ''}">${s.top ? esc(s.top.label) : 'no combination yet'}</span>
+          </span>
+        </button>`).join('')}
+      <div class="size-note">A build can run more than one size, so the three shares overlap. Pick a row to rank that size\u2019s combinations.</div>
     </div>`;
 }
 
@@ -1085,9 +1126,21 @@ function renderAll() {
   renderPills();
   renderCombos();
   renderGlobalRail();
+  renderSizeCard();
   renderMeta();
   renderLadder();
   renderSettings();
+}
+
+function setSize(size) {
+  if (!SIZES.includes(size)) return;
+  state.size = size;
+  renderPills();
+  renderHero();
+  renderCombos();
+  renderSizeCard();
+  const stat = selectedSkillStat();
+  if (stat) setStatus(`${stat.name} — ${size.toLowerCase()} cluster combinations ranked`);
 }
 
 function selectSkill(name) {
@@ -1096,6 +1149,7 @@ function selectSkill(name) {
   renderHero();
   renderPills();
   renderCombos();
+  renderSizeCard();
   const stat = selectedSkillStat();
   if (stat) {
     setStatus(`${stat.name} — ${state.analysis.profiles.get(stat.name).sampledBuilds} sampled builds, ${state.size.toLowerCase()} combinations ranked`);
@@ -1202,10 +1256,12 @@ function wire() {
   $('sizePills').addEventListener('click', (e) => {
     const pill = e.target.closest('.pill');
     if (!pill) return;
-    state.size = pill.dataset.size;
-    renderPills();
-    renderHero();
-    renderCombos();
+    setSize(pill.dataset.size);
+  });
+
+  $('mixCard').addEventListener('click', (e) => {
+    const row = e.target.closest('.size-row');
+    if (row) setSize(row.dataset.size);
   });
 
   $('comboList').addEventListener('click', (e) => {

@@ -80,6 +80,55 @@ public sealed partial class PillItem : ObservableObject
     private bool _isSelected;
 }
 
+/// <summary>
+/// One row of the "cluster sizes" card: how many sampled builds of the selected skill
+/// run this size, and the combination that size leads to.
+/// </summary>
+public sealed partial class SizeAdoptionItem : ObservableObject
+{
+    public SizeAdoptionItem(
+        ClusterSize size,
+        int adopters,
+        int total,
+        ClusterCombo? top,
+        Action<SizeAdoptionItem> onSelected)
+    {
+        Size = size;
+        Image = Palette.ImageForClusterSize(size);
+        Label = size.ToLabel().Trim();
+        AdoptionText = total > 0 ? $"{adopters} of {total}" : "no builds";
+        PercentText = total > 0 ? $"{Math.Round(adopters * 100.0 / total)}%" : "–";
+        BarPercent = total > 0 ? adopters * 100.0 / total : 0;
+        TopComboLabel = top is not null ? top.Label : "no combination yet";
+        HasTopCombo = top is not null;
+        IsSelectable = adopters > 0;
+        Command = new RelayCommand(() => onSelected(this));
+    }
+
+    public ClusterSize Size { get; }
+
+    public string Image { get; }
+
+    public string Label { get; }
+
+    public string AdoptionText { get; }
+
+    public string PercentText { get; }
+
+    public double BarPercent { get; }
+
+    public string TopComboLabel { get; }
+
+    public bool HasTopCombo { get; }
+
+    public bool IsSelectable { get; }
+
+    public RelayCommand Command { get; }
+
+    [ObservableProperty]
+    private bool _isSelected;
+}
+
 public sealed class ChipItem
 {
     public ChipItem(string label) => Label = label;

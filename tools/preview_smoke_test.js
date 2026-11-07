@@ -144,7 +144,19 @@ setTimeout(() => {
   check('global leader names an anchor build',
     txt('#globalLeader .leader-anchor').includes('·'),
     txt('#globalLeader .leader-name') + ' / ' + txt('#globalLeader .leader-anchor'));
-  check('jewel mix', qa('#mixCard .mix-row').length === 3);
+  check('size card lists the three cluster sizes', qa('#mixCard .size-row').length === 3,
+    qa('#mixCard .size-head').map((n) => n.textContent.replace(/\s+/g, ' ').trim()).join(' | '));
+  check('size card counts builds instead of bare percentages',
+    qa('#mixCard .size-head .cap').every((n) => /\d+ of \d+/.test(n.textContent)),
+    qa('#mixCard .size-head .cap').map((n) => n.textContent.trim()).join(' | '));
+  check('size card names the top combination for each size',
+    qa('#mixCard .size-top').filter((n) => n.textContent.trim().length > 2).length >= 2,
+    qa('#mixCard .size-top').map((n) => n.textContent.trim()).join(' | '));
+  check('size card explains that the shares overlap',
+    /overlap/i.test(txt('#mixCard .size-note')), txt('#mixCard .size-note'));
+  check('size card rows are not a fake 100% split',
+    qa('#mixCard .size-pct').reduce((n, e) => n + parseFloat(e.textContent), 0) !== 100,
+    qa('#mixCard .size-pct').map((n) => n.textContent.trim()).join(' + '));
   check('peak characters', qa('#dpsCard .mini-row').length === 5);
 
   /* ── size switch + skill selection ── */
@@ -160,6 +172,15 @@ setTimeout(() => {
   const mediumTop = txt('#comboList .combo .combo-chips');
   check('Winter Orb medium top combo', mediumTop.includes('Eye to Eye') && mediumTop.includes('Repeater'),
     mediumTop + ' ' + txt('#comboList .combo .combo-pct'));
+
+  const largeRow = qa('#mixCard .size-row').find((r) => r.querySelector('b').textContent === 'Large');
+  check('size card highlights the selected size',
+    qa('#mixCard .size-row.on').length === 1 &&
+    q('#mixCard .size-row.on').querySelector('b').textContent === 'Medium',
+    q('#mixCard .size-row.on') ? q('#mixCard .size-row.on').querySelector('b').textContent : '<none>');
+  click(largeRow);
+  check('clicking a size row ranks that size', txt('#comboHeader').includes('LARGE'), txt('#comboHeader'));
+  click(qa('#mixCard .size-row').find((r) => r.querySelector('b').textContent === 'Medium'));
 
   /* ── search ── */
   type(q('#skillSearch'), 'cold');
