@@ -28,7 +28,7 @@
                                 HorizontalOptions="Start" />
                     </Grid>
 
-                    <Label Text="{Binding LeaguesText}" Style="{StaticResource Caption}" FontSize="10" />
+                    <Label Text="{Binding LeaguesText}" Style="{StaticResource Caption}" FontSize="13" />
 
                     <HorizontalStackLayout Spacing="8">
                         <Button Text="SYNC LADDER"
@@ -43,7 +43,7 @@
 
                     <Label Text="Syncing reads poe.ninja's PoE 1 build ladder: every main skill above the popularity floor, graded by average and peak DPS."
                            Style="{StaticResource Caption}"
-                           FontSize="10"
+                           FontSize="13"
                            LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
             </Border>
@@ -110,7 +110,7 @@
                         </HorizontalStackLayout>
                         <Label Text="Ladder and dictionary calls are pooled and fast; per-character calls are the ones poe.ninja throttles, and the penalty grows on repeated hits. Slower pacing is kinder and more reliable."
                                Style="{StaticResource Caption}"
-                               FontSize="9.5"
+                               FontSize="12.5"
                                LineBreakMode="WordWrap" />
                     </VerticalStackLayout>
 
@@ -133,7 +133,7 @@
                     <Border Style="{StaticResource CardSunken}" Padding="10">
                         <Label Text="{Binding DataFolderText}"
                                Style="{StaticResource Caption}"
-                               FontSize="10"
+                               FontSize="13"
                                LineBreakMode="CharacterWrap" />
                     </Border>
 
@@ -160,7 +160,7 @@
                     <Label Text="ABOUT THE DATA" Style="{StaticResource Micro}" />
                     <Label Text="Forever Exiled reads poe.ninja's PoE 1 build API directly: the ladder aggregate for popularity and DPS, the per-character sheet for equipped cluster jewels. Requests are paced, cached and resumable. The bundled dataset is a sample and is labelled as such in the header."
                            Style="{StaticResource Caption}"
-                           FontSize="10"
+                           FontSize="13"
                            LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
             </Border>
@@ -168,7 +168,7 @@
             <Border Style="{StaticResource CardSunken}" Padding="12" IsVisible="{Binding HasError}">
                 <VerticalStackLayout Spacing="4">
                     <Label Text="LAST ERROR" Style="{StaticResource Micro}" TextColor="{StaticResource Danger}" />
-                    <Label Text="{Binding LastError}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource Danger}" LineBreakMode="WordWrap" />
+                    <Label Text="{Binding LastError}" Style="{StaticResource Caption}" FontSize="13" TextColor="{StaticResource Danger}" LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>
