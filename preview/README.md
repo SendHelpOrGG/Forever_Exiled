@@ -81,6 +81,7 @@ This folder is a design aid, not part of the shipped application and not referen
 | Path | What it is |
 | --- | --- |
 | `assets/logo.png` | Project mark (generated). |
+| `assets/notables.json` | 300 cluster-jewel notable descriptions (stats + reminder text) built from Path of Building's tree data; the hover card prints them under each notable. |
 | `assets/gems/` | 507 skill gem icons (78px) plus `index.json`, so a skill row can show its real gem art and fall back cleanly when a gem has none. Art from PoE-Gems / Grinding Gear Games. |
 | `assets/cluster_{large,medium,small}.png` | Real in-game cluster jewel icons (transparent), so pills and combo cards match the item art. Art from ExileCraft / Grinding Gear Games. |
 | `assets/asc/<class>.jpg` | Ascendancy and base-class portraits, shown next to every class name. Art from Path of Building / Grinding Gear Games. |
@@ -90,6 +91,6 @@ Regenerate the gem index and the app's copies with `python3 tools/sync_gem_art.p
 
 Hovering a cluster jewel anywhere in the preview builds an item card from the jewel that
 represents the combination (`representative` on each combo, kept by the analysis): name in its
-rarity colour, base type, passive count, enchant, notable lines, item level, flags, then the
-combination's own figures. It is positioned against the cursor, flips sides near the window
+rarity colour, base type, passive count, enchant, item level and flags, with each notable
+followed by its stat lines and reminder text from `assets/notables.json`. It is positioned against the cursor, flips sides near the window
 edge, and disappears on scroll, resize, blur or mouse-leave.

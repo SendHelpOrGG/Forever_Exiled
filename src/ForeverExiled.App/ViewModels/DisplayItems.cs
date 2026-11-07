@@ -194,7 +194,7 @@ public sealed class ComboItem
         SizeImage = Palette.ImageForClusterSize(combo.Size);
         SizeLabel = combo.Size.ToLabel();
         IsLeader = rank == 1;
-        ItemTipText = BuildItemTip(combo, sampleSize);
+        ItemTipText = BuildItemTip(combo);
 
         Chips = combo.Notables.Count > 0
             ? combo.Notables.Select(n => new ChipItem(n)).ToList()
@@ -257,7 +257,7 @@ public sealed class ComboItem
     /// </summary>
     public string ItemTipText { get; }
 
-    private static string BuildItemTip(ClusterCombo combo, int sampleSize)
+    private static string BuildItemTip(ClusterCombo combo)
     {
         var item = combo.Representative;
         var lines = new List<string>();
@@ -267,7 +267,7 @@ public sealed class ComboItem
             lines.Add(item.ItemName);
         }
 
-        lines.Add(item?.BaseType is { Length: > 0 } baseType ? baseType : combo.Size.ToBaseType() + "s");
+        lines.Add(item?.BaseType is { Length: > 0 } baseType ? baseType : combo.Size.ToBaseType());
         lines.Add("------------------------------");
 
         var props = new List<string>();
@@ -303,6 +303,15 @@ public sealed class ComboItem
         foreach (var notable in combo.Notables)
         {
             mods.Add("1 Added Passive Skill is " + notable);
+            foreach (var stat in NotableText.StatsFor(notable))
+            {
+                mods.Add("    " + stat);
+            }
+
+            foreach (var reminder in NotableText.RemindersFor(notable))
+            {
+                mods.Add("    " + reminder);
+            }
         }
 
         if (mods.Count > 0)
@@ -330,19 +339,6 @@ public sealed class ComboItem
         if (flags.Count > 0)
         {
             lines.AddRange(flags);
-        }
-
-        lines.Add("------------------------------");
-        lines.Add(sampleSize > 0
-            ? combo.BuildCount + " of " + sampleSize + " sampled builds · " + DpsFormatter.Percent(combo.PercentOfBuilds)
-            : combo.BuildCount + " builds");
-        lines.Add(DpsFormatter.FormatWithUnit(combo.AverageDps) + " average · "
-            + DpsFormatter.FormatWithUnit(combo.PeakDps) + " peak");
-
-        if (combo.TopBuildName.Length > 0)
-        {
-            lines.Add("Top build: " + combo.TopBuildName
-                + (combo.TopBuildClass.Length > 0 ? " · " + combo.TopBuildClass : string.Empty));
         }
 
         return string.Join(Environment.NewLine, lines);

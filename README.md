@@ -136,12 +136,14 @@ skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in t
 header), so a row reads as two pictures and a caption.
 
 Hovering any cluster jewel - in the combination list, the meta table or the global-leader card -
-opens the same item card the site shows: rarity-coloured name, base type, "Adds N Passive
-Skills", the enchant and notable lines, item level, fractured/corrupted flags, and below the
-separator the figures for that combination (builds, share of the sample, average and peak DPS,
-anchor build). The preview renders it as HTML positioned against the cursor; the app uses the
-same text through MAUI's `ToolTipProperties`, so the content is identical even though Windows
-draws the chrome.
+opens the item card the site shows: rarity-coloured name, base type, "Adds N Passive Skills",
+the enchant line, one "1 Added Passive Skill is X" line per notable, item level and
+fractured/corrupted flags. Each notable is followed by what it actually does - the numbers come
+from Path of Building's tree data (`preview/assets/notables.json`, 300 cluster notables, built by
+`tools/build_notable_text.py`) - including the game's grey reminder text. The preview renders it
+as HTML positioned against the cursor; the app compiles the same text through
+`Theming/NotableText.g.cs` and shows it via MAUI's `ToolTipProperties`, so content matches even
+though Windows draws the chrome.
 
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI
@@ -243,6 +245,10 @@ issues commands; the views contain no logic beyond bindings.
 ---
 
 ### Media assets
+
+`python3 tools/sync_notable_text.py` compiles the notable descriptions in
+`preview/assets/notables.json` into `Theming/NotableText.g.cs`; the JSON itself is extracted
+from a Path of Building tree file by `tools/build_notable_text.py`.
 
 `python3 tools/sync_gem_art.py` rebuilds everything derived from the gem art: the preview's
 `assets/gems/index.json` (so the browser knows which gems have art before asking for a 404),

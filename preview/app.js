@@ -356,6 +356,25 @@ function slugify(name) {
     .replace(/\s+/g, '_');
 }
 
+/** Notable passive text from assets/notables.json (cluster-jewel notables). */
+let notableText = {};
+
+async function loadNotableText() {
+  try {
+    const response = await fetch('assets/notables.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    const data = await response.json();
+    notableText = data.notables || {};
+  } catch {
+    notableText = {};
+  }
+}
+
+function notableLines(name) {
+  const entry = notableText[String(name || '').trim().toLowerCase()];
+  return entry ? entry : null;
+}
+
 /** Slug list from assets/gems/index.json — tells us which gems have art. */
 let gemIndex = null;
 
@@ -566,25 +585,29 @@ function itemTipHtml(combo) {
     props.push(`${item.jewelSockets} Added Passive Skill${item.jewelSockets === 1 ? ' is a' : 's are'} Jewel Socket${item.jewelSockets === 1 ? '' : 's'}`);
   }
 
+  // each notable is followed by what it actually does, as the game shows it
   const mods = [];
-  if (combo.grantType) mods.push(`Added Small Passive Skills grant: ${combo.grantType}`);
-  if (combo.effectPercent > 0) mods.push(`Added Small Passive Skills have ${combo.effectPercent}% increased Effect`);
-  for (const notable of combo.notables || []) mods.push(`1 Added Passive Skill is ${notable}`);
-  for (const small of item.smallGrants || []) mods.push(small);
+  if (combo.grantType) {
+    mods.push(`<div class="item-mod">Added Small Passive Skills grant: ${esc(combo.grantType)}</div>`);
+  }
+  if (combo.effectPercent > 0) {
+    mods.push(`<div class="item-mod">Added Small Passive Skills have ${combo.effectPercent}% increased Effect</div>`);
+  }
+  for (const notable of combo.notables || []) {
+    mods.push(`<div class="item-mod">1 Added Passive Skill is ${esc(notable)}</div>`);
+    const lines = notableLines(notable);
+    if (lines) {
+      mods.push(`<div class="item-mod-desc">${(lines.stats || []).map((line) => esc(line)).join('<br>')}</div>`);
+      if (lines.reminder && lines.reminder.length) {
+        mods.push(`<div class="item-reminder">${lines.reminder.map((line) => esc(line)).join('<br>')}</div>`);
+      }
+    }
+  }
+  for (const small of item.smallGrants || []) mods.push(`<div class="item-mod">${esc(small)}</div>`);
 
   const flags = [];
   if (item.fractured) flags.push('<span class="item-fractured">Fractured Item</span>');
   if (item.corrupted) flags.push('<span class="item-corrupt">Corrupted</span>');
-
-  const denominator = combo.sampleSize || 0;
-  const pct = combo.percentOfBuilds != null ? fmt.pct(combo.percentOfBuilds) : '—';
-  const footer = [
-    ['Builds', `${combo.buildCount}${denominator ? ` of ${denominator}` : ''}`],
-    ['Share of sample', pct],
-    ['Average DPS', fmt.dps(combo.averageDps)],
-    ['Peak DPS', fmt.dps(combo.peakDps)],
-    ['Anchor build', combo.topBuildName ? `${combo.topBuildName}${combo.topBuildClass ? ` · ${combo.topBuildClass}` : ''}` : '—'],
-  ];
 
   return `
     <div class="item-head">
@@ -595,14 +618,9 @@ function itemTipHtml(combo) {
       </span>
     </div>
     ${props.length ? `<hr><div class="item-props">${props.map((line) => esc(line)).join('<br>')}</div>` : ''}
-    ${mods.length ? `<hr><div class="item-mods">${mods.map((line) => esc(line)).join('<br>')}</div>` : ''}
+    ${mods.length ? `<hr><div class="item-mods">${mods.join('')}</div>` : ''}
     ${item.itemLevel ? `<hr><div class="item-props">Item Level: ${item.itemLevel}</div>` : ''}
-    ${flags.length ? `<hr><div class="item-props">${flags.join('<br>')}</div>` : ''}
-    <hr>
-    <div class="tip-stats">
-      ${footer.map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v">${esc(String(v))}</span>`).join('')}
-    </div>
-    <div class="tip-source">sampled cluster jewel · ${esc(combo.size)}</div>`;
+    ${flags.length ? `<hr><div class="item-props">${flags.join('<br>')}</div>` : ''}`;
 }
 
 function placeTip(event) {
@@ -1322,6 +1340,7 @@ async function boot() {
   window.addEventListener('blur', hideTip);
 
   await loadGemIndex();
+  await loadNotableText();
 
   state.snapshot = snapshot;
   state.floor = snapshot.minPopularityPercent || 1;

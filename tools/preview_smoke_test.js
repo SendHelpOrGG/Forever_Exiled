@@ -36,9 +36,15 @@ const { document } = window;
 
 const snapshot = JSON.parse(read('data/demo-snapshot.json'));
 const gemIndex = JSON.parse(read('assets/gems/index.json'));
+const notables = JSON.parse(read('assets/notables.json'));
 window.fetch = (url) => Promise.resolve({
   ok: true,
-  json: async () => (String(url).includes('gems/index.json') ? gemIndex : snapshot),
+  json: async () => {
+    const target = String(url);
+    if (target.includes('gems/index.json')) return gemIndex;
+    if (target.includes('notables.json')) return notables;
+    return snapshot;
+  },
 });
 window.eval(read('app.js'));
 
@@ -122,8 +128,16 @@ setTimeout(() => {
   check('item card lists the notables as item mods',
     !!tip && /1 Added Passive Skill is /.test(tip.textContent),
     tip ? (tip.textContent.match(/1 Added Passive Skill is [^0-9]+/) || ['none'])[0] : 'missing');
-  check('item card carries the analysis figures',
-    !!tip && /Builds/.test(tip.textContent) && /Average DPS/.test(tip.textContent));
+  check('item card explains what the notables do',
+    !!tip && qa('.item-tip .item-mod-desc').length > 0,
+    tip ? (qa('.item-tip .item-mod-desc')[0] || {}).textContent : 'missing');
+  check('item card no longer repeats the analysis figures',
+    !!tip && !/Share of sample|Average DPS/.test(tip.textContent));
+  const snapshotNotables = [...new Set(snapshot.characters.flatMap((c) =>
+    (c.clusterJewels || []).flatMap((j) => j.notables || [])))];
+  const undocumented = snapshotNotables.filter((n) => !notables.notables[String(n).toLowerCase()]);
+  check('every notable in the snapshot has its description', undocumented.length === 0,
+    (undocumented.length ? undocumented.join(', ') : snapshotNotables.length + ' notables documented'));
   jewelTile.dispatchEvent(new window.MouseEvent('mouseleave', { bubbles: false }));
   check('leaving the jewel hides the item card', !!tip && tip.hidden);
 

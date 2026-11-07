@@ -56,11 +56,11 @@ ARCHETYPES = {
         "large": [
             ("Devastator,Feed the Fury,Martial Prowess", "12% increased Fire Damage", 8, 6, 0),
             ("Feed the Fury,Martial Prowess,Sadist", "12% increased Fire Damage", 8, 3, 0),
-            ("Devastator,Titan's Fall,Feed the Fury", "12% increased Fire Damage", 12, 2, 0),
+            ("Devastator,Cremator,Feed the Fury", "12% increased Fire Damage", 12, 2, 0),
         ],
         "medium": [
             ("Sadist,Cooked Alive", "10% increased Fire Damage", 4, 6, 35),
-            ("Sadist,Blazing Salvo", "10% increased Fire Damage", 4, 3, 0),
+            ("Sadist,Cooked Alive", "10% increased Fire Damage", 4, 3, 0),
             ("Cooked Alive,Wasting Affliction", "10% increased Fire Damage", 5, 2, 0),
         ],
         "small": [
@@ -86,14 +86,14 @@ ARCHETYPES = {
     },
     "physical-impale": {
         "large": [
-            ("Deep Cuts,Vicious Skewer,Bloodscent", "12% increased Physical Damage", 8, 6, 0),
-            ("Vicious Skewer,Rend,Bloodscent", "12% increased Physical Damage", 8, 4, 0),
+            ("Deep Cuts,Wound Aggravation,Bloodscent", "12% increased Physical Damage", 8, 6, 0),
+            ("Wound Aggravation,Rend,Bloodscent", "12% increased Physical Damage", 8, 4, 0),
             ("Deep Cuts,Bloodscent,Martial Prowess", "12% increased Physical Damage", 12, 2, 0),
         ],
         "medium": [
-            ("Iron Breaker,Brutal Infusion", "10% increased Physical Damage", 4, 7, 35),
+            ("Iron Breaker,Force Multiplier", "10% increased Physical Damage", 4, 7, 35),
             ("Rend,Precise Focus", "10% increased Physical Damage", 4, 4, 0),
-            ("Brutal Infusion,Combat Rhythm", "10% increased Physical Damage", 5, 2, 0),
+            ("Force Multiplier,Combat Rhythm", "10% increased Physical Damage", 5, 2, 0),
         ],
         "small": [
             ("Fettle", "12% increased Maximum Life", 2, 6, 0),
@@ -103,12 +103,12 @@ ARCHETYPES = {
     "lightning": {
         "large": [
             ("Doryani's Lesson,Prismatic Heart,Scintillating Idea", "12% increased Lightning Damage", 8, 6, 0),
-            ("Scintillating Idea,Disorientation,Doryani's Lesson", "12% increased Lightning Damage", 8, 4, 0),
+            ("Scintillating Idea,Paralysis,Doryani's Lesson", "12% increased Lightning Damage", 8, 4, 0),
             ("Prismatic Heart,Scintillating Idea,Stormrider", "12% increased Lightning Damage", 12, 2, 0),
         ],
         "medium": [
             ("Overshock,Supercharge", "10% increased Lightning Damage", 4, 7, 35),
-            ("Overshock,Disorientation", "10% increased Lightning Damage", 4, 3, 0),
+            ("Overshock,Paralysis", "10% increased Lightning Damage", 4, 3, 0),
             ("Supercharge,Scintillating Idea", "10% increased Lightning Damage", 5, 2, 0),
         ],
         "small": [
