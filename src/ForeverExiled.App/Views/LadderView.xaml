@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ForeverExiled.App.Views.LadderView">
+
+    <Grid Padding="14" RowDefinitions="Auto,*" RowSpacing="12">
+
+        <Grid ColumnDefinitions="*,Auto">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="LADDER" Style="{StaticResource H1}" />
+                <Label Text="{Binding LadderSummary}" Style="{StaticResource Caption}" />
+            </VerticalStackLayout>
+
+            <Border Grid.Column="1"
+                    BackgroundColor="{StaticResource SurfaceSunken}"
+                    Stroke="{StaticResource BorderSoft}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 9"
+                    Padding="9,2"
+                    VerticalOptions="Center"
+                    WidthRequest="270">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                    <Label Text="&#xE721;" Style="{StaticResource GlyphSmall}" FontSize="12" VerticalOptions="Center" />
+                    <Entry Grid.Column="1"
+                           Text="{Binding LadderFilter}"
+                           Placeholder="Filter builds, class or skill"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardFlush}">
+            <Grid RowDefinitions="Auto,1,*">
+
+                <Grid ColumnDefinitions="40,*,130,180,96,70"
+                      ColumnSpacing="10"
+                      Padding="14,11"
+                      BackgroundColor="{StaticResource SurfaceSunken}">
+                    <Label Text="#" Style="{StaticResource Micro}" FontSize="8.5" />
+                    <Label Grid.Column="1" Text="CHARACTER" Style="{StaticResource Micro}" FontSize="8.5" />
+                    <Label Grid.Column="2" Text="CLASS" Style="{StaticResource Micro}" FontSize="8.5" />
+                    <Label Grid.Column="3" Text="MAIN SKILL" Style="{StaticResource Micro}" FontSize="8.5" />
+                    <Label Grid.Column="4" Text="DPS" Style="{StaticResource Micro}" FontSize="8.5" HorizontalTextAlignment="End" />
+                    <Label Grid.Column="5" Text="CLUSTERS" Style="{StaticResource Micro}" FontSize="8.5" HorizontalTextAlignment="End" />
+                </Grid>
+
+                <BoxView Grid.Row="1" Color="{StaticResource BorderSoft}" />
+
+                <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Never">
+                    <VerticalStackLayout Padding="6,6,6,14" Spacing="1"
+                                         BindableLayout.ItemsSource="{Binding LadderItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="40,*,130,180,96,70"
+                                      ColumnSpacing="10"
+                                      Padding="8,7">
+                                    <Label Text="{Binding RankText}"
+                                           FontFamily="Bahnschrift"
+                                           FontSize="11"
+                                           TextColor="{StaticResource TextFaint}"
+                                           VerticalOptions="Center" />
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="7" VerticalOptions="Center">
+                                        <Border WidthRequest="5" HeightRequest="5"
+                                                StrokeThickness="0"
+                                                BackgroundColor="{Binding AccentColor}"
+                                                StrokeShape="RoundRectangle 3"
+                                                VerticalOptions="Center" />
+                                        <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="11.5" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                    <Label Grid.Column="2" Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="10.5" VerticalOptions="Center" />
+                                    <Label Grid.Column="3" Text="{Binding SkillText}" Style="{StaticResource Body}" FontSize="11" VerticalOptions="Center" />
+                                    <Label Grid.Column="4" Text="{Binding DpsText}"
+                                           FontFamily="Bahnschrift"
+                                           FontSize="12.5"
+                                           TextColor="{StaticResource Gold}"
+                                           HorizontalTextAlignment="End"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="5" Text="{Binding ClusterText}"
+                                           Style="{StaticResource Caption}"
+                                           FontSize="10.5"
+                                           HorizontalTextAlignment="End"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Border>
+    </Grid>
+
+</ContentView>

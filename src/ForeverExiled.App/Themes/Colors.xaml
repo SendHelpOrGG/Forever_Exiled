@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Surfaces -->
+    <Color x:Key="BgDeep">#07090C</Color>
+    <Color x:Key="Bg">#0B0E13</Color>
+    <Color x:Key="Surface">#12161D</Color>
+    <Color x:Key="SurfaceAlt">#171C24</Color>
+    <Color x:Key="SurfaceRaised">#1C2230</Color>
+    <Color x:Key="SurfaceSunken">#0E121A</Color>
+
+    <!-- Lines -->
+    <Color x:Key="Border">#232B36</Color>
+    <Color x:Key="BorderSoft">#1A2029</Color>
+    <Color x:Key="BorderStrong">#313D4C</Color>
+
+    <!-- Type -->
+    <Color x:Key="TextPrimary">#EAEFF6</Color>
+    <Color x:Key="TextSecondary">#9DA9B8</Color>
+    <Color x:Key="TextMuted">#6B7787</Color>
+    <Color x:Key="TextFaint">#4B5563</Color>
+
+    <!-- Accents -->
+    <Color x:Key="Gold">#E4C078</Color>
+    <Color x:Key="GoldDeep">#C49A4F</Color>
+    <Color x:Key="GoldDim">#7A6335</Color>
+    <Color x:Key="GoldTint">#241E12</Color>
+
+    <Color x:Key="Cold">#69B7E8</Color>
+    <Color x:Key="Fire">#E8794A</Color>
+    <Color x:Key="Lightning">#E7C55E</Color>
+    <Color x:Key="Chaos">#AE7BE0</Color>
+    <Color x:Key="Physical">#B6BEC8</Color>
+    <Color x:Key="Minion">#74C6A2</Color>
+
+    <Color x:Key="Success">#5FB98C</Color>
+    <Color x:Key="Warning">#E0A24A</Color>
+    <Color x:Key="Danger">#D96C6C</Color>
+    <Color x:Key="Info">#69A8E8</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="BgBrush" Color="{StaticResource Bg}" />
+    <SolidColorBrush x:Key="BgDeepBrush" Color="{StaticResource BgDeep}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}" />
+    <SolidColorBrush x:Key="SurfaceAltBrush" Color="{StaticResource SurfaceAlt}" />
+    <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="{StaticResource SurfaceRaised}" />
+    <SolidColorBrush x:Key="SurfaceSunkenBrush" Color="{StaticResource SurfaceSunken}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Border}" />
+    <SolidColorBrush x:Key="BorderSoftBrush" Color="{StaticResource BorderSoft}" />
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BorderStrong}" />
+    <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource Gold}" />
+    <SolidColorBrush x:Key="GoldDeepBrush" Color="{StaticResource GoldDeep}" />
+    <SolidColorBrush x:Key="GoldTintBrush" Color="{StaticResource GoldTint}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+
+    <!-- Gradients -->
+    <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#131822" Offset="0.0" />
+        <GradientStop Color="#0B0E13" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GoldGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#F0D28F" Offset="0.0" />
+        <GradientStop Color="#C49A4F" Offset="1.0" />
+    </LinearGradientBrush>
+
+</ResourceDictionary>

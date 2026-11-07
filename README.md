@@ -1,1 +1,185 @@
-# Forever_Exiled
+# Forever Exiled
+
+A desktop **.NET 10 MAUI (Windows / WinUI 3) MVVM app** that answers one Path of Exile 1
+question properly: **which cluster jewel combinations do the best builds actually use?**
+
+It reads poe.ninja's PoE 1 build ladder, keeps every **main skill above 1% popularity**,
+grades those skills **by DPS**, and then pulls the equipped cluster jewels of their
+top-DPS characters to rank the combinations per skill and across the whole league.
+
+```
+Winter Orb  →  Medium cluster  →  Eye to Eye + Repeater   53.8%   7 / 13 builds   73.8M avg DPS
+Molten Strike of the Zenith → Large → Devastator + Feed the Fury + Martial Prowess   46.2%
+```
+
+---
+
+## What it does
+
+**Meta (league-wide)**
+- Builds in the ladder, skills tracked, builds sampled, distinct combinations found.
+- Most popular Large/Medium combinations across *all* sampled builds, with the skills
+  that use them and the build that anchors each one.
+- DPS leaders, most-used notables, highest-DPS builds.
+
+**Cluster Lab (the main screen)**
+- Ranked main-skill rail: every skill above the popularity floor, sorted by average DPS
+  (or popularity), with a colour-coded damage-type accent and a DPS bar.
+- Skill hero: average DPS, peak DPS, ladder popularity, build count, sampled-build count,
+  dominant classes.
+- Cluster-size switch (Large / Medium / Small) with live per-type counts.
+- Combination cards: the notable set as chips, how many sampled builds run it, its share
+  of the sample, the most common enchant type line, passive count, small-passive effect
+  roll, weighted average DPS and the highest-DPS build using it.
+
+**Ladder**
+- Every sampled (or ladder-listed) character with class, main skill, DPS and how many
+  cluster jewels they run; filterable.
+
+**Settings**
+- League selection, sample depth per skill, popularity floor, request pacing.
+- Cache size, data-folder shortcuts, CSV export, "sample every tracked skill".
+
+Everything is **cached locally and resumable**: characters already fetched are never
+fetched twice, so re-running an analysis gets faster and pressing Cancel never loses work.
+
+---
+
+## Requirements
+
+| | |
+|---|---|
+| OS | Windows 10 1809 (17763) or later, x64 |
+| SDK | [.NET 10 SDK](https://dotnet.microsoft.com/download) |
+| Workload | `dotnet workload install maui-windows` |
+
+## Build & run
+
+```powershell
+dotnet workload install maui-windows          # once
+dotnet build src/ForeverExiled.App -c Debug   # build the app
+dotnet run   --project src/ForeverExiled.App  # unpackaged, no MSIX certificate needed
+dotnet test  tests/ForeverExiled.Core.Tests   # parser + analyzer test suite
+```
+
+The app ships with a **bundled sample snapshot**, clearly badged `SAMPLE DATA` in the
+header, so the entire UI is explorable before the first network call. Press **SYNC** to
+pull the live ladder for the selected league.
+
+---
+
+## How the data pipeline works
+
+poe.ninja has no public builds API; the app talks to the same internal endpoints the site
+itself uses. Everything below was verified against live responses and against independent
+open-source clients (see [`docs/poe-ninja-api.md`](docs/poe-ninja-api.md)).
+
+```
+GET /poe1/api/data/index-state                    JSON   leagues + rotating snapshot versions
+GET /poe1/api/builds/{version}/search             protobuf  ladder rows + popularity aggregates
+GET /poe1/api/builds/dictionary/{hash}            NDIC   string tables for categorical columns
+GET /poe1/api/builds/{version}/character          JSON   one character sheet (items, jewels)
+```
+
+**Phase 1 — ladder (cheap: ~1 request per tracked skill).**
+One unfiltered search returns the aggregate popularity buckets *and* the ladder rows. The
+`skills` bucket gives every main skill's share of the ladder; each skill above the floor
+is then queried with `?skills=<name>` to collect its top-100 builds and grade them by
+average / median / peak DPS.
+
+**Phase 2 — cluster jewels (polite: rate-limited, cached).**
+For a skill, the top-N builds by DPS get one `/character` request each. Cluster jewels are
+extracted from `clusterJewels[]`, `jewels[].itemData` and `items[]` (all three shapes have
+existed) and reduced to: size, passive count, enchant type line, notables, small-passive
+grants and the `35% increased Effect` fracture.
+
+**Combination identity** is `size + alphabetically sorted notables`, so
+`Eye to Eye + Repeater` and `Repeater + Eye to Eye` are the same combination, and a build
+running the same jewel twice counts once. Popularity is *builds running it ÷ builds
+sampled for that skill*.
+
+### Rate limiting is deliberate
+
+poe.ninja throttles the character endpoint hard and the `Retry-After` penalty escalates
+(observed 81s → 168s → 865s → 3294s). The app therefore:
+
+- serialises every request through a pacer (default one request every 5 s, configurable);
+- honours `Retry-After` exactly and widens the steady pace by 1.5× after each 429;
+- saves after every few characters so a long crawl can be cancelled and resumed.
+
+Ladder and dictionary calls use a separate, faster gate (~1.2 s) because they are served from an
+aggregate cache — a full sync is ~30–40 s. Only per-character calls use the configurable pacing,
+so sampling one skill at depth 12 takes about a minute.
+
+---
+
+## Solution layout
+
+```
+ForeverExiled.sln
+├─ src/ForeverExiled.Core            net10.0 (no UI dependencies — unit-testable)
+│  ├─ Models/                        SkillStat, ClusterJewel, ClusterCombo, MetaAnalysis…
+│  ├─ Net/PoeNinjaClient.cs          endpoints, retry/429 handling, pacer
+│  ├─ Net/ProtoWire.cs               minimal protobuf wire reader (no codegen)
+│  ├─ Net/SearchResponseParser.cs    ladder columns + aggregate dimensions
+│  ├─ Net/DictionaryDecoder.cs       NDIC container + legacy protobuf fallback
+│  ├─ Net/CharacterJsonParser.cs     character sheet → CharacterSnapshot
+│  ├─ Analysis/ClusterJewelParser.cs mod text → structured cluster jewel
+│  ├─ Analysis/MetaAnalyzer.cs       per-skill + global aggregation
+│  ├─ Analysis/SyncService.cs        two-phase sync, resumable sampling
+│  ├─ Analysis/SnapshotStore.cs      JSON cache, settings, diagnostics
+│  └─ Resources/demo-snapshot.json   bundled offline sample (embedded resource)
+├─ src/ForeverExiled.App             net10.0-windows10.0.19041.0 (MAUI / WinUI 3)
+│  ├─ ViewModels/MainViewModel.*.cs  one screen VM, split by screen
+│  ├─ Views/                         MainPage shell + Meta / Cluster Lab / Ladder / Settings
+│  ├─ Themes/                        Colours + styles (dark, gold-accented)
+│  └─ Converters, Theming/Palette.cs
+└─ tests/ForeverExiled.Core.Tests    xunit: wire format, dictionaries, jewels, aggregation
+```
+
+The MAUI layer is pure MVVM: `MainViewModel` (CommunityToolkit.Mvvm source generators)
+owns the state, exposes display item view models (`SkillCardItem`, `ComboItem`, …) and
+issues commands; the views contain no logic beyond bindings.
+
+---
+
+## Verification without Windows
+
+The app needs Windows, but the risky part — the binary protocol — does not. Two scripts
+in `tools/` keep the parsers honest:
+
+```bash
+python3 tools/verify_parsers.py   # executable spec: builds real wire-format payloads
+                                  # (protobuf search response, NDIC dictionary, character
+                                  # JSON) and asserts decoding, DPS parsing, jewel parsing
+                                  # and aggregation match the C# logic
+python3 tools/check_csharp.py     # parses every .cs file with tree-sitter's C# grammar
+python3 tools/check_xaml.py       # validates XAML: StaticResource keys, binding paths,
+                                  # command names and image references against the C#
+python3 tools/generate_demo_snapshot.py   # regenerates the bundled sample snapshot
+```
+
+`verify_parsers.py` already caught two real bugs during development (a wrapped
+`clusterJewels[].itemData` shape and thousands-separator DPS values).
+
+---
+
+## Known limitations
+
+- **The builds API is undocumented and versioned per snapshot.** The snapshot hash comes
+  from `index-state` on every sync, so it self-heals across seasons, but poe.ninja can
+  still change the payload shape. When a decode fails the raw payload is written to
+  `…/forever-exiled/diagnostics/` and the status bar reports it instead of silently
+  showing zero builds.
+- **Cluster data is a sample, not a census.** Counting every character in a league would
+  mean tens of thousands of rate-limited requests. Sample depth is configurable (6–30
+  builds per skill) and every percentage is shown against the sample size.
+- **DPS is poe.ninja's weighted meta DPS**, not Path of Building's full calculation.
+- Windows only, by design (MAUI/WinUI 3 desktop).
+- The bundled sample data is synthetic-but-realistic and always labelled `SAMPLE DATA`.
+
+## Roadmap
+
+- Timemachine comparison (week-over-week shifts in cluster popularity).
+- Keep-percentile filters ("only builds above 50M DPS") before aggregation.
+- Pin/favourite combinations and diff two leagues side by side.

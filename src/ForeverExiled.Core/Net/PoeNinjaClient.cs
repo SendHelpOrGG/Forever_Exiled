@@ -1,0 +1,486 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using ForeverExiled.Core.Models;
+
+namespace ForeverExiled.Core.Net;
+
+/// <summary>Result of <c>/poe1/api/data/index-state</c>.</summary>
+public sealed class IndexState
+{
+    public List<LeagueInfo> BuildLeagues { get; init; } = new();
+
+    public List<LeagueInfo> Snapshots { get; init; } = new();
+
+    public List<string> EconomyLeagues { get; init; } = new();
+
+    /// <summary>All snapshot entries for one league slug, current first.</summary>
+    public IReadOnlyList<LeagueInfo> ForLeague(string url) =>
+        Snapshots.Where(s => string.Equals(s.Url, url, StringComparison.OrdinalIgnoreCase))
+                 .ToList();
+}
+
+/// <summary>
+/// Thin, rate-limited client for poe.ninja's internal PoE 1 builds API.
+///
+/// Endpoints used:
+///   GET /poe1/api/data/index-state                  -> JSON league + snapshot catalogue
+///   GET /poe1/api/builds/{version}/search           -> protobuf ladder + aggregates
+///   GET /poe1/api/builds/dictionary/{hash}          -> protobuf / NDIC string table
+///   GET /poe1/api/builds/{version}/character        -> JSON character sheet
+/// </summary>
+public sealed class PoeNinjaClient : IDisposable
+{
+    public const string DefaultUserAgent =
+        "ForeverExiled/1.0 (PoE1 cluster-jewel meta analysis; github.com/SendHelpOrGG/Forever_Exiled)";
+
+    private const string BaseAddress = "https://poe.ninja/";
+    private const int MaxAttempts = 4;
+
+    private static readonly string[] CharacterOverviewCandidates = { "snapshot", "slug" };
+    private static readonly string[] CharacterTypeCandidates = { "exp", "0" };
+
+    private readonly HttpClient _http;
+    private readonly bool _ownsHttpClient;
+
+    public PoeNinjaClient(HttpClient? httpClient = null, TimeSpan? minInterval = null)
+    {
+        if (httpClient is null)
+        {
+            _http = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All })
+            {
+                BaseAddress = new Uri(BaseAddress),
+                Timeout = TimeSpan.FromSeconds(90),
+            };
+            _ownsHttpClient = true;
+        }
+        else
+        {
+            _http = httpClient;
+            _http.BaseAddress ??= new Uri(BaseAddress);
+        }
+
+        _http.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
+        _http.DefaultRequestHeaders.Accept.Clear();
+        _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+        _http.DefaultRequestHeaders.Referrer = new Uri("https://poe.ninja/poe1/builds/");
+
+        Pacer = new RequestPacer(minInterval ?? TimeSpan.FromSeconds(5));
+        SearchPacer = new RequestPacer(TimeSpan.FromSeconds(1.2));
+    }
+
+    /// <summary>Gate for character requests - the endpoint poe.ninja rate-limits hard.</summary>
+    public RequestPacer Pacer { get; }
+
+    /// <summary>
+    /// Gate for ladder / dictionary requests. These are served from an aggregate cache and
+    /// are not throttled the same way, so a sync stays quick without hammering anything.
+    /// </summary>
+    public RequestPacer SearchPacer { get; }
+
+    /// <summary>Optional free-form diagnostics sink (HTTP status codes, retries, ...).</summary>
+    public Action<string>? Log { get; set; }
+
+    /// <summary>Remembers which (overview, type) pair the character endpoint accepted.</summary>
+    private (string OverviewMode, string Type)? _characterContract;
+
+    public async Task<IndexState> GetIndexStateAsync(CancellationToken cancellationToken)
+    {
+        var payload = await GetBytesAsync("poe1/api/data/index-state", null, cancellationToken, pacer: SearchPacer)
+            .ConfigureAwait(false);
+        return ParseIndexState(payload);
+    }
+
+    public static IndexState ParseIndexState(byte[] payload)
+    {
+        using var document = JsonDocument.Parse(payload);
+        var root = document.RootElement;
+
+        var snapshots = new List<LeagueInfo>();
+        if (root.TryGetProperty("snapshotVersions", out var versions) && versions.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var entry in versions.EnumerateArray())
+            {
+                if (entry.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+
+                var url = ReadString(entry, "url");
+                var type = ReadString(entry, "type");
+                var version = ReadString(entry, "version");
+                if (url.Length == 0 || version.Length == 0)
+                {
+                    continue;
+                }
+
+                if (!string.Equals(type, "exp", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var labels = new List<string>();
+                if (entry.TryGetProperty("timeMachineLabels", out var labelArray) &&
+                    labelArray.ValueKind == JsonValueKind.Array)
+                {
+                    labels.AddRange(labelArray.EnumerateArray()
+                        .Where(l => l.ValueKind == JsonValueKind.String)
+                        .Select(l => l.GetString() ?? string.Empty)
+                        .Where(l => l.Length > 0));
+                }
+
+                snapshots.Add(new LeagueInfo
+                {
+                    Url = url,
+                    Type = type,
+                    Name = ReadString(entry, "name"),
+                    SnapshotName = ReadString(entry, "snapshotName", fallback: url),
+                    Version = version,
+                    PassiveTree = ReadString(entry, "passiveTree"),
+                    TimeMachineLabels = labels,
+                    IsHardcore = url.Contains("hc", StringComparison.OrdinalIgnoreCase),
+                    IsSsf = url.Contains("ssf", StringComparison.OrdinalIgnoreCase),
+                    IsRuthless = url.EndsWith('r') && !url.Contains("standard", StringComparison.OrdinalIgnoreCase),
+                });
+            }
+        }
+
+        var leagues = new List<LeagueInfo>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void AddLeague(string name, string url, bool isChallenge)
+        {
+            if (url.Length == 0 || !seen.Add(url))
+            {
+                return;
+            }
+
+            var snapshot = snapshots.FirstOrDefault(s => string.Equals(s.Url, url, StringComparison.OrdinalIgnoreCase));
+            if (snapshot is null)
+            {
+                return;
+            }
+
+            leagues.Add(new LeagueInfo
+            {
+                Name = name.Length > 0 ? name : snapshot.Name,
+                Url = url,
+                SnapshotName = snapshot.SnapshotName,
+                Version = snapshot.Version,
+                Type = "exp",
+                PassiveTree = snapshot.PassiveTree,
+                TimeMachineLabels = snapshot.TimeMachineLabels,
+                IsChallenge = isChallenge,
+                IsHardcore = snapshot.IsHardcore,
+                IsSsf = snapshot.IsSsf,
+                IsRuthless = snapshot.IsRuthless,
+            });
+        }
+
+        if (root.TryGetProperty("buildLeagues", out var buildLeagues) && buildLeagues.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var entry in buildLeagues.EnumerateArray())
+            {
+                if (entry.ValueKind == JsonValueKind.Object)
+                {
+                    AddLeague(ReadString(entry, "name"), ReadString(entry, "url"), isChallenge: true);
+                }
+            }
+        }
+
+        if (leagues.Count == 0)
+        {
+            foreach (var snapshot in snapshots)
+            {
+                AddLeague(snapshot.Name, snapshot.Url, isChallenge: false);
+            }
+        }
+
+        var economy = new List<string>();
+        if (root.TryGetProperty("economyLeagues", out var economyLeagues) && economyLeagues.ValueKind == JsonValueKind.Array)
+        {
+            economy.AddRange(economyLeagues.EnumerateArray()
+                .Where(e => e.ValueKind == JsonValueKind.Object)
+                .Select(e => ReadString(e, "name"))
+                .Where(n => n.Length > 0));
+        }
+
+        return new IndexState
+        {
+            BuildLeagues = leagues,
+            Snapshots = snapshots,
+            EconomyLeagues = economy,
+        };
+    }
+
+    /// <summary>Runs a ladder search and decodes the protobuf envelope.</summary>
+    public async Task<SearchResponse> SearchAsync(
+        LeagueInfo league,
+        IReadOnlyDictionary<string, string>? filters,
+        CancellationToken cancellationToken)
+    {
+        var payload = await SearchRawAsync(league, filters, cancellationToken).ConfigureAwait(false);
+        return SearchResponseParser.Parse(payload);
+    }
+
+    public async Task<byte[]> SearchRawAsync(
+        LeagueInfo league,
+        IReadOnlyDictionary<string, string>? filters,
+        CancellationToken cancellationToken)
+    {
+        var query = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["overview"] = league.SnapshotName,
+            ["type"] = string.IsNullOrEmpty(league.Type) ? "exp" : league.Type,
+        };
+
+        if (filters is not null)
+        {
+            foreach (var pair in filters)
+            {
+                if (!string.IsNullOrWhiteSpace(pair.Value))
+                {
+                    query[pair.Key] = pair.Value;
+                }
+            }
+        }
+
+        var path = $"poe1/api/builds/{league.Version}/search{ToQueryString(query)}";
+        return await GetBytesAsync(path, null, cancellationToken, pacer: SearchPacer).ConfigureAwait(false);
+    }
+
+    /// <summary>Resolves every dictionary referenced by a search response.</summary>
+    public async Task<Dictionary<string, string[]>> GetDictionariesAsync(
+        SearchResponse response,
+        CancellationToken cancellationToken)
+    {
+        var resolved = new Dictionary<string, string[]>(StringComparer.Ordinal);
+
+        foreach (var pair in response.DictionaryHashes)
+        {
+            try
+            {
+                resolved[pair.Key] = await GetDictionaryAsync(pair.Value, cancellationToken).ConfigureAwait(false);
+            }
+            catch (PoeDataException ex)
+            {
+                Log?.Invoke($"dictionary {pair.Key} ({pair.Value}) failed: {ex.Message}");
+            }
+        }
+
+        return resolved;
+    }
+
+    public async Task<string[]> GetDictionaryAsync(string hash, CancellationToken cancellationToken)
+    {
+        var payload = await GetBytesAsync($"poe1/api/builds/dictionary/{hash}", null, cancellationToken, pacer: SearchPacer)
+            .ConfigureAwait(false);
+        return DictionaryDecoder.Decode(payload);
+    }
+
+    /// <summary>Fetches one character sheet. Tries the known query contracts in order.</summary>
+    public async Task<CharacterSnapshot> GetCharacterAsync(
+        LeagueInfo league,
+        BuildRef build,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(build.Account) || string.IsNullOrWhiteSpace(build.Name))
+        {
+            throw new PoeDataException("Character reference is missing an account or name.");
+        }
+
+        var modes = _characterContract is null
+            ? CharacterOverviewCandidates
+            : new[] { _characterContract.Value.OverviewMode };
+
+        var types = _characterContract is null
+            ? CharacterTypeCandidates
+            : new[] { _characterContract.Value.Type };
+
+        PoeDataException? lastError = null;
+
+        foreach (var overviewMode in modes)
+        {
+            foreach (var type in types)
+            {
+                var overview = string.Equals(overviewMode, "slug", StringComparison.Ordinal)
+                    ? league.Url
+                    : league.SnapshotName;
+
+                var query = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["account"] = build.Account,
+                    ["name"] = build.Name,
+                    ["overview"] = overview,
+                    ["type"] = type,
+                };
+
+                var path = $"poe1/api/builds/{league.Version}/character{ToQueryString(query)}";
+
+                try
+                {
+                    var payload = await GetBytesAsync(
+                        path,
+                        "application/json",
+                        cancellationToken,
+                        tolerateClientErrors: true).ConfigureAwait(false);
+
+                    using var document = JsonDocument.Parse(payload);
+                    var snapshot = CharacterJsonParser.Parse(
+                        document.RootElement,
+                        build.Account,
+                        build.Name,
+                        build.MainSkill,
+                        build.Dps);
+
+                    if (snapshot.Account.Length == 0)
+                    {
+                        snapshot.Account = build.Account;
+                    }
+
+                    if (snapshot.Name.Length == 0)
+                    {
+                        snapshot.Name = build.Name;
+                    }
+
+                    if (snapshot.ClassName.Length == 0)
+                    {
+                        snapshot.ClassName = build.ClassName;
+                    }
+
+                    if (snapshot.Level == 0)
+                    {
+                        snapshot.Level = build.Level;
+                    }
+
+                    _characterContract = (overviewMode, type);
+                    return snapshot;
+                }
+                catch (PoeDataException ex)
+                {
+                    lastError = ex;
+                    Log?.Invoke($"character {build.Name}: {ex.Message} (overview={overviewMode}, type={type})");
+                }
+            }
+        }
+
+        throw lastError ?? new PoeDataException($"Could not fetch character {build.Name}.");
+    }
+
+    private async Task<byte[]> GetBytesAsync(
+        string relativePath,
+        string? accept,
+        CancellationToken cancellationToken,
+        bool tolerateClientErrors = false,
+        RequestPacer? pacer = null)
+    {
+        var gate = pacer ?? Pacer;
+
+        for (var attempt = 1; attempt <= MaxAttempts; attempt++)
+        {
+            await gate.WaitTurnAsync(cancellationToken).ConfigureAwait(false);
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, relativePath);
+            if (!string.IsNullOrEmpty(accept))
+            {
+                request.Headers.Accept.Clear();
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            }
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new PoeDataException($"Network error contacting poe.ninja: {ex.Message}", ex);
+            }
+
+            using (response)
+            {
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    var retryAfter = ReadRetryAfter(response);
+                    Log?.Invoke($"429 from poe.ninja, waiting {retryAfter.TotalSeconds:0}s");
+                    await gate.ThrottleAsync(retryAfter, cancellationToken).ConfigureAwait(false);
+                    continue;
+                }
+
+                if ((response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.BadRequest) && tolerateClientErrors)
+                {
+                    throw new PoeDataException($"poe.ninja returned {(int)response.StatusCode} for {relativePath}");
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new PoeDataException(
+                        $"poe.ninja returned {(int)response.StatusCode} {response.ReasonPhrase} for {relativePath}");
+                }
+
+                var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+                if (bytes.Length == 0)
+                {
+                    throw new PoeDataException($"poe.ninja returned an empty body for {relativePath}");
+                }
+
+                gate.Relax();
+                return bytes;
+            }
+        }
+
+        throw new PoeDataException($"poe.ninja kept rate-limiting {relativePath}.");
+    }
+
+    private static TimeSpan ReadRetryAfter(HttpResponseMessage response)
+    {
+        if (response.Headers.RetryAfter is { } header)
+        {
+            if (header.Delta is { } delta)
+            {
+                return delta;
+            }
+
+            if (header.Date is { } date)
+            {
+                var wait = date - DateTimeOffset.UtcNow;
+                return wait > TimeSpan.Zero ? wait : TimeSpan.FromSeconds(30);
+            }
+        }
+
+        return TimeSpan.FromSeconds(30);
+    }
+
+    private static string ToQueryString(IReadOnlyDictionary<string, string> query)
+    {
+        if (query.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var parts = query.Select(pair =>
+            $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value)}");
+        return "?" + string.Join('&', parts);
+    }
+
+    private static string ReadString(JsonElement element, string name, string fallback = "")
+    {
+        if (element.ValueKind == JsonValueKind.Object &&
+            element.TryGetProperty(name, out var value) &&
+            value.ValueKind == JsonValueKind.String)
+        {
+            return value.GetString() ?? fallback;
+        }
+
+        return fallback;
+    }
+
+    public void Dispose()
+    {
+        if (_ownsHttpClient)
+        {
+            _http.Dispose();
+        }
+    }
+}

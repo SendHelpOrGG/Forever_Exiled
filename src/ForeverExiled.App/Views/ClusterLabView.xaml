@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ForeverExiled.App.Views.ClusterLabView">
+
+    <Grid ColumnDefinitions="348,*,332" ColumnSpacing="12" Padding="12">
+
+        <!-- ========================= Main skill rail ========================= -->
+        <Border Grid.Column="0" Style="{StaticResource CardFlush}">
+            <Grid RowDefinitions="Auto,1,*">
+
+                <VerticalStackLayout Padding="12,12,12,10" Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="MAIN SKILLS" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Skills.Count, StringFormat='{0} tracked'}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center" />
+                    </Grid>
+
+                    <Border BackgroundColor="{StaticResource SurfaceSunken}"
+                            Stroke="{StaticResource BorderSoft}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 9"
+                            Padding="9,2">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                            <Label Text="&#xE721;" Style="{StaticResource GlyphSmall}" FontSize="12" VerticalOptions="Center" />
+                            <Entry Grid.Column="1"
+                                   Text="{Binding SearchText}"
+                                   Placeholder="Filter by skill, class or element"
+                                   ReturnType="Search"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding SortPills}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Pill}" Padding="10,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Command}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" FontSize="10.5" />
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <BoxView Grid.Row="1" Color="{StaticResource BorderSoft}" />
+
+                <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Never">
+                    <VerticalStackLayout Padding="8,8,8,16" Spacing="2"
+                                         BindableLayout.ItemsSource="{Binding Skills}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SkillRow}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Command}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="26,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
+
+                                        <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                               Text="{Binding RankText}"
+                                               FontFamily="Bahnschrift"
+                                               FontSize="14"
+                                               TextColor="{StaticResource TextFaint}"
+                                               VerticalOptions="Start"
+                                               HorizontalTextAlignment="Center"
+                                               Margin="0,2,0,0" />
+
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               Text="{Binding Name}"
+                                               Style="{StaticResource BodyStrong}"
+                                               FontSize="12.5" />
+
+                                        <Label Grid.Row="0" Grid.Column="2"
+                                               Text="{Binding DpsText}"
+                                               FontFamily="Bahnschrift"
+                                               FontSize="15"
+                                               TextColor="{StaticResource Gold}"
+                                               HorizontalTextAlignment="End"
+                                               VerticalOptions="Center" />
+
+                                        <Label Grid.Row="1" Grid.Column="1"
+                                               Text="{Binding ClassText}"
+                                               Style="{StaticResource Caption}"
+                                               FontSize="10"
+                                               Margin="0,2,0,0" />
+
+                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="4" HorizontalOptions="End" Margin="0,2,0,0">
+                                            <Border WidthRequest="5" HeightRequest="5"
+                                                    StrokeThickness="0"
+                                                    BackgroundColor="{Binding AccentColor}"
+                                                    StrokeShape="RoundRectangle 3"
+                                                    VerticalOptions="Center" />
+                                            <Label Text="{Binding PopText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+
+                                        <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                              HeightRequest="3" Margin="0,7,0,0">
+                                            <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 2" />
+                                            <Border BackgroundColor="{Binding AccentColor}"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 2"
+                                                    HorizontalOptions="Start"
+                                                    WidthRequest="{Binding DpsBarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=240}" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Border>
+
+        <!-- ========================== Combination lab ======================= -->
+        <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="12" Padding="0,0,4,16">
+
+                <!-- skill hero -->
+                <Border Style="{StaticResource Card}" Padding="18,16">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <VerticalStackLayout Spacing="8">
+                            <HorizontalStackLayout Spacing="8">
+                                <Border WidthRequest="6" HeightRequest="6"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{Binding SelectedSkillAccent}"
+                                        StrokeShape="RoundRectangle 3"
+                                        VerticalOptions="Center" />
+                                <Label Text="{Binding SelectedSkillDamageType}" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                                <Label Text="·" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                                <Label Text="{Binding SelectedSkillClasses}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+
+                            <Label Text="{Binding SelectedSkillName}" Style="{StaticResource Hero}" />
+
+                            <FlexLayout Direction="Row" Wrap="Wrap" AlignItems="Center">
+                                <Border Style="{StaticResource Chip}" Margin="0,0,6,0">
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Label Text="&#xE716;" Style="{StaticResource GlyphSmall}" FontSize="9" VerticalOptions="Center" />
+                                        <Label Text="{Binding SelectedSkillBuilds}" Style="{StaticResource ChipLabel}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,6,0">
+                                    <Label Text="{Binding SelectedSkillPopularity, StringFormat='{0} of ladder'}" Style="{StaticResource ChipLabel}" />
+                                </Border>
+                                <Border Style="{StaticResource Chip}">
+                                    <Label Text="{Binding SelectedSkillSampleText}" Style="{StaticResource ChipLabel}" />
+                                </Border>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+
+                        <HorizontalStackLayout Grid.Column="1" Spacing="20" VerticalOptions="Start">
+                            <VerticalStackLayout Spacing="0">
+                                <Label Text="AVG DPS" Style="{StaticResource Micro}" HorizontalTextAlignment="End" />
+                                <Label Text="{Binding SelectedSkillAverageDps}" Style="{StaticResource StatValueGold}" FontSize="24" HorizontalTextAlignment="End" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="0">
+                                <Label Text="PEAK" Style="{StaticResource Micro}" HorizontalTextAlignment="End" />
+                                <Label Text="{Binding SelectedSkillPeakDps}" Style="{StaticResource StatValue}" FontSize="24" HorizontalTextAlignment="End" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- controls -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center" BindableLayout.ItemsSource="{Binding SizePills}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Pill}" Padding="12,7">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Command}" />
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
+                                        <Label Text="{Binding CountText}" Style="{StaticResource PillCount}" IsVisible="{Binding HasCount}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                        <Button Text="ANALYZE"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding AnalyzeSelectedSkillCommand}"
+                                IsEnabled="{Binding CanAnalyze}" />
+                        <Button Text="SAMPLE ALL"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding AnalyzeAllCommand}"
+                                IsEnabled="{Binding IsNotBusy}" />
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- list header -->
+                <Grid ColumnDefinitions="*,Auto" Margin="2,4,2,0">
+                    <Label Text="{Binding ComboHeaderText}" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                    <Label Grid.Column="1" Text="{Binding ComboHintText}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                </Grid>
+
+                <!-- combinations -->
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Combos}" IsVisible="{Binding HasCombos}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource Card}" Padding="14,12">
+                                <Grid ColumnDefinitions="34,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12">
+
+                                    <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+                                            WidthRequest="30" HeightRequest="30"
+                                            VerticalOptions="Start"
+                                            BackgroundColor="{StaticResource SurfaceSunken}"
+                                            Stroke="{StaticResource BorderSoft}"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 9">
+                                        <Label Text="{Binding RankText}"
+                                               FontFamily="Bahnschrift"
+                                               FontSize="13"
+                                               TextColor="{StaticResource TextMuted}"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="7">
+                                        <FlexLayout Direction="Row" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Chips}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{StaticResource ChipGold}" Margin="0,0,5,5">
+                                                        <Label Text="{Binding Label}"
+                                                               Style="{StaticResource ChipLabel}"
+                                                               TextColor="{StaticResource TextPrimary}"
+                                                               FontSize="11" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </FlexLayout>
+
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Image Source="{Binding SizeImage}" WidthRequest="14" HeightRequest="14" Aspect="AspectFit" VerticalOptions="Center" />
+                                            <Label Text="{Binding SizeLabel}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                            <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                            <Label Text="{Binding PassivesText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                            <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                            <Label Text="{Binding BuildsText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                            <Border Style="{StaticResource ChipGold}" Padding="6,1" IsVisible="{Binding HasEffect}">
+                                                <Label Text="{Binding EffectText}" Style="{StaticResource ChipLabel}" FontSize="9" TextColor="{StaticResource Gold}" />
+                                            </Border>
+                                        </HorizontalStackLayout>
+
+                                        <Label Text="{Binding GrantText}"
+                                               Style="{StaticResource Caption}"
+                                               FontSize="10"
+                                               TextColor="{StaticResource TextFaint}"
+                                               IsVisible="{Binding HasGrant}" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="2" Spacing="0" HorizontalOptions="End">
+                                        <Label Text="{Binding PercentText}"
+                                               FontFamily="Bahnschrift"
+                                               FontSize="20"
+                                               TextColor="{StaticResource Gold}"
+                                               HorizontalTextAlignment="End" />
+                                        <Label Text="{Binding PercentCaption}"
+                                               Style="{StaticResource Caption}"
+                                               FontSize="9"
+                                               HorizontalTextAlignment="End" />
+                                    </VerticalStackLayout>
+
+                                    <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                          HeightRequest="3" Margin="0,10,0,0">
+                                        <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 2" />
+                                        <Border BackgroundColor="{Binding AccentColor}"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 2"
+                                                HorizontalOptions="Start"
+                                                WidthRequest="{Binding BarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=300}" />
+                                    </Grid>
+
+                                    <HorizontalStackLayout Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                                           Spacing="6" Margin="0,9,0,0" IsVisible="{Binding HasTopBuild}">
+                                        <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" FontSize="9" VerticalOptions="Center" />
+                                        <Label Text="{Binding TopBuildText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                        <Label Text="{Binding TopBuildClassText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource TextFaint}" VerticalOptions="Center" />
+                                        <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                        <Label Text="{Binding AverageDpsText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource GoldDeep}" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- empty state -->
+                <Border Style="{StaticResource Card}" Padding="26" IsVisible="{Binding ShowComboEmptyState}">
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Image Source="cluster_medium.png" WidthRequest="52" HeightRequest="52" Aspect="AspectFit" Opacity="0.9" />
+                        <Label Text="{Binding ComboEmptyTitle}" Style="{StaticResource H2}" HorizontalTextAlignment="Center" />
+                        <Label Text="{Binding ComboEmptyMessage}"
+                               Style="{StaticResource Body}"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap"
+                               MaximumWidthRequest="380" />
+                        <Button Text="ANALYZE BUILDS"
+                                Style="{StaticResource PrimaryButton}"
+                                Command="{Binding AnalyzeSelectedSkillCommand}"
+                                IsVisible="{Binding CanAnalyze}"
+                                HorizontalOptions="Center"
+                                Margin="0,6,0,0" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- =========================== Global rail ========================== -->
+        <ScrollView Grid.Column="2" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="12" Padding="0,0,4,16">
+
+                <Border Style="{StaticResource Card}" Padding="14">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="GLOBAL LEADER" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Gold}" FontSize="10" />
+                        </Grid>
+                        <Label Text="{Binding GlobalLeaderLabel}" Style="{StaticResource BodyStrong}" FontSize="13" LineBreakMode="WordWrap" MaxLines="2" />
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="{Binding GlobalLeaderValue}" FontFamily="Bahnschrift" FontSize="26" TextColor="{StaticResource Gold}" />
+                            <Label Text="{Binding GlobalLeaderCaption}" Style="{StaticResource Caption}" VerticalOptions="End" Margin="0,0,0,5" LineBreakMode="WordWrap" MaxLines="2" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" FontSize="9" TextColor="{StaticResource GoldDeep}" VerticalOptions="Center" />
+                            <Label Text="{Binding GlobalLeaderBuild}" Style="{StaticResource Caption}" FontSize="9.5" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Padding="14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="COVERAGE" Style="{StaticResource Micro}" />
+                        <Label Text="{Binding CoverageText}" Style="{StaticResource Body}" FontSize="11.5" />
+                        <ProgressBar Progress="{Binding CoverageProgress}" />
+                        <BoxView Color="{StaticResource BorderSoft}" Margin="0,2" />
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="{Binding SampledBuildsText}" Style="{StaticResource StatValue}" FontSize="17" />
+                                <Label Text="BUILDS" Style="{StaticResource Micro}" FontSize="8.5" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                <Label Text="{Binding JewelsText}" Style="{StaticResource StatValue}" FontSize="17" />
+                                <Label Text="JEWELS" Style="{StaticResource Micro}" FontSize="8.5" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="1">
+                                <Label Text="{Binding CombosText}" Style="{StaticResource StatValue}" FontSize="17" />
+                                <Label Text="COMBOS" Style="{StaticResource Micro}" FontSize="8.5" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Padding="14">
+                    <VerticalStackLayout Spacing="9">
+                        <Label Text="CLUSTER TYPES" Style="{StaticResource Micro}" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Image Source="cluster_large.png" WidthRequest="34" HeightRequest="34" Aspect="AspectFit" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Large" Style="{StaticResource BodyStrong}" FontSize="12" />
+                                <Label Text="8-12 passives · 3 notables" Style="{StaticResource Caption}" FontSize="9.5" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Image Source="cluster_medium.png" WidthRequest="34" HeightRequest="34" Aspect="AspectFit" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Medium" Style="{StaticResource BodyStrong}" FontSize="12" />
+                                <Label Text="4-5 passives · 1-2 notables" Style="{StaticResource Caption}" FontSize="9.5" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Image Source="cluster_small.png" WidthRequest="34" HeightRequest="34" Aspect="AspectFit" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Small" Style="{StaticResource BodyStrong}" FontSize="12" />
+                                <Label Text="2-3 passives · utility" Style="{StaticResource Caption}" FontSize="9.5" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource CardSunken}" Padding="12">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="1% RULE" Style="{StaticResource Micro}" />
+                        <Label Text="Only main skills above 1% ladder popularity are graded, then sorted by average DPS."
+                               Style="{StaticResource Caption}"
+                               FontSize="10"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentView>

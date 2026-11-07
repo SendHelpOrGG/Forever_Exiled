@@ -1,0 +1,43 @@
+## Build output
+bin/
+obj/
+artifacts/
+*.binlog
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.csproj.user
+
+## Test + coverage
+TestResults/
+coverage/
+*.coverage
+*.trx
+
+## MAUI / Windows packaging
+AppPackages/
+*.appx
+*.msix
+*.msixupload
+*.appxupload
+BundleArtifacts/
+publish/
+
+## Python tooling
+__pycache__/
+*.pyc
+.venv/
+
+## OS noise
+.DS_Store
+Thumbs.db
+
+## Local snapshots (the app caches under %LOCALAPPDATA%, never in the repo)
+snapshot-*.json
+forever-exiled-clusters-*.csv
