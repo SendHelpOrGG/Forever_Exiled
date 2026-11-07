@@ -246,7 +246,7 @@
                             <VerticalStackLayout Spacing="7" BindableLayout.ItemsSource="{Binding TopBuilds}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnDefinitions="20,32,*,Auto" ColumnSpacing="8">
+                                        <Grid ColumnDefinitions="20,30,30,*,Auto" ColumnSpacing="7">
                                             <Label Text="{Binding RankText}"
                                                    FontFamily="Segoe UI Semibold"
                                                    FontSize="11"
@@ -260,21 +260,23 @@
                                                     IsVisible="{Binding HasGemImage}">
                                                 <Image Source="{Binding GemImage}" Aspect="AspectFit" />
                                             </Border>
-                                            <VerticalStackLayout Grid.Column="2" Spacing="0" VerticalOptions="Center">
+                                            <Border Grid.Column="2"
+                                                    Style="{StaticResource ClassTile}"
+                                                    WidthRequest="30" HeightRequest="30"
+                                                    VerticalOptions="Center"
+                                                    IsVisible="{Binding HasClassImage}">
+                                                <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="3" Spacing="0" VerticalOptions="Center">
                                                 <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="11" />
                                                 <HorizontalStackLayout Spacing="5">
-                                                    <Border Style="{StaticResource Portrait}"
-                                                            WidthRequest="12" HeightRequest="12"
-                                                            IsVisible="{Binding HasClassImage}">
-                                                        <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
-                                                    </Border>
                                                     <Label Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="9" VerticalOptions="Center" />
                                                     <Label Text="·" Style="{StaticResource Caption}" FontSize="9" VerticalOptions="Center" />
                                                     <Label Text="{Binding SkillText}" Style="{StaticResource Caption}" FontSize="9"
                                                            VerticalOptions="Center" LineBreakMode="TailTruncation" />
                                                 </HorizontalStackLayout>
                                             </VerticalStackLayout>
-                                            <Label Grid.Column="3"
+                                            <Label Grid.Column="4"
                                                    Text="{Binding DpsText}"
                                                    FontFamily="Segoe UI Semibold"
                                                    FontSize="12.5"

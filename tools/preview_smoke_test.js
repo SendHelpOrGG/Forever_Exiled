@@ -71,12 +71,15 @@ setTimeout(() => {
   check('skill rail populated', skills.length === snapshot.skills.length, skills.length + ' skills');
   check('rail sorted by DPS', txt('#skillList .skill .skill-name') === 'Molten Strike of the Zenith',
     txt('#skillList .skill .skill-name'));
-  const railIcons = qa('#skillList .skill .skill-sub img.asc');
+  const railIcons = qa('#skillList .skill .asc-slot img');
   check('skill rail shows ascendancy portraits', railIcons.length === skills.length,
     railIcons.length + ' of ' + skills.length + ' rows');
   check('ascendancy art exists on disk',
     railIcons.length > 0 && railIcons.every((img) => fs.existsSync(path.join(root, img.getAttribute('src')))),
     railIcons.length + ' portraits under assets/asc');
+  check('class art and gem art share a tile size',
+    qa('#skillList .skill .gem-slot').length === qa('#skillList .skill .asc-slot').length,
+    qa('#skillList .skill .gem-slot').length + ' gem tiles · ' + qa('#skillList .skill .asc-slot').length + ' class tiles');
   check('every class in the snapshot has art',
     [...new Set(snapshot.skills.flatMap((s) => s.classes.map((c) => c.name.toLowerCase())))].every((name) =>
       fs.existsSync(path.join(root, 'assets', 'asc', name + '.jpg'))),
@@ -85,8 +88,8 @@ setTimeout(() => {
   check('hero shows the skill gem', !!q('#hero .slot.xl img') &&
     String(q('#hero .slot.xl img').getAttribute('src')).includes('assets/gems/'),
     (q('#hero .slot.xl img') || {}).getAttribute ? q('#hero .slot.xl img').getAttribute('src') : 'missing');
-  check('hero shows the ascendancy portrait', !!q('#hero .hero-eyebrow img.asc'),
-    (q('#hero .hero-eyebrow img.asc') || {}).outerHTML || 'missing');
+  check('hero shows the ascendancy portrait as a tile', !!q('#hero .slot.portrait img'),
+    (q('#hero .slot.portrait img') || {}).src || 'missing');
   check('three size pills', qa('#sizePills .pill').length === 3);
 
   /* ── gem art: the visual anchor of every skill row ── */
@@ -147,8 +150,8 @@ setTimeout(() => {
   check('highest DPS builds', qa('#topBuildsCard .build-row').length === 8);
   check('meta build rows carry gem art', qa('#topBuildsCard .build-row .gem-slot img').length === 8,
     qa('#topBuildsCard .build-row .gem-slot img').length + ' of 8');
-  check('meta build rows carry portraits', qa('#topBuildsCard .build-sub img.asc').length === 8,
-    qa('#topBuildsCard .build-sub img.asc').length + ' of 8');
+  check('meta build rows carry class art', qa('#topBuildsCard .build-sub .asc-slot img').length === 8,
+    qa('#topBuildsCard .build-sub .asc-slot img').length + ' of 8');
   click(qa('#metaSizeFilter button').find((b) => b.dataset.size === 'Large'));
   check('meta Large filter', qa('#metaComboList .size-tag').every((e) => e.textContent === 'LARGE'),
     qa('#metaComboList .meta-combo').length + ' large combinations');

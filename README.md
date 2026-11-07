@@ -131,6 +131,9 @@ orange), and cluster jewels use tile-framed icons instead of text labels.
 
 Every skill, cluster jewel and class is identified by its real in-game artwork rather than a
 label, so the interface reads as pictures with captions rather than text with decorations.
+Class art is never a thumbnail inside a line of text: it gets the same tile footprint as the
+skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in the skill
+header), so a row reads as two pictures and a caption.
 
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI

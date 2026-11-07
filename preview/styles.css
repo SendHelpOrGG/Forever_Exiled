@@ -289,7 +289,7 @@ label.field { cursor: text; }
 /* ─────────────────────── cluster lab layout ─────────────────── */
 .lab {
   display: grid;
-  grid-template-columns: 322px minmax(0, 1fr) 292px;
+  grid-template-columns: 368px minmax(0, 1fr) 288px;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 12px; padding: 14px 16px 16px;
   min-height: 0; height: 100%;
@@ -315,7 +315,7 @@ label.field { cursor: text; }
 }
 
 .skill {
-  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto;
+  display: grid; grid-template-columns: 40px 40px minmax(0, 1fr) auto;
   gap: 10px; align-items: center; width: 100%; text-align: left;
   padding: 5px 9px 5px 7px; margin: 0;
   background: transparent; border: 0; border-left: 2px solid transparent;
@@ -329,6 +329,17 @@ label.field { cursor: text; }
 }
 .gem-slot img { width: 36px; height: 36px; object-fit: contain; }
 .gem-slot.empty .ic { width: 18px; height: 18px; color: #3a4653; }
+/* class art gets the same tile treatment as the gem, at the same size */
+.asc-slot {
+  width: 40px; height: 40px; flex: none; overflow: hidden; display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--panel-3);
+}
+.asc-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.asc-slot.empty .ic { width: 16px; height: 16px; color: #3a4653; }
+.asc-slot.sm { width: 24px; height: 24px; }
+.asc-slot.xs { width: 28px; height: 28px; }
+.asc-slot.sm.empty .ic { width: 11px; height: 11px; }
+.skill.on .asc-slot { border-color: rgba(63,174,122,.55); }
 .gem-slot.xs { width: 28px; height: 28px; }
 .gem-slot.xs img { width: 25px; height: 25px; }
 .gem-slot.sm { width: 24px; height: 24px; border-radius: 2px; }
@@ -359,7 +370,7 @@ img.asc {
 img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px; }
 img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px; margin-right: 7px; }
 .skill-sub img.asc { width: 16px; height: 16px; margin-right: 5px; }
-.anchor img.asc { width: 17px; height: 17px; }
+.anchor img.asc { width: 20px; height: 20px; border-radius: 3px; }
 .skill-sub, .build-sub { display: flex; align-items: center; }
 .skill-sub > span, .build-sub > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -369,7 +380,8 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .skill-cap { font-size: 8.5px; letter-spacing: .06em; color: var(--text-3); text-transform: uppercase; }
 
 /* skill hero — poe.ninja "build" header */
-.hero-card { padding: 14px; display: flex; align-items: center; gap: 14px; }
+.hero-card { padding: 14px; display: flex; align-items: center; gap: 12px; }
+.slot.portrait img { width: 100%; height: 100%; object-fit: cover; }
 .hero-card .slot { width: 78px; height: 78px; }
 .hero-card .slot img { width: 68px; height: 68px; }
 .hero-main { min-width: 0; flex: 1; }
@@ -573,7 +585,7 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .notable-bar { height: 2px; margin-top: 3px; }
 
 .build-row {
-  display: grid; grid-template-columns: 14px 34px minmax(0, 1fr) auto; gap: 9px;
+  display: grid; grid-template-columns: 14px 34px minmax(0, 1fr) auto; gap: 8px;
   align-items: center; padding: 5px 0;
 }
 .build-row + .build-row { border-top: 1px solid rgba(38,49,61,.55); }
@@ -588,7 +600,7 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 
 .table-card { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; padding: 0; }
 .table-head {
-  display: grid; grid-template-columns: 34px minmax(0, 1.2fr) 156px minmax(0, 1.25fr) 88px 58px;
+  display: grid; grid-template-columns: 34px minmax(0, 1.1fr) 190px minmax(0, 1.35fr) 88px 58px;
   gap: 10px; align-items: center; padding: 7px 12px;
   background: var(--panel-2); border-bottom: 1px solid var(--line);
 }
@@ -603,7 +615,7 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .th .caret { font-size: 8px; }
 .table-body { overflow-y: auto; min-height: 0; }
 .trow {
-  display: grid; grid-template-columns: 34px minmax(0, 1.2fr) 156px minmax(0, 1.25fr) 88px 58px;
+  display: grid; grid-template-columns: 34px minmax(0, 1.1fr) 190px minmax(0, 1.35fr) 88px 58px;
   gap: 10px; align-items: center; padding: 6px 12px;
   border-bottom: 1px solid rgba(38,49,61,.55); font-size: 12px;
   transition: background .1s ease;
@@ -617,9 +629,9 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .trow .cls, .trow .skl { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .trow .cls { display: flex; align-items: center; gap: 7px; }
 .trow .skl { display: flex; align-items: center; gap: 7px; }
-.trow .cls img.asc { width: 22px; height: 22px; border-radius: 3px; margin: 0; }
-.trow .skl .gem-slot { width: 26px; height: 26px; border-radius: 3px; }
-.trow .skl .gem-slot img { width: 23px; height: 23px; }
+.trow .cls img.asc { width: 30px; height: 30px; border-radius: 3px; margin: 0; object-fit: cover; border: 1px solid var(--line); }
+.trow .skl .gem-slot { width: 30px; height: 30px; border-radius: 3px; }
+.trow .skl .gem-slot img { width: 27px; height: 27px; }
 .trow .dps { font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
 .trow .cl { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .trow .cl.zero { color: #3a4653; }

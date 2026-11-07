@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ForeverExiled.App.Views.ClusterLabView">
 
-    <Grid ColumnDefinitions="292,*,300" ColumnSpacing="12" Padding="12">
+    <Grid ColumnDefinitions="356,*,292" ColumnSpacing="12" Padding="12">
 
         <!-- ========================= Main skill rail ========================= -->
         <Border Grid.Column="0" Style="{StaticResource CardFlush}">
@@ -59,7 +59,7 @@
                                         <TapGestureRecognizer Command="{Binding Command}" />
                                     </Border.GestureRecognizers>
 
-                                    <Grid ColumnDefinitions="38,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                                    <Grid ColumnDefinitions="38,38,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="9">
 
                                         <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
                                                 Style="{StaticResource GemTile}"
@@ -67,12 +67,18 @@
                                             <Image Source="{Binding GemImage}" Aspect="AspectFit" />
                                         </Border>
 
-                                        <Label Grid.Row="0" Grid.Column="1"
+                                        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                                Style="{StaticResource ClassTile}"
+                                                IsVisible="{Binding HasClassImage}">
+                                            <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
+                                        </Border>
+
+                                        <Label Grid.Row="0" Grid.Column="2"
                                                Text="{Binding Name}"
                                                Style="{StaticResource BodyStrong}"
                                                FontSize="12.5" />
 
-                                        <Label Grid.Row="0" Grid.Column="2"
+                                        <Label Grid.Row="0" Grid.Column="3"
                                                Text="{Binding DpsText}"
                                                FontFamily="Segoe UI Semibold"
                                                FontSize="15"
@@ -80,12 +86,7 @@
                                                HorizontalTextAlignment="End"
                                                VerticalOptions="Center" />
 
-                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="5" Margin="0,3,0,0">
-                                            <Border Style="{StaticResource Portrait}"
-                                                    WidthRequest="14" HeightRequest="14"
-                                                    IsVisible="{Binding HasClassImage}">
-                                                <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
-                                            </Border>
+                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="5" Margin="0,3,0,0">
                                             <Label Text="{Binding ClassText}"
                                                    Style="{StaticResource Caption}"
                                                    FontSize="10"
@@ -94,7 +95,7 @@
                                             <Label Text="{Binding PopText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
                                         </HorizontalStackLayout>
 
-                                        <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                        <Grid Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
                                               HeightRequest="3" Margin="0,7,0,0">
                                             <Border BackgroundColor="{StaticResource SurfaceRaised}"
                                                     StrokeThickness="0"
@@ -103,7 +104,7 @@
                                                     StrokeThickness="0"
                                                     StrokeShape="RoundRectangle 2"
                                                     HorizontalOptions="Start"
-                                                    WidthRequest="{Binding DpsBarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=240}" />
+                                                    WidthRequest="{Binding DpsBarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=200}" />
                                         </Grid>
                                     </Grid>
                                 </Border>
@@ -121,13 +122,21 @@
                 <!-- skill hero -->
                 <Border Style="{StaticResource Card}" Padding="18,16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                        <Border Style="{StaticResource GemTile}"
-                                WidthRequest="68" HeightRequest="68"
-                                Padding="4"
-                                StrokeShape="RoundRectangle 4"
-                                IsVisible="{Binding HasSelectedSkillGemImage}">
-                            <Image Source="{Binding SelectedSkillGemImage}" Aspect="AspectFit" />
-                        </Border>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Start">
+                            <Border Style="{StaticResource GemTile}"
+                                    WidthRequest="66" HeightRequest="66"
+                                    Padding="4"
+                                    StrokeShape="RoundRectangle 4"
+                                    IsVisible="{Binding HasSelectedSkillGemImage}">
+                                <Image Source="{Binding SelectedSkillGemImage}" Aspect="AspectFit" />
+                            </Border>
+                            <Border Style="{StaticResource ClassTile}"
+                                    WidthRequest="66" HeightRequest="66"
+                                    StrokeShape="RoundRectangle 4"
+                                    IsVisible="{Binding HasSelectedSkillClassImage}">
+                                <Image Source="{Binding SelectedSkillClassImage}" Aspect="AspectFill" />
+                            </Border>
+                        </HorizontalStackLayout>
 
                         <VerticalStackLayout Grid.Column="1" Spacing="8">
                             <HorizontalStackLayout Spacing="8">
@@ -138,11 +147,6 @@
                                         VerticalOptions="Center" />
                                 <Label Text="{Binding SelectedSkillDamageType}" Style="{StaticResource Micro}" VerticalOptions="Center" />
                                 <Label Text="·" Style="{StaticResource Caption}" VerticalOptions="Center" />
-                                <Border Style="{StaticResource Portrait}"
-                                        WidthRequest="20" HeightRequest="20" Margin="0,0,2,0"
-                                        IsVisible="{Binding HasSelectedSkillClassImage}">
-                                    <Image Source="{Binding SelectedSkillClassImage}" Aspect="AspectFill" />
-                                </Border>
                                 <Label Text="{Binding SelectedSkillClasses}" Style="{StaticResource Caption}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
 
@@ -300,8 +304,9 @@
                                                            Spacing="6" Margin="0,9,0,0" IsVisible="{Binding HasTopBuild}">
                                         <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" FontSize="9" VerticalOptions="Center" />
                                         <Label Text="{Binding TopBuildText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
-                                        <Border Style="{StaticResource Portrait}"
-                                                WidthRequest="14" HeightRequest="14"
+                                        <Border Style="{StaticResource ClassTile}"
+                                                WidthRequest="22" HeightRequest="22"
+                                                StrokeShape="RoundRectangle 3"
                                                 IsVisible="{Binding HasTopBuildClassImage}">
                                             <Image Source="{Binding TopBuildClassImage}" Aspect="AspectFill" />
                                         </Border>

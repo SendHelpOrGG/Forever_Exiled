@@ -391,6 +391,15 @@ function gemTile(skillName, extra = '') {
     : `<span class="${cls} empty"><svg class="ic"><use href="#i-gem"/></svg></span>`;
 }
 
+/** Class art in a tile of its own — same size as the gem tile next to it. */
+function ascTile(name, extra = '') {
+  const src = ascIcon(name);
+  const cls = `asc-slot ${extra}`.trim();
+  return src
+    ? `<span class="${cls}"><img src="${src}" alt="" loading="lazy"></span>`
+    : `<span class="${cls} empty"><svg class="ic"><use href="#i-user"/></svg></span>`;
+}
+
 function topClassOf(skill) {
   const top = (skill.classes || [])[0];
   return top ? top.name : '';
@@ -510,9 +519,10 @@ function renderSkillRail() {
       <button class="skill ${on ? 'on' : ''}" data-skill="${esc(skill.name)}" style="--c:${accent}"
               title="${esc(skill.name)} — ${esc(fmt.count(skill.buildCount))} builds, ${esc(fmt.pct(skill.popularityPercent))} of ladder">
         ${gemTile(skill.name)}
+        ${ascTile(topClassOf(skill))}
         <span class="skill-body">
           <div class="skill-name">${esc(skill.name)}</div>
-          <div class="skill-sub">${ascImg(topClassOf(skill))}<span>${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))}</span></div>
+          <div class="skill-sub"><span>${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))}</span></div>
         </span>
         <span class="skill-side">
           <div class="skill-dps">${esc(fmt.dps(skill.averageDps))}</div>
@@ -560,11 +570,16 @@ function renderHero() {
       <img src="${gemIcon(stat.name) || SIZE_IMG[state.size]}" alt=""
            onerror="this.src='${SIZE_IMG[state.size]}'">
     </div>
+    <div class="slot xl portrait" title="${esc(topClassOf(stat))}">
+      ${ascIcon(topClassOf(stat))
+        ? `<img src="${ascIcon(topClassOf(stat))}" alt="">`
+        : `<svg class="ic lg" style="color:var(--text-3)"><use href="#i-user"/></svg>`}
+    </div>
     <div class="hero-main">
       <div class="hero-eyebrow">
         <i style="width:5px;height:5px;border-radius:50%;background:${accent};display:inline-block"></i>
         <span class="micro">${esc(String(stat.damageType || '').toUpperCase())}</span>
-        <span class="cap" style="display:inline-flex;align-items:center">· ${ascImg(topClassOf(stat), 'xl')}${esc(classTextOf(stat))}</span>
+        <span class="cap">· ${esc(classTextOf(stat))}</span>
       </div>
       <div class="hero-name">${esc(stat.name)}</div>
       <div class="hero-chips">
@@ -665,7 +680,7 @@ function renderCombos() {
             <span class="anchor" title="${esc(combo.topBuildAccount)}">
               <svg class="ic sm"><use href="#i-anchor"/></svg>
               <b>${esc(combo.topBuildName || 'unknown')}</b>
-              <span>· ${ascImg(combo.topBuildClass)}${esc(combo.topBuildClass || '—')}</span>
+              <span style="display:inline-flex;align-items:center;gap:5px">${ascTile(combo.topBuildClass, 'sm')}${esc(combo.topBuildClass || '—')}</span>
             </span>
             <span class="dpsline">
               <svg class="ic sm bolt"><use href="#i-bolt"/></svg>
@@ -712,7 +727,7 @@ function renderGlobalRail() {
       <div class="leader-anchor">
         <svg class="ic sm"><use href="#i-anchor"/></svg>
         <b>${esc(leader.topBuildName || 'unknown')}</b>
-        <span>· ${ascImg(leader.topBuildClass)}${esc(leader.topBuildClass || '—')} · ${esc(fmt.dps(leader.peakDps))} peak</span>
+        <span style="display:inline-flex;align-items:center;gap:5px">· ${ascTile(leader.topBuildClass, 'sm')}${esc(leader.topBuildClass || '—')} · ${esc(fmt.dps(leader.peakDps))} peak</span>
       </div>
     </div>` : `
     ${panel('Global leader')}
@@ -848,7 +863,7 @@ function renderMeta() {
           ${gemTile(b.mainSkill, 'xs')}
           <div style="min-width:0">
             <div class="build-name">${esc(b.name)}</div>
-            <div class="build-sub">${ascImg(b.className)}<span>${esc(b.className)} · ${esc(b.mainSkill)}</span></div>
+            <div class="build-sub">${ascTile(b.className, 'xs')}<span>${esc(b.className)} · ${esc(b.mainSkill)}</span></div>
           </div>
           <span class="build-dps">${esc(fmt.dps(b.dps))}</span>
         </div>`).join('')}

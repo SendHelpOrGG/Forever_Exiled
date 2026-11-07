@@ -154,6 +154,18 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <!-- Class art tile: same footprint as GemTile so the two read as a pair -->
+    <Style x:Key="ClassTile" TargetType="Border">
+        <Setter Property="WidthRequest" Value="38" />
+        <Setter Property="HeightRequest" Value="38" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{StaticResource BorderSoft}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 3" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <!-- Skill gem tile — the visual anchor of a skill row (sizes set per use) -->
     <Style x:Key="GemTile" TargetType="Border">
         <Setter Property="WidthRequest" Value="38" />
