@@ -27,6 +27,7 @@
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.4 2"/></symbol>
   <symbol id="i-fork" viewBox="0 0 24 24"><path d="M6.5 3.5v6.2M3.8 3.5v3.4a2.7 2.7 0 0 0 5.4 0V3.5M6.5 9.7v10.8M17 3.5c-1.9 0-3.2 1.9-3.2 4.9 0 2 1.2 3.4 3.2 3.4s3.2-1.4 3.2-3.4c0-3-1.3-4.9-3.2-4.9zM17 11.8v8.7"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 5.8v6c0 4.4 3 7.6 7 9.2 4-1.6 7-4.8 7-9.2v-6z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.6 2.8 20h18.4z"/><path d="M12 9.4v4.4M12 17h.01"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M12.5 6.5 18 12l-5.5 5.5"/></symbol>
 </svg>
@@ -60,6 +61,12 @@
       <button class="btn primary" id="syncBtn"><svg class="ic"><use href="#i-sync"/></svg>SYNC</button>
     </div>
   </header>
+
+  <!-- ─────────────────── synthetic-data notice ─────────────────── -->
+  <div class="notice" id="notice" hidden>
+    <svg class="ic sm"><use href="#i-alert"/></svg>
+    <span id="noticeText"></span>
+  </div>
 
   <!-- ───────────────────────── nav rail ───────────────────────── -->
   <nav class="navrail" id="navrail">
@@ -214,6 +221,10 @@
             <span>Source</span>
             <span class="src-tag small"><i class="dot"></i><span class="src-label">SAMPLE DATA</span></span>
           </div>
+          <div class="setting-row">
+            <span>Synthetic</span>
+            <code id="setSynthetic">yes — generated, not scraped</code>
+          </div>
           <button class="btn ghost wide" data-toast="Preview build — league discovery is disabled. Showing the four leagues shipped with the sample.">
             <svg class="ic"><use href="#i-sync"/></svg>RELOAD LEAGUES
           </button>
@@ -271,10 +282,13 @@
         <div class="card about">
           <div class="micro">ABOUT THE DATA</div>
           <p class="body">
-            Builds, skills and cluster jewels come from the same endpoints the poe.ninja builds site
-            uses. Popularity is the share of the league ladder running a skill; DPS is poe.ninja's
+            Live builds, skills and cluster jewels come from the same endpoints the poe.ninja builds
+            site uses. Popularity is the share of the league ladder running a skill; DPS is poe.ninja's
             weighted value. Cluster combinations are counted once per build and expressed against the
             number of sampled builds, never the whole ladder.
+            <strong>The snapshot loaded here is synthetic:</strong> its skill shares, DPS figures and
+            character names are generated to demonstrate the analysis. Real numbers only appear after
+            a sync in the Windows app.
           </p>
           <div class="about-meta">
             <span class="chip"><svg class="ic sm"><use href="#i-clock"/></svg>generated <b id="generatedAt">—</b></span>

@@ -16,7 +16,9 @@ public partial class MainViewModel
             "\uE716",
             "LEAGUE BUILDS",
             DpsFormatter.Count(global.TotalBuildsInLeague),
-            _snapshot.LeagueName.Length > 0 ? _snapshot.LeagueName + " ladder" : string.Empty,
+            IsSampleData
+                ? "generated demo — not the live ladder"
+                : _snapshot.LeagueName.Length > 0 ? _snapshot.LeagueName + " ladder" : string.Empty,
             Palette.Gold));
 
         StatCards.Add(new StatCardItem(

@@ -319,6 +319,12 @@ const el = (selector, root = document) => root.querySelector(selector);
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 
+function isSynthetic() {
+  const snap = state.snapshot;
+  if (!snap) return true;
+  return snap.synthetic === true || snap.source === 'sample';
+}
+
 function classTextOf(skill) {
   const top = (skill.classes || [])[0];
   if (!top) return '–';
@@ -349,18 +355,31 @@ function setStatus(text) {
 
 function renderShell() {
   const snap = state.snapshot;
-  $('leagueName').textContent = snap.leagueName;
-  $('snapshotText').textContent = 'snapshot ' + snap.snapshotVersion.replace(/-?\d{8}$/, '');
-  $('setSnapshot').textContent = snap.snapshotVersion;
+  const synthetic = isSynthetic();
 
-  const sourceLabel = snap.source === 'sample' ? 'SAMPLE DATA' : 'LIVE SNAPSHOT';
+  $('leagueName').textContent = snap.leagueName;
+  $('snapshotText').textContent = synthetic ? 'demo — not the live ladder' : 'snapshot ' + snap.snapshotVersion;
+  $('setSnapshot').textContent = snap.snapshotVersion;
+  $('setSynthetic').textContent = synthetic ? 'yes — generated, not scraped' : 'no — crawled from poe.ninja';
+
+  const sourceLabel = synthetic ? 'SYNTHETIC SAMPLE' : 'LIVE LADDER';
   el('#sourceTag .src-label').textContent = sourceLabel;
   const setLabel = el('#view-settings .src-tag .src-label');
   if (setLabel) setLabel.textContent = sourceLabel;
 
+  // Banner: the bundled snapshot is invented, so say it where nobody can miss it.
+  const notice = $('notice');
+  notice.hidden = !synthetic;
+  if (synthetic) {
+    $('noticeText').innerHTML =
+      '<b>Synthetic demo data.</b> Skill shares, DPS values and character names in this snapshot ' +
+      'are generated to demonstrate the analysis — they are <b>not</b> the Allflame ladder. ' +
+      'Real numbers come from Sync in the Windows app.';
+  }
+
   $('lastSync').textContent = state.lastSync
     ? 'synced ' + state.lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : 'sample snapshot';
+    : (synthetic ? 'never synced' : 'cached snapshot');
 
   const g = state.analysis.global;
   $('statusCounts').textContent =
@@ -630,11 +649,13 @@ function renderMeta() {
   const g = state.analysis.global;
   const snap = state.snapshot;
 
-  $('metaSub').textContent =
-    `${snap.leagueName} · snapshot ${snap.snapshotVersion} · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}%`;
+  $('metaSub').textContent = isSynthetic()
+    ? `${snap.leagueName} · synthetic demo snapshot · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}% · numbers illustrate the analysis, they are not the ladder`
+    : `${snap.leagueName} · snapshot ${snap.snapshotVersion} · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}%`;
 
   const tiles = [
-    ['LADDER BUILDS', fmt.count(g.totalBuildsInLeague), `${snap.leagueName} league`, false],
+    ['LADDER BUILDS', fmt.count(g.totalBuildsInLeague),
+      isSynthetic() ? 'demo figure' : `${snap.leagueName} league`, false],
     ['SKILLS TRACKED', fmt.count(g.skillsTracked), `above ${state.floor.toFixed(1)}% popularity`, true],
     ['CHARACTERS SAMPLED', fmt.count(g.charactersSampled), 'cluster data read', false],
     ['JEWELS CATALOGUED', fmt.count(g.jewelsCatalogued), `${fmt.count(g.combosFound)} distinct combos`, false],
@@ -782,7 +803,7 @@ function renderSettings() {
   const tracked = state.analysis.skills.length;
   const totalSkills = state.snapshot.skills.length;
   $('floorHint').textContent =
-    `${fmt.count(total)} builds in league · ${tracked} of ${totalSkills} skills above the floor`;
+    `${fmt.count(total)} builds ${isSynthetic() ? 'in the demo' : 'in league'} · ${tracked} of ${totalSkills} skills above the floor`;
 
   const err = $('lastError');
   if (err && !err.textContent.trim()) err.textContent = 'none — sample snapshot loaded cleanly';
@@ -1039,8 +1060,17 @@ function downloadCsv() {
 async function boot() {
   let snapshot;
   try {
-    const response = await fetch('data/demo-snapshot.json', { cache: 'no-store' });
-    snapshot = await response.json();
+    // A real crawl can be dropped in as data/live-snapshot.json (the app's cache file);
+    // the bundled demo is only the fallback. Anything with source !== 'sample' is
+    // treated as real data and loses the synthetic banner automatically.
+    snapshot = await fetch('data/live-snapshot.json', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null);
+
+    if (!snapshot) {
+      const response = await fetch('data/demo-snapshot.json', { cache: 'no-store' });
+      snapshot = await response.json();
+    }
   } catch (error) {
     document.querySelector('.stage').innerHTML = `
       <div class="empty" style="height:100%">
@@ -1060,7 +1090,9 @@ async function boot() {
   wire();
   setTab('lab');
   renderAll();
-  setStatus(`Loaded the bundled ${snapshot.leagueName} sample — ${state.analysis.skills.length} tracked skills`);
+  setStatus(isSynthetic()
+    ? `Loaded the bundled demo snapshot — synthetic data, not the live ladder (${state.analysis.skills.length} tracked skills)`
+    : `Loaded ${snapshot.leagueName} snapshot ${snapshot.snapshotVersion} — ${state.analysis.skills.length} tracked skills`);
 }
 
 boot();

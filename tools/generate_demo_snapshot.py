@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 """Generates the bundled offline snapshot (src/ForeverExiled.Core/Resources/demo-snapshot.json).
 
-The app always labels this data as a sample. Numbers (popularity, average / peak DPS,
-class splits) are taken from the live Allflame ladder the app targets, and cluster jewel
-notables follow real PoE cluster-jewel pools so the UI is representative. Rows and
-characters are synthetic but internally consistent: sums, averages and sampled-build
-counts all line up with what MetaAnalyzer computes from live data.
+!!! THIS DATA IS SYNTHETIC !!!
+
+Nothing in the generated file was scraped from poe.ninja. Skill shares, DPS values,
+class splits, account names and character names are all invented here so the UI can be
+opened, demoed and tested offline. Only the *shape* is realistic: the cluster notables
+come from real PoE cluster-jewel pools, and every sum / average / sampled-build count is
+internally consistent, so MetaAnalyzer's arithmetic can be checked against it.
+
+Do not quote numbers from this file as league statistics. The snapshot is deliberately
+marked (league name "Allflame (demo)", snapshotVersion "demo-...", source "sample",
+synthetic true) so both the app and the preview label it as a demo everywhere it shows.
+
+Real data only arrives through Sync, which writes a normal cached snapshot.
 """
 from __future__ import annotations
 
@@ -16,6 +24,9 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "src" / "ForeverExiled.Core" / "Resources" / "demo-snapshot.json"
+
+LEAGUE_LABEL = "Allflame (demo)"
+SNAPSHOT_VERSION = "demo-2026-11-07"
 
 TOTAL_BUILDS = 13262
 ROWS_PER_SKILL = 24
@@ -332,10 +343,13 @@ def main() -> None:
     document = {
         "schemaVersion": 1,
         "leagueUrl": "allflame",
-        "leagueName": "Allflame",
+        "leagueName": LEAGUE_LABEL,
         "source": "sample",
-        "snapshotVersion": "sample-1550-20261107",
-        "snapshotName": "allflame",
+        "synthetic": True,
+        "syntheticNote": "Generated demo data. Not scraped from poe.ninja: skill shares, DPS, "
+                         "class splits and character names are invented to exercise the UI.",
+        "snapshotVersion": SNAPSHOT_VERSION,
+        "snapshotName": "demo",
         "generatedAt": "2026-11-07T09:15:00+00:00",
         "minPopularityPercent": 1.0,
         "totalBuildsInLeague": TOTAL_BUILDS,

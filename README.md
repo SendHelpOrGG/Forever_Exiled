@@ -9,8 +9,11 @@ top-DPS characters to rank the combinations per skill and across the whole leagu
 
 ```
 Winter Orb  →  Medium cluster  →  Eye to Eye + Repeater   53.8%   7 / 13 builds   73.8M avg DPS
-Molten Strike of the Zenith → Large → Devastator + Feed the Fury + Martial Prowess   46.2%
 ```
+
+> Those figures come from the **bundled demo snapshot**, which is synthetic — see
+> [Demo data is not league data](#demo-data-is-not-league-data). Real numbers only exist
+> after a Sync.
 
 ---
 
@@ -62,9 +65,27 @@ dotnet run   --project src/ForeverExiled.App  # unpackaged, no MSIX certificate 
 dotnet test  tests/ForeverExiled.Core.Tests   # parser + analyzer test suite
 ```
 
-The app ships with a **bundled sample snapshot**, clearly badged `SAMPLE DATA` in the
-header, so the entire UI is explorable before the first network call. Press **SYNC** to
-pull the live ladder for the selected league.
+The app ships with a **bundled demo snapshot** so the entire UI is explorable before the
+first network call. It is generated, not scraped: the header shows `SYNTHETIC SAMPLE`,
+the league reads `Allflame (demo)`, and the snapshot version reads `demo — not the live
+ladder`. Press **SYNC** to replace it with the real ladder for the selected league.
+
+### Demo data is not league data
+
+`src/ForeverExiled.Core/Resources/demo-snapshot.json` is produced by
+`tools/generate_demo_snapshot.py` and is **entirely synthetic**: skill shares, average and
+peak DPS, class splits, account names and character names are invented. Only the shape is
+realistic — cluster notables come from the actual PoE pools, and every sum, average and
+sampled-build count is internally consistent, so the aggregation can be verified against
+it.
+
+It exists because the alternative was an empty window with no network: the sample lets the
+UI, the analysis and the CSV export be exercised offline and in CI. **Do not quote its
+numbers as league statistics.** For reference, the live Allflame ladder currently has
+Winter Orb near the top of the popularity chart; the demo has its own ordering and numbers.
+
+Real data only arrives through **Sync**, which writes a normal cached snapshot (the demo is
+only the fallback when no cache exists).
 
 ### Look at it without Windows
 
@@ -78,7 +99,9 @@ python3 preview/serve.py        # → http://localhost:8080
 
 It is a design aid, not the app: the aggregation, search, sorting, size switch, meta
 filters, ladder table and the popularity floor are live, while sync/analyze show a progress
-overlay and explain that network access is disabled there. See
+overlay and explain that network access is disabled there. The preview opens on the same
+synthetic demo snapshot and carries an unmissable banner saying so; drop a real crawl in as
+`preview/data/live-snapshot.json` and the banner disappears. See
 [`preview/README.md`](preview/README.md) for the real-vs-simulated breakdown.
 
 ---

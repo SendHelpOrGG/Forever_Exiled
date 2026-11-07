@@ -52,6 +52,16 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 setTimeout(() => {
+  /* ── the snapshot must announce itself as synthetic ── */
+  check('synthetic banner visible', !q('#notice').hidden, txt('#noticeText').slice(0, 60) + '…');
+  check('banner says the data is not the ladder',
+    /Synthetic demo data/i.test(txt('#noticeText')) && /not/i.test(txt('#noticeText')));
+  check('header badge says SYNTHETIC SAMPLE', txt('#sourceTag .src-label').trim() === 'SYNTHETIC SAMPLE',
+    txt('#sourceTag .src-label').trim());
+  check('league labelled as demo', txt('#leagueName').includes('demo'), txt('#leagueName'));
+  check('ladder-builds tile is marked as a demo figure',
+    txt('#metaTiles .tile .sub').includes('demo'), txt('#metaTiles .tile .sub'));
+
   /* ── cluster lab ── */
   const skills = qa('#skillList .skill');
   check('skill rail populated', skills.length === snapshot.skills.length, skills.length + ' skills');

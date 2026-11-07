@@ -97,9 +97,26 @@ input, select { font-family: inherit; color: inherit; }
 .app {
   display: grid;
   grid-template-columns: 84px minmax(0, 1fr);
-  grid-template-rows: 64px minmax(0, 1fr) 34px;
+  grid-template-rows: 64px auto minmax(0, 1fr) 34px;
   height: 100vh; min-width: 900px;
 }
+.topbar { grid-row: 1; }
+.notice { grid-row: 2; grid-column: 1 / -1; }
+.navrail { grid-row: 3; grid-column: 1; }
+.stage { grid-row: 3; grid-column: 2; }
+.statusbar { grid-row: 4; }
+
+/* banner shown while the bundled demo snapshot is loaded */
+.notice {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 18px;
+  background: linear-gradient(90deg, rgba(224, 162, 74, .16), rgba(224, 162, 74, .04) 60%, transparent);
+  border-bottom: 1px solid rgba(224, 162, 74, .28);
+  color: #E9C98F; font-size: 11px;
+}
+.notice[hidden] { display: none; }
+.notice .ic { color: var(--warn); flex: none; }
+.notice b { color: #F3DCB0; font-weight: 600; }
 
 /* header */
 .topbar {

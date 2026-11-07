@@ -326,7 +326,7 @@ public partial class MainViewModel : ObservableObject
             _snapshot = SampleData.LoadCopy();
             _settings.LeagueUrl = _snapshot.LeagueUrl;
             Publish();
-            StatusMessage = "Showing the bundled sample snapshot — press Sync to pull the live Allflame ladder.";
+            StatusMessage = "Showing the bundled demo snapshot: skill shares, DPS and character names are generated for the demo, not scraped. Press Sync to pull the real ladder.";
         }
 
         await RefreshLeaguesSilentlyAsync().ConfigureAwait(true);
@@ -500,19 +500,25 @@ public partial class MainViewModel : ObservableObject
     {
         LeagueName = _snapshot.LeagueName.Length > 0 ? _snapshot.LeagueName : "Allflame";
         IsSampleData = _snapshot.IsSample;
-        DataSourceText = IsSampleData ? "SAMPLE DATA" : "LIVE LADDER";
+        DataSourceText = IsSampleData ? "SYNTHETIC SAMPLE" : "LIVE LADDER";
         DataSourceColor = IsSampleData ? Palette.Warning : Palette.Success;
 
-        var version = _snapshot.SnapshotVersion;
-        if (version.Length > 0)
+        // The bundled demo snapshot is generated, not scraped, so it must never be
+        // labelled like a real snapshot version.
+        if (IsSampleData)
         {
+            SnapshotText = "demo — not the live ladder";
+        }
+        else if (_snapshot.SnapshotVersion.Length > 0)
+        {
+            var version = _snapshot.SnapshotVersion;
             var dash = version.LastIndexOf('-');
             var shortVersion = dash > 0 ? version[(dash + 1)..] : version;
             SnapshotText = "snapshot " + shortVersion;
         }
         else
         {
-            SnapshotText = "offline sample";
+            SnapshotText = "no snapshot version";
         }
 
         LastSyncText = Humanize(_snapshot.GeneratedAt);

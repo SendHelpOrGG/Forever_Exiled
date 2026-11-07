@@ -158,3 +158,20 @@ Combination identity = `size + " + ".join(sorted(notables))`.
 2. The raw payload is written to `<AppData>/forever-exiled/diagnostics/*.bin`.
 3. Decode it with `tools/verify_parsers.py` as a scratchpad — it already contains a protobuf
    reader and writer for exactly these messages.
+
+## The bundled snapshot is synthetic
+
+`tools/generate_demo_snapshot.py` writes `src/ForeverExiled.Core/Resources/demo-snapshot.json`
+**without touching the network**. Skill popularity, average/peak DPS, class splits, accounts
+and character names are all generated; only the cluster-jewel notables and the arithmetic are
+real. The file identifies itself:
+
+| field | value |
+|---|---|
+| `source` | `"sample"` (the app swaps the header badge to `SYNTHETIC SAMPLE` on this) |
+| `synthetic` | `true` |
+| `leagueName` | `"Allflame (demo)"` |
+| `snapshotVersion` | `"demo-2026-11-07"` (real versions look like `1756-20261107-54805`) |
+
+Never quote its numbers as league statistics — the real ladder is only reachable through
+`Sync`, and the current live Allflame snapshot version comes from `index-state`.
