@@ -26,16 +26,13 @@ public static class TagColors
         ["bleed"] = "#c9453d",
         ["block"] = "#a8b6c8",
         ["caster"] = "#7b9ef5",
-        ["caster_damage"] = "#97a2f5",
         ["chaos"] = "#c184df",
-        ["chaos_damage"] = "#a86fce",
         ["cold"] = "#74c7ee",
         ["critical"] = "#ec6fa4",
         ["curse"] = "#a07be8",
         ["damage"] = "#e06c63",
         ["defences"] = "#8fa8c6",
         ["elemental"] = "#9dcf7c",
-        ["elemental_damage"] = "#84bf5f",
         ["endurance_charge"] = "#c9a06a",
         ["energy_shield"] = "#74b6e8",
         ["evasion"] = "#7fc79f",
@@ -47,11 +44,9 @@ public static class TagColors
         ["mana"] = "#4fa8dd",
         ["minion"] = "#b09ae6",
         ["physical"] = "#d3b795",
-        ["physical_damage"] = "#c3a480",
         ["poison"] = "#9ac84e",
         ["power_charge"] = "#94b0f5",
         ["resistance"] = "#9cc069",
-        ["resource"] = "#cbb26b",
         ["speed"] = "#5ed3a6"
     };
 

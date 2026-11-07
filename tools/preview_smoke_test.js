@@ -166,6 +166,17 @@ setTimeout(() => {
       return !expected || (n.getAttribute('style') || '').toLowerCase().includes(expected);
     }),
     itemTagNodes.map((n) => n.textContent).join(', '));
+  // the site lists leaf tags, not the composite ones a mod-tag query uses
+  const compositeTags = ['elemental_damage', 'chaos_damage', 'physical_damage', 'caster_damage', 'resource'];
+  const taggedNotables = Object.values(weights.notables).filter((n) => (n.tags || []).length > 0);
+  check('no notable carries a composite tag the site does not show',
+    taggedNotables.every((n) => n.tags.every((t) => !compositeTags.includes(t))),
+    taggedNotables.filter((n) => n.tags.some((t) => compositeTags.includes(t)))
+      .map((n) => n.name).join(', ') || `${taggedNotables.length} notables clean`);
+  check("Doryani's Lesson shows life, damage and elemental",
+    (weights.notables["doryani's lesson"].tags || []).join(',') === 'life,damage,elemental',
+    (weights.notables["doryani's lesson"].tags || []).join(', '));
+
   const dataTags = new Set(Object.values(weights.notables).flatMap((n) => n.tags || []));
   const unpainted = [...dataTags].filter((tag) => !tagColors.tags[tag]);
   check('every mod tag in the data has a colour', unpainted.length === 0,

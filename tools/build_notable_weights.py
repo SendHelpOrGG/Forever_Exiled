@@ -51,6 +51,13 @@ NOTABLE_TEXT = re.compile(r'^1 Added Passive Skill is (.+)$')
 
 SIZES = {"expansion_jewel_large": "Large", "expansion_jewel_medium": "Medium", "expansion_jewel_small": "Small"}
 
+# Path of Building's modTags also carry the composite tags the game uses when a mod has to
+# match a tag query: "elemental_damage" is just elemental + damage, "chaos_damage" is chaos +
+# damage, and "resource" is the parent of life/mana. The site lists the leaf tags only, so
+# drop the composites - every one of them is already implied by the tags printed beside it
+# (each of them always arrives with its parts, and resource always with life or mana).
+COMPOSITE_TAGS = {"elemental_damage", "chaos_damage", "physical_damage", "caster_damage", "resource"}
+
 
 def normalize_grant(text: str) -> str:
     """Drop the tier digits so 10% and 12% variants land on the same base tag."""
@@ -126,7 +133,7 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
         if not notable:
             continue
 
-        tags = parse_list(arrays.get("modTags", ""))
+        tags = [tag for tag in parse_list(arrays.get("modTags", "")) if tag not in COMPOSITE_TAGS]
         name = notable.group(1).strip()
         notables[name.lower()] = {
             "id": mod_id,

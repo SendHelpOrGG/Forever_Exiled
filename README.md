@@ -163,7 +163,11 @@ craftofexile.com reads - built into `preview/assets/notable_weights.json` by
 `tools/sync_notable_weights.py`. Notables are only ever shown with the weight of the pool their
 own jewel rolls from; the demo snapshot is regenerated so every jewel sits on a real base with
 its notables drawn from that base's pool. Each notable also prints the game's **mod tags**
-(`fire`, `ailment`, `elemental damage`...) - the tags fossils, harvest and influences key off.
+(`fire`, `ailment`, `elemental`...) - the tags fossils, harvest and influences key off. The tag
+list is the site's vocabulary of leaf tags: the composite tags a mod-tag query uses
+(`elemental_damage` is elemental + damage, `resource` is the parent of life and mana) are
+dropped, because each of them always arrives alongside the tags that explain it. Doryani's
+Lesson therefore reads *life, damage, elemental*, not five tags.
 They are coloured by family, not printed as one grey row: warm reds for damage, one hue per
 element, blues for mana and energy shield, greens for resistances, speed and poison. The palette
 lives in `preview/assets/tag_colors.json` and is mirrored into `Theming/TagColors.g.cs` by

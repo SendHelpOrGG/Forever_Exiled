@@ -83,7 +83,7 @@ This folder is a design aid, not part of the shipped application and not referen
 | `assets/logo.png` | Project mark (generated). |
 | `assets/notables.json` | 300 cluster-jewel notable descriptions (stats + reminder text) built from Path of Building's tree data; the hover card prints them under each notable. |
 | `assets/notable_weights.json` | Spawn weight of all 291 notables per cluster base, plus the generic small-passive mods that compete for the same slot (54 pools, 11,000-14,000 weight each at endgame item levels) from the game's mod data; the hover card prints the pool line and each notable's weight and odds. |
-| `assets/tag_colors.json` | One hue per mod tag (damage, fire, cold, life, speed...). Colours the tag chips on the item card and in the crafting card; mirrored into the app by `tools/sync_tag_colors.py`. |
+| `assets/tag_colors.json` | One hue per mod tag - the 30 leaf tags the site shows (damage, fire, cold, life, speed...), not the composite `X_damage`/`resource` tags. Colours the tag chips on the item card and in the crafting card; mirrored into the app by `tools/sync_tag_colors.py`. |
 | `assets/currency_costs.json` | Chaos-equivalent prices for the crafting card, defaulted to the league craftofexile.com priced its methods in. Placeholders - edit them to match your league. |
 | `assets/gems/` | 507 skill gem icons (78px) plus `index.json`, so a skill row can show its real gem art and fall back cleanly when a gem has none. Art from PoE-Gems / Grinding Gear Games. |
 | `assets/cluster_{large,medium,small}.png` | Real in-game cluster jewel icons (transparent), so pills and combo cards match the item art. Art from ExileCraft / Grinding Gear Games. |
