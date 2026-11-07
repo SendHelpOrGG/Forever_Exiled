@@ -89,6 +89,8 @@ public partial class MainViewModel
         SelectedSkillClasses = skill.ClassText;
         SelectedSkillClassImage = skill.ClassImage;
         HasSelectedSkillClassImage = skill.HasClassImage;
+        SelectedSkillGemImage = skill.GemImage;
+        HasSelectedSkillGemImage = skill.HasGemImage;
         SelectedSkillPopularity = skill.PopText;
         SelectedSkillBuilds = skill.BuildsText;
         SelectedSkillAverageDps = DpsFormatter.Format(skill.Stat.AverageDps);
@@ -115,6 +117,8 @@ public partial class MainViewModel
         SelectedSkillClasses = string.Empty;
         SelectedSkillClassImage = string.Empty;
         HasSelectedSkillClassImage = false;
+        SelectedSkillGemImage = string.Empty;
+        HasSelectedSkillGemImage = false;
         SelectedSkillPopularity = "–";
         SelectedSkillBuilds = string.Empty;
         SelectedSkillAverageDps = "–";

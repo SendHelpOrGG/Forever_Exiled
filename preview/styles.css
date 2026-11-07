@@ -255,9 +255,11 @@ label.field { cursor: text; }
   background: linear-gradient(180deg, #0f151b, #0b1015);
   border: 1px solid var(--line);
 }
-.slot img { width: 24px; height: 24px; object-fit: contain; }
-.slot.lg { width: 44px; height: 44px; }
-.slot.lg img { width: 38px; height: 38px; }
+.slot img { width: 30px; height: 30px; object-fit: contain; }
+.slot.lg { width: 54px; height: 54px; }
+.slot.lg img { width: 46px; height: 46px; }
+.slot.xl { width: 78px; height: 78px; border-radius: var(--r); }
+.slot.xl img { width: 68px; height: 68px; }
 
 .bar {
   height: 4px; border-radius: 2px; background: #1a242d; overflow: hidden;
@@ -287,7 +289,7 @@ label.field { cursor: text; }
 /* ─────────────────────── cluster lab layout ─────────────────── */
 .lab {
   display: grid;
-  grid-template-columns: 286px minmax(0, 1fr) 296px;
+  grid-template-columns: 322px minmax(0, 1fr) 292px;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 12px; padding: 14px 16px 16px;
   min-height: 0; height: 100%;
@@ -313,12 +315,26 @@ label.field { cursor: text; }
 }
 
 .skill {
-  display: grid; grid-template-columns: 2px minmax(0, 1fr) auto;
-  gap: 9px; align-items: center; width: 100%; text-align: left;
-  padding: 6px 9px 6px 0; margin: 0;
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px; align-items: center; width: 100%; text-align: left;
+  padding: 5px 9px 5px 7px; margin: 0;
   background: transparent; border: 0; border-left: 2px solid transparent;
+  border-radius: var(--r-sm);
   transition: background .1s ease;
 }
+.gem-slot {
+  width: 40px; height: 40px; flex: none; display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line); overflow: hidden;
+  background: radial-gradient(120% 120% at 50% 0%, #1b242e 0%, #0b1015 100%);
+}
+.gem-slot img { width: 36px; height: 36px; object-fit: contain; }
+.gem-slot.empty .ic { width: 18px; height: 18px; color: #3a4653; }
+.gem-slot.xs { width: 28px; height: 28px; }
+.gem-slot.xs img { width: 25px; height: 25px; }
+.gem-slot.sm { width: 24px; height: 24px; border-radius: 2px; }
+.gem-slot.sm img { width: 21px; height: 21px; }
+.skill.on .gem-slot { border-color: rgba(63,174,122,.55); }
+.skill-body { min-width: 0; }
 .skill:hover { background: var(--panel-2); }
 .skill.on { background: var(--green-soft); border-left-color: var(--green); }
 .skill .accent { width: 2px; height: 24px; border-radius: 1px; background: var(--c, var(--text-3)); }
@@ -328,9 +344,11 @@ label.field { cursor: text; }
 }
 .skill.on .skill-name { color: #fff; font-weight: 600; }
 .skill-sub {
-  font-size: 10px; color: var(--text-3); margin-top: 1px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 10px; color: var(--text-3); margin-top: 2px;
+  display: flex; align-items: center; gap: 5px;
+  white-space: nowrap; overflow: hidden;
 }
+.skill-sub > span { overflow: hidden; text-overflow: ellipsis; }
 /* ascendancy portraits — class art next to the class name, like the site */
 img.asc {
   width: 15px; height: 15px; flex: none; border-radius: 2px;
@@ -339,6 +357,9 @@ img.asc {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
 }
 img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px; }
+img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px; margin-right: 7px; }
+.skill-sub img.asc { width: 16px; height: 16px; margin-right: 5px; }
+.anchor img.asc { width: 17px; height: 17px; }
 .skill-sub, .build-sub { display: flex; align-items: center; }
 .skill-sub > span, .build-sub > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -348,16 +369,16 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 .skill-cap { font-size: 8.5px; letter-spacing: .06em; color: var(--text-3); text-transform: uppercase; }
 
 /* skill hero — poe.ninja "build" header */
-.hero-card { padding: 12px; display: flex; align-items: center; gap: 12px; }
-.hero-card .slot { width: 46px; height: 46px; }
-.hero-card .slot img { width: 40px; height: 40px; }
+.hero-card { padding: 14px; display: flex; align-items: center; gap: 14px; }
+.hero-card .slot { width: 78px; height: 78px; }
+.hero-card .slot img { width: 68px; height: 68px; }
 .hero-main { min-width: 0; flex: 1; }
 .hero-eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
-.hero-name { font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+.hero-name { font-size: 22px; font-weight: 600; letter-spacing: -.015em; line-height: 1.15; }
 .hero-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
 .hero-stats { display: flex; gap: 18px; text-align: right; font-variant-numeric: tabular-nums; }
 .hero-stat .k { font-size: 9px; letter-spacing: .09em; text-transform: uppercase; color: var(--text-3); }
-.hero-stat .v { font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.25; }
+.hero-stat .v { font-size: 20px; font-weight: 600; color: var(--text); line-height: 1.2; }
 .hero-stat .v.green { color: var(--green); }
 
 /* controls row */
@@ -386,14 +407,26 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
   padding: 10px 12px; margin-bottom: 8px; transition: .12s ease;
   position: relative;
+  display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: start;
 }
+.combo-art {
+  position: relative; width: 56px; height: 56px; display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line); overflow: visible;
+  background: radial-gradient(120% 120% at 50% 0%, #1b242e 0%, #0b1015 100%);
+}
+.combo-art img { width: 46px; height: 46px; object-fit: contain; }
+.combo-art .rank {
+  position: absolute; left: -5px; top: -5px; width: 20px; height: 20px;
+  font-size: 9.5px; border-radius: 3px;
+}
+.combo-body { min-width: 0; }
 .combo:hover { border-color: var(--line-2); background: #182029; }
 .combo.leader { border-color: rgba(63,174,122,.45); }
 .combo.leader::before {
   content: ""; position: absolute; left: -1px; top: 8px; bottom: 8px; width: 2px;
   border-radius: 2px; background: var(--green);
 }
-.combo-head { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+.combo-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
 .rank {
   display: grid; place-items: center; width: 34px; height: 34px;
   border-radius: var(--r-sm); border: 1px solid var(--line);
@@ -475,9 +508,10 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 .mix-val { font-size: 11px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
 
 .mini-row {
-  display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px;
+  display: grid; grid-template-columns: 16px 24px minmax(0, 1fr) auto; gap: 8px;
   align-items: center; padding: 4px 0; font-size: 11.5px;
 }
+.mini-row.no-art { grid-template-columns: 16px minmax(0, 1fr) auto; }
 .mini-row + .mini-row { border-top: 1px solid rgba(38,49,61,.55); }
 .mini-rank { font-size: 10px; color: var(--text-3); font-variant-numeric: tabular-nums; }
 .mini-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); }
@@ -499,8 +533,19 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 .meta-side { display: flex; flex-direction: column; gap: 12px; }
 
 .meta-combo {
-  display: grid; grid-template-columns: 24px minmax(0, 1fr) 58px; gap: 10px;
-  align-items: center; padding: 7px 0;
+  display: grid; grid-template-columns: 38px minmax(0, 1fr) 58px; gap: 11px;
+  align-items: center; padding: 6px 0;
+}
+.mc-art {
+  position: relative; width: 38px; height: 38px; display: grid; place-items: center;
+  border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: radial-gradient(120% 120% at 50% 0%, #1b242e 0%, #0b1015 100%);
+}
+.mc-art img { width: 31px; height: 31px; object-fit: contain; }
+.mc-art .mc-rank {
+  position: absolute; right: -4px; bottom: -4px; min-width: 15px; padding: 0 3px;
+  font-size: 8.5px; line-height: 14px; text-align: center; border-radius: 2px;
+  background: var(--sunken); border: 1px solid var(--line); color: var(--text-3);
 }
 .meta-combo + .meta-combo { border-top: 1px solid rgba(38,49,61,.55); }
 .mc-rank { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
@@ -528,7 +573,7 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 .notable-bar { height: 2px; margin-top: 3px; }
 
 .build-row {
-  display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 8px;
+  display: grid; grid-template-columns: 14px 34px minmax(0, 1fr) auto; gap: 9px;
   align-items: center; padding: 5px 0;
 }
 .build-row + .build-row { border-top: 1px solid rgba(38,49,61,.55); }
@@ -543,7 +588,7 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 
 .table-card { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; padding: 0; }
 .table-head {
-  display: grid; grid-template-columns: 44px minmax(0, 1.3fr) minmax(0, .85fr) minmax(0, 1.15fr) 84px 64px;
+  display: grid; grid-template-columns: 34px minmax(0, 1.2fr) 156px minmax(0, 1.25fr) 88px 58px;
   gap: 10px; align-items: center; padding: 7px 12px;
   background: var(--panel-2); border-bottom: 1px solid var(--line);
 }
@@ -558,7 +603,7 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 .th .caret { font-size: 8px; }
 .table-body { overflow-y: auto; min-height: 0; }
 .trow {
-  display: grid; grid-template-columns: 44px minmax(0, 1.3fr) minmax(0, .85fr) minmax(0, 1.15fr) 84px 64px;
+  display: grid; grid-template-columns: 34px minmax(0, 1.2fr) 156px minmax(0, 1.25fr) 88px 58px;
   gap: 10px; align-items: center; padding: 6px 12px;
   border-bottom: 1px solid rgba(38,49,61,.55); font-size: 12px;
   transition: background .1s ease;
@@ -570,7 +615,11 @@ img.asc.lg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px;
 .trow .nm b { font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .trow .accent { width: 2px; height: 16px; border-radius: 1px; background: var(--c); flex: none; }
 .trow .cls, .trow .skl { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.trow .cls { display: flex; align-items: center; }
+.trow .cls { display: flex; align-items: center; gap: 7px; }
+.trow .skl { display: flex; align-items: center; gap: 7px; }
+.trow .cls img.asc { width: 22px; height: 22px; border-radius: 3px; margin: 0; }
+.trow .skl .gem-slot { width: 26px; height: 26px; border-radius: 3px; }
+.trow .skl .gem-slot img { width: 23px; height: 23px; }
 .trow .dps { font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
 .trow .cl { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .trow .cl.zero { color: #3a4653; }

@@ -129,6 +129,9 @@ for selection and primary actions, a horizontal tab bar across the top, hairline
 own rarity colours are used where they carry meaning (mod text in magic blue, unique items in
 orange), and cluster jewels use tile-framed icons instead of text labels.
 
+Every skill, cluster jewel and class is identified by its real in-game artwork rather than a
+label, so the interface reads as pictures with captions rather than text with decorations.
+
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI
 with Segoe UI Semibold for headings, matching what the site renders as on Windows.
@@ -139,6 +142,8 @@ Icons are inline SVG (no icon font, no network). The logo is generated for this 
 Everything else is real Path of Exile art, so the cluster jewels and class portraits look
 exactly like the game's own inventory icons:
 
+* skill gem icons (`preview/assets/gems/`, `Resources/Images/gem_*.png`) come from
+  [PoE-Gems](https://github.com/MuffinsBeGreat/PoE-Gems) — 507 gems, shipped at two sizes;
 * cluster jewel icons (`preview/assets/cluster_*.png`, `Resources/Images/cluster_*.png`) come
   from [ExileCraft](https://github.com/jmduea/ExileCraft) (MIT);
 * ascendancy and class portraits (`preview/assets/asc/`, `Resources/Images/asc_*.png`) come from
@@ -225,6 +230,14 @@ owns the state, exposes display item view models (`SkillCardItem`, `ComboItem`, 
 issues commands; the views contain no logic beyond bindings.
 
 ---
+
+### Media assets
+
+`python3 tools/sync_gem_art.py` rebuilds everything derived from the gem art: the preview's
+`assets/gems/index.json` (so the browser knows which gems have art before asking for a 404),
+the 64px copies in `Resources/Images/gem_*.png`, and the generated `Theming/GemArt.g.cs`
+lookup. Both sides resolve a skill name the same way — exact slug first, then a variant
+("Raise Spectre" → "Raise Spectre of Transience"), then a neutral gem glyph.
 
 ## Verification without Windows
 

@@ -116,6 +116,7 @@ public sealed partial class SkillCardItem : ObservableObject
         }
 
         ClassImage = Palette.ImageForAscendancy(stat.TopClass);
+        GemImage = GemArt.ImageFor(stat.Name);
     }
 
     public SkillStat Stat { get; }
@@ -143,6 +144,10 @@ public sealed partial class SkillCardItem : ObservableObject
     public string ClassImage { get; }
 
     public bool HasClassImage => ClassImage.Length > 0;
+
+    public string GemImage { get; }
+
+    public bool HasGemImage => GemImage.Length > 0;
 
     public string DamageType => Stat.DamageType;
 
@@ -257,6 +262,7 @@ public sealed class BuildItem
         Name = build.Name.Length > 0 ? build.Name : build.Account;
         ClassText = build.ClassName.Length > 0 ? build.ClassName : "–";
         ClassImage = Palette.ImageForAscendancy(build.ClassName);
+        GemImage = GemArt.ImageFor(build.MainSkill);
         SkillText = build.MainSkill.Length > 0 ? build.MainSkill : "–";
         DpsText = DpsFormatter.Format(build.Dps);
         LevelText = build.Level > 0 ? build.Level.ToString() : "–";
@@ -273,6 +279,10 @@ public sealed class BuildItem
     public string ClassImage { get; }
 
     public bool HasClassImage => ClassImage.Length > 0;
+
+    public string GemImage { get; }
+
+    public bool HasGemImage => GemImage.Length > 0;
 
     public string SkillText { get; }
 

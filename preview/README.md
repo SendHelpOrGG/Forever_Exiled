@@ -81,5 +81,8 @@ This folder is a design aid, not part of the shipped application and not referen
 | Path | What it is |
 | --- | --- |
 | `assets/logo.png` | Project mark (generated). |
+| `assets/gems/` | 507 skill gem icons (78px) plus `index.json`, so a skill row can show its real gem art and fall back cleanly when a gem has none. Art from PoE-Gems / Grinding Gear Games. |
 | `assets/cluster_{large,medium,small}.png` | Real in-game cluster jewel icons (transparent), so pills and combo cards match the item art. Art from ExileCraft / Grinding Gear Games. |
 | `assets/asc/<class>.jpg` | Ascendancy and base-class portraits, shown next to every class name. Art from Path of Building / Grinding Gear Games. |
+
+Regenerate the gem index and the app's copies with `python3 tools/sync_gem_art.py`.

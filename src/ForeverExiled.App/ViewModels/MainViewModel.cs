@@ -162,6 +162,12 @@ public partial class MainViewModel : ObservableObject
     private bool _hasSelectedSkillClassImage;
 
     [ObservableProperty]
+    private string _selectedSkillGemImage = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasSelectedSkillGemImage;
+
+    [ObservableProperty]
     private string _selectedSkillPopularity = string.Empty;
 
     [ObservableProperty]

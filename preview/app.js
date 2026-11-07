@@ -345,6 +345,52 @@ function ascImg(name, extra = '') {
   return src ? `<img class="asc ${extra}" src="${src}" alt="" loading="lazy">` : '';
 }
 
+function slugify(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/['\u2019,.]/g, '')
+    .replace(/[^a-z0-9 ]+/g, '')
+    .trim()
+    .replace(/\s+/g, '_');
+}
+
+/** Slug list from assets/gems/index.json — tells us which gems have art. */
+let gemIndex = null;
+
+async function loadGemIndex() {
+  try {
+    const response = await fetch('assets/gems/index.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    const data = await response.json();
+    gemIndex = new Set(data.slugs || []);
+  } catch {
+    gemIndex = null; // no index: fall back to optimistic paths
+  }
+}
+
+function gemIcon(skillName) {
+  const slug = slugify(skillName);
+  if (!slug) return '';
+  if (!gemIndex) return `assets/gems/${slug}.png`;
+  if (gemIndex.has(slug)) return `assets/gems/${slug}.png`;
+
+  // transmuted gems share the base skill's art, so try a variant before giving up
+  const prefix = `${slug}_`;
+  for (const candidate of gemIndex) {
+    if (candidate.startsWith(prefix)) return `assets/gems/${candidate}.png`;
+  }
+  return '';
+}
+
+/** Gem art inside a tile; falls back to the gem glyph when we have no art. */
+function gemTile(skillName, extra = '') {
+  const src = gemIcon(skillName);
+  const cls = `gem-slot ${extra}`.trim();
+  return src
+    ? `<span class="${cls}"><img src="${src}" alt="" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()"></span>`
+    : `<span class="${cls} empty"><svg class="ic"><use href="#i-gem"/></svg></span>`;
+}
+
 function topClassOf(skill) {
   const top = (skill.classes || [])[0];
   return top ? top.name : '';
@@ -463,10 +509,10 @@ function renderSkillRail() {
     return `
       <button class="skill ${on ? 'on' : ''}" data-skill="${esc(skill.name)}" style="--c:${accent}"
               title="${esc(skill.name)} — ${esc(fmt.count(skill.buildCount))} builds, ${esc(fmt.pct(skill.popularityPercent))} of ladder">
-        <i class="accent"></i>
-        <span>
+        ${gemTile(skill.name)}
+        <span class="skill-body">
           <div class="skill-name">${esc(skill.name)}</div>
-          <div class="skill-sub">${ascImg(topClassOf(skill))}<span>${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))} of ladder</span></div>
+          <div class="skill-sub">${ascImg(topClassOf(skill))}<span>${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))}</span></div>
         </span>
         <span class="skill-side">
           <div class="skill-dps">${esc(fmt.dps(skill.averageDps))}</div>
@@ -510,14 +556,15 @@ function renderHero() {
       : 'no ladder rows';
 
   host.innerHTML = `
-    <div class="slot lg" style="border-color:${SIZE_COLOR[state.size]}55">
-      <img src="${SIZE_IMG[state.size]}" alt="">
+    <div class="slot xl" style="border-color:${SIZE_COLOR[state.size]}55">
+      <img src="${gemIcon(stat.name) || SIZE_IMG[state.size]}" alt=""
+           onerror="this.src='${SIZE_IMG[state.size]}'">
     </div>
     <div class="hero-main">
       <div class="hero-eyebrow">
         <i style="width:5px;height:5px;border-radius:50%;background:${accent};display:inline-block"></i>
         <span class="micro">${esc(String(stat.damageType || '').toUpperCase())}</span>
-        <span class="cap">· ${ascImg(topClassOf(stat), 'lg')}${esc(classTextOf(stat))}</span>
+        <span class="cap" style="display:inline-flex;align-items:center">· ${ascImg(topClassOf(stat), 'xl')}${esc(classTextOf(stat))}</span>
       </div>
       <div class="hero-name">${esc(stat.name)}</div>
       <div class="hero-chips">
@@ -595,32 +642,37 @@ function renderCombos() {
 
     return `
       <article class="combo ${rank === 1 ? 'leader' : ''}">
-        <div class="combo-head">
-          <div class="rank">${String(rank).padStart(2, '0')}</div>
-          <div style="min-width:0">
-            <div class="combo-chips">
-              ${notableMarkup}
-              <span class="chip ${SIZE_TAG_CLASS[combo.size]}"><img class="art tiny" src="${SIZE_IMG[combo.size]}" alt="">#${combo.size}</span>
-            </div>
-            <div class="combo-sub">${meta}</div>
-          </div>
-          <div class="combo-side">
-            <div class="combo-pct">${esc(fmt.pct(combo.percentOfBuilds))}</div>
-            <span class="cap">${combo.buildCount} of ${denominator} builds</span>
-          </div>
+        <div class="combo-art">
+          <img src="${SIZE_IMG[combo.size]}" alt="">
+          <span class="rank">${String(rank).padStart(2, '0')}</span>
         </div>
-        <div class="bar combo-bar"><i style="width:${share.toFixed(1)}%"></i></div>
-        <div class="combo-foot">
-          <span class="anchor" title="${esc(combo.topBuildAccount)}">
-            <svg class="ic sm"><use href="#i-anchor"/></svg>
-            <b>${esc(combo.topBuildName || 'unknown')}</b>
-            <span>· ${ascImg(combo.topBuildClass)}${esc(combo.topBuildClass || '—')}</span>
-          </span>
-          <span class="dpsline">
-            <svg class="ic sm bolt"><use href="#i-bolt"/></svg>
-            <b>${esc(fmt.dps(combo.averageDps))}</b><span class="cap">avg</span>
-            <b class="peak">${esc(fmt.dps(combo.peakDps))}</b><span class="cap">peak</span>
-          </span>
+        <div class="combo-body">
+          <div class="combo-head">
+            <div style="min-width:0">
+              <div class="combo-chips">
+                ${notableMarkup}
+                <span class="chip ${SIZE_TAG_CLASS[combo.size]}">#${combo.size}</span>
+              </div>
+              <div class="combo-sub">${meta}</div>
+            </div>
+            <div class="combo-side">
+              <div class="combo-pct">${esc(fmt.pct(combo.percentOfBuilds))}</div>
+              <span class="cap">${combo.buildCount} of ${denominator}</span>
+            </div>
+          </div>
+          <div class="bar combo-bar"><i style="width:${share.toFixed(1)}%"></i></div>
+          <div class="combo-foot">
+            <span class="anchor" title="${esc(combo.topBuildAccount)}">
+              <svg class="ic sm"><use href="#i-anchor"/></svg>
+              <b>${esc(combo.topBuildName || 'unknown')}</b>
+              <span>· ${ascImg(combo.topBuildClass)}${esc(combo.topBuildClass || '—')}</span>
+            </span>
+            <span class="dpsline">
+              <svg class="ic sm bolt"><use href="#i-bolt"/></svg>
+              <b>${esc(fmt.dps(combo.averageDps))}</b><span class="cap">avg</span>
+              <b class="peak">${esc(fmt.dps(combo.peakDps))}</b><span class="cap">peak</span>
+            </span>
+          </div>
         </div>
       </article>`;
   }).join('');
@@ -685,6 +737,7 @@ function renderGlobalRail() {
       ${top.map((b, i) => `
         <div class="mini-row">
           <span class="mini-rank">${String(i + 1).padStart(2, '0')}</span>
+          ${gemTile(b.mainSkill, 'sm')}
           <span class="mini-name" title="${esc(b.name)} · ${esc(b.mainSkill)}">${esc(b.name)}</span>
           <span class="mini-val">${esc(fmt.dps(b.dps))}</span>
         </div>`).join('')}
@@ -734,7 +787,10 @@ function renderMeta() {
 
   $('metaComboList').innerHTML = combos.length ? combos.map((c, i) => `
     <div class="meta-combo">
-      <span class="mc-rank">${String(i + 1).padStart(2, '0')}</span>
+      <span class="mc-art">
+        <img src="${SIZE_IMG[c.size]}" alt="">
+        <span class="mc-rank">${String(i + 1).padStart(2, '0')}</span>
+      </span>
       <div class="mc-main">
         <div class="mc-title" title="${esc(c.label)}">${esc(c.label)}</div>
         <div class="mc-sub">
@@ -773,8 +829,9 @@ function renderMeta() {
     ${panel('DPS leaders', '<span class="cap">avg per skill</span>')}
     <div class="panel-body">
       ${leaders.map((s) => `
-        <div class="mini-row" style="grid-template-columns:34px minmax(0,1fr) auto">
+        <div class="mini-row" style="grid-template-columns:34px 26px minmax(0,1fr) auto">
           <span class="mini-rank">${esc(fmt.pct(s.popularityPercent, 0))}</span>
+          ${gemTile(s.name, 'sm')}
           <span class="mini-name" title="${esc(s.name)}">${esc(s.name)}</span>
           <span class="mini-val">${esc(fmt.dps(s.averageDps))}</span>
         </div>
@@ -788,6 +845,7 @@ function renderMeta() {
       ${builds.map((b, i) => `
         <div class="build-row">
           <span class="build-rank">${String(i + 1).padStart(2, '0')}</span>
+          ${gemTile(b.mainSkill, 'xs')}
           <div style="min-width:0">
             <div class="build-name">${esc(b.name)}</div>
             <div class="build-sub">${ascImg(b.className)}<span>${esc(b.className)} · ${esc(b.mainSkill)}</span></div>
@@ -833,7 +891,7 @@ function renderLadder() {
         <span class="rk">${String(rank).padStart(2, '0')}</span>
         <span class="nm"><i class="accent" style="--c:${accent}"></i><b title="${esc(b.account)}">${esc(b.name)}</b></span>
         <span class="cls">${ascImg(b.className, 'lg')}${esc(b.className || '—')}</span>
-        <span class="skl" title="${esc(b.mainSkill)}">${esc(b.mainSkill || '—')}</span>
+        <span class="skl" title="${esc(b.mainSkill)}">${gemTile(b.mainSkill, 'sm')}<span>${esc(b.mainSkill || '—')}</span></span>
         <span class="dps">${esc(fmt.dps(b.dps))}</span>
         <span class="cl ${b.clusterJewelCount ? '' : 'zero'}">${b.clusterJewelCount ? b.clusterJewelCount : '—'}</span>
       </div>`;
@@ -1128,6 +1186,8 @@ async function boot() {
       </div>`;
     return;
   }
+
+  await loadGemIndex();
 
   state.snapshot = snapshot;
   state.floor = snapshot.minPopularityPercent || 1;

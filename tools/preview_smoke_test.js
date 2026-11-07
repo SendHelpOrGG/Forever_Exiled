@@ -35,7 +35,11 @@ const { window } = dom;
 const { document } = window;
 
 const snapshot = JSON.parse(read('data/demo-snapshot.json'));
-window.fetch = () => Promise.resolve({ json: async () => snapshot });
+const gemIndex = JSON.parse(read('assets/gems/index.json'));
+window.fetch = (url) => Promise.resolve({
+  ok: true,
+  json: async () => (String(url).includes('gems/index.json') ? gemIndex : snapshot),
+});
 window.eval(read('app.js'));
 
 const q = (s) => document.querySelector(s);
@@ -78,9 +82,31 @@ setTimeout(() => {
       fs.existsSync(path.join(root, 'assets', 'asc', name + '.jpg'))),
     [...new Set(snapshot.skills.flatMap((s) => s.classes.map((c) => c.name)))].join(', '));
   check('hero card', txt('#hero .hero-stats').includes('AVG DPS'), txt('#hero .hero-name') + ' · ' + txt('#hero .hero-stats'));
+  check('hero shows the skill gem', !!q('#hero .slot.xl img') &&
+    String(q('#hero .slot.xl img').getAttribute('src')).includes('assets/gems/'),
+    (q('#hero .slot.xl img') || {}).getAttribute ? q('#hero .slot.xl img').getAttribute('src') : 'missing');
   check('hero shows the ascendancy portrait', !!q('#hero .hero-eyebrow img.asc'),
     (q('#hero .hero-eyebrow img.asc') || {}).outerHTML || 'missing');
   check('three size pills', qa('#sizePills .pill').length === 3);
+
+  /* ── gem art: the visual anchor of every skill row ── */
+  const railGems = qa('#skillList .skill .gem-slot img');
+  check('skill rail shows gem art', railGems.length === skills.length,
+    railGems.length + ' of ' + skills.length + ' rows');
+  check('gem art files exist on disk',
+    railGems.length > 0 && railGems.every((img) => fs.existsSync(path.join(root, img.getAttribute('src')))),
+    railGems.length + ' icons under assets/gems');
+  check('every demo skill resolves to gem art',
+    snapshot.skills.every((s) => {
+      const slug = String(s.name).toLowerCase().replace(/['\u2019,.]/g, '').replace(/_/g, ' ')
+        .replace(/[^a-z0-9 ]+/g, '').trim().replace(/\s+/g, '_');
+      return gemIndex.slugs.some((candidate) => candidate === slug || candidate.startsWith(slug + '_'));
+    }),
+    snapshot.skills.map((s) => s.name).filter((n) => {
+      const slug = String(n).toLowerCase().replace(/['\u2019,.]/g, '').replace(/_/g, ' ')
+        .replace(/[^a-z0-9 ]+/g, '').trim().replace(/\s+/g, '_');
+      return !gemIndex.slugs.some((candidate) => candidate === slug || candidate.startsWith(slug + '_'));
+    }).join(', ') || 'all 18 mapped');
   check('combo cards', qa('#comboList .combo').length > 0,
     qa('#comboList .combo').length + ' cards · ' + txt('#comboList .combo .combo-pct'));
   check('global leader names an anchor build',
@@ -119,6 +145,8 @@ setTimeout(() => {
   check('notables card', qa('#notablesCard .notable-row').length === 9);
   check('skill DPS leaders', qa('#skillLeadersCard .mini-row').length === 6);
   check('highest DPS builds', qa('#topBuildsCard .build-row').length === 8);
+  check('meta build rows carry gem art', qa('#topBuildsCard .build-row .gem-slot img').length === 8,
+    qa('#topBuildsCard .build-row .gem-slot img').length + ' of 8');
   check('meta build rows carry portraits', qa('#topBuildsCard .build-sub img.asc').length === 8,
     qa('#topBuildsCard .build-sub img.asc').length + ' of 8');
   click(qa('#metaSizeFilter button').find((b) => b.dataset.size === 'Large'));
@@ -127,6 +155,9 @@ setTimeout(() => {
 
   /* ── ladder ── */
   click(qa('.nav-tile').find((t) => t.dataset.tab === 'ladder'));
+  check('ladder skill cells carry gem art',
+    qa('#ladderBody .trow .skl .gem-slot img').length === qa('#ladderBody .trow').length,
+    qa('#ladderBody .trow .skl .gem-slot img').length + ' gems');
   check('ladder class cells carry portraits',
     qa('#ladderBody .trow .cls img.asc').length === qa('#ladderBody .trow').length,
     qa('#ladderBody .trow .cls img.asc').length + ' portraits');

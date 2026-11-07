@@ -160,7 +160,7 @@ SKILLS = [
      [("Elementalist", 62), ("Trickster", 38)]),
     ("Cyclone of Tumult", 1.8, 15.2e6, 88.0e6, "physical-impale",
      [("Slayer", 58), ("Champion", 42)]),
-    ("Void Shockwave", 1.6, 17.3e6, 74.0e6, "physical-impale",
+    ("Earthquake", 1.6, 17.3e6, 74.0e6, "physical-impale",
      [("Slayer", 66), ("Juggernaut", 34)]),
     ("Fire Trap", 1.6, 9.9e6, 48.0e6, "fire-melee",
      [("Chieftain", 74), ("Elementalist", 26)]),

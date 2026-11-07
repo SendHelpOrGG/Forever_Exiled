@@ -154,6 +154,18 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <!-- Skill gem tile — the visual anchor of a skill row (sizes set per use) -->
+    <Style x:Key="GemTile" TargetType="Border">
+        <Setter Property="WidthRequest" Value="38" />
+        <Setter Property="HeightRequest" Value="38" />
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{StaticResource BorderSoft}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 3" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <!-- Ascendancy portrait beside a class name (15-18px tile, as on poe.ninja) -->
     <Style x:Key="Portrait" TargetType="Border">
         <Setter Property="WidthRequest" Value="16" />
