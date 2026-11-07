@@ -3,15 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ForeverExiled.App.Views.ClusterLabView">
 
-    <Grid ColumnDefinitions="356,*,292" ColumnSpacing="12" Padding="12">
+    <Grid ColumnDefinitions="470,*,276" ColumnSpacing="12" Padding="12">
 
         <!-- ========================= Main skill rail ========================= -->
         <Border Grid.Column="0" Style="{StaticResource CardFlush}">
             <Grid RowDefinitions="Auto,1,*">
 
-                <VerticalStackLayout Padding="12,12,12,10" Spacing="10">
+                <VerticalStackLayout Padding="14,14,14,12" Spacing="11">
                     <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="MAIN SKILLS" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                        <Label Text="MAIN SKILLS" Style="{StaticResource Micro}" FontSize="12.5" VerticalOptions="Center" />
                         <Label Grid.Column="1"
                                Text="{Binding Skills.Count, StringFormat='{0} tracked'}"
                                Style="{StaticResource Caption}"
@@ -28,19 +28,20 @@
                             <Entry Grid.Column="1"
                                    Text="{Binding SearchText}"
                                    Placeholder="Filter by skill, class or element"
+                                   FontSize="14"
                                    ReturnType="Search"
                                    VerticalOptions="Center" />
                         </Grid>
                     </Border>
 
-                    <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding SortPills}">
+                    <HorizontalStackLayout Spacing="7" BindableLayout.ItemsSource="{Binding SortPills}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource Pill}" Padding="10,5">
+                                <Border Style="{StaticResource Pill}" Padding="14,7">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding Command}" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" FontSize="10.5" />
+                                    <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" FontSize="12.5" />
                                 </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -59,7 +60,7 @@
                                         <TapGestureRecognizer Command="{Binding Command}" />
                                     </Border.GestureRecognizers>
 
-                                    <Grid ColumnDefinitions="38,38,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="9">
+                                    <Grid ColumnDefinitions="50,50,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12">
 
                                         <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
                                                 Style="{StaticResource GemTile}"
@@ -76,23 +77,23 @@
                                         <Label Grid.Row="0" Grid.Column="2"
                                                Text="{Binding Name}"
                                                Style="{StaticResource BodyStrong}"
-                                               FontSize="12.5" />
+                                               FontSize="16" />
 
                                         <Label Grid.Row="0" Grid.Column="3"
                                                Text="{Binding DpsText}"
                                                FontFamily="Segoe UI Semibold"
-                                               FontSize="15"
+                                               FontSize="19"
                                                TextColor="{StaticResource Accent}"
                                                HorizontalTextAlignment="End"
                                                VerticalOptions="Center" />
 
-                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="5" Margin="0,3,0,0">
+                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="6" Margin="0,4,0,0">
                                             <Label Text="{Binding ClassText}"
                                                    Style="{StaticResource Caption}"
-                                                   FontSize="10"
+                                                   FontSize="13"
                                                    VerticalOptions="Center" />
-                                            <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
-                                            <Label Text="{Binding PopText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                            <Label Text="·" Style="{StaticResource Caption}" FontSize="13" VerticalOptions="Center" />
+                                            <Label Text="{Binding PopText}" Style="{StaticResource Caption}" FontSize="13" VerticalOptions="Center" />
                                         </HorizontalStackLayout>
 
                                         <Grid Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
@@ -104,7 +105,7 @@
                                                     StrokeThickness="0"
                                                     StrokeShape="RoundRectangle 2"
                                                     HorizontalOptions="Start"
-                                                    WidthRequest="{Binding DpsBarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=200}" />
+                                                    WidthRequest="{Binding DpsBarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=270}" />
                                         </Grid>
                                     </Grid>
                                 </Border>

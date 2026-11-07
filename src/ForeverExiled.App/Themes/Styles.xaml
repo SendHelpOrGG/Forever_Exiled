@@ -156,8 +156,8 @@
 
     <!-- Class art tile: same footprint as GemTile so the two read as a pair -->
     <Style x:Key="ClassTile" TargetType="Border">
-        <Setter Property="WidthRequest" Value="38" />
-        <Setter Property="HeightRequest" Value="38" />
+        <Setter Property="WidthRequest" Value="50" />
+        <Setter Property="HeightRequest" Value="50" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoft}" />
@@ -168,8 +168,8 @@
 
     <!-- Skill gem tile — the visual anchor of a skill row (sizes set per use) -->
     <Style x:Key="GemTile" TargetType="Border">
-        <Setter Property="WidthRequest" Value="38" />
-        <Setter Property="HeightRequest" Value="38" />
+        <Setter Property="WidthRequest" Value="50" />
+        <Setter Property="HeightRequest" Value="50" />
         <Setter Property="Padding" Value="2" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoft}" />
@@ -201,7 +201,7 @@
         <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="9,4" />
+        <Setter Property="Padding" Value="12,6" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="3" />
@@ -216,7 +216,7 @@
     </Style>
 
     <Style x:Key="PillLabel" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Style.Triggers>
@@ -228,7 +228,7 @@
     </Style>
 
     <Style x:Key="PillCount" TargetType="Label">
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="TextColor" Value="{StaticResource TextMuted}" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Style.Triggers>
@@ -288,7 +288,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Stroke" Value="Transparent" />
         <Setter Property="StrokeThickness" Value="0" />
-        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="Padding" Value="10,8" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="3" />
