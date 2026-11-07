@@ -210,9 +210,19 @@ public partial class MainViewModel
         }
     }
 
+    /// <summary>The combination the crafting card is currently priced for, in either list.</summary>
+    private ClusterCombo? _craftedCombo;
+
     private void SelectCraftCombo(ComboItem? item)
     {
+        _craftedCombo = item?.Combo;
+
         foreach (var combo in Combos)
+        {
+            combo.IsCrafted = ReferenceEquals(combo, item);
+        }
+
+        foreach (var combo in TopCombos)
         {
             combo.IsCrafted = ReferenceEquals(combo, item);
         }

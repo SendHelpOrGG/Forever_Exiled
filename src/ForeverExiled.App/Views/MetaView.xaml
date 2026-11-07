@@ -81,12 +81,21 @@
                     <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding TopCombos}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
-                                <Border BackgroundColor="{StaticResource SurfaceSunken}"
-                                        Stroke="{StaticResource BorderSoft}"
-                                        StrokeThickness="1"
-                                        StrokeShape="RoundRectangle 10"
+                                <Border StrokeShape="RoundRectangle 10"
                                         Padding="12,9"
                                         ToolTipProperties.Text="{Binding ItemTipText}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+                                            <Setter Property="Stroke" Value="{StaticResource BorderSoft}" />
+                                            <Setter Property="StrokeThickness" Value="1" />
+                                            <Style.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsCrafted}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource AccentBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <Grid ColumnDefinitions="34,Auto,*,Auto" ColumnSpacing="12">
                                         <Label Text="{Binding RankText}"
                                                FontFamily="Segoe UI Semibold"

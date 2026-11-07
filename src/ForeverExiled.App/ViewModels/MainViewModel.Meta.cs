@@ -82,6 +82,14 @@ public partial class MainViewModel
         {
             SelectCraftCombo(TopCombos.FirstOrDefault());
         }
+        else
+        {
+            // keep the accent on the row whose combination the card is still pricing
+            foreach (var row in TopCombos)
+            {
+                row.IsCrafted = ReferenceEquals(row.Combo, _craftedCombo);
+            }
+        }
 
         // ---- cluster lab side rail
         var leader = global.LeaderCombo;

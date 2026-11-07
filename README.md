@@ -180,8 +180,10 @@ decoration: no odds or cost number ever reads it.
 ### Crafting options
 
 Because the weights are known, the app can say what a jewel costs to craft. Picking a
-combination in the lab prices it in the "Crafting" card: the three cheapest routes, each with
-the expected number of tries and the currency that goes into them.
+combination — in the Cluster Lab or on the Meta screen — prices it in the "Crafting" card:
+the three cheapest routes, each with the expected number of tries and the currency that goes
+into them. Both screens show the card and share the selection, so the priced row is outlined
+wherever you picked it.
 
 | Route | Assumption | Currency per attempt |
 | --- | --- | --- |
