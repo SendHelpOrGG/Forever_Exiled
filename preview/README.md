@@ -39,9 +39,16 @@ Copy a real crawl over the demo and the banner disappears automatically:
 cp path/to/snapshot.json preview/data/live-snapshot.json
 ```
 
-The file is the app's own cache format (`%LOCALAPPDATA%\ForeverExiled\snapshots\<league>.json`
-after a sync). Anything whose `source` is not `sample` is treated as live, so the header
-switches to `LIVE LADDER` and the synthetic notice is hidden.
+The file is the app's own cache format (`snapshot-<league>.json` inside its data folder —
+the exact path is shown in the app under *Settings › Local cache*, which also has
+**Open folder** / **Copy path** buttons). Anything whose `source` is not `sample` is treated
+as live, so the header switches to `LIVE LADDER` and the synthetic notice is hidden.
+
+You do not need the desktop app for this — the headless capture tool writes the file directly:
+
+```bash
+dotnet run --project tools/ForeverExiled.Capture -- --preview
+```
 
 ## Smoke test
 

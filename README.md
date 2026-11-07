@@ -70,6 +70,22 @@ first network call. It is generated, not scraped: the header shows `SYNTHETIC SA
 the league reads `Allflame (demo)`, and the snapshot version reads `demo — not the live
 ladder`. Press **SYNC** to replace it with the real ladder for the selected league.
 
+### Getting real data without the UI
+
+The ladder is on poe.ninja, not inside this app. Anything that produces a snapshot JSON can
+feed both the desktop app and the browser preview, so there is also a headless capture tool
+that uses the same `SyncService` (plain .NET 10 console — no MAUI, no Windows):
+
+```bash
+dotnet run --project tools/ForeverExiled.Capture -- --preview
+```
+
+It walks the ladder, samples the top builds per skill, prints the leader combination and
+writes `snapshot-allflame.json`; `--preview` also drops it in `preview/data/live-snapshot.json`
+so the browser preview shows **real** numbers (the synthetic banner disappears once the
+snapshot's `source` is `live`). Useful flags: `--skills 5 --depth 6 --pacing 3` for a quick
+look, `--no-sample` for the ladder alone, `--help` for the rest.
+
 ### Demo data is not league data
 
 `src/ForeverExiled.Core/Resources/demo-snapshot.json` is produced by

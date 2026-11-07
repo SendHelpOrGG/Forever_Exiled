@@ -29,6 +29,11 @@ AppPackages/
 BundleArtifacts/
 publish/
 
+## Capture tool output (real crawls are local artefacts, not repo content)
+capture-cache/
+snapshot-*.json
+preview/data/live-snapshot.json
+
 ## Python tooling
 __pycache__/
 *.pyc
