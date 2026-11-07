@@ -271,6 +271,26 @@
                                             </BindableLayout.ItemTemplate>
                                         </FlexLayout>
 
+                                        <!-- mod tags the notables are gated by, one hue per family -->
+                                        <FlexLayout Direction="Row" Wrap="Wrap"
+                                                    BindableLayout.ItemsSource="{Binding Tags}"
+                                                    IsVisible="{Binding HasTags}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,5,5" Padding="5,0"
+                                                            BackgroundColor="{Binding TintColor}"
+                                                            Stroke="{Binding BorderColor}"
+                                                            StrokeThickness="1"
+                                                            StrokeShape="RoundRectangle 3">
+                                                        <Label Text="{Binding Label}"
+                                                               FontSize="11.5"
+                                                               TextColor="{Binding TextColor}"
+                                                               VerticalOptions="Center" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </FlexLayout>
+
                                         <HorizontalStackLayout Spacing="8">
                                             <Label Text="{Binding SizeLabel}" Style="{StaticResource Caption}" FontSize="13" VerticalOptions="Center" />
                                             <Label Text="·" Style="{StaticResource Caption}" FontSize="13" VerticalOptions="Center" />
@@ -463,6 +483,25 @@
 
                         <Label Text="{Binding CraftLevelText}" Style="{StaticResource Caption}"
                                FontSize="12" TextColor="{StaticResource TextMuted}" Margin="0,-4,0,0" />
+
+                        <FlexLayout Direction="Row" Wrap="Wrap"
+                                    BindableLayout.ItemsSource="{Binding CraftTags}"
+                                    Margin="0,0,0,-3">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,5,5" Padding="5,0"
+                                            BackgroundColor="{Binding TintColor}"
+                                            Stroke="{Binding BorderColor}"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 3">
+                                        <Label Text="{Binding Label}"
+                                               FontSize="11.5"
+                                               TextColor="{Binding TextColor}"
+                                               VerticalOptions="Center" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
 
                         <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding CraftRoutes}">
                             <BindableLayout.ItemTemplate>

@@ -39,6 +39,7 @@ const gemIndex = JSON.parse(read('assets/gems/index.json'));
 const notables = JSON.parse(read('assets/notables.json'));
 const weights = JSON.parse(read('assets/notable_weights.json'));
 const costs = JSON.parse(read('assets/currency_costs.json'));
+const tagColors = JSON.parse(read('assets/tag_colors.json'));
 window.fetch = (url) => Promise.resolve({
   ok: true,
   json: async () => {
@@ -46,6 +47,7 @@ window.fetch = (url) => Promise.resolve({
     if (target.includes('gems/index.json')) return gemIndex;
     if (target.includes('notable_weights.json')) return weights;
     if (target.includes('currency_costs.json')) return costs;
+    if (target.includes('tag_colors.json')) return tagColors;
     if (target.includes('notables.json')) return notables;
     return snapshot;
   },
@@ -146,6 +148,25 @@ setTimeout(() => {
   check('notables list the mod tags the game gates them with',
     qa('.item-tip .item-tag').length > 0 && !/\s/.test(q('.item-tip .item-tag').textContent.trim().split(' ')[0] || ''),
     qa('.item-tip .item-tag').map((n) => n.textContent).join(', '));
+  /* colours, not one grey chip: the tag hue comes from assets/tag_colors.json */
+  const tagHues = (nodes) => nodes.map((n) => (n.getAttribute('style') || '').toLowerCase());
+  const itemTagNodes = qa('.item-tip .item-tag');
+  const itemHues = tagHues(itemTagNodes);
+  check('mod tags are coloured, not one neutral grey',
+    itemTagNodes.length > 0 && itemHues.every((style) => /color:#[0-9a-f]{6}/.test(style))
+      && new Set(itemHues.map((style) => (/color:#[0-9a-f]{6}/.exec(style) || [])[0])).size > 1,
+    itemTagNodes.map((n) => `${n.textContent}=${(/color:#[0-9a-f]{6}/.exec(n.getAttribute('style')) || [])[0]}`).join(' '));
+  check('each tag uses its own hue from the palette',
+    itemTagNodes.every((n) => {
+      const tag = n.textContent.trim().replace(/ /g, '_').toLowerCase();
+      const expected = tagColors.tags[tag];
+      return !expected || (n.getAttribute('style') || '').toLowerCase().includes(expected);
+    }),
+    itemTagNodes.map((n) => n.textContent).join(', '));
+  const dataTags = new Set(Object.values(weights.notables).flatMap((n) => n.tags || []));
+  const unpainted = [...dataTags].filter((tag) => !tagColors.tags[tag]);
+  check('every mod tag in the data has a colour', unpainted.length === 0,
+    unpainted.length ? unpainted.join(', ') : `${dataTags.size} tags painted`);
   check('the weight badge also gives the odds of rolling it',
     weightBadges.every((n) => /\d+\s*\d+(\.\d+)?%/.test(n.textContent.replace(/\s+/g, ' ').trim())),
     weightBadges.map((n) => n.textContent.trim()).join(' | '));
@@ -224,6 +245,10 @@ setTimeout(() => {
   }, 1);
   const statedLevel = /needs iLvl (\d+)/.exec(txt('#craftCard .craft-ilvl'));
   check('crafting names the minimum item level', !!statedLevel, txt('#craftCard .craft-ilvl'));
+  const craftTags = qa('#craftCard .craft-tags .tagchip');
+  check('crafting card colours the tags the targets are gated by',
+    craftTags.length > 0 && craftTags.every((n) => /color:#[0-9a-f]{6}/.test((n.getAttribute('style') || '').toLowerCase())),
+    craftTags.map((n) => n.textContent).join(', '));
   check('the minimum item level is the highest notable level',
     !!statedLevel && Number(statedLevel[1]) === expectedLevel,
     `stated ${statedLevel ? statedLevel[1] : '?'} · expected ${expectedLevel}`);

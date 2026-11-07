@@ -77,6 +77,9 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Crafting routes for the combination selected in the list.</summary>
     public ObservableCollection<CraftRouteItem> CraftRoutes { get; } = new();
 
+    /// <summary>The tags the notables being priced are gated by, shown above the routes.</summary>
+    public ObservableCollection<TagChipItem> CraftTags { get; } = new();
+
     public ObservableCollection<PillItem> SortPills { get; }
 
     public ObservableCollection<PillItem> DepthPills { get; } = new();

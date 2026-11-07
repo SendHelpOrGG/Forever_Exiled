@@ -157,6 +157,11 @@ craftofexile.com reads - built into `preview/assets/notable_weights.json` by
 own jewel rolls from; the demo snapshot is regenerated so every jewel sits on a real base with
 its notables drawn from that base's pool. Each notable also prints the game's **mod tags**
 (`fire`, `ailment`, `elemental damage`...) - the tags fossils, harvest and influences key off.
+They are coloured by family, not printed as one grey row: warm reds for damage, one hue per
+element, blues for mana and energy shield, greens for resistances, speed and poison. The palette
+lives in `preview/assets/tag_colors.json` and is mirrored into `Theming/TagColors.g.cs` by
+`tools/sync_tag_colors.py`, so the app and the preview paint a tag the same way. Colour is
+decoration: no odds or cost number ever reads it.
 
 ### Crafting options
 
@@ -299,6 +304,11 @@ cluster notable's spawn weight per cluster base tag into `preview/assets/notable
 (300 notables, 54 bases, pool totals around 6,000 each), and `tools/sync_notable_weights.py`
 compiles that into `Theming/NotableWeights.g.cs`. Both Lua files come from the Path of Building
 repository (`src/Data/`), which is generated from the game's own mod data.
+
+`python3 tools/sync_tag_colors.py` mirrors the hand-picked tag palette in
+`preview/assets/tag_colors.json` into `Theming/TagColors.g.cs` (one hue per tag, plus the 12%
+tint and 30% edge the chips are drawn with). Edit the JSON, re-run the script, and both the
+browser and the app repaint together.
 
 `python3 tools/sync_gem_art.py` rebuilds everything derived from the gem art: the preview's
 `assets/gems/index.json` (so the browser knows which gems have art before asking for a 404),

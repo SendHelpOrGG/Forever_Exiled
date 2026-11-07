@@ -219,12 +219,18 @@ public partial class MainViewModel
         }
 
         CraftRoutes.Clear();
+        CraftTags.Clear();
 
         if (item is null)
         {
             CraftTargetText = "No combination selected";
             CraftLevelText = string.Empty;
             return;
+        }
+
+        foreach (var chip in item.Tags)
+        {
+            CraftTags.Add(chip);
         }
 
         var level = CraftingMath.MinimumItemLevel(item.Combo);

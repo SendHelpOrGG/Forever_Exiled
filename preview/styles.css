@@ -858,12 +858,15 @@ img.art.tiny { width: 13px; height: 13px; margin-right: 4px; }
   flex: none; color: #6f7a86; font-size: 13px; font-variant-numeric: tabular-nums;
 }
 .item-tip .item-weight i { font-style: normal; color: #5a6470; margin-left: 6px; }
-.item-tip .item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 6px 10px; }
-.item-tip .item-tag {
-  font-size: 11.5px; letter-spacing: .01em; color: #77828e;
-  background: rgba(136,136,255,.07); border: 1px solid rgba(136,136,255,.16);
-  border-radius: 3px; padding: 1px 5px;
+/* mod tags: the hue comes from assets/tag_colors.json (inline), the shape lives here */
+.tagchip {
+  display: inline-block; font-size: 11.5px; letter-spacing: .02em; line-height: 1.5;
+  border: 1px solid transparent; border-radius: 3px; padding: 0 5px; white-space: nowrap;
 }
+.item-tip .item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 6px 10px; }
+.item-tip .item-tag { font-size: 11.5px; padding: 1px 5px; }
+.craft-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 8px; }
+.craft-tags .tagchip { font-size: 11.5px; }
 .item-tip .item-pool {
   color: #7b8794; font-size: 13px; letter-spacing: .02em;
   margin: 3px 0 6px; padding-top: 5px; border-top: 1px dotted rgba(136,136,255,.22);

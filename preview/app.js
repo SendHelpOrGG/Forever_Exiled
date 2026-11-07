@@ -416,6 +416,43 @@ function priceOf(key) {
   return table && typeof table[key] === 'number' ? table[key] : 0;
 }
 
+/* ── mod tag colours ──
+   Every notable carries the tags the game gates it with (fire, damage, speed...).
+   One hue per family so the chips read at a glance instead of all being one grey. */
+let tagColors = null;
+
+async function loadTagColors() {
+  try {
+    const response = await fetch('assets/tag_colors.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    tagColors = await response.json();
+  } catch {
+    tagColors = null;
+  }
+}
+
+function tagColor(tag) {
+  const key = String(tag || '').trim().toLowerCase();
+  const table = tagColors && tagColors.tags ? tagColors.tags : {};
+  return table[key] || (tagColors && tagColors.default) || '#8888ff';
+}
+
+/* chip markup: text in the tag's own hue, on a 12% tint of it, with a 30% border */
+function tagChip(tag, className = '') {
+  const color = tagColor(tag);
+  const label = esc(String(tag).replace(/_/g, ' '));
+  return `<span class="tagchip ${className}" title="mod tag: ${label}" style="color:${color};`
+    + `background:${alpha(color, 0.12)};border-color:${alpha(color, 0.3)}">${label}</span>`;
+}
+
+/* "#e06c63" -> "rgba(224,108,99,0.12)"; anything unparseable falls back to the neutral magic blue */
+function alpha(hex, value) {
+  const match = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+  if (!match) return `rgba(136,136,255,${value})`;
+  const n = parseInt(match[1], 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${value})`;
+}
+
 async function loadNotableWeights() {
   try {
     const response = await fetch('assets/notable_weights.json', { cache: 'no-store' });
@@ -761,7 +798,7 @@ function itemTipHtml(combo) {
     // the mod tags the game uses to gate this notable (fossils, harvest, influences)
     const tags = notableTags(notable);
     if (tags.length) {
-      mods.push(`<div class="item-tags">${tags.map((tag) => `<span class="item-tag">${esc(tag.replace(/_/g, ' '))}</span>`).join('')}</div>`);
+      mods.push(`<div class="item-tags">${tags.map((tag) => tagChip(tag, 'item-tag')).join('')}</div>`);
     }
   }
   for (const small of item.smallGrants || []) mods.push(`<div class="item-mod">${esc(small)}</div>`);
@@ -1216,6 +1253,8 @@ function renderCraftCard() {
   }
 
   const { target, routes } = craftRoutes(combo);
+  // the tags the target notables are gated by, in the order they appear
+  const targetTags = [...new Set((combo.notables || []).flatMap((name) => notableTags(name)))];
   const cheapest = routes.length ? routes[0].chaos : 0;
 
   host.innerHTML = `
@@ -1225,6 +1264,7 @@ function renderCraftCard() {
         <img src="${SIZE_IMG[combo.size]}" alt="">${esc(combo.label)}
       </div>
       <div class="craft-ilvl">needs iLvl <b>${target ? target.minimumLevel : '?'}</b> · priced on an iLvl ${target ? target.minimumLevel : '?'} base</div>
+      ${targetTags.length ? `<div class="craft-tags">${targetTags.map((tag) => tagChip(tag)).join('')}</div>` : ''}
       ${routes.length ? routes.slice(0, 3).map((route, i) => `
         <div class="craft-route ${i === 0 ? 'best' : ''}">
           <div class="craft-head">
@@ -1760,6 +1800,7 @@ async function boot() {
   await loadGemIndex();
   await loadNotableText();
   await loadNotableWeights();
+  await loadTagColors();
   await loadCurrencyCosts();
 
   state.snapshot = snapshot;

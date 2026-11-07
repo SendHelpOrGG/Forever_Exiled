@@ -136,6 +136,53 @@ public sealed class ChipItem
     public string Label { get; }
 }
 
+/// <summary>
+/// A mod tag as a coloured chip. The hue comes from Theming/TagColors (generated from the
+/// same palette the preview uses), so fire is orange, cold is blue, life is red and the
+/// chips say at a glance which families a combination lives in.
+/// </summary>
+public sealed class TagChipItem
+{
+    public TagChipItem(string tag)
+    {
+        Tag = tag;
+        Label = tag.Replace('_', ' ');
+        TextColor = TagColors.TextColorFor(tag);
+        TintColor = TagColors.TintColorFor(tag);
+        BorderColor = TagColors.BorderColorFor(tag);
+    }
+
+    public string Tag { get; }
+
+    public string Label { get; }
+
+    public Color TextColor { get; }
+
+    public Color TintColor { get; }
+
+    public Color BorderColor { get; }
+
+    /// <summary>The union of the notables' tags, in the order they first appear.</summary>
+    public static IReadOnlyList<TagChipItem> ForNotables(IEnumerable<string> notables)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var chips = new List<TagChipItem>();
+
+        foreach (var notable in notables)
+        {
+            foreach (var tag in NotableWeights.TagsFor(notable))
+            {
+                if (seen.Add(tag))
+                {
+                    chips.Add(new TagChipItem(tag));
+                }
+            }
+        }
+
+        return chips;
+    }
+}
+
 /// <summary>One row of the main-skill rail.</summary>
 public sealed partial class SkillCardItem : ObservableObject
 {
@@ -250,6 +297,8 @@ public sealed partial class ComboItem : ObservableObject
             ? combo.Notables.Select(n => new ChipItem(n)).ToList()
             : new List<ChipItem> { new(combo.Label) };
 
+        Tags = TagChipItem.ForNotables(combo.Notables);
+
         Command = new RelayCommand(() => onSelected?.Invoke(this));
     }
 
@@ -306,6 +355,11 @@ public sealed partial class ComboItem : ObservableObject
     public bool IsLeader { get; }
 
     public RelayCommand Command { get; }
+
+    /// <summary>The mod tags the combination's notables are gated by, coloured.</summary>
+    public IReadOnlyList<TagChipItem> Tags { get; }
+
+    public bool HasTags => Tags.Count > 0;
 
     /// <summary>The combination the crafting card is currently priced for.</summary>
     [ObservableProperty]
