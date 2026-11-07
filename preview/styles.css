@@ -600,8 +600,16 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 
 .meta-combo {
   display: grid; grid-template-columns: 46px minmax(0, 1fr) 74px; gap: 13px;
-  align-items: center; padding: 8px 0;
+  align-items: center; padding: 8px 6px; border-radius: var(--r-sm);
+  border: 1px solid transparent; cursor: pointer;
+  transition: background .14s ease, border-color .14s ease;
 }
+.meta-combo:hover { background: rgba(255,255,255,.022); }
+/* the row the crafting card is pricing */
+.meta-combo.on {
+  background: rgba(63,174,122,.06); border-color: rgba(63,174,122,.45);
+}
+.meta-combo.on .mc-rank { color: var(--green); border-color: rgba(63,174,122,.45); }
 .mc-art {
   position: relative; width: 46px; height: 46px; display: grid; place-items: center;
   border-radius: var(--r-sm); border: 1px solid var(--line);

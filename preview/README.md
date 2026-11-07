@@ -15,6 +15,20 @@ python3 preview/serve.py        # → http://localhost:8080
 
 Open the URL, press `1`–`4` to jump between screens, `/` to focus the skill search.
 
+## What each screen shows
+
+| Screen | Cards |
+| --- | --- |
+| `1` Cluster Lab | skill rail · skill hero · size switch · combination list · right rail: top combination, **Crafting**, DPS spread, coverage |
+| `2` Meta | league tiles · most popular combinations (tap a row to price it) · right rail: most used notables, **Crafting** |
+| `3` Ladder | searchable character table |
+| `4` Settings | data source, thresholds, cache |
+
+The Meta tab carries no DPS-leaders or highest-DPS-builds card: the leaders are already the
+skill rail on the lab screen, and the crafting card is the more useful occupant. The lab does
+not repeat the cluster-size breakdown as a card either — the Large / Medium / Small switch
+above the combination list already covers it.
+
 ## What is real and what is simulated
 
 | Real | Simulated |

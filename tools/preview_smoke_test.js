@@ -197,19 +197,10 @@ setTimeout(() => {
   check('global leader names an anchor build',
     txt('#globalLeader .leader-anchor').includes('·'),
     txt('#globalLeader .leader-name') + ' / ' + txt('#globalLeader .leader-anchor'));
-  check('size card lists the three cluster sizes', qa('#mixCard .size-row').length === 3,
-    qa('#mixCard .size-head').map((n) => n.textContent.replace(/\s+/g, ' ').trim()).join(' | '));
-  check('size card counts builds instead of bare percentages',
-    qa('#mixCard .size-head .cap').every((n) => /\d+ of \d+/.test(n.textContent)),
-    qa('#mixCard .size-head .cap').map((n) => n.textContent.trim()).join(' | '));
-  check('size card names the top combination for each size',
-    qa('#mixCard .size-top').filter((n) => n.textContent.trim().length > 2).length >= 2,
-    qa('#mixCard .size-top').map((n) => n.textContent.trim()).join(' | '));
-  check('size card explains that the shares overlap',
-    /overlap/i.test(txt('#mixCard .size-note')), txt('#mixCard .size-note'));
-  check('size card rows are not a fake 100% split',
-    qa('#mixCard .size-pct').reduce((n, e) => n + parseFloat(e.textContent), 0) !== 100,
-    qa('#mixCard .size-pct').map((n) => n.textContent.trim()).join(' + '));
+  check('the lab no longer carries the cluster sizes card', !q('#mixCard'),
+    q('#mixCard') ? 'still there' : 'removed');
+  check('the lab still lists combinations for the selected size', qa('#comboList .combo').length > 0,
+    qa('#comboList .combo').length + ' cards · ' + txt('#comboHeader'));
   check('peak characters', qa('#dpsCard .mini-row').length === 5);
 
   /* ── size switch + skill selection ── */
@@ -225,15 +216,6 @@ setTimeout(() => {
   const mediumTop = txt('#comboList .combo .combo-chips');
   check('Winter Orb medium top combo', mediumTop.includes('Eye to Eye') && mediumTop.includes('Repeater'),
     mediumTop + ' ' + txt('#comboList .combo .combo-pct'));
-
-  const largeRow = qa('#mixCard .size-row').find((r) => r.querySelector('b').textContent === 'Large');
-  check('size card highlights the selected size',
-    qa('#mixCard .size-row.on').length === 1 &&
-    q('#mixCard .size-row.on').querySelector('b').textContent === 'Medium',
-    q('#mixCard .size-row.on') ? q('#mixCard .size-row.on').querySelector('b').textContent : '<none>');
-  click(largeRow);
-  check('clicking a size row ranks that size', txt('#comboHeader').includes('LARGE'), txt('#comboHeader'));
-  click(qa('#mixCard .size-row').find((r) => r.querySelector('b').textContent === 'Medium'));
 
   /* ── crafting: expected tries and currency per route ── */
   const craftCard = q('#craftCard');
@@ -382,12 +364,24 @@ setTimeout(() => {
   check('meta stat tiles', qa('#metaTiles .tile').length === 6, qa('#metaTiles .v').map((e) => e.textContent).join(' / '));
   check('meta combination list', qa('#metaComboList .meta-combo').length === 12, txt('#metaComboList .mc-title'));
   check('notables card', qa('#notablesCard .notable-row').length === 9);
-  check('skill DPS leaders', qa('#skillLeadersCard .mini-row').length === 6);
-  check('highest DPS builds', qa('#topBuildsCard .build-row').length === 8);
-  check('meta build rows carry gem art', qa('#topBuildsCard .build-row .gem-slot img').length === 8,
-    qa('#topBuildsCard .build-row .gem-slot img').length + ' of 8');
-  check('meta build rows carry class art', qa('#topBuildsCard .build-sub .asc-slot img').length === 8,
-    qa('#topBuildsCard .build-sub .asc-slot img').length + ' of 8');
+  check('the meta tab drops the DPS cards', !q('#skillLeadersCard') && !q('#topBuildsCard'),
+    'DPS leaders and highest DPS builds removed');
+  check('the meta tab carries the crafting card',
+    q('#metaCraftCard') && qa('#metaCraftCard .craft-route').length > 0,
+    txt('#metaCraftCard .craft-target'));
+  check('the meta crafting card prices the most popular combination',
+    txt('#metaCraftCard .craft-target') === q('#metaComboList .mc-title').textContent,
+    txt('#metaCraftCard .craft-target') + ' vs ' + q('#metaComboList .mc-title').textContent);
+  check('the meta crafting card names the item level it prices',
+    /needs iLvl \d+/.test(txt('#metaCraftCard .craft-ilvl')), txt('#metaCraftCard .craft-ilvl'));
+  const secondCombo = qa('#metaComboList .meta-combo')[2];
+  click(secondCombo);
+  check('tapping a meta combination re-prices the crafting card',
+    txt('#metaCraftCard .craft-target') === secondCombo.querySelector('.mc-title').textContent,
+    txt('#metaCraftCard .craft-target'));
+  check('the priced combination is highlighted in the list',
+    qa('#metaComboList .meta-combo.on').length === 1,
+    qa('#metaComboList .meta-combo.on .mc-title').map((n) => n.textContent).join(', ') || 'none');
   click(qa('#metaSizeFilter button').find((b) => b.dataset.size === 'Large'));
   check('meta Large filter', qa('#metaComboList .size-tag').every((e) => e.textContent === 'LARGE'),
     qa('#metaComboList .meta-combo').length + ' large combinations');

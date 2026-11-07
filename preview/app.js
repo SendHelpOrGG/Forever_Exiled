@@ -336,6 +336,8 @@ const state = {
   size: 'Medium',
   floor: 1,
   metaSize: 'all',
+  // the combination the Meta tab's crafting card prices (null = the global leader)
+  metaCombo: null,
   ladderQuery: '',
   ladderSort: { key: 'dps', dir: -1 },
   settings: { depth: 12, pacing: 5, league: 'Allflame (current)' },
@@ -1298,9 +1300,9 @@ function fmtQty(value) {
   return fmt.count(Math.max(1, Math.round(value)));
 }
 
-function renderCraftCard() {
-  const host = $('craftCard');
-  const combo = selectedCombo();
+function renderCraftCard(hostId = 'craftCard', combo = selectedCombo()) {
+  const host = $(hostId);
+  if (!host) return;
 
   if (!combo) {
     host.innerHTML = `${panel('Crafting')}
@@ -1358,40 +1360,6 @@ function selectedCombo() {
   return combos[state.selectedCombo] || combos[0] || null;
 }
 
-function renderSizeCard() {
-  const host = $('mixCard');
-  const profile = selectedProfile();
-
-  if (!profile || !profile.sampledBuilds) {
-    host.innerHTML = `${panel('Cluster sizes')}
-      <div class="panel-body"><span class="cap">No sampled builds for this skill yet.</span></div>`;
-    return;
-  }
-
-  const total = profile.sampledBuilds;
-  host.innerHTML = `
-    ${panel('Cluster sizes', `<span class="cap">${total} build${total === 1 ? '' : 's'}</span>`)}
-    <div class="panel-body">
-      ${profile.sizes.map((s) => `
-        <button class="size-row ${s.size === state.size ? 'on' : ''}" data-size="${s.size}"
-                ${s.adopters ? '' : 'disabled'}>
-          <img class="size-art" src="${SIZE_IMG[s.size]}" alt="">
-          <span class="size-main">
-            <span class="size-head">
-              <b>${s.size}</b>
-              <span class="cap">${s.adopters} of ${s.total}</span>
-              <span class="size-pct">${esc(fmt.pct(s.percent, 0))}</span>
-            </span>
-            <span class="bar"><i style="width:${s.percent.toFixed(1)}%;background:${SIZE_COLOR[s.size]}"></i></span>
-            <span class="size-top" title="${s.top ? esc(s.top.label) : ''}">${s.top ? esc(s.top.label) : 'no combination yet'}</span>
-          </span>
-        </button>`).join('')}
-      <div class="size-note">A build can run more than one size, so the three shares overlap. Pick a row to rank that size\u2019s combinations.</div>
-    </div>`;
-}
-
-/* ─────────────────────────── meta page ─────────────────────────── */
-
 function renderMeta() {
   const g = state.analysis.global;
   const snap = state.snapshot;
@@ -1422,8 +1390,10 @@ function renderMeta() {
     : (state.metaSize === 'Large' ? g.largeCombos : g.mediumCombos).slice(0, 12));
   const max = comboMax(combos);
 
+  state.metaCombos = combos;
+  const pricedLabel = (state.metaCombo || g.leaderCombo || combos[0] || {}).label;
   $('metaComboList').innerHTML = combos.length ? combos.map((c, i) => `
-    <div class="meta-combo">
+    <div class="meta-combo ${c.label === pricedLabel ? 'on' : ''}" data-combo="${i}">
       <span class="mc-art">
         <img src="${SIZE_IMG[c.size]}" alt="">
         <span class="mc-rank">${String(i + 1).padStart(2, '0')}</span>
@@ -1470,36 +1440,9 @@ function renderMeta() {
         </div>`).join('')}
     </div>`;
 
-  const leaders = state.analysis.skills.slice(0, 6);
-  const maxDps = leaders.reduce((m, s) => Math.max(m, s.averageDps), 0);
-  $('skillLeadersCard').innerHTML = `
-    ${panel('DPS leaders', '<span class="cap">avg per skill</span>')}
-    <div class="panel-body">
-      ${leaders.map((s) => `
-        <div class="mini-row" style="grid-template-columns:34px 26px minmax(0,1fr) auto">
-          <span class="mini-rank">${esc(fmt.pct(s.popularityPercent, 0))}</span>
-          ${gemTile(s.name, 'sm')}
-          <span class="mini-name" title="${esc(s.name)}">${esc(s.name)}</span>
-          <span class="mini-val">${esc(fmt.dps(s.averageDps))}</span>
-        </div>
-        <div class="bar" style="margin:-1px 0 5px"><i style="width:${maxDps ? (s.averageDps * 100 / maxDps).toFixed(1) : 0}%"></i></div>`).join('')}
-    </div>`;
-
-  const builds = g.topDpsBuilds.slice(0, 8);
-  $('topBuildsCard').innerHTML = `
-    ${panel('Highest DPS builds', `<span class="cap">${esc(fmt.dps(builds[0] ? builds[0].dps : 0))} peak</span>`)}
-    <div class="panel-body">
-      ${builds.map((b, i) => `
-        <div class="build-row">
-          <span class="build-rank">${String(i + 1).padStart(2, '0')}</span>
-          ${gemTile(b.mainSkill, 'xs')}
-          <div style="min-width:0">
-            <div class="build-name">${esc(b.name)}</div>
-            <div class="build-sub">${ascTile(b.className, 'xs')}<span>${esc(b.className)} · ${esc(b.mainSkill)}</span></div>
-          </div>
-          <span class="build-dps">${esc(fmt.dps(b.dps))}</span>
-        </div>`).join('')}
-    </div>`;
+  // ---- crafting: the combination tapped above, or the most popular one overall
+  const priced = state.metaCombo || g.leaderCombo || combos[0] || null;
+  renderCraftCard('metaCraftCard', priced);
 }
 
 /* ─────────────────────────── ladder page ─────────────────────────── */
@@ -1585,7 +1528,6 @@ function renderAll() {
   renderPills();
   renderCombos();
   renderGlobalRail();
-  renderSizeCard();
   renderMeta();
   renderLadder();
   renderSettings();
@@ -1598,7 +1540,6 @@ function setSize(size) {
   renderPills();
   renderHero();
   renderCombos();
-  renderSizeCard();
   const stat = selectedSkillStat();
   if (stat) setStatus(`${stat.name} — ${size.toLowerCase()} cluster combinations ranked`);
 }
@@ -1610,7 +1551,6 @@ function selectSkill(name) {
   renderHero();
   renderPills();
   renderCombos();
-  renderSizeCard();
   const stat = selectedSkillStat();
   if (stat) {
     setStatus(`${stat.name} — ${state.analysis.profiles.get(stat.name).sampledBuilds} sampled builds, ${state.size.toLowerCase()} combinations ranked`);
@@ -1720,11 +1660,6 @@ function wire() {
     setSize(pill.dataset.size);
   });
 
-  $('mixCard').addEventListener('click', (e) => {
-    const row = e.target.closest('.size-row');
-    if (row) setSize(row.dataset.size);
-  });
-
   $('comboList').addEventListener('click', (e) => {
     if (e.target.closest('[data-analyze]')) {
       simulateAnalyze();
@@ -1752,6 +1687,14 @@ function wire() {
       downloadCsv();
       toast('CSV exported from the snapshot (preview download).');
     });
+  });
+
+  $('metaComboList').addEventListener('click', (e) => {
+    const row = e.target.closest('.meta-combo');
+    if (!row) return;
+    const combos = state.metaCombos || [];
+    state.metaCombo = combos[Number(row.dataset.combo)] || null;
+    renderMeta();
   });
 
   document.querySelectorAll('#metaSizeFilter button').forEach((btn) => {

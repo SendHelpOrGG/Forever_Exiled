@@ -23,7 +23,8 @@ Winter Orb  →  Medium cluster  →  Eye to Eye + Repeater   53.8%   7 / 13 bui
 - Builds in the ladder, skills tracked, builds sampled, distinct combinations found.
 - Most popular Large/Medium combinations across *all* sampled builds, with the skills
   that use them and the build that anchors each one.
-- DPS leaders, most-used notables, highest-DPS builds.
+- Most-used notables, and a crafting card for the combination you select: target notables,
+  minimum item level, the method routes with currency amounts, try counts and expected cost.
 
 **Cluster Lab (the main screen)**
 - Ranked main-skill rail: every skill above the popularity floor, sorted by average DPS
@@ -31,6 +32,8 @@ Winter Orb  →  Medium cluster  →  Eye to Eye + Repeater   53.8%   7 / 13 bui
 - Skill hero: average DPS, peak DPS, ladder popularity, build count, sampled-build count,
   dominant classes.
 - Cluster-size switch (Large / Medium / Small) with live per-type counts.
+- Crafting card: the selected combination priced with the cheapest ways to hit it, the
+  minimum item level its notables need, and the odds for that level-gated pool.
 - Combination cards: the notable set as chips, how many sampled builds run it, its share
   of the sample, the most common enchant type line, passive count, small-passive effect
   roll, weighted average DPS and the highest-DPS build using it.

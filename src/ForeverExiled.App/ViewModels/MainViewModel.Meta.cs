@@ -4,7 +4,7 @@ using ForeverExiled.Core.Models;
 
 namespace ForeverExiled.App.ViewModels;
 
-/// <summary>Meta overview: league-wide statistic cards, leaders, notables and top builds.</summary>
+/// <summary>Meta overview: league-wide statistic cards, notables and the crafting card.</summary>
 public partial class MainViewModel
 {
     private void RebuildMetaView()
@@ -45,23 +45,6 @@ public partial class MainViewModel
             Palette.Fire,
             "cluster_medium.png"));
 
-        // ---- leaders (by DPS, matching the rail sort the app is built around)
-        MetaLeaders.Clear();
-        var maxDps = _analysis.Skills.Count > 0 ? _analysis.Skills.Max(s => s.AverageDps) : 0;
-        var rank = 1;
-        foreach (var skill in _analysis.Skills.Take(9))
-        {
-            MetaLeaders.Add(new LeaderItem(
-                rank.ToString("00"),
-                skill.Name,
-                DpsFormatter.Format(skill.AverageDps),
-                DpsFormatter.Percent(skill.PopularityPercent) + "  ·  " + DpsFormatter.Count(skill.BuildCount) + " builds",
-                maxDps > 0 ? skill.AverageDps * 100d / maxDps : 0,
-                Palette.ForDamageType(skill.DamageType),
-                string.Empty));
-            rank++;
-        }
-
         // ---- notables
         TopNotables.Clear();
         var maxNotable = global.TopNotables.Count > 0 ? global.TopNotables[0].Count : 0;
@@ -83,21 +66,21 @@ public partial class MainViewModel
                 Palette.ImageForClusterSize(notable.Size)));
         }
 
-        // ---- popular combinations
+        // ---- popular combinations, each tap pricing it in the crafting card
         TopCombos.Clear();
         var maxCombo = global.TopCombos.Count > 0 ? global.TopCombos[0].BuildCount : 0;
-        rank = 1;
+        var comboRank = 1;
         foreach (var combo in global.TopCombos.Take(6))
         {
-            TopCombos.Add(new ComboItem(combo, rank++, global.CharactersSampled, maxCombo, showSkills: true));
+            TopCombos.Add(new ComboItem(
+                combo, comboRank++, global.CharactersSampled, maxCombo, showSkills: true, SelectCraftCombo));
         }
 
-        // ---- highest DPS builds
-        TopBuilds.Clear();
-        rank = 1;
-        foreach (var build in global.TopDpsBuilds.Take(8))
+        // the meta tab shows the crafting card, so something has to be priced: default to the
+        // most popular combination until the user picks one
+        if (CraftRoutes.Count == 0)
         {
-            TopBuilds.Add(new BuildItem(build, rank++));
+            SelectCraftCombo(TopCombos.FirstOrDefault());
         }
 
         // ---- cluster lab side rail
