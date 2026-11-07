@@ -159,8 +159,9 @@ python3 tools/check_xaml.py       # validates XAML: StaticResource keys, binding
 python3 tools/generate_demo_snapshot.py   # regenerates the bundled sample snapshot
 ```
 
-`verify_parsers.py` already caught two real bugs during development (a wrapped
-`clusterJewels[].itemData` shape and thousands-separator DPS values).
+`verify_parsers.py` caught two real bugs during development (cluster jewels wrapped in
+`itemData` inside `clusterJewels[]`, and DPS values written with thousands separators), and
+`check_xaml.py` caught a missing binding target and a stale command name.
 
 ---
 

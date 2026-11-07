@@ -4,9 +4,9 @@ poe.ninja publishes no builds API. The app uses the same internal endpoints as t
 This note records exactly what was verified, so the parsers can be repaired quickly when
 poe.ninja changes something.
 
-Everything here was cross-checked against two independent open-source clients
-(`cyrushadavi1/poe-league-tools`, `srhinos/poe-cli`, `jpitty03/cluster-jewel-research`) and
-against poe.ninja's own client bundle. All requests are plain `GET`s with a descriptive
+Everything here was cross-checked against independent open-source clients
+(`cyrushadavi1/poe-league-tools`, `srhinos/poe-cli`, `jpitty03/cluster-jewel-research`,
+`JCouce/poe-assistant`) and against poe.ninja's own client bundle. All requests are plain `GET`s with a descriptive
 `User-Agent`.
 
 ---
