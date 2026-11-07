@@ -330,6 +330,7 @@ public sealed class MetaAnalyzer
                 PassivesLabel = _passives.Count > 0 ? _passives.MaxBy(kv => kv.Value).Key : "unknown passives",
                 EffectPercent = _effects.Count > 0 ? _effects.MaxBy(kv => kv.Value).Key : 0,
                 Slug = ClusterJewelParser.Slugify(_sample.ComboLabel),
+                Representative = _sample,
             };
 
             if (includeSkills)

@@ -194,6 +194,7 @@ public sealed class ComboItem
         SizeImage = Palette.ImageForClusterSize(combo.Size);
         SizeLabel = combo.Size.ToLabel();
         IsLeader = rank == 1;
+        ItemTipText = BuildItemTip(combo, sampleSize);
 
         Chips = combo.Notables.Count > 0
             ? combo.Notables.Select(n => new ChipItem(n)).ToList()
@@ -249,6 +250,103 @@ public sealed class ComboItem
     public string SizeLabel { get; }
 
     public bool IsLeader { get; }
+
+    /// <summary>
+    /// The item card for the hover tooltip: the jewel as the game/site presents it
+    /// (name, base type, passives, mods, item level, flags) plus the analysis figures.
+    /// </summary>
+    public string ItemTipText { get; }
+
+    private static string BuildItemTip(ClusterCombo combo, int sampleSize)
+    {
+        var item = combo.Representative;
+        var lines = new List<string>();
+
+        if (item is { ItemName.Length: > 0 })
+        {
+            lines.Add(item.ItemName);
+        }
+
+        lines.Add(item?.BaseType is { Length: > 0 } baseType ? baseType : combo.Size.ToBaseType() + "s");
+        lines.Add("------------------------------");
+
+        var props = new List<string>();
+        if (item?.Passives is int passives)
+        {
+            props.Add("Adds " + passives + (passives == 1 ? " Passive Skill" : " Passive Skills"));
+        }
+
+        if (item is { JewelSockets: > 0 })
+        {
+            props.Add(item.JewelSockets == 1
+                ? "1 Added Passive Skill is a Jewel Socket"
+                : item.JewelSockets + " Added Passive Skills are Jewel Sockets");
+        }
+
+        if (props.Count > 0)
+        {
+            lines.AddRange(props);
+            lines.Add("------------------------------");
+        }
+
+        var mods = new List<string>();
+        if (combo.GrantType.Length > 0)
+        {
+            mods.Add("Added Small Passive Skills grant: " + combo.GrantType);
+        }
+
+        if (combo.EffectPercent > 0)
+        {
+            mods.Add("Added Small Passive Skills have " + combo.EffectPercent + "% increased Effect");
+        }
+
+        foreach (var notable in combo.Notables)
+        {
+            mods.Add("1 Added Passive Skill is " + notable);
+        }
+
+        if (mods.Count > 0)
+        {
+            lines.AddRange(mods);
+            lines.Add("------------------------------");
+        }
+
+        if (item is { ItemLevel: > 0 })
+        {
+            lines.Add("Item Level: " + item.ItemLevel);
+        }
+
+        var flags = new List<string>();
+        if (item is { Fractured: true })
+        {
+            flags.Add("Fractured Item");
+        }
+
+        if (item is { Corrupted: true })
+        {
+            flags.Add("Corrupted");
+        }
+
+        if (flags.Count > 0)
+        {
+            lines.AddRange(flags);
+        }
+
+        lines.Add("------------------------------");
+        lines.Add(sampleSize > 0
+            ? combo.BuildCount + " of " + sampleSize + " sampled builds · " + DpsFormatter.Percent(combo.PercentOfBuilds)
+            : combo.BuildCount + " builds");
+        lines.Add(DpsFormatter.FormatWithUnit(combo.AverageDps) + " average · "
+            + DpsFormatter.FormatWithUnit(combo.PeakDps) + " peak");
+
+        if (combo.TopBuildName.Length > 0)
+        {
+            lines.Add("Top build: " + combo.TopBuildName
+                + (combo.TopBuildClass.Length > 0 ? " · " + combo.TopBuildClass : string.Empty));
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
 
     public List<ChipItem> Chips { get; }
 }

@@ -86,3 +86,10 @@ This folder is a design aid, not part of the shipped application and not referen
 | `assets/asc/<class>.jpg` | Ascendancy and base-class portraits, shown next to every class name. Art from Path of Building / Grinding Gear Games. |
 
 Regenerate the gem index and the app's copies with `python3 tools/sync_gem_art.py`.
+## Hover cards
+
+Hovering a cluster jewel anywhere in the preview builds an item card from the jewel that
+represents the combination (`representative` on each combo, kept by the analysis): name in its
+rarity colour, base type, passive count, enchant, notable lines, item level, flags, then the
+combination's own figures. It is positioned against the cursor, flips sides near the window
+edge, and disappears on scroll, resize, blur or mouse-leave.

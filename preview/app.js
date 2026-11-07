@@ -155,11 +155,13 @@ function buildCombos(characters, size, denominator, includeSkills) {
       label: comboLabel(acc.sample),
       buildCount: acc.count,
       percentOfBuilds: denominator > 0 ? (acc.count * 100) / denominator : 0,
+      sampleSize: denominator,
       averageDps: acc.count > 0 ? acc.dpsSum / acc.count : 0,
       peakDps: acc.peakDps,
       topBuildName: acc.topBuildName,
       topBuildAccount: acc.topBuildAccount,
       topBuildClass: acc.topBuildClass,
+      representative: acc.sample,
       grantType: Object.keys(acc.grants).length ? modeOf(acc.grants) : acc.sample.grantType || '',
       passivesLabel: Object.keys(acc.passives).length ? modeOf(acc.passives) : 'unknown passives',
       effectPercent: Object.keys(acc.effects).length ? Number(modeOf(acc.effects)) : 0,
@@ -532,6 +534,112 @@ function renderSkillRail() {
   }).join('') || `<div class="empty"><h3>No match</h3><p>Try another skill, class or damage type.</p></div>`;
 }
 
+/* ─────────────────────── item tooltip (as on the site) ───────────────────── */
+
+const RARITY_COLOR = { normal: '#c8c8c8', magic: '#8888ff', rare: '#ffff77', unique: '#af6025' };
+
+let tipEl = null;
+
+function ensureTip() {
+  if (!tipEl) {
+    tipEl = document.createElement('div');
+    tipEl.className = 'item-tip';
+    tipEl.hidden = true;
+    document.body.appendChild(tipEl);
+  }
+  return tipEl;
+}
+
+/** The item card poe.ninja shows when you hover a cluster jewel. */
+function itemTipHtml(combo) {
+  const item = combo.representative || {};
+  const rarity = String(item.rarity || (item.itemName ? 'rare' : 'magic')).toLowerCase();
+  const name = item.itemName || '';
+  const base = item.baseType || `${combo.size} Cluster Jewel`;
+  const color = RARITY_COLOR[rarity] || RARITY_COLOR.magic;
+
+  const props = [];
+  if (item.passives != null) {
+    props.push(`Adds ${item.passives} Passive Skill${item.passives === 1 ? '' : 's'}`);
+  }
+  if (item.jewelSockets > 0) {
+    props.push(`${item.jewelSockets} Added Passive Skill${item.jewelSockets === 1 ? ' is a' : 's are'} Jewel Socket${item.jewelSockets === 1 ? '' : 's'}`);
+  }
+
+  const mods = [];
+  if (combo.grantType) mods.push(`Added Small Passive Skills grant: ${combo.grantType}`);
+  if (combo.effectPercent > 0) mods.push(`Added Small Passive Skills have ${combo.effectPercent}% increased Effect`);
+  for (const notable of combo.notables || []) mods.push(`1 Added Passive Skill is ${notable}`);
+  for (const small of item.smallGrants || []) mods.push(small);
+
+  const flags = [];
+  if (item.fractured) flags.push('<span class="item-fractured">Fractured Item</span>');
+  if (item.corrupted) flags.push('<span class="item-corrupt">Corrupted</span>');
+
+  const denominator = combo.sampleSize || 0;
+  const pct = combo.percentOfBuilds != null ? fmt.pct(combo.percentOfBuilds) : '—';
+  const footer = [
+    ['Builds', `${combo.buildCount}${denominator ? ` of ${denominator}` : ''}`],
+    ['Share of sample', pct],
+    ['Average DPS', fmt.dps(combo.averageDps)],
+    ['Peak DPS', fmt.dps(combo.peakDps)],
+    ['Anchor build', combo.topBuildName ? `${combo.topBuildName}${combo.topBuildClass ? ` · ${combo.topBuildClass}` : ''}` : '—'],
+  ];
+
+  return `
+    <div class="item-head">
+      <span class="item-icon"><img src="${SIZE_IMG[combo.size]}" alt=""></span>
+      <span class="item-titles">
+        ${name ? `<span class="item-name" style="color:${color}">${esc(name)}</span>` : ''}
+        <span class="item-base" style="color:${name ? '#c8c8c8' : color}">${esc(base)}</span>
+      </span>
+    </div>
+    ${props.length ? `<hr><div class="item-props">${props.map((line) => esc(line)).join('<br>')}</div>` : ''}
+    ${mods.length ? `<hr><div class="item-mods">${mods.map((line) => esc(line)).join('<br>')}</div>` : ''}
+    ${item.itemLevel ? `<hr><div class="item-props">Item Level: ${item.itemLevel}</div>` : ''}
+    ${flags.length ? `<hr><div class="item-props">${flags.join('<br>')}</div>` : ''}
+    <hr>
+    <div class="tip-stats">
+      ${footer.map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v">${esc(String(v))}</span>`).join('')}
+    </div>
+    <div class="tip-source">sampled cluster jewel · ${esc(combo.size)}</div>`;
+}
+
+function placeTip(event) {
+  if (!tipEl || tipEl.hidden) return;
+  const pad = 14;
+  const rect = tipEl.getBoundingClientRect();
+  let x = event.clientX + 18;
+  let y = event.clientY + 14;
+  if (x + rect.width + pad > window.innerWidth) x = Math.max(pad, event.clientX - rect.width - 18);
+  if (y + rect.height + pad > window.innerHeight) y = Math.max(pad, window.innerHeight - rect.height - pad);
+  tipEl.style.left = `${x}px`;
+  tipEl.style.top = `${y}px`;
+}
+
+function showTip(event, combo) {
+  const tip = ensureTip();
+  tip.innerHTML = itemTipHtml(combo);
+  tip.hidden = false;
+  placeTip(event);
+}
+
+function hideTip() {
+  if (tipEl) tipEl.hidden = true;
+}
+
+/** Hover any cluster jewel to get the item card, exactly like the site. */
+function bindItemTips(selector, combos) {
+  document.querySelectorAll(selector).forEach((el, index) => {
+    const combo = combos[index];
+    if (!combo) return;
+    el.classList.add('has-tip');
+    el.addEventListener('mouseenter', (event) => showTip(event, combo));
+    el.addEventListener('mousemove', placeTip);
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
 /* ─────────────────────────── cluster lab ─────────────────────────── */
 
 function selectedSkillStat() {
@@ -691,6 +799,8 @@ function renderCombos() {
         </div>
       </article>`;
   }).join('');
+
+  bindItemTips('#comboList .combo-art', combos.slice(0, 10));
 }
 
 function emptyState(title, message, withButton) {
@@ -732,6 +842,8 @@ function renderGlobalRail() {
     </div>` : `
     ${panel('Global leader')}
     <div class="panel-body"><span class="cap">No cluster jewels in this snapshot.</span></div>`;
+
+  if (leader) bindItemTips('#globalLeader .leader-top .slot', [leader]);
 
   $('mixCard').innerHTML = `
     ${panel('Jewel mix', `<span class="cap">${g.charactersSampled} builds</span>`)}
@@ -821,6 +933,8 @@ function renderMeta() {
         <span>${esc(fmt.dps(c.averageDps))} avg</span>
       </div>
     </div>`).join('') : `<div class="empty"><h3>No combinations</h3><p>Relax the popularity floor in Settings.</p></div>`;
+
+  bindItemTips('#metaComboList .mc-art', combos);
 
   const notables = g.topNotables.slice(0, 9);
   $('notablesCard').innerHTML = `
@@ -1201,6 +1315,11 @@ async function boot() {
       </div>`;
     return;
   }
+
+  // a hover card must never outlive the thing under the cursor
+  window.addEventListener('scroll', hideTip, true);
+  window.addEventListener('resize', hideTip);
+  window.addEventListener('blur', hideTip);
 
   await loadGemIndex();
 

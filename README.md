@@ -135,6 +135,14 @@ Class art is never a thumbnail inside a line of text: it gets the same tile foot
 skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in the skill
 header), so a row reads as two pictures and a caption.
 
+Hovering any cluster jewel - in the combination list, the meta table or the global-leader card -
+opens the same item card the site shows: rarity-coloured name, base type, "Adds N Passive
+Skills", the enchant and notable lines, item level, fractured/corrupted flags, and below the
+separator the figures for that combination (builds, share of the sample, average and peak DPS,
+anchor build). The preview renders it as HTML positioned against the cursor; the app uses the
+same text through MAUI's `ToolTipProperties`, so the content is identical even though Windows
+draws the chrome.
+
 Those tokens live in one place per surface: `preview/styles.css` (`:root`) for the browser
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI
 with Segoe UI Semibold for headings, matching what the site renders as on Windows.

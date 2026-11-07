@@ -112,6 +112,21 @@ setTimeout(() => {
     }).join(', ') || 'all 18 mapped');
   check('combo cards', qa('#comboList .combo').length > 0,
     qa('#comboList .combo').length + ' cards · ' + txt('#comboList .combo .combo-pct'));
+  /* ── hover card: the cluster jewel as an item, like the site ── */
+  const jewelTile = q('#comboList .combo-art');
+  jewelTile.dispatchEvent(new window.MouseEvent('mouseenter', { bubbles: false, clientX: 120, clientY: 160 }));
+  const tip = document.querySelector('.item-tip');
+  check('hovering a cluster jewel shows the item card', !!tip && !tip.hidden,
+    tip ? tip.textContent.replace(/\s+/g, ' ').trim().slice(0, 70) : 'missing');
+  check('item card names the jewel base type', !!tip && /Cluster Jewel/.test(tip.textContent));
+  check('item card lists the notables as item mods',
+    !!tip && /1 Added Passive Skill is /.test(tip.textContent),
+    tip ? (tip.textContent.match(/1 Added Passive Skill is [^0-9]+/) || ['none'])[0] : 'missing');
+  check('item card carries the analysis figures',
+    !!tip && /Builds/.test(tip.textContent) && /Average DPS/.test(tip.textContent));
+  jewelTile.dispatchEvent(new window.MouseEvent('mouseleave', { bubbles: false }));
+  check('leaving the jewel hides the item card', !!tip && tip.hidden);
+
   check('global leader names an anchor build',
     txt('#globalLeader .leader-anchor').includes('·'),
     txt('#globalLeader .leader-name') + ' / ' + txt('#globalLeader .leader-anchor'));

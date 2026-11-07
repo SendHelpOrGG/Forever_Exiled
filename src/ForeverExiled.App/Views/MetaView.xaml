@@ -85,7 +85,8 @@
                                         Stroke="{StaticResource BorderSoft}"
                                         StrokeThickness="1"
                                         StrokeShape="RoundRectangle 10"
-                                        Padding="12,9">
+                                        Padding="12,9"
+                                        ToolTipProperties.Text="{Binding ItemTipText}">
                                     <Grid ColumnDefinitions="26,Auto,*,Auto" ColumnSpacing="10">
                                         <Label Text="{Binding RankText}"
                                                FontFamily="Segoe UI Semibold"

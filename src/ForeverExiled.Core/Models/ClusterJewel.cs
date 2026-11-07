@@ -147,6 +147,12 @@ public sealed class ClusterCombo
     public List<string> Skills { get; set; } = new();
 
     public string Slug { get; set; } = string.Empty;
+
+    /// <summary>
+    /// One jewel that represents the combination (the first sample seen), so the UI can
+    /// show the item card - rarity, name, item level, flags - exactly as the site does.
+    /// </summary>
+    public ClusterJewel? Representative { get; set; }
 }
 
 /// <summary>Frequency of a single notable passive across the analysed sample.</summary>

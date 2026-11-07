@@ -226,7 +226,8 @@
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Combos}" IsVisible="{Binding HasCombos}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource Card}" Padding="14,12">
+                            <Border Style="{StaticResource Card}" Padding="14,12"
+                                    ToolTipProperties.Text="{Binding ItemTipText}">
                                 <Grid ColumnDefinitions="52,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12">
 
                                     <VerticalStackLayout Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
