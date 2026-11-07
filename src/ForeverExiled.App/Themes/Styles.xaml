@@ -154,6 +154,17 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <!-- Ascendancy portrait beside a class name (15-18px tile, as on poe.ninja) -->
+    <Style x:Key="Portrait" TargetType="Border">
+        <Setter Property="WidthRequest" Value="16" />
+        <Setter Property="HeightRequest" Value="16" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 2" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <!-- Notable names use Path of Exile's mod-text colour, as on the site -->
     <Style x:Key="ChipAccent" TargetType="Border" BasedOn="{StaticResource Chip}">
         <Setter Property="Background" Value="{StaticResource PoeMagicTintBrush}" />

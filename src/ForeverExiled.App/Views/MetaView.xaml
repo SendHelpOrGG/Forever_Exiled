@@ -254,7 +254,17 @@
                                                    VerticalOptions="Center" />
                                             <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
                                                 <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="11" />
-                                                <Label Text="{Binding SkillText}" Style="{StaticResource Caption}" FontSize="9" />
+                                                <HorizontalStackLayout Spacing="5">
+                                                    <Border Style="{StaticResource Portrait}"
+                                                            WidthRequest="12" HeightRequest="12"
+                                                            IsVisible="{Binding HasClassImage}">
+                                                        <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
+                                                    </Border>
+                                                    <Label Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="9" VerticalOptions="Center" />
+                                                    <Label Text="·" Style="{StaticResource Caption}" FontSize="9" VerticalOptions="Center" />
+                                                    <Label Text="{Binding SkillText}" Style="{StaticResource Caption}" FontSize="9"
+                                                           VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                                </HorizontalStackLayout>
                                             </VerticalStackLayout>
                                             <Label Grid.Column="2"
                                                    Text="{Binding DpsText}"

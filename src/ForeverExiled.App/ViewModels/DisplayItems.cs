@@ -106,6 +106,8 @@ public sealed partial class SkillCardItem : ObservableObject
         {
             ClassText = "–";
         }
+
+        ClassImage = Palette.ImageForAscendancy(stat.TopClass);
     }
 
     public SkillStat Stat { get; }
@@ -129,6 +131,10 @@ public sealed partial class SkillCardItem : ObservableObject
     public string BuildsText => DpsFormatter.Count(Stat.BuildCount) + " builds";
 
     public string ClassText { get; }
+
+    public string ClassImage { get; }
+
+    public bool HasClassImage => ClassImage.Length > 0;
 
     public string DamageType => Stat.DamageType;
 
@@ -167,6 +173,7 @@ public sealed class ComboItem
         HasEffect = combo.EffectPercent > 0;
         TopBuildText = combo.TopBuildName;
         TopBuildClassText = combo.TopBuildClass;
+        TopBuildClassImage = Palette.ImageForAscendancy(combo.TopBuildClass);
         SkillsText = showSkills ? string.Join("  ·  ", combo.Skills) : string.Empty;
         ShowSkills = showSkills && combo.Skills.Count > 0;
         BarPercent = maxBuildCount > 0 ? combo.BuildCount * 100d / maxBuildCount : 0;
@@ -212,6 +219,10 @@ public sealed class ComboItem
 
     public string TopBuildClassText { get; }
 
+    public string TopBuildClassImage { get; }
+
+    public bool HasTopBuildClassImage => TopBuildClassImage.Length > 0;
+
     public string SkillsText { get; }
 
     public bool ShowSkills { get; }
@@ -237,6 +248,7 @@ public sealed class BuildItem
         RankText = rank.ToString("00");
         Name = build.Name.Length > 0 ? build.Name : build.Account;
         ClassText = build.ClassName.Length > 0 ? build.ClassName : "–";
+        ClassImage = Palette.ImageForAscendancy(build.ClassName);
         SkillText = build.MainSkill.Length > 0 ? build.MainSkill : "–";
         DpsText = DpsFormatter.Format(build.Dps);
         LevelText = build.Level > 0 ? build.Level.ToString() : "–";
@@ -249,6 +261,10 @@ public sealed class BuildItem
     public string Name { get; }
 
     public string ClassText { get; }
+
+    public string ClassImage { get; }
+
+    public bool HasClassImage => ClassImage.Length > 0;
 
     public string SkillText { get; }
 

@@ -75,3 +75,11 @@ node tools/preview_smoke_test.js     # 28/28 checks passed
 
 This folder is a design aid, not part of the shipped application and not referenced by
 `ForeverExiled.sln`. If the C# models change, `app.js` needs the same edit.
+
+## Assets
+
+| Path | What it is |
+| --- | --- |
+| `assets/logo.png` | Project mark (generated). |
+| `assets/cluster_{large,medium,small}.png` | Cluster jewel tiles (generated, transparent). |
+| `assets/asc/<class>.jpg` | Ascendancy and base-class portraits, shown next to every class name. Art from Path of Building / Grinding Gear Games. |

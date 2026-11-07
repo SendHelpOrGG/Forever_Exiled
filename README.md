@@ -133,6 +133,15 @@ Those tokens live in one place per surface: `preview/styles.css` (`:root`) for t
 preview and `src/ForeverExiled.App/Themes/Colors.xaml` for the app; the app fonts are Segoe UI
 with Segoe UI Semibold for headings, matching what the site renders as on Windows.
 
+#### Artwork
+
+Icons are inline SVG (no icon font, no network). Cluster jewels and the logo are generated for
+this project. Ascendancy and class portraits in `preview/assets/asc/` and
+`Resources/Images/asc_*.png` are extracted from [Path of
+Building](https://github.com/PathOfBuildingCommunity/PathOfBuilding) — the art itself belongs to
+Grinding Gear Games and is used here the same way poe.ninja uses it, as identification for a
+free, non-commercial fan tool. Replace or drop them if that is a problem for your use.
+
 ---
 
 ## How the data pipeline works

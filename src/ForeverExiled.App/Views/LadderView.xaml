@@ -67,7 +67,13 @@
                                                 VerticalOptions="Center" />
                                         <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="11.5" VerticalOptions="Center" />
                                     </HorizontalStackLayout>
-                                    <Label Grid.Column="2" Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="10.5" VerticalOptions="Center" />
+                                    <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                                        <Border Style="{StaticResource Portrait}" IsVisible="{Binding HasClassImage}">
+                                            <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
+                                        </Border>
+                                        <Label Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="10.5"
+                                               VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                    </HorizontalStackLayout>
                                     <Label Grid.Column="3" Text="{Binding SkillText}" Style="{StaticResource Body}" FontSize="11" VerticalOptions="Center" />
                                     <Label Grid.Column="4" Text="{Binding DpsText}"
                                            FontFamily="Segoe UI Semibold"

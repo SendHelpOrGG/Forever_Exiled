@@ -56,5 +56,26 @@ public static class Palette
         _ => "cluster_medium.png",
     };
 
+    /// <summary>
+    /// Ascendancy and base-class names that have portrait art in Resources/Images
+    /// (asc_&lt;name&gt;.png). Returns an empty string for anything unknown so the
+    /// views can simply hide the portrait.
+    /// </summary>
+    private static readonly HashSet<string> AscendancyArt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Ascendant", "Assassin", "Berserker", "Champion", "Chieftain", "Deadeye", "Elementalist",
+        "Gladiator", "Guardian", "Hierophant", "Inquisitor", "Juggernaut", "Necromancer",
+        "Occultist", "Pathfinder", "Raider", "Saboteur", "Slayer", "Trickster", "Warden",
+        "Duelist", "Marauder", "Ranger", "Scion", "Shadow", "Templar", "Witch",
+    };
+
+    public static string ImageForAscendancy(string? className)
+    {
+        var name = (className ?? string.Empty).Trim();
+        return AscendancyArt.Contains(name)
+            ? "asc_" + name.ToLowerInvariant() + ".png"
+            : string.Empty;
+    }
+
     public static Color Alpha(Color color, float alpha) => color.WithAlpha(alpha);
 }

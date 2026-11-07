@@ -87,6 +87,8 @@ public partial class MainViewModel
         SelectedSkill = skill;
         SelectedSkillName = skill.Name;
         SelectedSkillClasses = skill.ClassText;
+        SelectedSkillClassImage = skill.ClassImage;
+        HasSelectedSkillClassImage = skill.HasClassImage;
         SelectedSkillPopularity = skill.PopText;
         SelectedSkillBuilds = skill.BuildsText;
         SelectedSkillAverageDps = DpsFormatter.Format(skill.Stat.AverageDps);
@@ -111,6 +113,8 @@ public partial class MainViewModel
         SelectedSkill = null;
         SelectedSkillName = "No match";
         SelectedSkillClasses = string.Empty;
+        SelectedSkillClassImage = string.Empty;
+        HasSelectedSkillClassImage = false;
         SelectedSkillPopularity = "–";
         SelectedSkillBuilds = string.Empty;
         SelectedSkillAverageDps = "–";

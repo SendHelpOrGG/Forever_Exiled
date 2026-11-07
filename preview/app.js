@@ -325,6 +325,31 @@ function isSynthetic() {
   return snap.synthetic === true || snap.source === 'sample';
 }
 
+const ASC_ART = {
+  ascendant: 'ascendant', assassin: 'assassin', berserker: 'berserker', champion: 'champion',
+  chieftain: 'chieftain', deadeye: 'deadeye', elementalist: 'elementalist', gladiator: 'gladiator',
+  guardian: 'guardian', hierophant: 'hierophant', inquisitor: 'inquisitor', juggernaut: 'juggernaut',
+  necromancer: 'necromancer', occultist: 'occultist', pathfinder: 'pathfinder', raider: 'raider',
+  saboteur: 'saboteur', slayer: 'slayer', trickster: 'trickster', warden: 'warden',
+  duelist: 'duelist', marauder: 'marauder', ranger: 'ranger', scion: 'scion', shadow: 'shadow',
+  templar: 'templar', witch: 'witch',
+};
+
+function ascIcon(name) {
+  const key = String(name || '').trim().toLowerCase();
+  return ASC_ART[key] ? `assets/asc/${ASC_ART[key]}.jpg` : '';
+}
+
+function ascImg(name, extra = '') {
+  const src = ascIcon(name);
+  return src ? `<img class="asc ${extra}" src="${src}" alt="" loading="lazy">` : '';
+}
+
+function topClassOf(skill) {
+  const top = (skill.classes || [])[0];
+  return top ? top.name : '';
+}
+
 function classTextOf(skill) {
   const top = (skill.classes || [])[0];
   if (!top) return '—';
@@ -441,7 +466,7 @@ function renderSkillRail() {
         <i class="accent"></i>
         <span>
           <div class="skill-name">${esc(skill.name)}</div>
-          <div class="skill-sub">${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))} of ladder</div>
+          <div class="skill-sub">${ascImg(topClassOf(skill))}<span>${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))} of ladder</span></div>
         </span>
         <span class="skill-side">
           <div class="skill-dps">${esc(fmt.dps(skill.averageDps))}</div>
@@ -492,7 +517,7 @@ function renderHero() {
       <div class="hero-eyebrow">
         <i style="width:5px;height:5px;border-radius:50%;background:${accent};display:inline-block"></i>
         <span class="micro">${esc(String(stat.damageType || '').toUpperCase())}</span>
-        <span class="cap">· ${esc(classTextOf(stat))}</span>
+        <span class="cap">· ${ascImg(topClassOf(stat), 'lg')}${esc(classTextOf(stat))}</span>
       </div>
       <div class="hero-name">${esc(stat.name)}</div>
       <div class="hero-chips">
@@ -589,7 +614,7 @@ function renderCombos() {
           <span class="anchor" title="${esc(combo.topBuildAccount)}">
             <svg class="ic sm"><use href="#i-anchor"/></svg>
             <b>${esc(combo.topBuildName || 'unknown')}</b>
-            <span>· ${esc(combo.topBuildClass || '—')}</span>
+            <span>· ${ascImg(combo.topBuildClass)}${esc(combo.topBuildClass || '—')}</span>
           </span>
           <span class="dpsline">
             <svg class="ic sm bolt"><use href="#i-bolt"/></svg>
@@ -635,7 +660,7 @@ function renderGlobalRail() {
       <div class="leader-anchor">
         <svg class="ic sm"><use href="#i-anchor"/></svg>
         <b>${esc(leader.topBuildName || 'unknown')}</b>
-        <span>· ${esc(leader.topBuildClass || '—')} · ${esc(fmt.dps(leader.peakDps))} peak</span>
+        <span>· ${ascImg(leader.topBuildClass)}${esc(leader.topBuildClass || '—')} · ${esc(fmt.dps(leader.peakDps))} peak</span>
       </div>
     </div>` : `
     ${panel('Global leader')}
@@ -765,7 +790,7 @@ function renderMeta() {
           <span class="build-rank">${String(i + 1).padStart(2, '0')}</span>
           <div style="min-width:0">
             <div class="build-name">${esc(b.name)}</div>
-            <div class="build-sub">${esc(b.className)} · ${esc(b.mainSkill)}</div>
+            <div class="build-sub">${ascImg(b.className)}<span>${esc(b.className)} · ${esc(b.mainSkill)}</span></div>
           </div>
           <span class="build-dps">${esc(fmt.dps(b.dps))}</span>
         </div>`).join('')}
@@ -807,7 +832,7 @@ function renderLadder() {
       <div class="trow ${rank <= 3 ? 'top' : ''}">
         <span class="rk">${String(rank).padStart(2, '0')}</span>
         <span class="nm"><i class="accent" style="--c:${accent}"></i><b title="${esc(b.account)}">${esc(b.name)}</b></span>
-        <span class="cls">${esc(b.className || '—')}</span>
+        <span class="cls">${ascImg(b.className, 'lg')}${esc(b.className || '—')}</span>
         <span class="skl" title="${esc(b.mainSkill)}">${esc(b.mainSkill || '—')}</span>
         <span class="dps">${esc(fmt.dps(b.dps))}</span>
         <span class="cl ${b.clusterJewelCount ? '' : 'zero'}">${b.clusterJewelCount ? b.clusterJewelCount : '—'}</span>

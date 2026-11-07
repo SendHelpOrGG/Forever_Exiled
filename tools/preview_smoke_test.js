@@ -67,7 +67,19 @@ setTimeout(() => {
   check('skill rail populated', skills.length === snapshot.skills.length, skills.length + ' skills');
   check('rail sorted by DPS', txt('#skillList .skill .skill-name') === 'Molten Strike of the Zenith',
     txt('#skillList .skill .skill-name'));
+  const railIcons = qa('#skillList .skill .skill-sub img.asc');
+  check('skill rail shows ascendancy portraits', railIcons.length === skills.length,
+    railIcons.length + ' of ' + skills.length + ' rows');
+  check('ascendancy art exists on disk',
+    railIcons.length > 0 && railIcons.every((img) => fs.existsSync(path.join(root, img.getAttribute('src')))),
+    railIcons.length + ' portraits under assets/asc');
+  check('every class in the snapshot has art',
+    [...new Set(snapshot.skills.flatMap((s) => s.classes.map((c) => c.name.toLowerCase())))].every((name) =>
+      fs.existsSync(path.join(root, 'assets', 'asc', name + '.jpg'))),
+    [...new Set(snapshot.skills.flatMap((s) => s.classes.map((c) => c.name)))].join(', '));
   check('hero card', txt('#hero .hero-stats').includes('AVG DPS'), txt('#hero .hero-name') + ' · ' + txt('#hero .hero-stats'));
+  check('hero shows the ascendancy portrait', !!q('#hero .hero-eyebrow img.asc'),
+    (q('#hero .hero-eyebrow img.asc') || {}).outerHTML || 'missing');
   check('three size pills', qa('#sizePills .pill').length === 3);
   check('combo cards', qa('#comboList .combo').length > 0,
     qa('#comboList .combo').length + ' cards · ' + txt('#comboList .combo .combo-pct'));
@@ -107,12 +119,17 @@ setTimeout(() => {
   check('notables card', qa('#notablesCard .notable-row').length === 9);
   check('skill DPS leaders', qa('#skillLeadersCard .mini-row').length === 6);
   check('highest DPS builds', qa('#topBuildsCard .build-row').length === 8);
+  check('meta build rows carry portraits', qa('#topBuildsCard .build-sub img.asc').length === 8,
+    qa('#topBuildsCard .build-sub img.asc').length + ' of 8');
   click(qa('#metaSizeFilter button').find((b) => b.dataset.size === 'Large'));
   check('meta Large filter', qa('#metaComboList .size-tag').every((e) => e.textContent === 'LARGE'),
     qa('#metaComboList .meta-combo').length + ' large combinations');
 
   /* ── ladder ── */
   click(qa('.nav-tile').find((t) => t.dataset.tab === 'ladder'));
+  check('ladder class cells carry portraits',
+    qa('#ladderBody .trow .cls img.asc').length === qa('#ladderBody .trow').length,
+    qa('#ladderBody .trow .cls img.asc').length + ' portraits');
   check('ladder rows', qa('#ladderBody .trow').length === snapshot.characters.length,
     qa('#ladderBody .trow').length + ' rows');
   type(q('#ladderSearch'), 'occultist');

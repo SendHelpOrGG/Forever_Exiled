@@ -83,11 +83,17 @@
                                                HorizontalTextAlignment="End"
                                                VerticalOptions="Center" />
 
-                                        <Label Grid.Row="1" Grid.Column="1"
-                                               Text="{Binding ClassText}"
-                                               Style="{StaticResource Caption}"
-                                               FontSize="10"
-                                               Margin="0,2,0,0" />
+                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="5" Margin="0,2,0,0">
+                                            <Border Style="{StaticResource Portrait}"
+                                                    WidthRequest="13" HeightRequest="13"
+                                                    IsVisible="{Binding HasClassImage}">
+                                                <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
+                                            </Border>
+                                            <Label Text="{Binding ClassText}"
+                                                   Style="{StaticResource Caption}"
+                                                   FontSize="10"
+                                                   VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
 
                                         <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="4" HorizontalOptions="End" Margin="0,2,0,0">
                                             <Border WidthRequest="5" HeightRequest="5"
@@ -134,6 +140,11 @@
                                         VerticalOptions="Center" />
                                 <Label Text="{Binding SelectedSkillDamageType}" Style="{StaticResource Micro}" VerticalOptions="Center" />
                                 <Label Text="·" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                                <Border Style="{StaticResource Portrait}"
+                                        WidthRequest="16" HeightRequest="16" Margin="0,0,2,0"
+                                        IsVisible="{Binding HasSelectedSkillClassImage}">
+                                    <Image Source="{Binding SelectedSkillClassImage}" Aspect="AspectFill" />
+                                </Border>
                                 <Label Text="{Binding SelectedSkillClasses}" Style="{StaticResource Caption}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
 
@@ -287,6 +298,11 @@
                                                            Spacing="6" Margin="0,9,0,0" IsVisible="{Binding HasTopBuild}">
                                         <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" FontSize="9" VerticalOptions="Center" />
                                         <Label Text="{Binding TopBuildText}" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
+                                        <Border Style="{StaticResource Portrait}"
+                                                WidthRequest="14" HeightRequest="14"
+                                                IsVisible="{Binding HasTopBuildClassImage}">
+                                            <Image Source="{Binding TopBuildClassImage}" Aspect="AspectFill" />
+                                        </Border>
                                         <Label Text="{Binding TopBuildClassText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource TextFaint}" VerticalOptions="Center" />
                                         <Label Text="·" Style="{StaticResource Caption}" FontSize="10" VerticalOptions="Center" />
                                         <Label Text="{Binding AverageDpsText}" Style="{StaticResource Caption}" FontSize="10" TextColor="{StaticResource AccentDeep}" VerticalOptions="Center" />
