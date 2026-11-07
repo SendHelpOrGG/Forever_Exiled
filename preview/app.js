@@ -1,0 +1,1066 @@
+/* ============================================================
+   Forever Exiled — UI preview
+   A browser mirror of the .NET MAUI app: same layout, same copy,
+   same aggregation rules as MetaAnalyzer.cs, running on the bundled
+   demo snapshot. Nothing here talks to the network.
+   ============================================================ */
+
+'use strict';
+
+/* ─────────────────────────── constants ─────────────────────────── */
+
+const SIZES = ['Large', 'Medium', 'Small'];
+
+const SIZE_COLOR = { Large: '#E2794F', Medium: '#59C2CE', Small: '#A98BE8' };
+const SIZE_IMG = {
+  Large: 'assets/cluster_large.png',
+  Medium: 'assets/cluster_medium.png',
+  Small: 'assets/cluster_small.png',
+};
+
+const DAMAGE_COLOR = {
+  Cold: '#69B7E8', Fire: '#E8794A', Lightning: '#E7C55E',
+  Chaos: '#AE7BE0', Physical: '#B6BEC8', Minion: '#74C6A2',
+};
+
+const KNOWN_DAMAGE = {
+  'molten strike of the zenith': 'Fire', 'molten strike': 'Fire', 'hexblast': 'Chaos',
+  'ice nova of frostbolts': 'Cold', 'ice nova': 'Cold', 'winter orb': 'Cold',
+  'splitting steel': 'Physical', 'lightning strike': 'Lightning',
+  'righteous fire': 'Fire', 'fire trap': 'Fire', 'animate guardian': 'Minion',
+  'raise spectre': 'Minion', 'summon raging spirit': 'Minion',
+  'animate weapon of ranged arms': 'Minion', 'penance brand': 'Lightning',
+  'penance brand of dissipation': 'Lightning', 'ethereal knives': 'Physical',
+  'cyclone of tumult': 'Physical', 'cyclone': 'Physical', 'void shockwave': 'Physical',
+  'earthshatter': 'Physical', 'boneshatter of complex trauma': 'Physical',
+  'boneshatter': 'Physical', 'essence drain': 'Chaos', 'blight of contagion': 'Chaos',
+  'storm burst of repulsion': 'Lightning', 'toxic rain': 'Chaos', 'soulrend': 'Chaos',
+  'arc': 'Lightning', 'spark': 'Lightning', 'ball lightning of orbiting': 'Lightning',
+  'venom gyre': 'Chaos', 'detonate dead of chain reaction': 'Fire',
+  'explosive arrow': 'Fire', 'burning arrow': 'Fire', 'caustic arrow': 'Chaos',
+  'lightning arrow': 'Lightning', 'tornado shot': 'Physical', 'kinetic blast': 'Physical',
+  'ice shot': 'Cold', 'spectral helix': 'Physical', 'frost blades': 'Cold',
+};
+
+const DAMAGE_KEYWORDS = [
+  ['fire', 'Fire'], ['flame', 'Fire'], ['burn', 'Fire'], ['ignite', 'Fire'], ['molten', 'Fire'],
+  ['cold', 'Cold'], ['ice', 'Cold'], ['frost', 'Cold'], ['freeze', 'Cold'], ['winter', 'Cold'],
+  ['lightning', 'Lightning'], ['storm', 'Lightning'], ['spark', 'Lightning'], ['arc', 'Lightning'],
+  ['chaos', 'Chaos'], ['poison', 'Chaos'], ['toxic', 'Chaos'], ['blight', 'Chaos'], ['void', 'Chaos'],
+  ['summon', 'Minion'], ['animate', 'Minion'], ['spectre', 'Minion'], ['golem', 'Minion'],
+  ['skeleton', 'Minion'], ['raise', 'Minion'],
+];
+
+/* ─────────────────────────── formatting (DpsFormatter.cs) ────────── */
+
+function trimNum(v) {
+  const t = v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2);
+  return String(parseFloat(t));
+}
+
+const fmt = {
+  dps(v) {
+    if (!(v > 0)) return '–';
+    if (v >= 1e9) return trimNum(v / 1e9) + 'B';
+    if (v >= 1e6) return trimNum(v / 1e6) + 'M';
+    if (v >= 1e3) return trimNum(v / 1e3) + 'K';
+    return String(Math.round(v));
+  },
+  pct(v, decimals = 1) {
+    if (!Number.isFinite(v)) return '–';
+    const t = decimals <= 0 ? v.toFixed(0) : String(parseFloat(v.toFixed(decimals)));
+    return t + '%';
+  },
+  count(v) { return Number(v).toLocaleString('en-US'); },
+};
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+
+function damageOf(skillName) {
+  const key = String(skillName || '').toLowerCase();
+  if (KNOWN_DAMAGE[key]) return KNOWN_DAMAGE[key];
+  for (const [word, type] of DAMAGE_KEYWORDS) if (key.includes(word)) return type;
+  return 'Physical';
+}
+
+/* ─────────────────────────── aggregation (MetaAnalyzer.cs) ───────── */
+
+function comboKey(jewel) {
+  const notables = (jewel.notables || []).length
+    ? [...jewel.notables].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).join(' + ')
+    : (jewel.itemName && jewel.itemName.trim() ? jewel.itemName : '(no notables)');
+  return jewel.size + '|' + notables;
+}
+
+function comboLabel(jewel) {
+  const notables = (jewel.notables || []).slice()
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  if (notables.length) return notables.join(' + ');
+  if (jewel.itemName && jewel.itemName.trim()) {
+    return jewel.jewelSockets > 0 ? `${jewel.itemName} (${jewel.jewelSockets} sockets)` : jewel.itemName;
+  }
+  return 'No named notables';
+}
+
+function modeOf(bag, fallback) {
+  let best = fallback, bestValue = -1;
+  for (const [key, value] of Object.entries(bag)) {
+    if (value > bestValue) { bestValue = value; best = key; }
+  }
+  return best;
+}
+
+function buildCombos(characters, size, denominator, includeSkills) {
+  const groups = new Map();
+
+  for (const build of characters) {
+    const seen = new Set();
+    for (const jewel of build.clusterJewels || []) {
+      const key = comboKey(jewel);
+      if (jewel.size !== size || seen.has(key)) continue;
+      seen.add(key);
+
+      let acc = groups.get(key);
+      if (!acc) {
+        acc = {
+          sample: jewel, count: 0, dpsSum: 0, peakDps: 0,
+          topBuildName: '', topBuildAccount: '', topBuildClass: '',
+          passives: {}, grants: {}, effects: {}, skills: {},
+        };
+        groups.set(key, acc);
+      }
+
+      acc.count += 1;
+      acc.dpsSum += build.dps || 0;
+      if ((build.dps || 0) >= acc.peakDps) {
+        acc.peakDps = build.dps || 0;
+        acc.topBuildName = build.name;
+        acc.topBuildAccount = build.account;
+        acc.topBuildClass = build.className;
+      }
+      const passives = jewel.passives != null ? `${jewel.passives} passives` : 'unknown passives';
+      acc.passives[passives] = (acc.passives[passives] || 0) + 1;
+      if (jewel.grantType) acc.grants[jewel.grantType] = (acc.grants[jewel.grantType] || 0) + 1;
+      if (jewel.effectPercent > 0) acc.effects[jewel.effectPercent] = (acc.effects[jewel.effectPercent] || 0) + 1;
+      if (build.mainSkill) acc.skills[build.mainSkill] = (acc.skills[build.mainSkill] || 0) + 1;
+    }
+  }
+
+  const combos = [...groups.values()].map((acc) => {
+    const combo = {
+      size,
+      notables: (acc.sample.notables || []).slice(),
+      label: comboLabel(acc.sample),
+      buildCount: acc.count,
+      percentOfBuilds: denominator > 0 ? (acc.count * 100) / denominator : 0,
+      averageDps: acc.count > 0 ? acc.dpsSum / acc.count : 0,
+      peakDps: acc.peakDps,
+      topBuildName: acc.topBuildName,
+      topBuildAccount: acc.topBuildAccount,
+      topBuildClass: acc.topBuildClass,
+      grantType: Object.keys(acc.grants).length ? modeOf(acc.grants) : acc.sample.grantType || '',
+      passivesLabel: Object.keys(acc.passives).length ? modeOf(acc.passives) : 'unknown passives',
+      effectPercent: Object.keys(acc.effects).length ? Number(modeOf(acc.effects)) : 0,
+      skills: [],
+    };
+    if (includeSkills) {
+      combo.skills = Object.entries(acc.skills)
+        .sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name]) => name);
+    }
+    return combo;
+  });
+
+  combos.sort((a, b) =>
+    b.buildCount - a.buildCount ||
+    b.percentOfBuilds - a.percentOfBuilds ||
+    b.averageDps - a.averageDps);
+
+  return combos;
+}
+
+function buildProfile(skill, builds) {
+  const sampledKeys = new Set(builds.map((b) => `${b.account}/${b.name}`.toLowerCase()));
+  const pending = (skill.topBuilds || [])
+    .filter((b) => !sampledKeys.has(`${b.account}/${b.name}`.toLowerCase())).length;
+
+  return {
+    skill: skill.name,
+    sampledBuilds: builds.length,
+    pendingBuilds: pending,
+    topBuilds: (skill.topBuilds || []).length,
+    Large: buildCombos(builds, 'Large', builds.length, false),
+    Medium: buildCombos(builds, 'Medium', builds.length, false),
+    Small: buildCombos(builds, 'Small', builds.length, false),
+  };
+}
+
+function notableStats(characters) {
+  const counts = new Map();
+  for (const build of characters) {
+    for (const jewel of build.clusterJewels || []) {
+      for (const notable of jewel.notables || []) {
+        const key = `${jewel.size}|${notable}`;
+        let entry = counts.get(key);
+        if (!entry) { entry = { size: jewel.size, name: notable, builds: new Set() }; counts.set(key, entry); }
+        entry.builds.add(`${build.account}/${build.name}`);
+      }
+    }
+  }
+  return [...counts.values()]
+    .map((e) => ({
+      name: e.name, size: e.size, count: e.builds.size,
+      percent: characters.length ? (e.builds.size * 100) / characters.length : 0,
+    }))
+    .sort((a, b) => b.count - a.count || a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+    .slice(0, 24);
+}
+
+function sizeMix(characters) {
+  return SIZES.map((size) => {
+    const count = characters.filter((c) => (c.clusterJewels || []).some((j) => j.size === size)).length;
+    return { size, count, percent: characters.length ? (count * 100) / characters.length : 0 };
+  });
+}
+
+function toBuildRef(c) {
+  return {
+    name: c.name, account: c.account, className: c.className, mainSkill: c.mainSkill,
+    level: c.level, dps: c.dps, league: c.league,
+    clusterJewelCount: (c.clusterJewels || []).length,
+  };
+}
+
+function analyze(snapshot, floor) {
+  const skills = snapshot.skills
+    .filter((s) => s.popularityPercent >= floor)
+    .slice()
+    .sort((a, b) => b.averageDps - a.averageDps || b.buildCount - a.buildCount);
+
+  const profiles = new Map();
+  for (const skill of skills) {
+    const builds = snapshot.characters.filter(
+      (c) => String(c.mainSkill || '').toLowerCase() === skill.name.toLowerCase());
+    profiles.set(skill.name, buildProfile(skill, builds));
+  }
+
+  const characters = snapshot.characters;
+  const allKeys = new Set();
+  for (const c of characters) for (const j of c.clusterJewels || []) allKeys.add(comboKey(j));
+
+  const large = buildCombos(characters, 'Large', characters.length, true);
+  const medium = buildCombos(characters, 'Medium', characters.length, true);
+  const combined = [...large, ...medium].sort((a, b) =>
+    b.buildCount - a.buildCount ||
+    b.percentOfBuilds - a.percentOfBuilds ||
+    b.averageDps - a.averageDps);
+
+  let topDpsBuilds = characters.slice()
+    .sort((a, b) => b.dps - a.dps).slice(0, 12).map(toBuildRef);
+
+  if (!topDpsBuilds.length) {
+    topDpsBuilds = skills.flatMap((s) => s.topBuilds || [])
+      .sort((a, b) => b.dps - a.dps).slice(0, 12);
+  }
+
+  const ladder = characters.length
+    ? characters.slice().sort((a, b) => b.dps - a.dps).map(toBuildRef)
+    : skills.flatMap((s) => s.topBuilds || [])
+        .filter((b) => b.name)
+        .sort((a, b) => b.dps - a.dps);
+
+  const covered = [...profiles.values()].filter((p) => p.sampledBuilds > 0).length;
+
+  return {
+    snapshot,
+    skills,
+    profiles,
+    global: {
+      totalBuildsInLeague: snapshot.totalBuildsInLeague,
+      skillsTracked: skills.length,
+      charactersSampled: characters.length,
+      jewelsCatalogued: characters.reduce((n, c) => n + (c.clusterJewels || []).length, 0),
+      combosFound: allKeys.size,
+      topCombos: combined.slice(0, 12),
+      largeCombos: large,
+      mediumCombos: medium,
+      leaderCombo: combined[0] || null,
+      topNotables: notableStats(characters),
+      sizeMix: sizeMix(characters),
+      topDpsBuilds,
+      coveragePercent: profiles.size ? (covered * 100) / profiles.size : 0,
+      ladder,
+    },
+  };
+}
+
+/* ─────────────────────────── state ─────────────────────────── */
+
+const state = {
+  tab: 'lab',
+  snapshot: null,
+  analysis: null,
+  query: '',
+  sort: 'dps',
+  selectedSkill: null,
+  size: 'Medium',
+  floor: 1,
+  metaSize: 'all',
+  ladderQuery: '',
+  ladderSort: { key: 'dps', dir: -1 },
+  settings: { depth: 12, pacing: 5, league: 'Allflame (current)' },
+  lastSync: null,
+  busy: false,
+};
+
+const $ = (id) => document.getElementById(id);
+const el = (selector, root = document) => root.querySelector(selector);
+
+/* ─────────────────────────── helpers ─────────────────────────── */
+
+function classTextOf(skill) {
+  const top = (skill.classes || [])[0];
+  if (!top) return '–';
+  return top.percent > 0.5 ? `${top.name} · ${fmt.pct(top.percent, 0)}` : top.name;
+}
+
+function comboMax(combos) {
+  return combos.reduce((m, c) => Math.max(m, c.buildCount), 0);
+}
+
+function toast(message) {
+  const host = $('toasts');
+  const node = document.createElement('div');
+  node.className = 'toast';
+  node.innerHTML = `<svg class="ic"><use href="#i-bolt"/></svg><span>${esc(message)}</span>`;
+  host.appendChild(node);
+  setTimeout(() => {
+    node.classList.add('out');
+    setTimeout(() => node.remove(), 220);
+  }, 4200);
+}
+
+function setStatus(text) {
+  $('statusText').textContent = text;
+}
+
+/* ─────────────────────────── header / shell ─────────────────────────── */
+
+function renderShell() {
+  const snap = state.snapshot;
+  $('leagueName').textContent = snap.leagueName;
+  $('snapshotText').textContent = 'snapshot ' + snap.snapshotVersion.replace(/-?\d{8}$/, '');
+  $('setSnapshot').textContent = snap.snapshotVersion;
+
+  const sourceLabel = snap.source === 'sample' ? 'SAMPLE DATA' : 'LIVE SNAPSHOT';
+  el('#sourceTag .src-label').textContent = sourceLabel;
+  const setLabel = el('#view-settings .src-tag .src-label');
+  if (setLabel) setLabel.textContent = sourceLabel;
+
+  $('lastSync').textContent = state.lastSync
+    ? 'synced ' + state.lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : 'sample snapshot';
+
+  const g = state.analysis.global;
+  $('statusCounts').textContent =
+    `${state.analysis.skills.length} skills · ${g.charactersSampled} characters · ${fmt.count(g.jewelsCatalogued)} jewels`;
+
+  $('generatedAt').textContent = new Date(snap.generatedAt).toLocaleDateString([], {
+    day: '2-digit', month: 'short', year: 'numeric',
+  });
+
+  const cacheKb = Math.round(JSON.stringify(snap).length / 1024);
+  $('cacheSize').textContent = `${fmt.count(cacheKb)} KB`;
+}
+
+/* ─────────────────────────── skill rail ─────────────────────────── */
+
+function visibleSkills() {
+  const query = state.query.trim().toLowerCase();
+  const list = state.analysis.skills.slice();
+
+  const filtered = query
+    ? list.filter((s) =>
+        s.name.toLowerCase().includes(query) ||
+        classTextOf(s).toLowerCase().includes(query) ||
+        String(s.damageType || '').toLowerCase().includes(query))
+    : list;
+
+  if (state.sort === 'popularity') {
+    filtered.sort((a, b) => b.popularityPercent - a.popularityPercent || b.averageDps - a.averageDps);
+  }
+  return filtered;
+}
+
+function renderSkillRail() {
+  const list = visibleSkills();
+  $('skillCount').textContent = list.length;
+
+  const host = $('skillList');
+  host.innerHTML = list.map((skill) => {
+    const on = state.selectedSkill === skill.name;
+    const accent = DAMAGE_COLOR[skill.damageType] || DAMAGE_COLOR.Physical;
+    return `
+      <button class="skill ${on ? 'on' : ''}" data-skill="${esc(skill.name)}" style="--c:${accent}"
+              title="${esc(skill.name)} — ${esc(fmt.count(skill.buildCount))} builds, ${esc(fmt.pct(skill.popularityPercent))} of ladder">
+        <i class="accent"></i>
+        <span>
+          <div class="skill-name">${esc(skill.name)}</div>
+          <div class="skill-sub">${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))} ladder</div>
+        </span>
+        <span class="skill-side">
+          <div class="skill-dps">${esc(fmt.dps(skill.averageDps))}</div>
+          <div class="skill-cap">AVG DPS</div>
+        </span>
+      </button>`;
+  }).join('') || `<div class="empty"><h3>No match</h3><p>Try another skill, class or damage type.</p></div>`;
+}
+
+/* ─────────────────────────── cluster lab ─────────────────────────── */
+
+function selectedSkillStat() {
+  return state.analysis.skills.find((s) => s.name === state.selectedSkill) || null;
+}
+
+function selectedProfile() {
+  return state.selectedSkill ? state.analysis.profiles.get(state.selectedSkill) || null : null;
+}
+
+function renderHero() {
+  const stat = selectedSkillStat();
+  const profile = selectedProfile();
+  const host = $('hero');
+
+  if (!stat) {
+    host.innerHTML = `
+      <div>
+        <div class="hero-top"><span class="hero-dot" style="--c:#6B7787"></span><span class="micro">NO SKILL SELECTED</span></div>
+        <div class="hero-name">Pick a main skill</div>
+        <div class="hero-chips"><span class="chip">The rail is sorted by average DPS</span></div>
+      </div>`;
+    return;
+  }
+
+  const accent = DAMAGE_COLOR[stat.damageType] || DAMAGE_COLOR.Physical;
+  const sampleText = profile && profile.sampledBuilds > 0
+    ? `${profile.sampledBuilds} of ${profile.topBuilds} top builds sampled`
+    : profile && profile.topBuilds > 0
+      ? `0 of ${profile.topBuilds} top builds sampled`
+      : 'no ladder rows';
+
+  host.innerHTML = `
+    <div>
+      <div class="hero-top">
+        <span class="hero-dot" style="--c:${accent}"></span>
+        <span class="micro">${esc(String(stat.damageType || '').toUpperCase())}</span>
+        <span class="cap">·</span>
+        <span class="cap">${esc(classTextOf(stat))}</span>
+      </div>
+      <div class="hero-name">${esc(stat.name)}</div>
+      <div class="hero-chips">
+        <span class="chip"><svg class="ic sm"><use href="#i-ladder"/></svg>${esc(fmt.count(stat.buildCount))} builds</span>
+        <span class="chip">${esc(fmt.pct(stat.popularityPercent))} of ladder</span>
+        <span class="chip">${esc(sampleText)}</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="micro">AVG DPS</span>
+        <div class="v gold">${esc(fmt.dps(stat.averageDps))}</div>
+      </div>
+      <div class="hero-stat">
+        <span class="micro">PEAK</span>
+        <div class="v">${esc(fmt.dps(stat.peakDps))}</div>
+      </div>
+    </div>`;
+}
+
+function renderPills() {
+  const profile = selectedProfile();
+  $('sizePills').innerHTML = SIZES.map((size) => {
+    const count = profile ? profile[size].length : 0;
+    return `
+      <button class="pill ${size === state.size ? 'on' : ''}" data-size="${size}">
+        <i class="swatch" style="--c:${SIZE_COLOR[size]}"></i>
+        ${size.toUpperCase()}
+        ${count > 0 ? `<span class="n">${count}</span>` : ''}
+      </button>`;
+  }).join('');
+}
+
+function renderCombos() {
+  const stat = selectedSkillStat();
+  const profile = selectedProfile();
+  const host = $('comboList');
+
+  $('comboHeader').textContent = `${state.size} combinations`.toUpperCase();
+
+  if (!stat) {
+    $('comboHeader').textContent = `${state.size} clusters`.toUpperCase();
+    $('comboHint').textContent = '';
+    host.innerHTML = emptyState('Nothing matches that filter', 'Try a different skill, class or damage type.', false);
+    return;
+  }
+
+  const combos = profile ? profile[state.size] : [];
+  if (!combos.length) {
+    $('comboHint').textContent = '';
+    const sampled = profile ? profile.sampledBuilds : 0;
+    host.innerHTML = sampled > 0
+      ? emptyState(`No ${state.size} clusters`,
+          `None of the ${sampled} sampled ${state.size === 'Small' ? 'builds run a small cluster jewel' : state.size.toLowerCase() === 'large' ? 'builds run a large cluster jewel' : 'builds run a medium cluster jewel'}.`,
+          false)
+      : emptyState('Not sampled yet',
+          'Analyze this skill to pull its top builds and cluster jewels from poe.ninja.', true);
+    return;
+  }
+
+  $('comboHint').textContent = 'Ranked by how many sampled builds run the combination';
+  const max = comboMax(combos);
+  const denominator = profile ? profile.sampledBuilds : 0;
+
+  host.innerHTML = combos.slice(0, 10).map((combo, i) => {
+    const rank = i + 1;
+    const share = max > 0 ? (combo.buildCount * 100) / max : 0;
+    const chips = (combo.notables.length ? combo.notables : [combo.label])
+      .map((n) => `<span class="chip gold">${esc(n)}</span>`).join('');
+    const meta = [
+      combo.grantType ? `<span class="grant">${esc(combo.grantType)}</span>` : '',
+      combo.passivesLabel ? `<span>${esc(combo.passivesLabel)}</span>` : '',
+      combo.effectPercent > 0 ? `<span>${esc(combo.effectPercent)}% effect</span>` : '',
+    ].filter(Boolean).join('<span class="dot"></span>');
+
+    return `
+      <article class="combo ${rank === 1 ? 'leader' : ''}">
+        <div class="combo-head">
+          <div class="rank">${String(rank).padStart(2, '0')}</div>
+          <div style="min-width:0">
+            <div class="combo-chips">${chips}</div>
+            <div class="combo-sub">${meta}</div>
+          </div>
+          <div class="combo-side">
+            <div class="combo-pct">${esc(fmt.pct(combo.percentOfBuilds))}</div>
+            <span class="cap">${combo.buildCount} of ${denominator} builds</span>
+          </div>
+        </div>
+        <div class="bar combo-bar"><i style="width:${share.toFixed(1)}%;background:linear-gradient(90deg,${SIZE_COLOR[state.size]}55,${SIZE_COLOR[state.size]})"></i></div>
+        <div class="combo-foot">
+          <span class="anchor" title="${esc(combo.topBuildAccount)}">
+            <svg class="ic sm"><use href="#i-anchor"/></svg>
+            <b>${esc(combo.topBuildName || 'unknown')}</b>
+            <span>· ${esc(combo.topBuildClass || '–')}</span>
+          </span>
+          <span class="dpsline">
+            <b>${esc(fmt.dps(combo.averageDps))}</b><span class="cap">avg</span>
+            <b class="peak">${esc(fmt.dps(combo.peakDps))}</b><span class="cap">peak</span>
+          </span>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function emptyState(title, message, withButton) {
+  return `
+    <div class="card">
+      <div class="empty">
+        <img src="assets/cluster_medium.png" alt="">
+        <h3>${esc(title)}</h3>
+        <p>${esc(message)}</p>
+        ${withButton ? `<button class="btn primary" data-analyze><svg class="ic"><use href="#i-bolt"/></svg>ANALYZE BUILDS</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderGlobalRail() {
+  const g = state.analysis.global;
+  const leader = g.leaderCombo;
+
+  $('globalLeader').innerHTML = leader ? `
+    <div class="leader-top">
+      <span class="micro">GLOBAL LEADER · ${leader.size.toUpperCase()}</span>
+      <svg class="ic sm" style="color:var(--gold)"><use href="#i-crown"/></svg>
+    </div>
+    <div class="leader-body">
+      <img src="${SIZE_IMG[leader.size]}" alt="">
+      <div style="min-width:0">
+        <div class="leader-name">${esc(leader.label)}</div>
+        <div class="leader-sub">${leader.buildCount} builds · ${esc(fmt.pct(leader.percentOfBuilds))} of sample · ${esc(fmt.dps(leader.averageDps))} avg DPS</div>
+      </div>
+    </div>
+    <div class="bar" style="margin-bottom:9px"><i style="width:${leader.percentOfBuilds.toFixed(1)}%"></i></div>
+    <div class="leader-anchor">
+      <svg class="ic sm"><use href="#i-anchor"/></svg>
+      <b>${esc(leader.topBuildName || 'unknown')}</b>
+      <span>· ${esc(leader.topBuildClass || '–')}</span>
+    </div>` : `
+    <div class="leader-top"><span class="micro">GLOBAL LEADER</span></div>
+    <div class="cap" style="margin-top:8px">No cluster jewels in the sample.</div>`;
+
+  $('mixCard').innerHTML = `
+    <div class="head-row"><span class="micro">JEWEL MIX</span><span class="cap">of ${g.charactersSampled} builds</span></div>
+    ${g.sizeMix.map((m) => `
+      <div class="mix-row">
+        <i class="swatch" style="--c:${SIZE_COLOR[m.size]}"></i>
+        <span class="mix-name">${m.size}</span>
+        <span class="bar"><i style="width:${m.percent.toFixed(1)}%;background:${SIZE_COLOR[m.size]}"></i></span>
+        <span class="mix-val">${esc(fmt.pct(m.percent, 0))}</span>
+      </div>`).join('')}`;
+
+  const top = g.topDpsBuilds.slice(0, 5);
+  $('dpsCard').innerHTML = `
+    <div class="head-row"><span class="micro">PEAK CHARACTERS</span><span class="cap">${esc(fmt.dps(top[0] ? top[0].dps : 0))} best</span></div>
+    ${top.map((b, i) => `
+      <div class="mini-row">
+        <span class="mini-rank">${String(i + 1).padStart(2, '0')}</span>
+        <span class="mini-name" title="${esc(b.name)} · ${esc(b.mainSkill)}">${esc(b.name)}</span>
+        <span class="mini-val">${esc(fmt.dps(b.dps))}</span>
+      </div>`).join('')}`;
+
+  $('coverageCard').innerHTML = `
+    <div class="cov-row"><span class="micro">COVERAGE</span><b>${esc(fmt.pct(g.coveragePercent, 0))}</b></div>
+    <div class="bar"><i style="width:${g.coveragePercent.toFixed(1)}%"></i></div>
+    <div class="cov-row"><span class="cap">Combinations found</span><b>${fmt.count(g.combosFound)}</b></div>
+    <div class="cov-row"><span class="cap">Jewels catalogued</span><b>${fmt.count(g.jewelsCatalogued)}</b></div>`;
+}
+
+/* ─────────────────────────── meta page ─────────────────────────── */
+
+function renderMeta() {
+  const g = state.analysis.global;
+  const snap = state.snapshot;
+
+  $('metaSub').textContent =
+    `${snap.leagueName} · snapshot ${snap.snapshotVersion} · ${state.analysis.skills.length} skills above ${state.floor.toFixed(1)}%`;
+
+  const tiles = [
+    ['LADDER BUILDS', fmt.count(g.totalBuildsInLeague), `${snap.leagueName} league`, false],
+    ['SKILLS TRACKED', fmt.count(g.skillsTracked), `above ${state.floor.toFixed(1)}% popularity`, true],
+    ['CHARACTERS SAMPLED', fmt.count(g.charactersSampled), 'cluster data read', false],
+    ['JEWELS CATALOGUED', fmt.count(g.jewelsCatalogued), `${fmt.count(g.combosFound)} distinct combos`, false],
+    ['COVERAGE', fmt.pct(g.coveragePercent, 0), 'of tracked skills sampled', true],
+    ['TOP COMBO', String(g.leaderCombo ? g.leaderCombo.buildCount : 0), g.leaderCombo ? `${g.leaderCombo.size} · ${fmt.pct(g.leaderCombo.percentOfBuilds)}` : '—', true],
+  ];
+
+  $('metaTiles').innerHTML = tiles.map(([label, value, sub, gold]) => `
+    <div class="tile">
+      <span class="micro">${esc(label)}</span>
+      <div class="v ${gold ? 'gold' : ''}">${esc(value)}</div>
+      <div class="sub">${esc(sub)}</div>
+    </div>`).join('');
+
+  const combos = (state.metaSize === 'all'
+    ? g.topCombos
+    : (state.metaSize === 'Large' ? g.largeCombos : g.mediumCombos).slice(0, 12));
+  const max = comboMax(combos);
+
+  $('metaComboList').innerHTML = combos.length ? combos.map((c, i) => `
+    <div class="meta-combo">
+      <span class="mc-rank">${String(i + 1).padStart(2, '0')}</span>
+      <div class="mc-main">
+        <div class="mc-title">${esc(c.label)}</div>
+        <div class="mc-sub">
+          <span class="size-tag" style="--c:${SIZE_COLOR[c.size]}">${c.size.toUpperCase()}</span>
+          <span>${c.buildCount} builds</span>
+          <span>·</span>
+          <span class="skills" title="${esc(c.skills.join(', '))}">${esc(c.skills.join(' · ') || '—')}</span>
+          <span>·</span>
+          <span>${esc(c.topBuildName || '')}</span>
+        </div>
+        <div class="bar mc-bar"><i style="width:${max ? (c.buildCount * 100 / max).toFixed(1) : 0}%;background:${SIZE_COLOR[c.size]}"></i></div>
+      </div>
+      <div class="mc-val">
+        <b>${esc(fmt.pct(c.percentOfBuilds))}</b>
+        <span>${esc(fmt.dps(c.averageDps))} avg</span>
+      </div>
+    </div>`).join('') : `<div class="empty"><h3>No combinations</h3><p>Relax the popularity floor in Settings.</p></div>`;
+
+  const notables = g.topNotables.slice(0, 9);
+  $('notablesCard').innerHTML = `
+    <div class="head-row"><span class="micro">MOST USED NOTABLES</span><span class="cap">share of builds</span></div>
+    ${notables.map((n) => `
+      <div class="notable-row">
+        <div>
+          <div class="notable-name" title="${esc(n.name)} — ${n.size} cluster">
+            <i class="dot" style="--c:${SIZE_COLOR[n.size]}"></i>${esc(n.name)}
+          </div>
+          <div class="bar notable-bar"><i style="width:${n.percent.toFixed(1)}%;background:${SIZE_COLOR[n.size]}"></i></div>
+        </div>
+        <div class="notable-val">${esc(fmt.pct(n.percent, 0))}</div>
+      </div>`).join('')}`;
+
+  const leaders = state.analysis.skills.slice(0, 6);
+  const maxDps = leaders.reduce((m, s) => Math.max(m, s.averageDps), 0);
+  $('skillLeadersCard').innerHTML = `
+    <div class="head-row"><span class="micro">DPS LEADERS</span><span class="cap">avg per skill</span></div>
+    ${leaders.map((s) => `
+      <div class="mini-row" style="grid-template-columns:18px minmax(0,1fr) auto">
+        <span class="mini-rank">${esc(fmt.pct(s.popularityPercent, 0))}</span>
+        <span class="mini-name" title="${esc(s.name)}">${esc(s.name)}</span>
+        <span class="mini-val">${esc(fmt.dps(s.averageDps))}</span>
+      </div>
+      <div class="bar" style="margin:-2px 0 4px"><i style="width:${maxDps ? (s.averageDps * 100 / maxDps).toFixed(1) : 0}%"></i></div>`).join('')}`;
+
+  const builds = g.topDpsBuilds.slice(0, 8);
+  $('topBuildsCard').innerHTML = `
+    <div class="head-row"><span class="micro">HIGHEST DPS BUILDS</span><span class="cap">${esc(fmt.dps(builds[0] ? builds[0].dps : 0))} peak</span></div>
+    ${builds.map((b, i) => `
+      <div class="build-row">
+        <span class="build-rank">${String(i + 1).padStart(2, '0')}</span>
+        <div style="min-width:0">
+          <div class="build-name">${esc(b.name)}</div>
+          <div class="build-sub">${esc(b.className)} · ${esc(b.mainSkill)}</div>
+        </div>
+        <span class="build-dps">${esc(fmt.dps(b.dps))}</span>
+      </div>`).join('')}`;
+}
+
+/* ─────────────────────────── ladder page ─────────────────────────── */
+
+function renderLadder() {
+  const g = state.analysis.global;
+  const all = g.ladder;
+
+  const query = state.ladderQuery.trim().toLowerCase();
+  let rows = query
+    ? all.filter((b) =>
+        String(b.name).toLowerCase().includes(query) ||
+        String(b.className).toLowerCase().includes(query) ||
+        String(b.mainSkill).toLowerCase().includes(query))
+    : all.slice();
+
+  const { key, dir } = state.ladderSort;
+  rows.sort((a, b) => {
+    const av = key === 'rank' ? all.indexOf(a) + 1 : key === 'clusterJewelCount'
+      ? (a.clusterJewelCount || 0) : a[key];
+    const bv = key === 'rank' ? all.indexOf(b) + 1 : key === 'clusterJewelCount'
+      ? (b.clusterJewelCount || 0) : b[key];
+    if (typeof av === 'string') return dir * String(av).localeCompare(String(bv));
+    return dir * ((av || 0) - (bv || 0));
+  });
+
+  $('ladderSub').textContent =
+    `${fmt.count(rows.length)} of ${fmt.count(all.length)} builds · sorted by ${key === 'clusterJewelCount' ? 'cluster count' : key}`;
+
+  $('ladderBody').innerHTML = rows.map((b) => {
+    const rank = all.indexOf(b) + 1;
+    const accent = DAMAGE_COLOR[damageOf(b.mainSkill)] || DAMAGE_COLOR.Physical;
+    return `
+      <div class="trow ${rank <= 3 ? 'top' : ''}">
+        <span class="rk">${String(rank).padStart(2, '0')}</span>
+        <span class="nm"><i class="accent" style="--c:${accent}"></i><b title="${esc(b.account)}">${esc(b.name)}</b></span>
+        <span class="cls">${esc(b.className || '–')}</span>
+        <span class="skl" title="${esc(b.mainSkill)}">${esc(b.mainSkill || '–')}</span>
+        <span class="dps">${esc(fmt.dps(b.dps))}</span>
+        <span class="cl ${b.clusterJewelCount ? '' : 'zero'}">${b.clusterJewelCount ? b.clusterJewelCount : '–'}</span>
+      </div>`;
+  }).join('') || `<div class="empty"><h3>No builds</h3><p>Nothing matches that filter.</p></div>`;
+
+  document.querySelectorAll('.th').forEach((th) => {
+    const active = th.dataset.key === state.ladderSort.key;
+    th.classList.toggle('on', active);
+    const existing = th.querySelector('.caret');
+    if (existing) existing.remove();
+    if (active) {
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+      caret.textContent = state.ladderSort.dir === -1 ? '▼' : '▲';
+      th.appendChild(caret);
+    }
+  });
+}
+
+/* ─────────────────────────── settings page ─────────────────────────── */
+
+function renderSettings() {
+  $('depthVal').textContent = state.settings.depth;
+  $('depthRange').value = state.settings.depth;
+  $('floorVal').textContent = state.floor.toFixed(1) + '%';
+  $('floorRange').value = state.floor;
+
+  const total = state.snapshot.totalBuildsInLeague;
+  const tracked = state.analysis.skills.length;
+  const totalSkills = state.snapshot.skills.length;
+  $('floorHint').textContent =
+    `${fmt.count(total)} builds in league · ${tracked} of ${totalSkills} skills above the floor`;
+
+  const err = $('lastError');
+  if (err && !err.textContent.trim()) err.textContent = 'none — sample snapshot loaded cleanly';
+}
+
+/* ─────────────────────────── master render ─────────────────────────── */
+
+function renderAll() {
+  renderShell();
+  renderSkillRail();
+  renderHero();
+  renderPills();
+  renderCombos();
+  renderGlobalRail();
+  renderMeta();
+  renderLadder();
+  renderSettings();
+}
+
+function reanalyze({ keepSkill = true } = {}) {
+  const previous = keepSkill ? state.selectedSkill : null;
+  state.analysis = analyze(state.snapshot, state.floor);
+
+  const stillValid = previous && state.analysis.skills.some((s) => s.name === previous);
+  state.selectedSkill = stillValid
+    ? previous
+    : (visibleSkills()[0] ? visibleSkills()[0].name : null);
+
+  renderAll();
+}
+
+function selectSkill(name) {
+  state.selectedSkill = name;
+  renderSkillRail();
+  renderHero();
+  renderPills();
+  renderCombos();
+  const stat = selectedSkillStat();
+  if (stat) setStatus(`${stat.name} — ${state.analysis.profiles.get(stat.name).sampledBuilds} sampled builds, ${state.size.toLowerCase()} combinations ranked`);
+}
+
+function setTab(tab) {
+  state.tab = tab;
+  for (const key of ['lab', 'meta', 'ladder', 'settings']) {
+    $('view-' + key).hidden = key !== tab;
+  }
+  document.querySelectorAll('.nav-tile').forEach((t) => t.classList.toggle('on', t.dataset.tab === tab));
+}
+
+/* ─────────────────────────── simulated work ─────────────────────────── */
+
+function runBusy(title, steps, stepLabel, done) {
+  if (state.busy) return;
+  state.busy = true;
+  const scrim = $('busy');
+  $('busyTitle').textContent = title;
+  $('busyBar').style.width = '0%';
+  $('busySub').textContent = stepLabel(0, steps);
+  scrim.hidden = false;
+
+  let step = 0;
+  let cancelled = false;
+  const cancel = () => { cancelled = true; clearInterval(timer); finish(); };
+  const finish = () => {
+    clearInterval(timer);
+    scrim.hidden = true;
+    state.busy = false;
+    $('busyCancel').removeEventListener('click', cancel);
+    if (!cancelled) done();
+    else setStatus('Cancelled — nothing was fetched');
+  };
+  $('busyCancel').addEventListener('click', cancel);
+
+  const timer = setInterval(() => {
+    step += 1;
+    const ratio = Math.min(1, step / steps);
+    $('busyBar').style.width = (ratio * 100).toFixed(0) + '%';
+    $('busySub').textContent = stepLabel(Math.min(step, steps), steps);
+    if (step >= steps) finish();
+  }, 110);
+}
+
+function simulateSync() {
+  const skill = selectedSkillStat();
+  if (state.busy) return;
+  runBusy('Sampling builds', 14,
+    (i, n) => `${i} / ${n} characters${skill ? ' · ' + skill.name : ''}`,
+    () => {
+      state.lastSync = new Date();
+      renderShell();
+      setStatus('Preview build — network calls are disabled, so the bundled sample snapshot was re-analysed.');
+      toast('Preview build: live poe.ninja sync is disabled here. The Windows app performs the real crawl.');
+    });
+}
+
+function simulateAnalyze() {
+  const stat = selectedSkillStat();
+  if (!stat) return;
+  const profile = state.analysis.profiles.get(stat.name);
+  runBusy(`Sampling ${stat.name}`, Math.max(6, Math.min(14, profile.topBuilds || 12)),
+    (i, n) => `${i} / ${n} top builds`,
+    () => {
+      setStatus(`${stat.name} — analysis refreshed from the sample (${profile.sampledBuilds} builds)`);
+      toast(`Preview build: “${stat.name}” already has ${profile.sampledBuilds} sampled builds in the bundled snapshot.`);
+      renderAll();
+    });
+}
+
+/* ─────────────────────────── wiring ─────────────────────────── */
+
+function wire() {
+  document.querySelectorAll('.nav-tile').forEach((tile) => {
+    tile.addEventListener('click', () => setTab(tile.dataset.tab));
+  });
+
+  $('skillSearch').addEventListener('input', (e) => {
+    state.query = e.target.value;
+    renderSkillRail();
+    if (!visibleSkills().some((s) => s.name === state.selectedSkill)) {
+      const first = visibleSkills()[0];
+      state.selectedSkill = first ? first.name : null;
+      renderHero(); renderPills(); renderCombos();
+    }
+  });
+
+  document.querySelectorAll('#sortPills button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.sort = btn.dataset.sort;
+      document.querySelectorAll('#sortPills button').forEach((b) => b.classList.toggle('on', b === btn));
+      renderSkillRail();
+    });
+  });
+
+  $('skillList').addEventListener('click', (e) => {
+    const row = e.target.closest('.skill');
+    if (row) selectSkill(row.dataset.skill);
+  });
+
+  $('sizePills').addEventListener('click', (e) => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    state.size = pill.dataset.size;
+    renderPills();
+    renderCombos();
+  });
+
+  $('comboList').addEventListener('click', (e) => {
+    if (e.target.closest('[data-analyze]')) simulateAnalyze();
+  });
+
+  $('analyzeBtn').addEventListener('click', simulateAnalyze);
+  $('sampleAllBtn').addEventListener('click', simulateAnalyze);
+  $('syncBtn').addEventListener('click', simulateSync);
+  $('metaResync').addEventListener('click', simulateSync);
+
+  document.querySelectorAll('[data-sync]').forEach((btn) => {
+    btn.addEventListener('click', simulateSync);
+  });
+
+  document.querySelectorAll('[data-toast]').forEach((btn) => {
+    btn.addEventListener('click', () => toast(btn.dataset.toast));
+  });
+
+  document.querySelectorAll('[data-export]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      downloadCsv();
+      toast('CSV exported from the sample snapshot (preview download).');
+    });
+  });
+
+  document.querySelectorAll('#metaSizeFilter button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.metaSize = btn.dataset.size;
+      document.querySelectorAll('#metaSizeFilter button').forEach((b) => b.classList.toggle('on', b === btn));
+      renderMeta();
+    });
+  });
+
+  $('ladderSearch').addEventListener('input', (e) => {
+    state.ladderQuery = e.target.value;
+    renderLadder();
+  });
+
+  document.querySelectorAll('.th').forEach((th) => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (state.ladderSort.key === key) state.ladderSort.dir *= -1;
+      else state.ladderSort = { key, dir: key === 'rank' ? 1 : -1 };
+      renderLadder();
+    });
+  });
+
+  $('depthRange').addEventListener('input', (e) => {
+    state.settings.depth = Number(e.target.value);
+    $('depthVal').textContent = state.settings.depth;
+    setStatus(`Sample depth set to ${state.settings.depth} builds per skill — applies on the next sync`);
+  });
+
+  $('floorRange').addEventListener('input', (e) => {
+    state.floor = Number(e.target.value);
+    $('floorVal').textContent = state.floor.toFixed(1) + '%';
+    state.analysis = analyze(state.snapshot, state.floor);
+    const stillValid = state.selectedSkill && state.analysis.skills.some((s) => s.name === state.selectedSkill);
+    if (!stillValid) {
+      const first = visibleSkills()[0];
+      state.selectedSkill = first ? first.name : null;
+    }
+    renderAll();
+    setStatus(`Popularity floor ${state.floor.toFixed(1)}% — tracking ${state.analysis.skills.length} skills`);
+  });
+
+  $('paceSel').addEventListener('change', (e) => {
+    state.settings.pacing = Number(e.target.value);
+    setStatus(`Character request pacing set to ${state.settings.pacing} s`);
+  });
+
+  $('leagueSel').addEventListener('change', (e) => {
+    state.settings.league = e.target.value;
+    toast('Preview build: only the bundled Allflame sample is available locally.');
+    e.target.value = 'Allflame (current)';
+    state.settings.league = 'Allflame (current)';
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, select, textarea')) return;
+    const map = { 1: 'meta', 2: 'lab', 3: 'ladder', 4: 'settings' };
+    if (map[e.key]) setTab(map[e.key]);
+    if (e.key === '/' && state.tab === 'lab') { e.preventDefault(); $('skillSearch').focus(); }
+  });
+}
+
+/* ─────────────────────────── CSV export ─────────────────────────── */
+
+function downloadCsv() {
+  const rows = [['size', 'combination', 'builds', 'percent', 'avg_dps', 'peak_dps', 'top_build', 'top_class']];
+  for (const size of SIZES) {
+    const combos = buildCombos(state.snapshot.characters, size, state.snapshot.characters.length, false);
+    for (const c of combos) {
+      rows.push([size, c.label, c.buildCount, c.percentOfBuilds.toFixed(1),
+        Math.round(c.averageDps), Math.round(c.peakDps), c.topBuildName, c.topBuildClass]);
+    }
+  }
+  const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `forever-exiled-combos-${state.snapshot.leagueUrl}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+/* ─────────────────────────── boot ─────────────────────────── */
+
+async function boot() {
+  let snapshot;
+  try {
+    const response = await fetch('data/demo-snapshot.json', { cache: 'no-store' });
+    snapshot = await response.json();
+  } catch (error) {
+    document.querySelector('.stage').innerHTML = `
+      <div class="empty" style="height:100%">
+        <img src="assets/cluster_medium.png" alt="">
+        <h3>Snapshot not loaded</h3>
+        <p>Serve this folder over HTTP (for example <code>python3 -m http.server</code>) — browsers block
+        local file reads for security. Details: ${esc(error.message)}</p>
+      </div>`;
+    return;
+  }
+
+  state.snapshot = snapshot;
+  state.floor = snapshot.minPopularityPercent || 1;
+  state.analysis = analyze(snapshot, state.floor);
+  state.selectedSkill = visibleSkills()[0] ? visibleSkills()[0].name : null;
+
+  wire();
+  setTab('lab');
+  renderAll();
+  setStatus(`Loaded the bundled ${snapshot.leagueName} sample — ${state.analysis.skills.length} tracked skills`);
+}
+
+boot();

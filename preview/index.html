@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forever Exiled — PoE 1 Cluster Meta (UI preview)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ───────────────────────── icon sprite ───────────────────────── -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-lab" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></symbol>
+  <symbol id="i-meta" viewBox="0 0 24 24"><path d="M4 20V10M9.3 20V5M14.7 20v-7M20 20V8"/></symbol>
+  <symbol id="i-ladder" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9M18.6 18.6l-1.9-1.9M7.3 7.3 5.4 5.4"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-13.6-5M4 13a8 8 0 0 0 13.6 5"/><path d="M20 4.5V11h-6M4 19.5V13h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M16 16l4.4 4.4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.4 2.5 4.8 13.4h5.5l-.7 8.1 8.6-10.9h-5.5z"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3.4 7.6 12 12.2l8.6-4.6z"/><path d="m3.4 12.4 8.6 4.6 8.6-4.6M3.4 16.9l8.6 4.6 8.6-4.6"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8.4 7.4 12 12 5l4.6 7L21 8.4 19.2 19H4.8z"/></symbol>
+  <symbol id="i-anchor" viewBox="0 0 24 24"><circle cx="12" cy="5.2" r="2.2"/><path d="M12 7.4V20M6.5 11h11M4.5 15.5a7.5 7.5 0 0 0 15 0"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3.5v11M7.8 10.6 12 14.8l4.2-4.2M4 18.5v1.2a1.8 1.8 0 0 0 1.8 1.8h12.4A1.8 1.8 0 0 0 20 19.7v-1.2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.4 7.2a2 2 0 0 1 2-2h3.5l2 2.4h7.7a2 2 0 0 1 2 2v8.2a2 2 0 0 1-2 2H5.4a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.6" y="8.6" width="11" height="11" rx="2"/><path d="M5.6 15.4h-.8a1.8 1.8 0 0 1-1.8-1.8V5.4a1.8 1.8 0 0 1 1.8-1.8h8.2a1.8 1.8 0 0 1 1.8 1.8v.8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.3 7V4.8h5.4V7M6.4 7l.9 12.2a1.8 1.8 0 0 0 1.8 1.6h5.8a1.8 1.8 0 0 0 1.8-1.6L17.6 7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.4 2"/></symbol>
+  <symbol id="i-fork" viewBox="0 0 24 24"><path d="M6.5 3.5v6.2M3.8 3.5v3.4a2.7 2.7 0 0 0 5.4 0V3.5M6.5 9.7v10.8M17 3.5c-1.9 0-3.2 1.9-3.2 4.9 0 2 1.2 3.4 3.2 3.4s3.2-1.4 3.2-3.4c0-3-1.3-4.9-3.2-4.9zM17 11.8v8.7"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 5.8v6c0 4.4 3 7.6 7 9.2 4-1.6 7-4.8 7-9.2v-6z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M12.5 6.5 18 12l-5.5 5.5"/></symbol>
+</svg>
+
+<div class="app" id="app">
+
+  <!-- ───────────────────────── header ───────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo.png" alt="" class="brand-logo">
+      <div>
+        <div class="brand-name">FOREVER EXILED</div>
+        <div class="micro">POE 1 CLUSTER META</div>
+      </div>
+    </div>
+
+    <div class="topbar-center">
+      <div class="tag">
+        <svg class="ic sm"><use href="#i-shield"/></svg>
+        <b id="leagueName">Allflame</b>
+        <span class="cap">·</span>
+        <span class="cap" id="snapshotText">snapshot sample-1550</span>
+      </div>
+      <div class="tag src-tag" id="sourceTag">
+        <i class="dot"></i><span class="src-label">SAMPLE DATA</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <span class="cap" id="lastSync">never synced</span>
+      <button class="btn primary" id="syncBtn"><svg class="ic"><use href="#i-sync"/></svg>SYNC</button>
+    </div>
+  </header>
+
+  <!-- ───────────────────────── nav rail ───────────────────────── -->
+  <nav class="navrail" id="navrail">
+    <button class="nav-tile" data-tab="meta"><svg class="ic lg"><use href="#i-meta"/></svg><span>META</span></button>
+    <button class="nav-tile" data-tab="lab"><img src="assets/cluster_medium.png" alt=""><span>CLUSTERS</span></button>
+    <button class="nav-tile" data-tab="ladder"><svg class="ic lg"><use href="#i-ladder"/></svg><span>LADDER</span></button>
+    <button class="nav-tile" data-tab="settings"><svg class="ic lg"><use href="#i-settings"/></svg><span>SETTINGS</span></button>
+  </nav>
+
+  <!-- ───────────────────────── stage ───────────────────────── -->
+  <main class="stage">
+
+    <!-- ===================== CLUSTER LAB ===================== -->
+    <section class="view lab" id="view-lab">
+
+      <!-- skill rail -->
+      <aside class="card rail-card">
+        <div class="rail-head">
+          <div class="rail-title">
+            <span class="micro">MAIN SKILLS</span>
+            <span class="pill-count" id="skillCount">18</span>
+          </div>
+          <div class="search">
+            <svg class="ic sm"><use href="#i-search"/></svg>
+            <input id="skillSearch" type="search" placeholder="Search skill, class, damage" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="segmented" id="sortPills">
+            <button data-sort="dps" class="on">BY DPS</button>
+            <button data-sort="popularity">BY POPULARITY</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="rail-scroll" id="skillList"></div>
+      </aside>
+
+      <!-- combination lab -->
+      <div class="col lab-center">
+        <div class="card hero" id="hero"></div>
+
+        <div class="controls">
+          <div class="pills" id="sizePills"></div>
+          <div class="btn-row">
+            <button class="btn ghost" id="analyzeBtn"><svg class="ic"><use href="#i-bolt"/></svg>ANALYZE</button>
+            <button class="btn ghost" id="sampleAllBtn"><svg class="ic"><use href="#i-layers"/></svg>SAMPLE ALL</button>
+          </div>
+        </div>
+
+        <div class="list-head">
+          <span class="micro" id="comboHeader">MEDIUM COMBINATIONS</span>
+          <span class="cap" id="comboHint"></span>
+        </div>
+
+        <div class="col-scroll" id="comboList"></div>
+      </div>
+
+      <!-- global rail -->
+      <aside class="col rail-right">
+        <div class="card leader-card" id="globalLeader"></div>
+        <div class="card" id="mixCard"></div>
+        <div class="card" id="dpsCard"></div>
+        <div class="card coverage-card" id="coverageCard"></div>
+      </aside>
+    </section>
+
+    <!-- ===================== META ===================== -->
+    <section class="view meta" id="view-meta" hidden>
+      <div class="meta-head">
+        <div>
+          <div class="h1">Meta overview</div>
+          <div class="cap" id="metaSub"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="metaResync"><svg class="ic"><use href="#i-sync"/></svg>RESYNC</button>
+          <button class="btn ghost" data-export><svg class="ic"><use href="#i-export"/></svg>EXPORT CSV</button>
+        </div>
+      </div>
+
+      <div class="tiles" id="metaTiles"></div>
+
+      <div class="meta-grid">
+        <div class="card meta-combos">
+          <div class="card-head">
+            <span class="micro">MOST POPULAR CLUSTER COMBINATIONS</span>
+            <div class="segmented small" id="metaSizeFilter">
+              <button data-size="all" class="on">ALL</button>
+              <button data-size="Large">LARGE</button>
+              <button data-size="Medium">MEDIUM</button>
+            </div>
+          </div>
+          <div class="meta-combo-list" id="metaComboList"></div>
+        </div>
+
+        <div class="meta-side">
+          <div class="card" id="notablesCard"></div>
+          <div class="card" id="skillLeadersCard"></div>
+          <div class="card" id="topBuildsCard"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LADDER ===================== -->
+    <section class="view ladder" id="view-ladder" hidden>
+      <div class="ladder-head">
+        <div>
+          <div class="h1">Ladder</div>
+          <div class="cap" id="ladderSub"></div>
+        </div>
+        <div class="search wide">
+          <svg class="ic sm"><use href="#i-search"/></svg>
+          <input id="ladderSearch" type="search" placeholder="Filter by character, class or skill" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-head">
+          <button class="th" data-key="rank">#</button>
+          <button class="th" data-key="name">CHARACTER</button>
+          <button class="th" data-key="className">CLASS</button>
+          <button class="th" data-key="mainSkill">MAIN SKILL</button>
+          <button class="th num" data-key="dps">DPS</button>
+          <button class="th num" data-key="clusterJewelCount">CLUSTERS</button>
+        </div>
+        <div class="table-body" id="ladderBody"></div>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section class="view settings" id="view-settings" hidden>
+      <div class="settings-head">
+        <div class="h1">Settings</div>
+        <div class="cap">Everything here applies to the next sync. The analysis re-runs instantly.</div>
+      </div>
+
+      <div class="settings-grid">
+
+        <div class="card">
+          <div class="micro">DATA SOURCE</div>
+          <div class="setting-row">
+            <label for="leagueSel">League</label>
+            <select id="leagueSel">
+              <option>Allflame (current)</option>
+              <option>Standard</option>
+              <option>Hardcore</option>
+              <option>SSF Allflame</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <span>Snapshot</span>
+            <code id="setSnapshot">sample-1550</code>
+          </div>
+          <div class="setting-row">
+            <span>Source</span>
+            <span class="src-tag small"><i class="dot"></i><span class="src-label">SAMPLE DATA</span></span>
+          </div>
+          <button class="btn ghost wide" data-toast="Preview build — league discovery is disabled. Showing the four leagues shipped with the sample.">
+            <svg class="ic"><use href="#i-sync"/></svg>RELOAD LEAGUES
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="micro">SAMPLING</div>
+          <div class="setting-row col">
+            <label for="depthRange">Builds sampled per skill <b id="depthVal">12</b></label>
+            <input id="depthRange" type="range" min="6" max="30" step="1" value="12">
+            <span class="cap">Top builds by DPS. Higher costs more requests.</span>
+          </div>
+          <div class="setting-row col">
+            <label for="floorRange">Popularity floor <b id="floorVal">1.0%</b></label>
+            <input id="floorRange" type="range" min="0.5" max="15" step="0.5" value="1">
+            <span class="cap" id="floorHint">13,262 builds in league · 18 skills above the floor</span>
+          </div>
+          <div class="setting-row">
+            <label for="paceSel">Character request pacing</label>
+            <select id="paceSel">
+              <option value="3">3 s — fast</option>
+              <option value="5" selected>5 s — polite (default)</option>
+              <option value="8">8 s — cautious</option>
+              <option value="12">12 s — very slow</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="micro">SYNC ACTIONS</div>
+          <div class="action-row">
+            <button class="btn ghost" data-sync="ladder"><svg class="ic"><use href="#i-sync"/></svg>SYNC LADDER</button>
+            <button class="btn ghost" data-sync="all"><svg class="ic"><use href="#i-layers"/></svg>SAMPLE EVERY TRACKED SKILL</button>
+          </div>
+          <div class="action-row">
+            <button class="btn ghost" data-export><svg class="ic"><use href="#i-export"/></svg>EXPORT CSV</button>
+          </div>
+          <div class="card sunken">
+            <div class="micro">LAST ERROR</div>
+            <div class="cap" id="lastError">none</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="micro">LOCAL CACHE</div>
+          <div class="setting-row"><span>Snapshot</span><code id="cacheSize">612 KB</code></div>
+          <div class="setting-row"><span>Folder</span><code class="path">%LOCALAPPDATA%\ForeverExiled</code></div>
+          <div class="action-row">
+            <button class="btn ghost" data-toast="Preview build — the cache folder is only opened by the Windows app."><svg class="ic"><use href="#i-folder"/></svg>OPEN FOLDER</button>
+            <button class="btn ghost" data-toast="Preview build — path copied to clipboard is a Windows-app action."><svg class="ic"><use href="#i-copy"/></svg>COPY PATH</button>
+            <button class="btn ghost danger" data-toast="Preview build — clearing the cache is disabled here."><svg class="ic"><use href="#i-trash"/></svg>CLEAR CACHE</button>
+          </div>
+        </div>
+
+        <div class="card about">
+          <div class="micro">ABOUT THE DATA</div>
+          <p class="body">
+            Builds, skills and cluster jewels come from the same endpoints the poe.ninja builds site
+            uses. Popularity is the share of the league ladder running a skill; DPS is poe.ninja's
+            weighted value. Cluster combinations are counted once per build and expressed against the
+            number of sampled builds, never the whole ladder.
+          </p>
+          <div class="about-meta">
+            <span class="chip"><svg class="ic sm"><use href="#i-clock"/></svg>generated <b id="generatedAt">—</b></span>
+            <span class="chip"><svg class="ic sm"><use href="#i-fork"/></svg>schema v1</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ───────────────────────── status bar ───────────────────────── -->
+  <footer class="statusbar">
+    <div class="status-left">
+      <i class="status-dot"></i>
+      <span id="statusText">Ready</span>
+    </div>
+    <div class="status-right">
+      <span id="statusCounts"></span>
+      <span class="sep"></span>
+      <span class="preview-badge">UI PREVIEW</span>
+      <span class="cap">mirror of the .NET MAUI app · bundled sample snapshot</span>
+    </div>
+  </footer>
+</div>
+
+<!-- busy overlay -->
+<div class="scrim" id="busy" hidden>
+  <div class="card busy-card">
+    <div class="spinner"></div>
+    <div class="busy-title" id="busyTitle">Sampling builds</div>
+    <div class="cap" id="busySub">0 / 12 characters</div>
+    <div class="bar"><i id="busyBar" style="width:0%"></i></div>
+    <button class="btn ghost wide" id="busyCancel">CANCEL</button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

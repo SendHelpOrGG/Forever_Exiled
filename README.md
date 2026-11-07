@@ -66,6 +66,21 @@ The app ships with a **bundled sample snapshot**, clearly badged `SAMPLE DATA` i
 header, so the entire UI is explorable before the first network call. Press **SYNC** to
 pull the live ladder for the selected league.
 
+### Look at it without Windows
+
+The MAUI build is Windows-only, so the repository also carries a **browser preview of the
+same UI** — identical layout, palette and copy, driven by the bundled snapshot and the same
+aggregation rules:
+
+```bash
+python3 preview/serve.py        # → http://localhost:8080
+```
+
+It is a design aid, not the app: the aggregation, search, sorting, size switch, meta
+filters, ladder table and the popularity floor are live, while sync/analyze show a progress
+overlay and explain that network access is disabled there. See
+[`preview/README.md`](preview/README.md) for the real-vs-simulated breakdown.
+
 ---
 
 ## How the data pipeline works
@@ -134,7 +149,8 @@ ForeverExiled.sln
 │  ├─ Views/                         MainPage shell + Meta / Cluster Lab / Ladder / Settings
 │  ├─ Themes/                        Colours + styles (dark, gold-accented)
 │  └─ Converters, Theming/Palette.cs
-└─ tests/ForeverExiled.Core.Tests    xunit: wire format, dictionaries, jewels, aggregation
+├─ tests/ForeverExiled.Core.Tests    xunit: wire format, dictionaries, jewels, aggregation
+└─ preview/                          browser mirror of the UI (design aid, not shipped)
 ```
 
 The MAUI layer is pure MVVM: `MainViewModel` (CommunityToolkit.Mvvm source generators)
