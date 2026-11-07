@@ -59,6 +59,18 @@ public static class CraftingMath
 
     private const int RareSlots = 2;
 
+    /// <summary>The cheapest item level that can still roll every notable in the combination.</summary>
+    public static int MinimumItemLevel(ClusterCombo combo)
+    {
+        var level = 1;
+        foreach (var notable in combo.Notables)
+        {
+            level = Math.Max(level, NotableWeights.LevelFor(notable));
+        }
+
+        return level;
+    }
+
     public static IReadOnlyList<CraftRouteItem> Routes(ClusterCombo combo)
     {
         var size = combo.Size.ToString();
@@ -68,8 +80,11 @@ public static class CraftingMath
             return Array.Empty<CraftRouteItem>();
         }
 
-        var prefixTotal = NotableWeights.PoolTotal(tag, size, "Prefix");
-        var suffixTotal = NotableWeights.PoolTotal(tag, size, "Suffix");
+        // price the base a crafter would actually buy: the lowest iLvl that rolls them all,
+        // which also means the smallest pool
+        var minimumLevel = MinimumItemLevel(combo);
+        var prefixTotal = NotableWeights.PoolTotal(tag, size, "Prefix", minimumLevel);
+        var suffixTotal = NotableWeights.PoolTotal(tag, size, "Suffix", minimumLevel);
 
         var prefixWeights = new List<int>();
         var suffixWeights = new List<int>();

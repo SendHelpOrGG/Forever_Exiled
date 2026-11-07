@@ -363,8 +363,9 @@ public sealed partial class ComboItem : ObservableObject
         // the pools this base rolls from, then how heavy each notable is inside its own
         var size = combo.Size.ToString();
         var pool = NotableWeights.PoolFor(size, combo.GrantType);
-        var prefixTotal = NotableWeights.PoolTotal(pool, size, "Prefix");
-        var suffixTotal = NotableWeights.PoolTotal(pool, size, "Suffix");
+        var itemLevel = item?.ItemLevel ?? 0;
+        var prefixTotal = NotableWeights.PoolTotal(pool, size, "Prefix", itemLevel);
+        var suffixTotal = NotableWeights.PoolTotal(pool, size, "Suffix", itemLevel);
         if (pool is not null && (prefixTotal > 0 || suffixTotal > 0))
         {
             var split = string.Join(" / ", new[]
@@ -373,13 +374,14 @@ public sealed partial class ComboItem : ObservableObject
                 suffixTotal > 0 ? $"{suffixTotal:N0} suffix" : string.Empty,
             }.Where(part => part.Length > 0));
 
-            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables · {split} weight");
+            var levelText = itemLevel > 0 ? $" at iLvl {itemLevel}" : string.Empty;
+            mods.Add($"{NotableWeights.PoolLabel(pool)} pool · {NotableWeights.PoolNotables(pool)} notables · {split} weight{levelText}");
         }
 
         foreach (var notable in combo.Notables)
         {
             var weight = NotableWeights.WeightFor(notable, pool);
-            var chance = NotableWeights.ChancePercent(notable, pool, size);
+            var chance = NotableWeights.ChancePercent(notable, pool, size, itemLevel);
             var suffix = weight > 0 ? $"    ({weight:N0} weight · {chance:0.#}% of pool)" : string.Empty;
 
             mods.Add("1 Added Passive Skill is " + notable + suffix);

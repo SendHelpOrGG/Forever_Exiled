@@ -210,6 +210,9 @@ public partial class MainViewModel : ObservableObject
     private string _craftTargetText = string.Empty;
 
     [ObservableProperty]
+    private string _craftLevelText = string.Empty;
+
+    [ObservableProperty]
     private bool _hasCombos;
 
     [ObservableProperty]

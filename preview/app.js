@@ -440,7 +440,25 @@ function poolFor(jewel) {
     || grants[`${size}~${normalised}`] || grants[`any~${normalised}`] || null;
 }
 
-function poolInfo(tag, size) {
+/* A mod only joins the pool once the base's item level reaches its level, so the
+   weight behind a notable shrinks with the base: an iLvl 68 jewel cannot roll the
+   notables that need 75. */
+function poolTotalAt(slot, size, iLvl) {
+  if (!slot) return 0;
+  const full = slot.total[size] || 0;
+  if (!iLvl) return full;
+
+  const points = (slot.levels && slot.levels[size]) || [];
+  let total = 0;
+  for (const [level, weight] of points) {
+    if (level > iLvl) break;
+    total = weight;
+  }
+
+  return total || full;
+}
+
+function poolInfo(tag, size, iLvl) {
   if (!notableWeights || !tag) return null;
   const category = notableWeights.categories[tag];
   if (!category) return null;
@@ -449,11 +467,15 @@ function poolInfo(tag, size) {
   // against its own affix type
   const totals = {};
   for (const kind of ['Prefix', 'Suffix']) {
-    const slot = category.pools ? category.pools[kind] : null;
-    totals[kind] = slot ? (slot.total[size] || 0) : 0;
+    totals[kind] = poolTotalAt(category.pools ? category.pools[kind] : null, size, iLvl);
   }
 
-  return { tag, label: category.label, size, totals, count: category.notables.length };
+  return { tag, label: category.label, size, ilvl: iLvl || 0, totals, count: category.notables.length };
+}
+
+function notableLevel(name) {
+  const entry = notableWeights && notableWeights.notables[String(name || '').trim().toLowerCase()];
+  return entry ? entry.level || 1 : 1;
 }
 
 function poolTotalFor(pool, name) {
@@ -718,11 +740,12 @@ function itemTipHtml(combo) {
   if (combo.effectPercent > 0) {
     mods.push(`<div class="item-mod">Added Small Passive Skills have ${combo.effectPercent}% increased Effect</div>`);
   }
-  const pool = poolInfo(poolFor(item.size ? item : combo), (item.size || combo.size));
+  const pool = poolInfo(poolFor(item.size ? item : combo), (item.size || combo.size), item.itemLevel);
   if (pool) {
     const split = [pool.totals.Prefix ? `${fmt.count(pool.totals.Prefix)} prefix` : '',
       pool.totals.Suffix ? `${fmt.count(pool.totals.Suffix)} suffix` : ''].filter(Boolean).join(' / ');
-    mods.push(`<div class="item-pool" title="the pools this base rolls from">${esc(pool.label)} pool · ${pool.count} notables${split ? ' · ' + split + ' weight' : ''}</div>`);
+    const levelText = item.itemLevel ? ` at iLvl ${item.itemLevel}` : '';
+    mods.push(`<div class="item-pool" title="the pools this base rolls from">${esc(pool.label)} pool · ${pool.count} notables${split ? ' · ' + split + ' weight' + levelText : ''}</div>`);
   }
 
   for (const notable of combo.notables || []) {
@@ -1087,13 +1110,19 @@ function craftTarget(combo) {
     type: notableType(name),
   }));
 
+  // the cheapest base that can still roll every notable in the combination
+  const minimumLevel = targets.reduce((level, target) => Math.max(level, notableLevel(target.name)), 1);
+  const unavailable = targets.filter((target) => notableLevel(target.name) > minimumLevel);
+
   return {
     tag,
     label: category.label,
     size: combo.size,
     targets,
-    prefixTotal: (category.pools.Prefix && category.pools.Prefix.total[combo.size]) || 0,
-    suffixTotal: (category.pools.Suffix && category.pools.Suffix.total[combo.size]) || 0,
+    unavailable,
+    minimumLevel,
+    prefixTotal: poolTotalAt(category.pools.Prefix, combo.size, minimumLevel),
+    suffixTotal: poolTotalAt(category.pools.Suffix, combo.size, minimumLevel),
   };
 }
 
@@ -1195,6 +1224,7 @@ function renderCraftCard() {
       <div class="craft-target" title="${esc(combo.label)}">
         <img src="${SIZE_IMG[combo.size]}" alt="">${esc(combo.label)}
       </div>
+      <div class="craft-ilvl">needs iLvl <b>${target ? target.minimumLevel : '?'}</b> · priced on an iLvl ${target ? target.minimumLevel : '?'} base</div>
       ${routes.length ? routes.slice(0, 3).map((route, i) => `
         <div class="craft-route ${i === 0 ? 'best' : ''}">
           <div class="craft-head">
@@ -1209,8 +1239,8 @@ function renderCraftCard() {
           <div class="craft-sub">${esc(route.note)}</div>
         </div>`).join('') : '<div class="craft-empty">No route modelled: these notables do not all roll from this base’s pool.</div>'}
       <div class="craft-note">
-        Odds from the game's spawn weights for ${esc(target ? target.label : 'this base')} ·
-        prices are placeholders in <code>assets/currency_costs.json</code>.
+        Odds from the game's spawn weights for ${esc(target ? target.label : 'this base')} at that
+        item level · prices are placeholders in <code>assets/currency_costs.json</code>.
       </div>
     </div>`;
 }

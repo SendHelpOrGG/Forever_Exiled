@@ -60,6 +60,9 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
     notables: dict[str, dict] = {}
     tag_totals: dict[str, dict[str, int]] = {}
     pool_meta: dict[str, dict] = {}
+    # level -> weight, so a pool can be measured at an item level: a mod only
+    # competes for a slot once the base's iLvl reaches its level
+    pool_levels: dict[str, dict[str, dict[str, list]]] = {}
 
     for line in path.read_text(encoding="utf-8").splitlines():
         head = ENTRY.match(line)
@@ -84,12 +87,16 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
         multipliers = dict(zip(mult_keys, mult_values))
         sizes = [label for key, label in SIZES.items() if multipliers.get(key, 100) > 0]
 
+        levels_match = NUMBER.search(body)
+        level = int(levels_match.group(2)) if levels_match else 1
+
         for tag, weight in weights.items():
             bucket = tag_totals.setdefault(tag, {})
             meta = pool_meta.setdefault(tag, {}).setdefault(kind, {"total": {}})
             for size in sizes:
                 bucket[size] = bucket.get(size, 0) + weight
                 meta["total"][size] = meta["total"].get(size, 0) + weight
+                pool_levels.setdefault(tag, {}).setdefault(kind, {}).setdefault(size, []).append((level, weight))
 
             meta["total"][""] = meta["total"].get("", 0) + weight
 
@@ -97,23 +104,22 @@ def build_notables(path: Path) -> tuple[dict, dict, dict]:
         if not notable:
             continue
 
-        levels = NUMBER.search(body)
         tags = parse_list(arrays.get("modTags", ""))
         name = notable.group(1).strip()
         notables[name.lower()] = {
             "id": mod_id,
             "name": name,
             "type": kind,
-            "level": int(levels.group(2)) if levels else 0,
+            "level": level,
             "tags": tags,
             "weights": weights,
             "sizes": sizes,
         }
 
-    return notables, tag_totals, pool_meta
+    return notables, tag_totals, pool_meta, pool_levels
 
 
-def build_categories(path: Path, notables: dict, tag_totals: dict, pool_meta: dict) -> tuple[dict, dict]:
+def build_categories(path: Path, notables: dict, tag_totals: dict, pool_meta: dict, pool_levels: dict) -> tuple[dict, dict]:
     """Read the [tag] blocks that sit under each jewel size in ClusterJewels.lua.
 
     A tag block only appears under the size it belongs to (projectile damage lives
@@ -159,11 +165,23 @@ def build_categories(path: Path, notables: dict, tag_totals: dict, pool_meta: di
             # prefix and suffix slots draw from separate pools, so keep them apart:
             # a magic jewel can only hold one notable of each type
             for kind, meta in pool_meta.get(current, {}).items():
-                slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0})
+                slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0, "levels": {}})
 
             for kind, meta in pool_meta.get(current, {}).items():
-                slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0})
+                slot = entry["pools"].setdefault(kind, {"total": {}, "count": 0, "levels": {}})
                 slot["total"][size] = meta["total"].get(size, 0)
+
+                # cumulative weight by item level: [[level, weight at or below it], ...]
+                entries = sorted(pool_levels.get(current, {}).get(kind, {}).get(size, []))
+                cumulative: list[list[int]] = []
+                running = 0
+                for mod_level, weight in entries:
+                    running += weight
+                    if cumulative and cumulative[-1][0] == mod_level:
+                        cumulative[-1][1] = running
+                    else:
+                        cumulative.append([mod_level, running])
+                slot["levels"][size] = cumulative
 
             if size and size not in entry["sizes"]:
                 entry["sizes"].append(size)
@@ -199,8 +217,8 @@ def main() -> int:
     mods_path = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/ModJewelCluster.lua")
     jewels_path = Path(sys.argv[2] if len(sys.argv) > 2 else "/tmp/ClusterJewels.lua")
 
-    notables, tag_totals, pool_meta = build_notables(mods_path)
-    categories, grants = build_categories(jewels_path, notables, tag_totals, pool_meta)
+    notables, tag_totals, pool_meta, pool_levels = build_notables(mods_path)
+    categories, grants = build_categories(jewels_path, notables, tag_totals, pool_meta, pool_levels)
 
     payload = {
         "source": "Path of Building game data (ModJewelCluster.lua + ClusterJewels.lua)",

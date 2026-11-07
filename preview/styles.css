@@ -468,6 +468,8 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 /* ── crafting card ─────────────────────────────────────────────────── */
 .craft-target { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); margin-bottom: 10px; }
 .craft-target img { width: 22px; height: 22px; object-fit: contain; }
+.craft-ilvl { font-size: 12px; color: var(--text-3); margin: -6px 0 10px 30px; }
+.craft-ilvl b { color: var(--text-2); font-weight: 600; }
 .craft-route {
   padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--r-sm);
   background: var(--panel-2); margin-bottom: 8px;

@@ -77,6 +77,23 @@ def main() -> int:
     lines.append("    };")
     lines.append("")
 
+    lines.append('    private static readonly Dictionary<string, string> PoolLevels = new(StringComparer.OrdinalIgnoreCase)')
+    lines.append("    {")
+    for tag, category in sorted(categories.items()):
+        for kind, slot in sorted(category.get("pools", {}).items()):
+            for size, points in sorted(slot.get("levels", {}).items()):
+                packed = "|".join(f"{level}:{weight}" for level, weight in points)
+                lines.append(f"        [{cs_text(f'{tag}|{size}|{kind}')}] = {cs_text(packed)},")
+    lines.append("    };")
+    lines.append("")
+
+    lines.append('    private static readonly Dictionary<string, int> Levels = new(StringComparer.OrdinalIgnoreCase)')
+    lines.append("    {")
+    for key, entry in sorted(notables.items()):
+        lines.append(f"        [{cs_text(key)}] = {entry.get('level', 1)},")
+    lines.append("    };")
+    lines.append("")
+
     lines.append('    private static readonly Dictionary<string, string> Types = new(StringComparer.OrdinalIgnoreCase)')
     lines.append("    {")
     for key, entry in sorted(notables.items()):
@@ -172,17 +189,55 @@ def main() -> int:
         tag is not null && PoolCounts.TryGetValue(tag, out var count) ? count : 0;
 
     /// <summary>Weight of one affix pool ("Prefix"/"Suffix") for a size.</summary>
-    public static int PoolTotal(string? tag, string? size, string? kind)
+    public static int PoolTotal(string? tag, string? size, string? kind) =>
+        PoolTotal(tag, size, kind, 0);
+
+    /// <summary>
+    /// Weight of an affix pool as it stands at an item level: a mod only competes for a
+    /// slot once the base is high enough, so an iLvl 68 jewel rolls a smaller pool.
+    /// </summary>
+    public static int PoolTotal(string? tag, string? size, string? kind, int itemLevel)
     {
         if (tag is null)
         {
             return 0;
         }
 
-        return PoolTotals.TryGetValue(tag + "|" + (size ?? string.Empty) + "|" + (kind ?? string.Empty), out var total)
-            ? total
-            : 0;
+        var key = tag + "|" + (size ?? string.Empty) + "|" + (kind ?? string.Empty);
+        if (itemLevel > 0 && PoolLevels.TryGetValue(key, out var packed))
+        {
+            var total = 0;
+            foreach (var point in packed.Split('|', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var split = point.IndexOf(':');
+                if (split <= 0 || !int.TryParse(point[..split], out var level))
+                {
+                    continue;
+                }
+
+                if (level > itemLevel)
+                {
+                    break;
+                }
+
+                if (int.TryParse(point[(split + 1)..], out var weight))
+                {
+                    total = weight;
+                }
+            }
+
+            if (total > 0)
+            {
+                return total;
+            }
+        }
+
+        return PoolTotals.TryGetValue(key, out var full) ? full : 0;
     }
+
+    /// <summary>The item level a notable needs before it can roll.</summary>
+    public static int LevelFor(string? notable) =>
+        notable is not null && Levels.TryGetValue(notable.Trim(), out var level) ? level : 1;
 
     /// <summary>Prefix or Suffix - the slot a notable occupies.</summary>
     public static string TypeFor(string? notable) =>
@@ -199,9 +254,9 @@ def main() -> int:
     }
 
     /// <summary>Chance of rolling this notable, as a percentage of its base's pool.</summary>
-    public static double ChancePercent(string? notable, string? tag, string? size)
+    public static double ChancePercent(string? notable, string? tag, string? size, int itemLevel = 0)
     {
-        var total = PoolTotal(tag, size, TypeFor(notable));
+        var total = PoolTotal(tag, size, TypeFor(notable), itemLevel);
         return total <= 0 ? 0 : WeightFor(notable, tag) * 100.0 / total;
     }
 

@@ -216,6 +216,37 @@ setTimeout(() => {
     routeCosts.join(' <= '));
   check('at most the three best routes are shown', routeRows.length <= 3, routeRows.length + ' routes');
 
+  const selectedComboLabel = txt('#craftCard .craft-target');
+  const comboNotables = selectedComboLabel.split(' + ');
+  const expectedLevel = comboNotables.reduce((level, name) => {
+    const entry = weights.notables[name.toLowerCase()];
+    return Math.max(level, entry ? entry.level || 1 : 1);
+  }, 1);
+  const statedLevel = /needs iLvl (\d+)/.exec(txt('#craftCard .craft-ilvl'));
+  check('crafting names the minimum item level', !!statedLevel, txt('#craftCard .craft-ilvl'));
+  check('the minimum item level is the highest notable level',
+    !!statedLevel && Number(statedLevel[1]) === expectedLevel,
+    `stated ${statedLevel ? statedLevel[1] : '?'} · expected ${expectedLevel}`);
+
+  // every pool carries cumulative weight per item level
+  const levelTables = Object.values(weights.categories).flatMap((c) => Object.values(c.pools || {})
+    .flatMap((slot) => Object.entries(slot.levels || {})));
+  check('pools record their weight per item level', levelTables.length > 0,
+    levelTables.length + ' level tables');
+  check('level tables rise with the item level and end at the pool total',
+    levelTables.every(([, points]) =>
+      points.length > 0 && points.every((p, i) => i === 0 || (p[0] > points[i - 1][0] && p[1] >= points[i - 1][1]))),
+    levelTables.length + ' tables checked');
+
+  // an iLvl 68 base cannot roll the notables that need 75, so the pool is smaller
+  const gatedPool = Object.values(weights.categories)
+    .flatMap((c) => Object.values(c.pools || {}).map((slot) => ({ slot, cat: c })))
+    .find(({ slot }) => Object.values(slot.levels || {}).some((points) => points[points.length - 1][0] > 70));
+  const gatedPoints = gatedPool && Object.values(gatedPool.slot.levels)[0];
+  check('a lower item level shrinks the pool', !!gatedPoints && gatedPoints.length > 1
+      && gatedPoints[0][1] < gatedPoints[gatedPoints.length - 1][1],
+    gatedPoints ? `${gatedPoints[0][1]} at iLvl ${gatedPoints[0][0]} → ${gatedPoints[gatedPoints.length - 1][1]} at iLvl ${gatedPoints[gatedPoints.length - 1][0]}` : 'missing');
+
   const firstTries = parseInt(qa('#craftCard .craft-tries')[0].textContent.replace(/[^\d]/g, ''), 10);
   const firstChaos = parseFloat(qa('#craftCard .craft-cost b')[0].textContent.replace(/[^\d.]/g, ''));
   check('cost follows the price table, not a guess',

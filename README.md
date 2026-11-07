@@ -172,6 +172,13 @@ the expected number of tries and the currency that goes into them.
 | Fossil (3-socket) | odds treat the fossils as neutral | 1 resonator + 3 fossils |
 | Alt → Regal | alt to the first notable, then one regal per cycle for the second | alts + 1 regal |
 
+A jewel can only roll a notable once its item level reaches the notable's level, so the card
+names the **minimum iLvl** for the combination (the highest level among its notables) and prices
+every route on a base at exactly that level. That is both the cheapest base and the smallest
+pool: an iLvl 68 base cannot roll the notables that need 75, so the same combination is easier to
+hit than on the iLvl 86 one already in the build. The item card weighs its notables at the
+actual item's own level instead, and says so ("at iLvl 86").
+
 Tries are `1 / chance`, where a notable's chance is its weight over its own affix pool and a
 route's chance is the joint probability of every notable landing in its slots. Costs are tries
 times the price of one attempt; prices live in `preview/assets/currency_costs.json` for the

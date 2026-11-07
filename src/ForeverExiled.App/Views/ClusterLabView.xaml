@@ -461,6 +461,9 @@
                         <Label Text="{Binding CraftTargetText}" Style="{StaticResource BodyStrong}"
                                FontSize="14.5" LineBreakMode="TailTruncation" MaxLines="2" />
 
+                        <Label Text="{Binding CraftLevelText}" Style="{StaticResource Caption}"
+                               FontSize="12" TextColor="{StaticResource TextMuted}" Margin="0,-4,0,0" />
+
                         <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding CraftRoutes}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate>

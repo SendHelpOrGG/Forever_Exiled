@@ -219,12 +219,17 @@ public partial class MainViewModel
         }
 
         CraftRoutes.Clear();
-        CraftTargetText = item is null ? "No combination selected" : item.Label;
 
         if (item is null)
         {
+            CraftTargetText = "No combination selected";
+            CraftLevelText = string.Empty;
             return;
         }
+
+        var level = CraftingMath.MinimumItemLevel(item.Combo);
+        CraftTargetText = item.Label;
+        CraftLevelText = $"needs iLvl {level} · priced on an iLvl {level} base";
 
         foreach (var route in CraftingMath.Routes(item.Combo))
         {
