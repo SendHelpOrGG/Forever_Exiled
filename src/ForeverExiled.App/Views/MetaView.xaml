@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ForeverExiled.App.Views.MetaView">
+             x:Class="ForeverExiled.App.Views.MetaView"
+             xmlns:controls="clr-namespace:ForeverExiled.App.Views.Controls">
 
+    <Grid x:Name="MetaRoot">
     <ScrollView VerticalScrollBarVisibility="Never">
         <VerticalStackLayout Padding="14" Spacing="12">
 
@@ -82,8 +84,12 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
                                 <Border StrokeShape="RoundRectangle 10"
-                                        Padding="12,9"
-                                        ToolTipProperties.Text="{Binding ItemTipText}">
+                                        Padding="12,9">
+                                    <Border.GestureRecognizers>
+                                        <PointerGestureRecognizer PointerEntered="OnJewelPointerEntered"
+                                                                  PointerMoved="OnJewelPointerMoved"
+                                                                  PointerExited="OnJewelPointerExited" />
+                                    </Border.GestureRecognizers>
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
@@ -284,6 +290,19 @@
                    FontSize="12.5"
                    Margin="2,0,0,8" />
         </VerticalStackLayout>
-    </ScrollView>
+    
+        <Border ZIndex="90"
+                InputTransparent="True"
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Start"
+                VerticalOptions="Start"
+                TranslationX="{Binding ItemCardX}"
+                TranslationY="{Binding ItemCardY}"
+                IsVisible="{Binding IsItemCardVisible}">
+            <controls:ClusterJewelCard Card="{Binding ItemCard}" />
+        </Border>
+</ScrollView>
 
+    </Grid>
 </ContentView>

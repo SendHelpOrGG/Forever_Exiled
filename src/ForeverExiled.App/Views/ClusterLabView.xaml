@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ForeverExiled.App.Views.ClusterLabView">
+             x:Class="ForeverExiled.App.Views.ClusterLabView"
+             xmlns:controls="clr-namespace:ForeverExiled.App.Views.Controls">
 
-    <Grid ColumnDefinitions="470,*,276" ColumnSpacing="12" Padding="12">
+    <Grid x:Name="LabRoot" ColumnDefinitions="470,*,276" ColumnSpacing="12" Padding="12">
 
         <!-- ========================= Main skill rail ========================= -->
         <Border Grid.Column="0" Style="{StaticResource CardFlush}">
@@ -227,7 +228,7 @@
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Combos}" IsVisible="{Binding HasCombos}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="14,12" ToolTipProperties.Text="{Binding ItemTipText}">
+                            <Border Padding="14,12">
                                 <Border.Style>
                                     <Style TargetType="Border" BasedOn="{StaticResource Card}">
                                         <Style.Triggers>
@@ -239,6 +240,9 @@
                                 </Border.Style>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding Command}" />
+                                    <PointerGestureRecognizer PointerEntered="OnJewelPointerEntered"
+                                                              PointerMoved="OnJewelPointerMoved"
+                                                              PointerExited="OnJewelPointerExited" />
                                 </Border.GestureRecognizers>
                                 <Grid ColumnDefinitions="66,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="14">
 
@@ -507,6 +511,20 @@
                 </Border>
             </VerticalStackLayout>
         </ScrollView>
-    </Grid>
+    
+        <!-- the hover card: one floating jewel card, positioned under the pointer -->
+        <Border Grid.ColumnSpan="3"
+                ZIndex="90"
+                InputTransparent="True"
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Start"
+                VerticalOptions="Start"
+                TranslationX="{Binding ItemCardX}"
+                TranslationY="{Binding ItemCardY}"
+                IsVisible="{Binding IsItemCardVisible}">
+            <controls:ClusterJewelCard Card="{Binding ItemCard}" />
+        </Border>
+</Grid>
 
 </ContentView>

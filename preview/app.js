@@ -775,76 +775,93 @@ function ensureTip() {
   return tipEl;
 }
 
-/** The item card poe.ninja shows when you hover a cluster jewel. */
+/**
+ * The cluster jewel card poe.ninja shows on hover, rebuilt line for line: a gold header band
+ * carrying the name and the base type, then centred blocks of properties, notables and the
+ * flavour line, separated by hairlines and closed by the jewel's own art. It carries no
+ * analytics - the weights and tags belong to the crafting surface, not to the item.
+ */
 function itemTipHtml(combo) {
   const item = combo.representative || {};
   const rarity = String(item.rarity || (item.itemName ? 'rare' : 'magic')).toLowerCase();
   const name = item.itemName || '';
   const base = item.baseType || `${combo.size} Cluster Jewel`;
-  const color = RARITY_COLOR[rarity] || RARITY_COLOR.magic;
+  const nameColor = RARITY_COLOR[rarity] || RARITY_COLOR.magic;
+  const icon = SIZE_IMG[combo.size] || '';
 
-  const props = [];
+  const blue = (text) => `<div class="tip-line blue">${esc(text)}</div>`;
+  const gold = (text) => `<div class="tip-line gold">${esc(text)}</div>`;
+  const dim = (text) => `<div class="tip-line dim">${esc(text)}</div>`;
+  const sep = '<div class="tip-sep"></div>';
+
+  // item level first, the way the game prints the item's own properties
+  const head = [];
+  if (item.itemLevel) head.push(dim(`Item Level: ${item.itemLevel}`));
+
+  // what the base does, before any notable
+  const base_ = [];
   if (item.passives != null) {
-    props.push(`Adds ${item.passives} Passive Skill${item.passives === 1 ? '' : 's'}`);
+    base_.push(blue(`Adds ${item.passives} Passive Skill${item.passives === 1 ? '' : 's'}`));
   }
   if (item.jewelSockets > 0) {
-    props.push(`${item.jewelSockets} Added Passive Skill${item.jewelSockets === 1 ? ' is a' : 's are'} Jewel Socket${item.jewelSockets === 1 ? '' : 's'}`);
+    base_.push(blue(`${item.jewelSockets} Added Passive Skill${item.jewelSockets === 1 ? ' is a' : 's are'} Jewel Socket${item.jewelSockets === 1 ? '' : 's'}`));
   }
 
-  // each notable is followed by what it actually does, as the game shows it
-  const mods = [];
-  if (combo.grantType) {
-    mods.push(`<div class="item-mod">Added Small Passive Skills grant: ${esc(combo.grantType)}</div>`);
-  }
-  if (combo.effectPercent > 0) {
-    mods.push(`<div class="item-mod">Added Small Passive Skills have ${combo.effectPercent}% increased Effect</div>`);
-  }
-  const pool = poolInfo(poolFor(item.size ? item : combo), (item.size || combo.size), item.itemLevel);
-  if (pool) {
-    const split = [pool.totals.Prefix ? `${fmt.count(pool.totals.Prefix)} prefix` : '',
-      pool.totals.Suffix ? `${fmt.count(pool.totals.Suffix)} suffix` : ''].filter(Boolean).join(' / ');
-    const levelText = item.itemLevel ? ` at iLvl ${item.itemLevel}` : '';
-    // the pool is the notables *plus* the generic small-passive grants: both compete for
-    // the same affix slot, so leaving the generic mods out doubles every notable's odds
-    const generic = (pool.generic.Prefix || 0) + (pool.generic.Suffix || 0);
-    const genericText = generic ? ` + ${generic} small-passive mods` : '';
-    mods.push(`<div class="item-pool" title="the pools this base rolls from">${esc(pool.label)} pool · ${pool.count} notables${genericText}${split ? ' · ' + split + ' weight' + levelText : ''}</div>`);
-  }
+  // the cluster type and its effect are small-passive mods, so they sit with the base block
+  const smalls = [];
+  if (combo.grantType) smalls.push(blue(`Added Small Passive Skills grant: ${combo.grantType}`));
+  if (combo.effectPercent > 0) smalls.push(blue(`Added Small Passive Skills have ${combo.effectPercent}% increased Effect`));
 
-  for (const notable of combo.notables || []) {
-    mods.push(`<div class="item-mod"><span>1 Added Passive Skill is ${esc(notable)}</span>${weightLine(notable, pool)}</div>`);
+  // the notables themselves: the affix line, then what each one grants
+  const affixes = [];
+  const notables = combo.notables || [];
+  notables.forEach((notable, index) => {
+    affixes.push(gold(`1 Added Passive Skill is ${notable}`));
+    // the crafted "also grant" line follows the first notable, as the game orders it
+    if (index === 0) {
+      for (const small of item.smallGrants || []) affixes.push(blue(small));
+    }
+  });
+
+  const details = [];
+  for (const notable of notables) {
     const lines = notableLines(notable);
-    if (lines) {
-      mods.push(`<div class="item-mod-desc">${(lines.stats || []).map((line) => esc(line)).join('<br>')}</div>`);
-      if (lines.reminder && lines.reminder.length) {
-        mods.push(`<div class="item-reminder">${lines.reminder.map((line) => esc(line)).join('<br>')}</div>`);
-      }
-    }
-
-    // the mod tags the game uses to gate this notable (fossils, harvest, influences)
-    const tags = notableTags(notable);
-    if (tags.length) {
-      mods.push(`<div class="item-tags">${tags.map((tag) => tagChip(tag, 'item-tag')).join('')}</div>`);
-    }
+    if (!lines) continue;
+    details.push(`<div class="tip-notable">${esc(notable)}</div>`);
+    for (const stat of lines.stats || []) details.push(blue(stat));
+    for (const reminder of lines.reminder || []) details.push(`<div class="tip-line faint">${esc(reminder)}</div>`);
   }
-  for (const small of item.smallGrants || []) mods.push(`<div class="item-mod">${esc(small)}</div>`);
 
   const flags = [];
-  if (item.fractured) flags.push('<span class="item-fractured">Fractured Item</span>');
-  if (item.corrupted) flags.push('<span class="item-corrupt">Corrupted</span>');
+  if (item.fractured) flags.push('<div class="tip-line fractured">Fractured Item</div>');
+  if (item.corrupted) flags.push('<div class="tip-line corrupt">Corrupted</div>');
+
+  const flavour =
+    `Place into an allocated ${combo.size} Jewel Socket on the Passive Skill Tree. ` +
+    'Added passives do not interact with jewel radiuses. Right click to remove from the Socket.';
+
+  const blocks = [
+    head.join(''),
+    base_.join('') + smalls.join(''),
+    affixes.join(''),
+    details.join(''),
+    flags.join(''),
+  ].filter((block) => block.length > 0);
 
   return `
-    <div class="item-head">
-      <span class="item-icon"><img src="${SIZE_IMG[combo.size]}" alt=""></span>
-      <span class="item-titles">
-        ${name ? `<span class="item-name" style="color:${color}">${esc(name)}</span>` : ''}
-        <span class="item-base" style="color:${name ? '#c8c8c8' : color}">${esc(base)}</span>
+    <div class="tip-head">
+      ${icon ? `<span class="tip-head-icon"><img src="${icon}" alt=""></span>` : ''}
+      <span class="tip-titles">
+        ${name ? `<span class="tip-name" style="color:${nameColor}">${esc(name)}</span>` : ''}
+        <span class="tip-base"${name ? '' : ` style="color:${nameColor}"`}>${esc(base)}</span>
       </span>
     </div>
-    ${props.length ? `<hr><div class="item-props">${props.map((line) => esc(line)).join('<br>')}</div>` : ''}
-    ${mods.length ? `<hr><div class="item-mods">${mods.join('')}</div>` : ''}
-    ${item.itemLevel ? `<hr><div class="item-props">Item Level: ${item.itemLevel}</div>` : ''}
-    ${flags.length ? `<hr><div class="item-props">${flags.join('<br>')}</div>` : ''}`;
+    <div class="tip-body">
+      ${blocks.map((block) => `<div class="tip-block">${block}</div>`).join(sep)}
+      ${sep}
+      <div class="tip-flavour">${esc(flavour)}</div>
+      <div class="tip-foot">${icon ? `<img src="${icon}" alt="">` : ''}</div>
+    </div>`;
 }
 
 function placeTip(event) {

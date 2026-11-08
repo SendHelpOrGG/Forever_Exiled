@@ -159,21 +159,25 @@ skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in t
 header), so a row reads as two pictures and a caption.
 
 Hovering any cluster jewel - in the combination list, the meta table or the global-leader card -
-opens the item card the site shows: rarity-coloured name, base type, "Adds N Passive Skills",
-the enchant line, one "1 Added Passive Skill is X" line per notable, item level and
-fractured/corrupted flags. Each notable is followed by what it actually does - the numbers come
-from Path of Building's tree data (`preview/assets/notables.json`, 300 cluster notables, built by
-`tools/build_notable_text.py`) - including the game's grey reminder text. The preview renders it
-as HTML positioned against the cursor; the app compiles the same text through
-`Theming/NotableText.g.cs` and shows it via MAUI's `ToolTipProperties`, so content matches even
-though Windows draws the chrome.
+opens the item card exactly as poe.ninja prints it: a gold band carrying the rarity-coloured name
+over the base type with the jewel's art pinned to its left, then centred blocks separated by
+hairlines - item level, "Adds N Passive Skills" and the jewel sockets, "Added Small Passive Skills
+grant: ...", one gold "1 Added Passive Skill is X" per notable, then each notable spelled out with
+its own blue modifier lines - closed by the grey "Place into an allocated ... Jewel Socket" line
+and the jewel art again at the foot. The body is set in a serif face on near-black, every line
+centred, and nothing else: no build counts, no DPS, no odds. The preview positions the card against
+the cursor in `preview/app.js`; the app builds the same card from the same model
+(`ViewModels/JewelCard.cs` → `Views/Controls/ClusterJewelCard.cs`) and floats it under the pointer.
+The modifier text comes from Path of Building's tree data (`preview/assets/notables.json`, 300
+cluster notables, built by `tools/build_notable_text.py`), including the game's grey reminder text.
 
 Every notable also carries its **spawn weight**. A cluster jewel base ("12% increased Fire
-Damage", "10% increased Projectile Damage") rolls its notables from one pool, and each notable
-has a weight inside that pool - so the card prints the pool ("Fire Damage over Time pool · 18
-notables + 51 small-passive mods · 13,195 prefix / 14,150 suffix weight at iLvl 86") and, next to
-each notable, its weight and the odds of rolling it (Exposure Therapy 733 · 5.6%, Cooked Alive
-137 · 1.0%).
+Damage", "10% increased Projectile Damage") rolls its notables from one pool, and each notable has
+a weight inside that pool. Those numbers live on the **crafting** surface, where they decide the
+cost - the card that prices a combination prints the pool ("Fire Damage over Time pool · 18
+notables + 51 small-passive mods · 13,195 prefix / 14,150 suffix weight at iLvl 86") and, per
+target mod, its weight and the odds of rolling it. The item card does not repeat them: on the site
+the item card is the item, and the analysis belongs to the table beside it.
 
 The pool is **not just the notables**. The generic small-passive grants every cluster jewel can
 roll ("Added Small Passive Skills also grant: +3 to maximum Life") compete for the same affix
@@ -185,8 +189,9 @@ craftofexile.com reads - built into `preview/assets/notable_weights.json` by
 `tools/build_notable_weights.py` and compiled into `Theming/NotableWeights.g.cs` by
 `tools/sync_notable_weights.py`. Notables are only ever shown with the weight of the pool their
 own jewel rolls from; the demo snapshot is regenerated so every jewel sits on a real base with
-its notables drawn from that base's pool. Each notable also prints the game's **mod tags**
-(`fire`, `ailment`, `elemental`...) - the tags fossils, harvest and influences key off. The tag
+its notables drawn from that base's pool. Each notable also carries the game's **mod tags**
+(`fire`, `ailment`, `elemental`...) - the tags fossils, harvest and influences key off - shown as
+coloured chips wherever a mod is being priced. The tag
 list is the site's vocabulary of leaf tags: the composite tags a mod-tag query uses
 (`elemental_damage` is elemental + damage, `resource` is the parent of life and mana) are
 dropped, because each of them always arrives alongside the tags that explain it. Doryani's

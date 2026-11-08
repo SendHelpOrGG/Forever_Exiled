@@ -134,26 +134,30 @@ setTimeout(() => {
   check('item card lists the notables as item mods',
     !!tip && /1 Added Passive Skill is /.test(tip.textContent),
     tip ? (tip.textContent.match(/1 Added Passive Skill is [^0-9]+/) || ['none'])[0] : 'missing');
-  check('item card explains what the notables do',
-    !!tip && qa('.item-tip .item-mod-desc').length > 0,
-    tip ? (qa('.item-tip .item-mod-desc')[0] || {}).textContent : 'missing');
-  check('item card names the cluster base pool',
-    /pool · \d+ notables( \+ \d+ small-passive mods)? · [\d,]+ (prefix|suffix)/.test(txt('.item-tip .item-pool')),
-    txt('.item-tip .item-pool'));
-  check('the pool counts the generic small-passive mods, not just the notables',
-    /\+ \d+ small-passive mods/.test(txt('.item-tip .item-pool')),
-    txt('.item-tip .item-pool'));
-  const notableMods = qa('.item-tip .item-mod').filter((n) => /^1 Added Passive Skill is /.test(n.textContent.trim()));
-  const weightBadges = qa('.item-tip .item-weight');
-  check('every notable on the card carries its weight',
-    notableMods.length > 0 && weightBadges.length === notableMods.length,
-    `${weightBadges.length} weights for ${notableMods.length} notables`);
-  check('notables list the mod tags the game gates them with',
-    qa('.item-tip .item-tag').length > 0 && !/\s/.test(q('.item-tip .item-tag').textContent.trim().split(' ')[0] || ''),
-    qa('.item-tip .item-tag').map((n) => n.textContent).join(', '));
+  check('the card opens with the gold name band',
+    !!tip && qa('.item-tip .tip-head').length === 1 && !!q('.item-tip .tip-base'),
+    txt('.item-tip .tip-titles'));
+  check('the band prints the base type under the name',
+    /Cluster Jewel$/.test(txt('.item-tip .tip-base').trim()),
+    txt('.item-tip .tip-base'));
+  const goldLines = qa('.item-tip .tip-line.gold');
+  check('notable affixes are printed in gold, one per notable',
+    goldLines.length >= 2 && goldLines.every((n) => /^1 Added Passive Skill is \S/.test(n.textContent.trim())),
+    goldLines.map((n) => n.textContent.trim()).join(' | '));
+  const notablesOnCard = qa('.item-tip .tip-notable');
+  check('every notable is then spelled out with its own modifiers',
+    notablesOnCard.length > 0 && qa('.item-tip .tip-line.blue').length > notablesOnCard.length,
+    `${notablesOnCard.length} notable blocks · ${qa('.item-tip .tip-line.blue').length} blue lines`);
+  check('the card is closed by the flavour line and the jewel art',
+    /Place into an allocated \w+ Jewel Socket/.test(txt('.item-tip .tip-flavour')) &&
+      qa('.item-tip .tip-foot img').length === 1,
+    txt('.item-tip .tip-flavour').slice(0, 60));
+  check('the card draws the hairlines between blocks',
+    qa('.item-tip .tip-sep').length >= 3,
+    qa('.item-tip .tip-sep').length + ' separators');
   /* colours, not one grey chip: the tag hue comes from assets/tag_colors.json */
   const tagHues = (nodes) => nodes.map((n) => (n.getAttribute('style') || '').toLowerCase());
-  const itemTagNodes = qa('.item-tip .item-tag');
+  const itemTagNodes = qa('#metaCraftCard .craft-tags .tagchip');
   const itemHues = tagHues(itemTagNodes);
   check('mod tags are coloured, not one neutral grey',
     itemTagNodes.length > 0 && itemHues.every((style) => /color:#[0-9a-f]{6}/.test(style))
@@ -181,11 +185,9 @@ setTimeout(() => {
   const unpainted = [...dataTags].filter((tag) => !tagColors.tags[tag]);
   check('every mod tag in the data has a colour', unpainted.length === 0,
     unpainted.length ? unpainted.join(', ') : `${dataTags.size} tags painted`);
-  check('the weight badge also gives the odds of rolling it',
-    weightBadges.every((n) => /\d+\s*\d+(\.\d+)?%/.test(n.textContent.replace(/\s+/g, ' ').trim())),
-    weightBadges.map((n) => n.textContent.trim()).join(' | '));
-  check('item card no longer repeats the analysis figures',
-    !!tip && !/Share of sample|Average DPS/.test(tip.textContent));
+  check('item card carries no analysis and no crafting figures',
+    !!tip && !/Share of sample|Average DPS|% of pool|weight|pool ·/.test(tip.textContent),
+    tip ? tip.textContent.replace(/\s+/g, ' ').slice(0, 110) : 'missing');
   const snapshotNotables = [...new Set(snapshot.characters.flatMap((c) =>
     (c.clusterJewels || []).flatMap((j) => j.notables || [])))];
   const undocumented = snapshotNotables.filter((n) => !notables.notables[String(n).toLowerCase()]);

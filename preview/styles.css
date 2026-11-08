@@ -844,67 +844,62 @@ img.art.tiny { width: 13px; height: 13px; margin-right: 4px; }
 .chip img.art.tiny, .size-tag img.art.tiny { display: inline-block; vertical-align: -3px; }
 .size-tag { display: inline-flex; align-items: center; }
 
-/* ─────────────────── item tooltip (poe.ninja / in-game card) ───────────────── */
+/* ─────────────────── item tooltip (the cluster jewel card, as the game prints it) ───────────────── */
 .item-tip {
-  position: fixed; z-index: 9999; width: 300px; pointer-events: none;
-  padding: 9px 11px 10px;
-  background: linear-gradient(180deg, rgba(14,12,9,.975), rgba(7,8,10,.985));
-  border: 1px solid #45402f; border-radius: 3px;
-  box-shadow: 0 16px 38px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.03);
-  font-size: 15.5px; line-height: 1.45; color: #c8c8c8;
+  position: fixed; z-index: 9999; width: 292px; pointer-events: none;
+  background: #08090a;
+  border: 1px solid #8d8b76; border-radius: 2px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.78);
+  font-family: 'Fontin', 'Palatino Linotype', 'Book Antiqua', Georgia, 'Times New Roman', serif;
+  font-size: 15px; line-height: 1.42; color: #c8c8c8;
   animation: tipIn .08s ease-out;
 }
 @keyframes tipIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
-.item-tip .item-head { display: flex; gap: 10px; align-items: flex-start; }
-.item-tip .item-icon {
-  width: 48px; height: 48px; flex: none; display: grid; place-items: center;
-  background: radial-gradient(120% 120% at 50% 0%, #1b1a12 0%, #0a0b0c 100%);
-  border: 1px solid #3a382c; border-radius: 2px;
+/* the gold band: name over base type, jewel art pinned to its left */
+.item-tip .tip-head {
+  position: relative; text-align: center; padding: 8px 44px 9px;
+  background: linear-gradient(180deg, #7c6b33 0%, #4a3f1d 46%, #2a2412 100%);
+  border-bottom: 1px solid #6a5f3c;
+  display: flex; align-items: center; justify-content: center;
 }
-.item-tip .item-icon img { width: 42px; height: 42px; object-fit: contain; }
-.item-tip .item-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 2px; }
-.item-tip .item-name { font-size: 17.5px; font-weight: 700; letter-spacing: .01em; }
-.item-tip .item-base { font-size: 15.5px; }
+.item-tip .tip-head-icon {
+  position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border-radius: 50%; background: rgba(0,0,0,.42);
+  border: 1px solid rgba(214,197,146,.35);
+}
+.item-tip .tip-head-icon img { width: 26px; height: 26px; object-fit: contain; }
+.item-tip .tip-titles { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.item-tip .tip-name { font-size: 18.5px; font-weight: 700; letter-spacing: .01em; color: #fff; }
+.item-tip .tip-base { font-size: 15.5px; font-weight: 700; color: #f0eadd; }
 
-.item-tip hr {
-  border: 0; height: 1px; margin: 7px 0;
-  background: linear-gradient(90deg, transparent, #4a4436 10%, #4a4436 90%, transparent);
+/* body: every line centred, blocks separated by hairlines */
+.item-tip .tip-body { padding: 8px 12px 9px; }
+.item-tip .tip-block { padding: 1px 0; }
+.item-tip .tip-sep {
+  height: 1px; margin: 6px 0;
+  background: linear-gradient(90deg, transparent, #4b4a40 6%, #4b4a40 94%, transparent);
 }
+.item-tip .tip-line { text-align: center; }
+.item-tip .tip-line.blue { color: #8888ff; }
+.item-tip .tip-line.gold { color: #c9a24c; }
+.item-tip .tip-line.dim { color: #8f8b80; }
+.item-tip .tip-line.faint { color: #6f7a86; font-size: 14px; }
+.item-tip .tip-line.fractured { color: #a29162; }
+.item-tip .tip-line.corrupt { color: #d20000; }
 
-.item-tip .item-props { color: #7f7f7f; }
-.item-tip .item-mods { color: #8888ff; }
-.item-tip .item-mod { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
-.item-tip .item-mod > span:first-child { min-width: 0; }
-.item-tip .item-weight {
-  flex: none; color: #6f7a86; font-size: 13px; font-variant-numeric: tabular-nums;
+/* one notable per block: its name in gold, its mods beneath it in blue */
+.item-tip .tip-notable {
+  text-align: center; color: #c9a24c; font-size: 15px; margin-top: 4px;
 }
-.item-tip .item-weight i { font-style: normal; color: #5a6470; margin-left: 6px; }
-/* mod tags: the hue comes from assets/tag_colors.json (inline), the shape lives here */
-.tagchip {
-  display: inline-block; font-size: 11.5px; letter-spacing: .02em; line-height: 1.5;
-  border: 1px solid transparent; border-radius: 3px; padding: 0 5px; white-space: nowrap;
+.item-tip .tip-notable:first-child { margin-top: 0; }
+
+.item-tip .tip-flavour {
+  text-align: center; color: #8a8a80; font-size: 14px; line-height: 1.4; padding: 0 2px;
 }
-.item-tip .item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 6px 10px; }
-.item-tip .item-tag { font-size: 11.5px; padding: 1px 5px; }
-.craft-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 8px; }
-.craft-tags .tagchip { font-size: 11.5px; }
-.item-tip .item-pool {
-  color: #7b8794; font-size: 13px; letter-spacing: .02em;
-  margin: 3px 0 6px; padding-top: 5px; border-top: 1px dotted rgba(136,136,255,.22);
-}
-.item-tip .item-mods .item-mod + .item-mod { margin-top: 1px; }
-.item-tip .item-mod-desc {
-  color: #8f9aa6; font-size: 14.5px; line-height: 1.4;
-  margin: 1px 0 4px; padding-left: 10px;
-  border-left: 1px solid rgba(136,136,255,.22);
-}
-.item-tip .item-reminder {
-  color: #6b7683; font-size: 13.5px; font-style: italic;
-  margin: -2px 0 4px; padding-left: 10px;
-}
-.item-tip .item-fractured { color: #a29162; }
-.item-tip .item-corrupt { color: #d20000; }
+.item-tip .tip-foot { display: grid; place-items: center; padding-top: 3px; }
+.item-tip .tip-foot img { width: 34px; height: 34px; object-fit: contain; }
 
 
 .has-tip { cursor: help; }
