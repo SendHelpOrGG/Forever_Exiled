@@ -3,6 +3,8 @@
 //   291 cluster-jewel notables across 54 cluster bases,
 //   from the game's mod data (see tools/build_notable_weights.py).
 // </auto-generated>
+#nullable enable
+
 namespace ForeverExiled.App.Theming;
 
 /// <summary>
@@ -11,7 +13,7 @@ namespace ForeverExiled.App.Theming;
 /// </summary>
 public static class NotableWeights
 {
-    public const string Source = "PoE mod data via Path of Building, 2026-11-07";
+    public const string Source = "PoE mod data via Path of Building, 2026-11-08";
 
     private static readonly Dictionary<string, string> PoolLabels = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -1053,10 +1055,10 @@ public static class NotableWeights
         ["antifreeze"] = new[] { "elemental", "cold", "resistance", "ailment" },
         ["antivenom"] = new[] { "poison", "chaos", "resistance", "ailment" },
         ["arcane adept"] = new[] { "damage", "attack", "caster", "speed" },
-        ["arcane heroism"] = new[] {  },
+        ["arcane heroism"] = Array.Empty<string>(),
         ["arcane pyrotechnics"] = new[] { "damage" },
         ["arcing shot"] = new[] { "damage", "attack", "critical" },
-        ["assert dominance"] = new[] {  },
+        ["assert dominance"] = Array.Empty<string>(),
         ["astonishing affliction"] = new[] { "damage", "ailment" },
         ["basics of pain"] = new[] { "damage", "critical" },
         ["battle-hardened"] = new[] { "defences", "armour", "evasion", "physical" },
@@ -1132,7 +1134,7 @@ public static class NotableWeights
         ["eternal suffering"] = new[] { "damage", "chaos" },
         ["evil eye"] = new[] { "damage", "caster", "curse" },
         ["expansive might"] = new[] { "damage", "attack" },
-        ["expendability"] = new[] {  },
+        ["expendability"] = Array.Empty<string>(),
         ["expert sabotage"] = new[] { "speed" },
         ["exploit weakness"] = new[] { "damage", "physical", "caster", "curse" },
         ["explosive force"] = new[] { "damage", "physical", "chaos", "attack" },
@@ -1163,10 +1165,10 @@ public static class NotableWeights
         ["grim oath"] = new[] { "damage", "physical", "chaos" },
         ["guerilla tactics"] = new[] { "damage", "speed" },
         ["haemorrhage"] = new[] { "damage", "critical", "ailment" },
-        ["haunting shout"] = new[] {  },
+        ["haunting shout"] = Array.Empty<string>(),
         ["heart of iron"] = new[] { "defences", "armour" },
         ["heavy hitter"] = new[] { "damage", "attack" },
-        ["heraldry"] = new[] {  },
+        ["heraldry"] = Array.Empty<string>(),
         ["hex breaker"] = new[] { "attack", "caster", "speed", "curse" },
         ["hibernator"] = new[] { "elemental", "cold", "ailment" },
         ["hit and run"] = new[] { "damage", "attack" },
@@ -1195,7 +1197,7 @@ public static class NotableWeights
         ["martial momentum"] = new[] { "damage", "attack", "speed" },
         ["martial prowess"] = new[] { "damage", "attack", "speed" },
         ["master of command"] = new[] { "mana", "aura" },
-        ["master of fire"] = new[] {  },
+        ["master of fire"] = Array.Empty<string>(),
         ["master of the maelstrom"] = new[] { "elemental", "caster", "ailment", "curse" },
         ["master the fundamentals"] = new[] { "damage", "physical", "elemental", "resistance" },
         ["mender's wellspring"] = new[] { "flask", "life" },
@@ -1214,7 +1216,7 @@ public static class NotableWeights
         ["opportunistic fusilade"] = new[] { "damage", "attack", "critical" },
         ["overlord"] = new[] { "damage", "attack" },
         ["overshock"] = new[] { "elemental", "lightning", "ailment" },
-        ["overwhelming malice"] = new[] {  },
+        ["overwhelming malice"] = Array.Empty<string>(),
         ["paralysis"] = new[] { "damage", "elemental", "lightning" },
         ["peace amidst chaos"] = new[] { "life", "defences", "armour" },
         ["peak vigour"] = new[] { "flask", "life" },
@@ -1258,7 +1260,7 @@ public static class NotableWeights
         ["savage response"] = new[] { "damage", "critical" },
         ["savour the moment"] = new[] { "defences", "energy_shield" },
         ["scintillating idea"] = new[] { "mana", "damage", "elemental", "lightning" },
-        ["seal mender"] = new[] {  },
+        ["seal mender"] = Array.Empty<string>(),
         ["second skin"] = new[] { "block", "defences", "armour" },
         ["seeker runes"] = new[] { "damage", "caster" },
         ["self-control"] = new[] { "mana" },
@@ -1269,7 +1271,7 @@ public static class NotableWeights
         ["shrieking bolts"] = new[] { "damage" },
         ["skeletal atrophy"] = new[] { "damage", "physical", "chaos", "minion" },
         ["skullbreaker"] = new[] { "damage", "critical" },
-        ["sleepless sentries"] = new[] {  },
+        ["sleepless sentries"] = Array.Empty<string>(),
         ["smite the weak"] = new[] { "damage", "attack" },
         ["smoking remains"] = new[] { "damage", "elemental", "fire" },
         ["snaring spirits"] = new[] { "damage" },

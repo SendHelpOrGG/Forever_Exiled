@@ -33,7 +33,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- .NET 8+ no longer flows these in through <UseMaui> (MAUI002): name them explicitly. -->
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <!-- MauiProgram's debug logger factory: AddDebug() lives in this package. -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>

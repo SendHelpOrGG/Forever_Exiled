@@ -51,6 +51,8 @@ def main() -> None:
 //   Regenerate with `python3 tools/sync_notable_text.py`; do not edit by hand.
 //   {len(notables)} cluster-jewel notables from preview/assets/notables.json.
 // </auto-generated>
+#nullable enable
+
 namespace ForeverExiled.App.Theming;
 
 /// <summary>

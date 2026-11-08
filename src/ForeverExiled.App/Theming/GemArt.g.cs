@@ -2,6 +2,8 @@
 //   Regenerate with `python3 tools/sync_gem_art.py`; do not edit by hand.
 //   507 skill gem icons from preview/assets/gems.
 // </auto-generated>
+#nullable enable
+
 namespace ForeverExiled.App.Theming;
 
 /// <summary>Skill gem icons shipped in Resources/Images as gem_&lt;slug&gt;.png.</summary>

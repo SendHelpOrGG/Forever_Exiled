@@ -23,6 +23,16 @@ def cs_text(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def cs_array(values: list[str]) -> str:
+    """A string-array literal, or Array.Empty for the notables that carry no tags.
+
+    `new[] { }` has no element type to infer, so an empty list has to name one.
+    """
+    if not values:
+        return "Array.Empty<string>()"
+    return "new[] { " + ", ".join(cs_text(v) for v in values) + " }"
+
+
 def main() -> int:
     data = json.loads(SRC.read_text(encoding="utf-8"))
     categories = data["categories"]
@@ -35,6 +45,9 @@ def main() -> int:
     lines.append(f"//   {len(notables)} cluster-jewel notables across {len(categories)} cluster bases,")
     lines.append("//   from the game's mod data (see tools/build_notable_weights.py).")
     lines.append("// </auto-generated>")
+    # generated code sits outside the project's nullable context, so it has to ask for one
+    lines.append("#nullable enable")
+    lines.append("")
     lines.append("namespace ForeverExiled.App.Theming;")
     lines.append("")
     lines.append("/// <summary>")
@@ -63,8 +76,7 @@ def main() -> int:
     lines.append('    private static readonly Dictionary<string, string[]> PoolSizes = new(StringComparer.OrdinalIgnoreCase)')
     lines.append("    {")
     for tag, category in sorted(categories.items()):
-        sizes = ", ".join(cs_text(s) for s in category["sizes"])
-        lines.append(f"        [{cs_text(tag)}] = new[] {{ {sizes} }},")
+        lines.append(f"        [{cs_text(tag)}] = {cs_array(category['sizes'])},")
     lines.append("    };")
     lines.append("")
 
@@ -116,8 +128,7 @@ def main() -> int:
     lines.append('    private static readonly Dictionary<string, string[]> Tags = new(StringComparer.OrdinalIgnoreCase)')
     lines.append("    {")
     for key, entry in sorted(notables.items()):
-        tags = ", ".join(cs_text(t) for t in entry.get("tags", []))
-        lines.append(f"        [{cs_text(key)}] = new[] {{ {tags} }},")
+        lines.append(f"        [{cs_text(key)}] = {cs_array(entry.get('tags', []))},")
     lines.append("    };")
     lines.append("")
 
