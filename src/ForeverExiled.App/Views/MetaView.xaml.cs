@@ -54,10 +54,11 @@ public partial class MetaView : ContentView
     {
         if (ItemCardHost.Content is VisualElement card)
         {
+            // MAUI's Measure returns a Size directly - there is no SizeRequest wrapper to unwrap
             var measured = card.Measure(CardWidth, double.PositiveInfinity);
-            if (measured.Request.Height > 0)
+            if (measured.Height > 0)
             {
-                return measured.Request.Height;
+                return measured.Height;
             }
         }
 
