@@ -48,6 +48,7 @@ internal static class Program
         }
 
         using var client = new PoeNinjaClient(minInterval: TimeSpan.FromSeconds(options.PacingSeconds));
+        client.PreferCharacterPages = !options.NoPages;
         client.Log = message =>
         {
             if (options.Verbose)
@@ -357,6 +358,9 @@ internal sealed record CaptureOptions
 
     public int PacingSeconds { get; init; } = 5;
 
+    /// <summary>Ask the JSON endpoint instead of scraping character pages.</summary>
+    public bool NoPages { get; init; }
+
     public string OutputPath { get; init; } = "snapshot.json";
 
     public string CacheDirectory { get; init; } = "capture-cache";
@@ -403,6 +407,7 @@ internal sealed record CaptureOptions
                 "--diagnose-dir" => options with { DiagnoseDirectory = Next(arg) },
                 "--no-sample" => options with { Depth = 0 },
                 "--grade-all" => options with { GradeEverySkill = true },
+                "--no-pages" => options with { NoPages = true },
                 "--league" => options with { LeagueUrl = Next(arg) },
                 "--floor" => options with { Floor = ParseDouble(Next(arg), arg) },
                 "--depth" => options with { Depth = ParseInt(Next(arg), arg) },
@@ -470,6 +475,8 @@ internal sealed record CaptureOptions
               --diagnose          Dump the raw search response + column summary, then exit
               --diagnose-dir <d>  Where --diagnose writes its files (default: diagnostics)
               --no-sample         Ladder only, skip the per-character crawl
+              --no-pages          Read characters from the JSON endpoint instead of scraping
+                                  their pages (the pages are the lighter route)
               --grade-all         One search per skill instead of ranking from the single
                                   ladder window (slower, more rows per skill)
               --verbose           Print every HTTP request the client makes

@@ -74,6 +74,7 @@ public sealed class PoeNinjaClient : IDisposable
 
         Pacer = new RequestPacer(minInterval ?? TimeSpan.FromSeconds(5));
         SearchPacer = new RequestPacer(TimeSpan.FromSeconds(1.2));
+        PagePacer = new RequestPacer(TimeSpan.FromSeconds(1.2));
     }
 
     /// <summary>Gate for character requests - the endpoint poe.ninja rate-limits hard.</summary>
@@ -84,6 +85,9 @@ public sealed class PoeNinjaClient : IDisposable
     /// are not throttled the same way, so a sync stays quick without hammering anything.
     /// </summary>
     public RequestPacer SearchPacer { get; }
+
+    /// <summary>Gate for character pages - HTML routes, cached, and far less limited than the API.</summary>
+    public RequestPacer PagePacer { get; }
 
     /// <summary>Optional free-form diagnostics sink (HTTP status codes, retries, ...).</summary>
     public Action<string>? Log { get; set; }
@@ -303,7 +307,13 @@ public sealed class PoeNinjaClient : IDisposable
         return DictionaryDecoder.Decode(payload);
     }
 
-    /// <summary>Fetches one character sheet. Tries the known query contracts in order.</summary>
+    /// <summary>
+    /// Whether a character is read from its own page before the JSON endpoint. The page route
+    /// is cached and served far more freely, and the item sections are the same data.
+    /// </summary>
+    public bool PreferCharacterPages { get; set; } = true;
+
+    /// <summary>Fetches one character sheet. Reads the character page first, then the JSON endpoint.</summary>
     public async Task<CharacterSnapshot> GetCharacterAsync(
         LeagueInfo league,
         BuildRef build,
@@ -312,6 +322,15 @@ public sealed class PoeNinjaClient : IDisposable
         if (string.IsNullOrWhiteSpace(build.Account) || string.IsNullOrWhiteSpace(build.Name))
         {
             throw new PoeDataException("Character reference is missing an account or name.");
+        }
+
+        if (PreferCharacterPages)
+        {
+            var scraped = await TryReadCharacterPageAsync(league, build, cancellationToken).ConfigureAwait(false);
+            if (scraped is not null)
+            {
+                return scraped;
+            }
         }
 
         var modes = _characterContract is null
@@ -391,6 +410,56 @@ public sealed class PoeNinjaClient : IDisposable
         }
 
         throw lastError ?? new PoeDataException($"Could not fetch character {build.Name}.");
+    }
+
+    /// <summary>
+    /// Scrapes the character's own page. Returns null when the page cannot be read or carries
+    /// no items, which is the signal to fall back to the JSON endpoint.
+    /// </summary>
+    private async Task<CharacterSnapshot?> TryReadCharacterPageAsync(
+        LeagueInfo league,
+        BuildRef build,
+        CancellationToken cancellationToken)
+    {
+        var slug = league.Url.Trim('/');
+        if (slug.Contains('/'))
+        {
+            slug = slug[(slug.LastIndexOf('/') + 1)..];
+        }
+
+        var path = CharacterPageScraper.PagePath(slug, build.Account, build.Name);
+
+        try
+        {
+            var payload = await GetBytesAsync(
+                path,
+                "text/html",
+                cancellationToken,
+                tolerateClientErrors: true,
+                pacer: PagePacer).ConfigureAwait(false);
+
+            var html = System.Text.Encoding.UTF8.GetString(payload);
+            var scraped = CharacterPageScraper.Parse(html, build.Account, build.Name, build.MainSkill, build.Dps);
+
+            if (scraped is not null)
+            {
+                Log?.Invoke(
+                    $"character {build.Name}: scraped its page ({scraped.ClusterJewels.Count} cluster jewels)");
+                return scraped;
+            }
+
+            Log?.Invoke($"character {build.Name}: page carried no item data, asking the JSON endpoint");
+            return null;
+        }
+        catch (RateLimitedException)
+        {
+            throw;
+        }
+        catch (PoeDataException ex)
+        {
+            Log?.Invoke($"character {build.Name}: page failed ({ex.Message}), asking the JSON endpoint");
+            return null;
+        }
     }
 
     private async Task<byte[]> GetBytesAsync(

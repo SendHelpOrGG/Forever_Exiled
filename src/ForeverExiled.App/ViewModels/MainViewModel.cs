@@ -39,6 +39,7 @@ public partial class MainViewModel : ObservableObject
         var pace = TimeSpan.FromSeconds(Math.Clamp(_settings.PacingSeconds, 2, 60));
         _sync.Client.Pacer.Interval = pace;
         _sync.Client.Pacer.Floor = pace;
+        _sync.Client.PreferCharacterPages = _settings.PreferCharacterPages;
 
         // a crawl spends most of its time waiting on the server; say what it is waiting for
         _sync.Client.Log = message => BusyDetail = message;

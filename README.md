@@ -334,6 +334,24 @@ It prints the total, the dimensions and every column it decoded for both `overvi
 values, and writes `diagnostics/search-*.bin` (the raw protobuf) plus a `.txt` summary.
 Those two files are what a parser fix needs.
 
+### Scraping the pages before the API
+
+poe.ninja rate-limits its JSON endpoints, and the character endpoint hardest: a crawl of a few
+hundred characters earns multi-minute penalties. The same character is also published as a
+server-rendered HTML page - the site's own builds table links every row to
+`/poe1/builds/{league}/character/{account}/{name}` - which is cached and served far more freely.
+
+So a character is read from **its page first**: the scraper pulls the JSON the page embeds
+(Astro island props, or a `application/json` script block), unwraps Astro's `[tag, value]`
+encoding, and hands the result to the same parser the JSON endpoint feeds. The jewel sections
+are the same data. If a page carries no item data - the one case where the site renders names
+only - the log says so and the JSON endpoint is asked instead, so the fallback is automatic
+rather than a setting to get right. `--no-pages` (capture tool) and
+`AppSettings.PreferCharacterPages` force the endpoint.
+
+Other HTML on the same route (`/poe1/builds/{league}?sort=dps`) is the site's DPS-sorted builds
+table, which is what the search API's `sort=dps` now asks for as well.
+
 ### Rate limiting is deliberate
 
 poe.ninja throttles the character endpoint hard and the `Retry-After` penalty escalates

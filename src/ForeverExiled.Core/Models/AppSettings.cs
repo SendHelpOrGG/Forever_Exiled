@@ -20,6 +20,13 @@ public sealed class AppSettings
     /// </summary>
     public bool GradeEverySkill { get; set; } = true;
 
+    /// <summary>
+    /// Read each character from its own page (server-rendered HTML, cached, lightly limited)
+    /// instead of the JSON endpoint that rate-limits a crawl. Falls back to the endpoint by
+    /// itself when a page carries no item data.
+    /// </summary>
+    public bool PreferCharacterPages { get; set; } = true;
+
     /// <summary>Characters to sample per skill when looking for cluster jewels.</summary>
     public int SampleDepth { get; set; } = 12;
 
