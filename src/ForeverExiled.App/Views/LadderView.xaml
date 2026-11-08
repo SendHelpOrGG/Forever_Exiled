@@ -66,6 +66,11 @@
                                                 StrokeShape="RoundRectangle 3"
                                                 VerticalOptions="Center" />
                                         <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="15" VerticalOptions="Center" />
+                                        <Label Text="{Binding SourceText}"
+                                               Style="{StaticResource Micro}"
+                                               FontSize="10.5"
+                                               TextColor="{StaticResource TextFaint}"
+                                               VerticalOptions="Center" />
                                     </HorizontalStackLayout>
                                     <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
                                         <Border Style="{StaticResource ClassTile}"

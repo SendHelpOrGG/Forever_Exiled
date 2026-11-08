@@ -34,11 +34,13 @@ public partial class MainViewModel
             LadderItems.Add(item);
         }
 
+        var sampled = _allLadderItems.Count(item => item.IsSampled);
+
         LadderSummary = _allLadderItems.Count == 0
-            ? "No builds yet — sync or analyse a skill"
+            ? "No builds yet — press SYNC"
             : query.Length == 0
-                ? $"{_allLadderItems.Count} builds"
-                : $"{LadderItems.Count} of {_allLadderItems.Count} builds";
+                ? $"{_allLadderItems.Count} builds in use · {sampled} sampled"
+                : $"{LadderItems.Count} of {_allLadderItems.Count} builds · {sampled} sampled";
     }
 
     partial void OnLadderFilterChanged(string value) => ApplyLadderFilter();

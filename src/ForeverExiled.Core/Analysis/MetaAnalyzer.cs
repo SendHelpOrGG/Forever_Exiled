@@ -139,17 +139,28 @@ public sealed class MetaAnalyzer
         List<SkillStat> skills,
         List<CharacterSnapshot> characters)
     {
-        if (characters.Count > 0)
-        {
-            return characters
-                .OrderByDescending(c => c.Dps)
-                .Select(ToBuildRef)
-                .ToList();
-        }
+        // every build the app is using: the characters it has read, plus the top-DPS ladder
+        // rows it picked to sample. Showing only the first group is how the Ladder tab ended
+        // up looking like the sample rather than the selection.
+        var sampled = characters
+            .OrderByDescending(c => c.Dps)
+            .Select(ToBuildRef)
+            .ToList();
 
-        return skills
-            .SelectMany(s => s.TopBuilds)
+        var seen = new HashSet<string>(
+            sampled.Select(b => $"{b.Account}/{b.Name}"),
+            StringComparer.OrdinalIgnoreCase);
+
+        // the top of each skill's ladder page - the builds the sampler actually picks from -
+        // rather than all forty per skill, which would bury the list
+        var picks = skills
+            .SelectMany(s => s.TopBuilds.Take(12))
             .Where(b => !string.IsNullOrWhiteSpace(b.Name))
+            .Where(b => seen.Add($"{b.Account}/{b.Name}"))
+            .ToList();
+
+        return sampled
+            .Concat(picks)
             .OrderByDescending(b => b.Dps)
             .ToList();
     }
@@ -164,6 +175,7 @@ public sealed class MetaAnalyzer
         Dps = character.Dps,
         League = character.League,
         ClusterJewelCount = character.ClusterJewels.Count,
+        Sampled = true,
     };
 
     private static List<ClusterCombo> BuildCombos(

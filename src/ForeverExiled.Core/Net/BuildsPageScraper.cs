@@ -68,7 +68,7 @@ public static partial class BuildsPageScraper
         }
 
         var cells = Cell().Matches(rowHtml)
-            .Select(match => new Cell(match.Groups["inner"].Value))
+            .Select(match => new TableCell(match.Groups["inner"].Value))
             .ToList();
 
         if (cells.Count < 3)
@@ -180,7 +180,8 @@ public static partial class BuildsPageScraper
     private static string Clean(string text) =>
         Regex.Replace(WebUtility.HtmlDecode(text).Replace('\u00A0', ' '), @"\s+", " ").Trim();
 
-    private sealed record Cell(string Html)
+    /// <summary>One table cell: its markup for image lookups, its text for numbers.</summary>
+    private sealed record TableCell(string Html)
     {
         public string Text { get; } = Clean(Tag().Replace(Html, " "));
     }

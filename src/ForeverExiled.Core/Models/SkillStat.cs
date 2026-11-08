@@ -64,6 +64,9 @@ public sealed class BuildRef
     /// <summary>Number of cluster jewels the character runs (0 when not sampled yet).</summary>
     public int ClusterJewelCount { get; set; }
 
+    /// <summary>True once this character's sheet has been read, so its jewels are counted.</summary>
+    public bool Sampled { get; set; }
+
     public string DisplayName => string.IsNullOrWhiteSpace(Account) ? Name : $"{Name} ({Account})";
 }
 

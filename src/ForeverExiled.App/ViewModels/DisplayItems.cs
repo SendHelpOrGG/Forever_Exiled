@@ -463,6 +463,8 @@ public sealed class BuildItem
         DpsText = DpsFormatter.Format(build.Dps);
         LevelText = build.Level > 0 ? build.Level.ToString() : "–";
         ClusterText = build.ClusterJewelCount > 0 ? build.ClusterJewelCount.ToString() : "–";
+        SourceText = build.Sampled ? "sampled" : "top-DPS pick";
+        IsSampled = build.Sampled;
         AccentColor = Palette.ForDamageType(DamageTypes.Classify(build.MainSkill));
     }
 
@@ -487,6 +489,11 @@ public sealed class BuildItem
     public string LevelText { get; }
 
     public string ClusterText { get; }
+
+    /// <summary>"sampled" once the character sheet was read, else "top-DPS pick".</summary>
+    public string SourceText { get; }
+
+    public bool IsSampled { get; }
 
     public Color AccentColor { get; }
 }
