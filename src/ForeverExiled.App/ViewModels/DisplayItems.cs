@@ -184,7 +184,7 @@ public sealed partial class SkillCardItem : ObservableObject
     /// </summary>
     public string DpsText => DpsFormatter.Format(Stat.PeakDps);
 
-    public string DpsCaption => "peak DPS";
+    public string DpsCaption => Stat.TopBuilds.Count == 0 ? "not graded" : "peak DPS";
 
     public string PopText => DpsFormatter.Percent(Stat.PopularityPercent);
 

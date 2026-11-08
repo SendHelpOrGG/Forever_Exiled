@@ -148,6 +148,11 @@ public sealed class SyncService
         var denominator = candidates.Count + 1;
         var skills = new List<SkillStat>(candidates.Count);
 
+        // a skill whose request failed or was rate limited has no builds and no DPS; staying
+        // quiet about that is how the rail ends up full of dashes with no explanation
+        var ungraded = new List<string>();
+        RateLimitedException? pause = null;
+
         // Quick mode: one request already returned every ladder row poe.ninja is willing to
         // hand over, so group those by skill instead of asking again per skill. Full mode
         // spends a request per skill to see more of that skill's builds.
@@ -215,8 +220,22 @@ public sealed class SyncService
                         buildCount = filtered.Total;
                     }
                 }
+                catch (RateLimitedException ex)
+                {
+                    // splitting the ladder page over twenty requests is exactly what earns a
+                    // pause; keep what was graded and stop asking
+                    pause = ex;
+                    for (var rest = index; rest < candidates.Count; rest++)
+                    {
+                        ungraded.Add(candidates[rest].Name);
+                    }
+
+                    _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                    break;
+                }
                 catch (PoeDataException ex)
                 {
+                    ungraded.Add(candidate.Name);
                     _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
                 }
             }
@@ -251,6 +270,23 @@ public sealed class SyncService
                 Classes = BuildClassShares(graded, buildCount),
                 TopBuilds = orderable.Take(40).ToList(),
             });
+        }
+
+        var missing = skills
+            .Where(s => s.TopBuilds.Count == 0)
+            .Select(s => s.Name)
+            .Concat(ungraded)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (missing.Count > 0 && ladderWarning.Length == 0)
+        {
+            var examples = string.Join(", ", missing.Take(4)) + (missing.Count > 4 ? ", …" : string.Empty);
+            ladderWarning = pause is not null
+                ? $"{missing.Count} of {candidates.Count} skills were not graded - {pause.Message}"
+                : $"{missing.Count} of {candidates.Count} skills came back without builds ({examples}), " +
+                  "so their DPS is unknown until they answer. Press SYNC again to retry them.";
+            _client.Log?.Invoke(ladderWarning);
         }
 
         // rows on disk but no skill owns them: the skills column did not resolve, so every

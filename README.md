@@ -73,6 +73,16 @@ first network call. It is generated, not scraped: the header shows `SYNTHETIC SA
 the league reads `Allflame (demo)`, and the snapshot version reads `demo — not the live
 ladder`. Press **SYNC** to replace it with the real ladder for the selected league.
 
+**SYNC is the whole pipeline**: it grades the ladder, then reads the top builds of every
+tracked skill so the cluster lab has characters to work with. One button, two phases, with the
+phase named on the busy panel. The lab's **ANALYZE** / **SAMPLE ALL** buttons remain for
+re-reading a single skill or everything on demand — already-sampled characters are skipped, so
+they cost only what is new.
+
+A skill the ladder could not grade (a failed request, or a pause from poe.ninja) is not left as
+a silent dash: the rail labels it `not graded`, the status banner names how many skills are
+affected and why, and the next sync retries them.
+
 ### Getting real data without the UI
 
 The ladder is on poe.ninja, not inside this app. Anything that produces a snapshot JSON can

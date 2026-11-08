@@ -404,8 +404,6 @@ public partial class MainViewModel : ObservableObject
         var token = _cancellation.Token;
         BeginBusy("SYNCING LADDER", "Contacting poe.ninja…");
         ClearError();
-        string? autoSampleSkill = null;
-        var cancelled = false;
 
         var progress = new Progress<SyncProgress>(OnSyncProgress);
 
@@ -432,16 +430,39 @@ public partial class MainViewModel : ObservableObject
 
             StatusMessage = _snapshot.HasLadderWarning
                 ? _snapshot.LadderWarning
-                : $"{_snapshot.Skills.Count} skills above {DpsFormatter.Percent(_settings.MinPopularityPercent)} popularity, sorted by DPS.";
+                : $"{_snapshot.Skills.Count} skills above {DpsFormatter.Percent(_settings.MinPopularityPercent)} popularity, sorted by peak DPS.";
 
-            // Sample the selected skill right away, but only once the busy overlay is gone -
-            // the sampler refuses to start while another job owns the busy state.
-            autoSampleSkill = SelectedSkill?.Stat.Name;
+            // the ladder is only half the data, and asking for a second click to fetch the
+            // other half is a design mistake: sync means sync
+            var sampleNames = _snapshot.Skills.Select(skill => skill.Name).ToList();
+            if (!_snapshot.IsSample && sampleNames.Count > 0)
+            {
+                BeginBusy(
+                    "SAMPLING CHARACTERS",
+                    $"Reading the top {_settings.SampleDepth} builds of {sampleNames.Count} skills…");
+
+                _snapshot = await _sync
+                    .SampleManyAsync(_snapshot, sampleNames, _settings.SampleDepth, progress, token)
+                    .ConfigureAwait(true);
+
+                Publish();
+
+                if (_sync.LastSamplingError.Length > 0)
+                {
+                    LastError = _sync.LastSamplingError;
+                    HasError = true;
+                    StatusMessage = LastError;
+                }
+                else
+                {
+                    StatusMessage =
+                        $"{_snapshot.Characters.Count} characters sampled across {_snapshot.Skills.Count} skills.";
+                }
+            }
         }
         catch (OperationCanceledException)
         {
-            cancelled = true;
-            StatusMessage = "Sync cancelled.";
+            StatusMessage = "Sync cancelled. Whatever was sampled is saved.";
         }
         catch (Exception ex) when (ex is PoeDataException or HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException)
         {
@@ -454,10 +475,6 @@ public partial class MainViewModel : ObservableObject
             _cancellation = null;
         }
 
-        if (autoSampleSkill is not null && !cancelled)
-        {
-            await AnalyzeSkillInternalAsync(autoSampleSkill, updateStatus: false).ConfigureAwait(true);
-        }
     }
 
     [RelayCommand]
