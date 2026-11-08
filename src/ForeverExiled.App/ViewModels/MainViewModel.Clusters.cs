@@ -102,9 +102,9 @@ public partial class MainViewModel
         var profile = _analysis.FindProfile(skill.Name);
         var total = skill.Stat.TopBuilds.Count;
         SelectedSkillSampleText = profile is { SampledBuilds: > 0 }
-            ? $"{profile.SampledBuilds} of {total} top builds sampled"
+            ? $"{profile.SampledBuilds} of {total} top-DPS builds sampled"
             : total > 0
-                ? $"0 of {total} top builds sampled"
+                ? $"0 of {total} top-DPS builds sampled"
                 : _snapshot.HasLadderWarning
                     ? "no ladder rows — see the status bar"
                     : "no ladder rows";

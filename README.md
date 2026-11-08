@@ -274,7 +274,11 @@ is then queried with `?skills=<name>` to collect its top-100 builds and grade th
 average / median / peak DPS.
 
 **Phase 2 — cluster jewels (polite: rate-limited, cached).**
-For a skill, the top-N builds by DPS get one `/character` request each. Cluster jewels are
+For a skill, the top-N builds by DPS get one `/character` request each. The ordering is
+poe.ninja's `dps.total` per ladder row, sorted by us, descending — and the rows we ever see
+are capped: one `search` call returns at most ~100 rows for the site's current sort, so a
+skill's sample is its DPS leaders, not a random or complete slice of the ladder. The sample
+size is `SampleDepth` (default 12, Settings → sample depth). Cluster jewels are
 extracted from `clusterJewels[]`, `jewels[].itemData` and `items[]` (all three shapes have
 existed) and reduced to: size, passive count, enchant type line, notables, small-passive
 grants and the `35% increased Effect` fracture.

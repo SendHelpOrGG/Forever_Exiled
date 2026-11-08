@@ -910,9 +910,9 @@ function renderHero() {
 
   const accent = DAMAGE_COLOR[stat.damageType] || DAMAGE_COLOR.Physical;
   const sampleText = profile && profile.sampledBuilds > 0
-    ? `${profile.sampledBuilds} of ${profile.topBuilds} top builds sampled`
+    ? `${profile.sampledBuilds} of ${profile.topBuilds} top-DPS builds sampled`
     : profile && profile.topBuilds > 0
-      ? `0 of ${profile.topBuilds} top builds sampled`
+      ? `0 of ${profile.topBuilds} top-DPS builds sampled`
       : 'no ladder rows';
 
   host.innerHTML = `
