@@ -210,7 +210,8 @@ things keep that from costing frames: the rows live in a virtualising `Collectio
 visible dozen exist as controls, so scrolling does not re-lay-out hundreds of them), and the rows
 themselves are handed over as one freshly built list per filter change rather than appended one by
 one to an observable collection - appending re-lays-out the whole stack per row, which is
-quadratic. The preview does the same job with `content-visibility: auto`, a rank lookup table
+quadratic. The same holds for the skill rail and the combination cards, and picking a skill whose
+cards are already on screen does not rebuild them at all. The preview does the same job with `content-visibility: auto`, a rank lookup table
 instead of `indexOf` inside a comparator, and a debounce on the search field so typing does not
 rebuild every row per keystroke.
 

@@ -15,8 +15,6 @@ public partial class MainViewModel
     /// <summary>Rebuilds the full skill rail from the current analysis, preserving selection.</summary>
     private void RebuildSkillRail(string? preferredName)
     {
-        _allSkillCards.Clear();
-
         var ordered = string.Equals(_sortMode, "Popularity", StringComparison.Ordinal)
             ? _analysis.Skills
                 .OrderByDescending(s => s.PopularityPercent)
@@ -30,12 +28,10 @@ public partial class MainViewModel
 
         var maxDps = ordered.Count > 0 ? ordered.Max(s => s.PeakDps) : 0;
 
-        for (var index = 0; index < ordered.Count; index++)
-        {
-            var stat = ordered[index];
-            var profile = _analysis.FindProfile(stat.Name);
-            _allSkillCards.Add(new SkillCardItem(stat, index + 1, profile, maxDps, SelectSkill));
-        }
+        _allSkillCards = ordered
+            .Select((stat, index) => new SkillCardItem(
+                stat, index + 1, _analysis.FindProfile(stat.Name), maxDps, SelectSkill))
+            .ToList();
 
         ApplySkillFilter(preferredName);
     }
@@ -52,11 +48,7 @@ public partial class MainViewModel
                             || c.DamageType.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-        Skills.Clear();
-        foreach (var item in filtered)
-        {
-            Skills.Add(item);
-        }
+        Skills = filtered;
 
         var target = filtered.FirstOrDefault(c => string.Equals(c.Name, preferredName, StringComparison.OrdinalIgnoreCase))
                      ?? filtered.FirstOrDefault(c => c.IsSelected)
@@ -64,7 +56,19 @@ public partial class MainViewModel
 
         if (target is not null)
         {
-            SelectSkill(target);
+            // typing in the filter re-applies the same selection on every keystroke; rebuilding
+            // the combination cards and their prices for an unchanged skill is pure waste
+            if (ReferenceEquals(target, SelectedSkill) && HasCombos)
+            {
+                foreach (var item in _allSkillCards)
+                {
+                    item.IsSelected = ReferenceEquals(item, target);
+                }
+            }
+            else
+            {
+                SelectSkill(target);
+            }
         }
         else
         {
@@ -133,7 +137,7 @@ public partial class MainViewModel
         SelectedSkillDamageType = string.Empty;
         SelectedSkillSampleText = string.Empty;
         CanAnalyze = false;
-        Combos.Clear();
+        Combos = Array.Empty<ComboItem>();
         SelectCraftCombo(null);
         HasCombos = false;
         ShowComboEmptyState = true;
@@ -143,8 +147,6 @@ public partial class MainViewModel
 
     private void RebuildCombos()
     {
-        Combos.Clear();
-
         var skill = SelectedSkill;
         var profile = skill is null ? null : _analysis.FindProfile(skill.Stat.Name);
         var combos = profile?.ForSize(CurrentSize) ?? new List<ClusterCombo>();
@@ -153,15 +155,19 @@ public partial class MainViewModel
 
         var maxBuilds = combos.Count > 0 ? combos.Max(c => c.BuildCount) : 0;
         var rank = 1;
-        foreach (var combo in combos.Take(10))
-        {
-            Combos.Add(new ComboItem(combo, rank++, profile?.SampledBuilds ?? 0, maxBuilds, showSkills: false, SelectCraftCombo));
-        }
+        var cards = combos
+            .Take(10)
+            .Select(combo => new ComboItem(
+                combo, rank++, profile?.SampledBuilds ?? 0, maxBuilds, showSkills: false, SelectCraftCombo))
+            .ToList();
+
+        // one assignment, so the stack lays out once rather than once per card
+        Combos = cards;
 
         // the first combination is priced until another one is picked
-        SelectCraftCombo(Combos.FirstOrDefault());
+        SelectCraftCombo(cards.FirstOrDefault());
 
-        HasCombos = Combos.Count > 0;
+        HasCombos = cards.Count > 0;
         ShowComboEmptyState = !HasCombos;
 
         var sizeLabel = CurrentSize.ToLabel();
@@ -220,6 +226,25 @@ public partial class MainViewModel
     /// <summary>The combination the crafting card is currently priced for, in either list.</summary>
     private ClusterCombo? _craftedCombo;
 
+    /// <summary>
+    /// Priced routes per combination and item level. Switching between combinations recomputed
+    /// the same odds from scratch, twice - once for the base's own level, once for an iLvl 86
+    /// base - for jewels that were just priced a moment before.
+    /// </summary>
+    private readonly Dictionary<(ClusterCombo Combo, int Level), IReadOnlyList<CraftRouteItem>> _routeCache = new();
+
+    private IReadOnlyList<CraftRouteItem> RoutesFor(ClusterCombo combo, int level)
+    {
+        if (_routeCache.TryGetValue((combo, level), out var known))
+        {
+            return known;
+        }
+
+        var routes = level == 0 ? CraftingMath.Routes(combo) : CraftingMath.Routes(combo, level);
+        _routeCache[(combo, level)] = routes;
+        return routes;
+    }
+
     private void SelectCraftCombo(ComboItem? item)
     {
         _craftedCombo = item?.Combo;
@@ -266,14 +291,14 @@ public partial class MainViewModel
         // an iLvl 86 base rolls a bigger pool, so the same craft is harder - and that is the
         // number every other calculator shows, because that is the base people buy
         const int endgameLevel = 86;
-        var endgame = level < endgameLevel ? CraftingMath.Routes(item.Combo, endgameLevel) : Array.Empty<CraftRouteItem>();
+        var endgame = level < endgameLevel ? RoutesFor(item.Combo, endgameLevel) : Array.Empty<CraftRouteItem>();
         // other calculators price an iLvl 84+ base and lead with alt -> regal
         var sameRoute = endgame.FirstOrDefault(route => route.Name == "Alt → Regal") ?? endgame.FirstOrDefault();
         CraftEndgameText = sameRoute is null
             ? string.Empty
             : $"{sameRoute.Name} on an iLvl {endgameLevel} base ≈ {CraftRouteItem.ChaosLabel(sameRoute.Chaos)}";
 
-        foreach (var route in CraftingMath.Routes(item.Combo))
+        foreach (var route in RoutesFor(item.Combo, 0))
         {
             CraftRoutes.Add(route);
         }

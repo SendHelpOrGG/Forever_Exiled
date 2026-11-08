@@ -247,7 +247,7 @@ public sealed partial class ComboItem : ObservableObject
         SizeImage = Palette.ImageForClusterSize(combo.Size);
         SizeLabel = combo.Size.ToLabel();
         IsLeader = rank == 1;
-        ItemCard = JewelCard.For(combo);
+        _comboForCard = combo;
 
         Chips = combo.Notables.Count > 0
             ? combo.Notables.Select(n => new ChipItem(n)).ToList()
@@ -321,11 +321,15 @@ public sealed partial class ComboItem : ObservableObject
     [ObservableProperty]
     private bool _isCrafted;
 
+    private readonly ClusterCombo _comboForCard;
+    private JewelCard? _itemCard;
+
     /// <summary>
     /// The jewel as poe.ninja prints it on hover - name over base type in the gold band, then
-    /// the mods as coloured lines. No weights, no tags: those belong to the crafting surface.
+    /// the mods as coloured lines. Built on first hover: a list rebuild creates a dozen of
+    /// these rows, and none of them needs a card until one is actually pointed at.
     /// </summary>
-    public JewelCard ItemCard { get; }
+    public JewelCard ItemCard => _itemCard ??= JewelCard.For(_comboForCard);
 
     public List<ChipItem> Chips { get; }
 }

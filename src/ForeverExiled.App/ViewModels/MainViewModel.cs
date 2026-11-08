@@ -21,7 +21,7 @@ public partial class MainViewModel : ObservableObject
     private readonly MetaAnalyzer _analyzer;
     private readonly SnapshotStore _store;
     private readonly AppSettings _settings;
-    private readonly List<SkillCardItem> _allSkillCards = new();
+    private List<SkillCardItem> _allSkillCards = new();
     private List<BuildItem> _allLadderItems = new();
 
     private SnapshotDocument _snapshot = new();
@@ -79,9 +79,21 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<NavItem> NavItems { get; }
 
-    public ObservableCollection<SkillCardItem> Skills { get; } = new();
+    /// <summary>
+    /// The skill rail's rows, replaced in one assignment per filter change. Each row is a gem
+    /// image, a class portrait and a DPS bar; adding them one at a time re-laid-out the whole
+    /// rail per row, which made typing in the skill filter stutter.
+    /// </summary>
+    [ObservableProperty]
+    private IReadOnlyList<SkillCardItem> _skills = Array.Empty<SkillCardItem>();
 
-    public ObservableCollection<ComboItem> Combos { get; } = new();
+    /// <summary>
+    /// The combination cards on screen. A plain list replaced in one assignment: with an
+    /// observable collection every add re-lays-out the stack, and each card is a heavy template
+    /// (two images, chips, tags, a bar), so ten adds meant ten layout passes.
+    /// </summary>
+    [ObservableProperty]
+    private IReadOnlyList<ComboItem> _combos = Array.Empty<ComboItem>();
 
     public ObservableCollection<PillItem> SizePills { get; }
 
@@ -107,7 +119,8 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<LeaderItem> TopNotables { get; } = new();
 
-    public ObservableCollection<ComboItem> TopCombos { get; } = new();
+    [ObservableProperty]
+    private IReadOnlyList<ComboItem> _topCombos = Array.Empty<ComboItem>();
 
     /// <summary>
     /// The ladder rows on screen. A plain list, replaced in one assignment per filter change:
@@ -576,6 +589,10 @@ public partial class MainViewModel : ObservableObject
     private void Publish()
     {
         var previousName = SelectedSkill?.Stat.Name;
+
+        // a new analysis means new combination objects: prices worked out for the old ones
+        // cannot be reused
+        _routeCache.Clear();
 
         _analysis = _analyzer.Analyze(_snapshot, _settings.MinPopularityPercent);
         IsSampleData = _snapshot.IsSample;

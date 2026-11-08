@@ -68,25 +68,26 @@ public partial class MainViewModel
         }
 
         // ---- popular combinations, each tap pricing it in the crafting card
-        TopCombos.Clear();
         var maxCombo = global.TopCombos.Count > 0 ? global.TopCombos[0].BuildCount : 0;
         var comboRank = 1;
-        foreach (var combo in global.TopCombos.Take(6))
-        {
-            TopCombos.Add(new ComboItem(
-                combo, comboRank++, global.CharactersSampled, maxCombo, showSkills: true, SelectCraftCombo));
-        }
+        var rows = global.TopCombos
+            .Take(6)
+            .Select(combo => new ComboItem(
+                combo, comboRank++, global.CharactersSampled, maxCombo, showSkills: true, SelectCraftCombo))
+            .ToList();
+
+        TopCombos = rows;
 
         // the meta tab shows the crafting card, so something has to be priced: default to the
         // most popular combination until the user picks one
         if (CraftRoutes.Count == 0)
         {
-            SelectCraftCombo(TopCombos.FirstOrDefault());
+            SelectCraftCombo(rows.FirstOrDefault());
         }
         else
         {
             // keep the accent on the row whose combination the card is still pricing
-            foreach (var row in TopCombos)
+            foreach (var row in rows)
             {
                 row.IsCrafted = ReferenceEquals(row.Combo, _craftedCombo);
             }
