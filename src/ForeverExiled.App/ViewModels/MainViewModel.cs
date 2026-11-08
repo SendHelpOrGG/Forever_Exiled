@@ -401,7 +401,9 @@ public partial class MainViewModel : ObservableObject
             _snapshot = await _sync.RefreshLadderAsync(league, _settings, progress, token).ConfigureAwait(true);
             Publish();
 
-            StatusMessage = $"{_snapshot.Skills.Count} skills above {DpsFormatter.Percent(_settings.MinPopularityPercent)} popularity, sorted by DPS.";
+            StatusMessage = _snapshot.HasLadderWarning
+                ? _snapshot.LadderWarning
+                : $"{_snapshot.Skills.Count} skills above {DpsFormatter.Percent(_settings.MinPopularityPercent)} popularity, sorted by DPS.";
 
             // Sample the selected skill right away, but only once the busy overlay is gone -
             // the sampler refuses to start while another job owns the busy state.

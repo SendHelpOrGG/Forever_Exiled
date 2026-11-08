@@ -214,23 +214,30 @@ public sealed class PoeNinjaClient : IDisposable
     }
 
     /// <summary>Runs a ladder search and decodes the protobuf envelope.</summary>
+    /// <param name="overviewOverride">
+    /// Value for the <c>overview</c> query parameter. Defaults to the snapshot name; the
+    /// league slug is the other value the site answers to, and the only way to tell which
+    /// one a deployment wants is to ask for both.
+    /// </param>
     public async Task<SearchResponse> SearchAsync(
         LeagueInfo league,
         IReadOnlyDictionary<string, string>? filters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? overviewOverride = null)
     {
-        var payload = await SearchRawAsync(league, filters, cancellationToken).ConfigureAwait(false);
+        var payload = await SearchRawAsync(league, filters, cancellationToken, overviewOverride).ConfigureAwait(false);
         return SearchResponseParser.Parse(payload);
     }
 
     public async Task<byte[]> SearchRawAsync(
         LeagueInfo league,
         IReadOnlyDictionary<string, string>? filters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? overviewOverride = null)
     {
         var query = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["overview"] = league.SnapshotName,
+            ["overview"] = string.IsNullOrWhiteSpace(overviewOverride) ? league.SnapshotName : overviewOverride,
             ["type"] = string.IsNullOrEmpty(league.Type) ? "exp" : league.Type,
         };
 

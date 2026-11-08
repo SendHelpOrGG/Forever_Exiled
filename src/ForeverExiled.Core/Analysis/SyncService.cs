@@ -48,6 +48,55 @@ public sealed class SyncService
         var dictionaries = await _client.GetDictionariesAsync(first, cancellationToken).ConfigureAwait(false);
         var unfilteredRows = SearchResponseParser.ExtractRows(first, dictionaries);
 
+        // poe.ninja answers the same call with the aggregate buckets only when the
+        // `overview` value it wants is not the one we sent, and the site's own pages use
+        // the league slug. Try that before concluding the ladder has no rows.
+        var overview = league.SnapshotName;
+        var ladderWarning = string.Empty;
+
+        if (unfilteredRows.Count == 0 && first.Total > 0 &&
+            !string.Equals(league.SnapshotName, league.Url, StringComparison.OrdinalIgnoreCase))
+        {
+            _client.Log?.Invoke(
+                $"no ladder rows for overview={league.SnapshotName}: {SearchResponseParser.Describe(first)}");
+
+            var retry = await _client.SearchAsync(league, null, cancellationToken, league.Url).ConfigureAwait(false);
+            var retryDictionaries = retry.DictionaryHashes.Count > 0
+                ? await _client.GetDictionariesAsync(retry, cancellationToken).ConfigureAwait(false)
+                : dictionaries;
+            var retryRows = SearchResponseParser.ExtractRows(retry, retryDictionaries);
+
+            if (retryRows.Count > 0)
+            {
+                _client.Log?.Invoke($"ladder rows arrived with overview={league.Url}");
+                overview = league.Url;
+                first = retry;
+                dictionaries = retryDictionaries;
+                unfilteredRows = retryRows;
+            }
+            else
+            {
+                ladderWarning =
+                    $"poe.ninja reported {first.Total:N0} builds but returned no ladder rows, " +
+                    $"so there are no per-build DPS values or characters to sample. " +
+                    $"Response: {SearchResponseParser.Describe(retry)}. " +
+                    "Run the capture tool with --diagnose to dump the payload.";
+            }
+        }
+        else if (unfilteredRows.Count == 0 && first.Total > 0)
+        {
+            ladderWarning =
+                $"poe.ninja reported {first.Total:N0} builds but returned no ladder rows, " +
+                $"so there are no per-build DPS values or characters to sample. " +
+                $"Response: {SearchResponseParser.Describe(first)}. " +
+                "Run the capture tool with --diagnose to dump the payload.";
+        }
+
+        if (ladderWarning.Length > 0)
+        {
+            _client.Log?.Invoke(ladderWarning);
+        }
+
         var totalBuilds = first.Total > 0 ? first.Total : unfilteredRows.Count;
 
         var counts = ReadSkillCounts(first, dictionaries, unfilteredRows);
@@ -93,7 +142,8 @@ public sealed class SyncService
                 var filtered = await _client.SearchAsync(
                     league,
                     new Dictionary<string, string>(StringComparer.Ordinal) { ["skills"] = candidate.Name },
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken,
+                    overview).ConfigureAwait(false);
 
                 var filteredDictionaries = filtered.DictionaryHashes.Count > 0
                     ? await _client.GetDictionariesAsync(filtered, cancellationToken).ConfigureAwait(false)
@@ -128,6 +178,9 @@ public sealed class SyncService
                 .OrderByDescending(r => r.Dps)
                 .ToList();
 
+            // no DPS in the ladder (a parsing gap, or a league that does not publish it):
+            // keep the rows in the site's order so the sampler still has characters to visit
+            var orderable = graded.Count > 0 ? graded : rows;
             var dpsValues = graded.Select(r => r.Dps).ToList();
 
             skills.Add(new SkillStat
@@ -140,7 +193,7 @@ public sealed class SyncService
                 MedianDps = Median(dpsValues),
                 DamageType = DamageTypes.Classify(candidate.Name),
                 Classes = BuildClassShares(graded, buildCount),
-                TopBuilds = graded.Take(40).ToList(),
+                TopBuilds = orderable.Take(40).ToList(),
             });
         }
 
@@ -156,6 +209,7 @@ public sealed class SyncService
             GeneratedAt = DateTimeOffset.UtcNow,
             MinPopularityPercent = settings.MinPopularityPercent,
             TotalBuildsInLeague = totalBuilds,
+            LadderWarning = ladderWarning,
             Skills = skills.OrderByDescending(s => s.AverageDps).ThenByDescending(s => s.BuildCount).ToList(),
             Characters = previous?.Characters ?? new List<CharacterSnapshot>(),
         };

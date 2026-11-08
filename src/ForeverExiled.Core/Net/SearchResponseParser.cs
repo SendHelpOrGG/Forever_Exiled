@@ -133,6 +133,26 @@ public static class SearchResponseParser
     }
 
     /// <summary>
+    /// One-line summary of what a search response actually carried: totals, how many
+    /// columns arrived and what each holds. Printed by the diagnostics path, because a
+    /// response that reports builds but no rows is otherwise indistinguishable from an
+    /// empty league.
+    /// </summary>
+    public static string Describe(SearchResponse response)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+
+        var columns = response.Columns.Count == 0
+            ? "none"
+            : string.Join(", ", response.Columns.Select(c =>
+                $"{c.Name}(rows:{c.Rows} strings:{c.Strings?.Count ?? 0} numbers:{c.Numbers?.Count ?? 0}" +
+                (c.DictionaryId.Length > 0 ? $" dict:{c.DictionaryId}" : string.Empty) + ")"));
+
+        return $"total={response.Total} dimensions={response.Dimensions.Count} " +
+               $"dictionaries={response.DictionaryHashes.Count} rows={response.RowCount} columns=[{columns}]";
+    }
+
+    /// <summary>
     /// Flattens the column-oriented ladder table into build rows. Column names are
     /// matched with tolerant candidates because poe.ninja renames them between
     /// seasons (e.g. <c>dps</c> vs <c>dps.total</c>).

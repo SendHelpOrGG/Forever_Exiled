@@ -78,6 +78,11 @@ internal static class Program
 
         Console.WriteLine($"snapshot {league.SnapshotName} · version {league.Version}");
 
+        if (options.Diagnose)
+        {
+            return await DiagnoseAsync(client, league, options.DiagnoseDirectory).ConfigureAwait(false);
+        }
+
         var settings = new AppSettings
         {
             LeagueUrl = league.Url,
@@ -175,6 +180,102 @@ internal static class Program
         return 0;
     }
 
+    /// <summary>
+    /// Prints what poe.ninja actually returned for the search call, for both values of the
+    /// `overview` parameter, and drops the raw payloads next to the summary so a parser bug
+    /// can be reproduced without another network round trip.
+    /// </summary>
+    private static async Task<int> DiagnoseAsync(PoeNinjaClient client, LeagueInfo league, string directory)
+    {
+        var target = Path.GetFullPath(directory);
+        Directory.CreateDirectory(target);
+
+        Console.WriteLine($"diagnose · league \"{league.Url}\" · name \"{league.Name}\"");
+        Console.WriteLine($"  snapshotName \"{league.SnapshotName}\" · version {league.Version} · type {league.Type}");
+        Console.WriteLine($"  writing {target}");
+        Console.WriteLine();
+
+        var overviews = new[] { league.SnapshotName, league.Url }
+            .Where(o => o.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var found = 0;
+        foreach (var overview in overviews)
+        {
+            var raw = await client.SearchRawAsync(league, null, CancellationToken.None, overview).ConfigureAwait(false);
+            var response = SearchResponseParser.Parse(raw);
+            var dictionaries = await client.GetDictionariesAsync(response, CancellationToken.None).ConfigureAwait(false);
+            var rows = SearchResponseParser.ExtractRows(response, dictionaries);
+
+            var slug = new string(overview.Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
+            var stem = Path.Combine(target, $"search-{slug}-{league.Version}");
+            await File.WriteAllBytesAsync(stem + ".bin", raw).ConfigureAwait(false);
+
+            var summary = new List<string>
+            {
+                $"overview={overview}",
+                $"url=/poe1/api/builds/{league.Version}/search?overview={overview}&type={league.Type}",
+                $"payload={raw.Length} bytes",
+                SearchResponseParser.Describe(response),
+                $"rows extracted: {rows.Count}",
+                string.Empty,
+            };
+
+            foreach (var column in response.Columns)
+            {
+                summary.Add($"column {column.Name}: rows={column.Rows} strings={column.Strings?.Count ?? 0} " +
+                            $"numbers={column.Numbers?.Count ?? 0} dict={column.DictionaryId}");
+            }
+
+            foreach (var row in rows.Take(5))
+            {
+                summary.Add($"row {row.Name} | {row.Account} | {row.ClassName} | " +
+                            $"lvl {row.Level} | {row.Dps:N0} dps | {row.MainSkill}");
+            }
+
+            if (rows.Count == 0)
+            {
+                summary.Add("no rows: if the column list above is empty, poe.ninja sent aggregates " +
+                            "only; if it is not, the column names no longer match what ExtractRows looks for.");
+            }
+
+            await File.WriteAllLinesAsync(stem + ".txt", summary).ConfigureAwait(false);
+
+            Console.WriteLine($"overview=\"{overview}\"");
+            Console.WriteLine($"  {SearchResponseParser.Describe(response)}");
+            Console.WriteLine($"  rows extracted: {rows.Count}");
+            foreach (var column in response.Columns.Take(20))
+            {
+                Console.WriteLine($"    column {column.Name}: rows={column.Rows} " +
+                                  $"strings={column.Strings?.Count ?? 0} numbers={column.Numbers?.Count ?? 0} " +
+                                  $"dict={column.DictionaryId}");
+            }
+
+            foreach (var row in rows.Take(3))
+            {
+                Console.WriteLine($"    row {row.Name} | {row.Account} | {row.ClassName} | {row.Dps:N0} dps");
+            }
+
+            Console.WriteLine($"  wrote {stem}.bin and .txt");
+            Console.WriteLine();
+
+            found = Math.Max(found, rows.Count);
+        }
+
+        if (found == 0)
+        {
+            Console.WriteLine("Neither `overview` value returned ladder rows. Send the .bin/.txt pair");
+            Console.WriteLine("above along with the poe.ninja snapshot version - that is the payload");
+            Console.WriteLine("the parser has to be taught.");
+            return 3;
+        }
+
+        Console.WriteLine($"Ladder rows are readable ({found} rows). A sync should work; if the app still");
+        Console.WriteLine("shows none, the app is reading a cached snapshot from before the fix.");
+        return 0;
+    }
+
     private static int _lastProgressWidth;
 
     private static void WriteProgress(SyncProgress progress)
@@ -222,6 +323,10 @@ internal sealed record CaptureOptions
 
     public bool CopyToPreview { get; init; }
 
+    public bool Diagnose { get; init; }
+
+    public string DiagnoseDirectory { get; init; } = "diagnostics";
+
     public bool Verbose { get; init; }
 
     public bool ShowHelp { get; init; }
@@ -251,6 +356,8 @@ internal sealed record CaptureOptions
                 "-h" or "--help" => options with { ShowHelp = true },
                 "-v" or "--verbose" => options with { Verbose = true },
                 "--preview" => options with { CopyToPreview = true },
+                "--diagnose" => options with { Diagnose = true },
+                "--diagnose-dir" => options with { DiagnoseDirectory = Next(arg) },
                 "--no-sample" => options with { Depth = 0 },
                 "--league" => options with { LeagueUrl = Next(arg) },
                 "--floor" => options with { Floor = ParseDouble(Next(arg), arg) },
@@ -316,6 +423,8 @@ internal sealed record CaptureOptions
               --out <path>        Snapshot file to write (default: snapshot-<league>.json)
               --cache <dir>       Working cache, lets a crawl resume (default: capture-cache)
               --preview           Also copy the result to preview/data/live-snapshot.json
+              --diagnose          Dump the raw search response + column summary, then exit
+              --diagnose-dir <d>  Where --diagnose writes its files (default: diagnostics)
               --no-sample         Ladder only, skip the per-character crawl
               --verbose           Print every HTTP request the client makes
               -h, --help          This text
@@ -326,6 +435,9 @@ internal sealed record CaptureOptions
 
               # quick look: top 5 skills only, 6 builds each, 3s pacing
               dotnet run --project tools/ForeverExiled.Capture -- --skills 5 --depth 6 --pacing 3
+
+              # the ladder came back empty: what is poe.ninja actually sending?
+              dotnet run --project tools/ForeverExiled.Capture -- --diagnose
 
             Etiquette: per-character requests are the ones poe.ninja throttles. The client
             honours Retry-After and widens its pace after a 429. Leave --pacing at 5s unless

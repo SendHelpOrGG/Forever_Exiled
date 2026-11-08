@@ -66,6 +66,14 @@ public sealed class SnapshotDocument
 
     public int TotalBuildsInLeague { get; set; }
 
+    /// <summary>
+    /// Set when the ladder came back without usable rows: the skills and their shares are
+    /// real, but nothing can be sampled, so the UI says why instead of showing an empty lab.
+    /// </summary>
+    public string LadderWarning { get; set; } = string.Empty;
+
+    public bool HasLadderWarning => LadderWarning.Length > 0;
+
     public List<SkillStat> Skills { get; set; } = new();
 
     public List<CharacterSnapshot> Characters { get; set; } = new();

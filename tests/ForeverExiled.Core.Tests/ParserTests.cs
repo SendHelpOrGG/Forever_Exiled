@@ -69,6 +69,47 @@ public class SearchResponseParserTests
     }
 
     [Fact]
+    public void Describe_reports_an_aggregate_only_response()
+    {
+        // what poe.ninja sends when it answers with popularity but no ladder rows
+        var dimension = ProtoFixture.Concat(
+            ProtoFixture.FieldString(1, "skills"),
+            ProtoFixture.FieldString(2, "gem"),
+            ProtoFixture.FieldBytes(3, ProtoFixture.Concat(
+                ProtoFixture.FieldVarint(1, 2),
+                ProtoFixture.FieldVarint(2, 1114))));
+        var result = ProtoFixture.Concat(
+            ProtoFixture.FieldVarint(1, 13262),
+            ProtoFixture.FieldBytes(2, dimension));
+        var payload = ProtoFixture.FieldBytes(1, result);
+
+        var response = SearchResponseParser.Parse(payload);
+
+        Assert.Equal(13262, response.Total);
+        Assert.Empty(response.Columns);
+        Assert.Equal(0, response.RowCount);
+        Assert.Empty(SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>()));
+
+        var described = SearchResponseParser.Describe(response);
+        Assert.Contains("total=13262", described);
+        Assert.Contains("dimensions=1", described);
+        Assert.Contains("rows=0", described);
+        Assert.Contains("columns=[none]", described);
+    }
+
+    [Fact]
+    public void Describe_names_the_columns_it_did_get()
+    {
+        var fixture = ProtoFixture.BuildSearchResponse();
+
+        var described = SearchResponseParser.Describe(SearchResponseParser.Parse(fixture.Payload));
+
+        Assert.Contains("rows=4", described);
+        Assert.Contains("name(rows:4", described);
+        Assert.Contains("dps.total(rows:4", described);
+    }
+
+    [Fact]
     public void Rejects_a_response_without_an_envelope()
     {
         var payload = ProtoFixture.Concat(ProtoFixture.FieldVarint(2, 7));

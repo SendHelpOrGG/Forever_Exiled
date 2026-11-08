@@ -105,7 +105,9 @@ public partial class MainViewModel
             ? $"{profile.SampledBuilds} of {total} top builds sampled"
             : total > 0
                 ? $"0 of {total} top builds sampled"
-                : "no ladder rows";
+                : _snapshot.HasLadderWarning
+                    ? "no ladder rows — see the status bar"
+                    : "no ladder rows";
 
         CanAnalyze = !IsSampleData && total > 0;
         RebuildCombos();

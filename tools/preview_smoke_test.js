@@ -363,6 +363,11 @@ setTimeout(() => {
   check('meta tab switches', !q('#view-meta').hidden && q('#view-lab').hidden);
   check('meta stat tiles', qa('#metaTiles .tile').length === 6, qa('#metaTiles .v').map((e) => e.textContent).join(' / '));
   check('meta combination list', qa('#metaComboList .meta-combo').length === 12, txt('#metaComboList .mc-title'));
+  // the demo snapshot is synthetic, so the banner is the demo notice - never the
+  // "ladder unreadable" variant that a live snapshot with no rows would show
+  check('demo notice is the synthetic one',
+    !q('#notice').hidden && /Synthetic demo data/.test(txt('#noticeText')));
+
   check('notables card rows', qa('#notablesCard .notable-row').length === 14);
   // the card is height-capped and scrolls instead of pushing the page down
   check('notables card scrolls', qa('#notablesCard .notable-scroll').length === 1);

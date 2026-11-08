@@ -674,12 +674,17 @@ function renderShell() {
   }
 
   const notice = $('notice');
-  notice.hidden = !synthetic;
+  // a live snapshot can arrive with its skills but no ladder rows: say so instead of
+  // rendering an empty lab as if the league had no clusters
+  const ladderWarning = !synthetic && typeof snap.ladderWarning === 'string' ? snap.ladderWarning : '';
+  notice.hidden = !synthetic && !ladderWarning;
   if (synthetic) {
     $('noticeText').innerHTML =
       '<b>Synthetic demo data.</b> Skill shares, DPS values and character names in this snapshot ' +
       'are generated to demonstrate the analysis — they are <b>not</b> the Allflame ladder. ' +
       'Real numbers come from Sync in the Windows app.';
+  } else if (ladderWarning) {
+    $('noticeText').innerHTML = '<b>Ladder unreadable.</b> ' + esc(ladderWarning);
   }
 
   $('lastSync').textContent = state.lastSync

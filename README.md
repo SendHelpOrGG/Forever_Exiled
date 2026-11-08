@@ -284,6 +284,30 @@ grants and the `35% increased Effect` fracture.
 running the same jewel twice counts once. Popularity is *builds running it ÷ builds
 sampled for that skill*.
 
+### When the ladder comes back without rows
+
+A sync can return the skills and their popularity but no ladder rows: poe.ninja answers
+the same `search` call with the aggregate buckets alone. That is the shape of the response
+in which nothing can be sampled, so the app now
+
+- retries the call once with the league slug as `overview` (the site's own pages use it)
+  before concluding the ladder is empty;
+- keeps the rows it did get, even without DPS values, and samples them anyway — the
+  character sheet carries the DPS number;
+- records a `ladderWarning` on the snapshot, which the app shows in the status bar and the
+  preview shows as a banner, instead of an empty lab that looks like a league with no
+  cluster jewels.
+
+To see what poe.ninja actually sent, run the capture tool in diagnostic mode:
+
+```powershell
+dotnet run --project tools/ForeverExiled.Capture -- --diagnose
+```
+
+It prints the total, the dimensions and every column it decoded for both `overview`
+values, and writes `diagnostics/search-*.bin` (the raw protobuf) plus a `.txt` summary.
+Those two files are what a parser fix needs.
+
 ### Rate limiting is deliberate
 
 poe.ninja throttles the character endpoint hard and the `Retry-After` penalty escalates
