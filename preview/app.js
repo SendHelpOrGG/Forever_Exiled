@@ -676,7 +676,15 @@ function renderShell() {
   const notice = $('notice');
   // a live snapshot can arrive with its skills but no ladder rows: say so instead of
   // rendering an empty lab as if the league had no clusters
-  const ladderWarning = !synthetic && typeof snap.ladderWarning === 'string' ? snap.ladderWarning : '';
+  // a snapshot written before the warning field existed can still be flagged: skills but
+  // no ladder rows means there is nothing to sample
+  const ladderEmpty = !synthetic && Array.isArray(snap.skills) && snap.skills.length > 0
+    && snap.skills.every((s) => !Array.isArray(s.topBuilds) || s.topBuilds.length === 0);
+  const ladderWarning = !synthetic
+    ? (typeof snap.ladderWarning === 'string' && snap.ladderWarning.length ? snap.ladderWarning
+      : ladderEmpty ? 'poe.ninja listed the skills and their popularity, but returned no ladder rows, '
+        + 'so there are no characters to sample. Re-run the capture tool with --diagnose.' : '')
+    : '';
   notice.hidden = !synthetic && !ladderWarning;
   if (synthetic) {
     $('noticeText').innerHTML =

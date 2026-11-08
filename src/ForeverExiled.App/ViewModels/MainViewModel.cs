@@ -561,11 +561,20 @@ public partial class MainViewModel : ObservableObject
         }
 
         // a live snapshot with skills but no ladder rows: the lab would look empty for no
-        // stated reason, so say it in a strip above the content as well as the status bar
-        HasLadderWarning = _snapshot.HasLadderWarning;
-        LadderWarningText = HasLadderWarning
+        // stated reason, so say it in a strip above the content as well as the status bar.
+        // Older snapshots predate the warning field, so the empty ladder is also derived.
+        var ladderEmpty = !_snapshot.IsSample &&
+                          _snapshot.Skills.Count > 0 &&
+                          _snapshot.Skills.All(skill => skill.TopBuilds.Count == 0);
+
+        HasLadderWarning = _snapshot.HasLadderWarning || ladderEmpty;
+        LadderWarningText = _snapshot.HasLadderWarning
             ? _snapshot.LadderWarning + " The Cluster Lab stays empty until the ladder parses again."
-            : string.Empty;
+            : ladderEmpty
+                ? "poe.ninja listed this league's skills and their popularity, but returned no ladder rows, "
+                  + "so there are no characters to sample. Press SYNC to retry; if it stays empty, run "
+                  + "tools/ForeverExiled.Capture with --diagnose and send the dump."
+                : string.Empty;
 
         LastSyncText = Humanize(_snapshot.GeneratedAt);
         LeaguesText = LeagueNames.Count == 0 ? LeaguesText : $"{ LeagueNames.Count} leagues available";
