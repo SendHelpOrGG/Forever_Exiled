@@ -207,6 +207,27 @@
                     </HorizontalStackLayout>
 
                     <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                        <!-- the two unique cluster jewels are not rollable combinations -->
+                        <Border Style="{StaticResource Pill}" Padding="11,7"
+                                ToolTipProperties.Text="{Binding UniquesCaption}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleUniqueJewelsCommand}" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding ShowUniqueJewels}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+                                    <Setter Property="Opacity" Value="0.72" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <HorizontalStackLayout Spacing="6">
+                                <Image Source="cluster_large.png"
+                                       WidthRequest="15" HeightRequest="15"
+                                       Aspect="AspectFit"
+                                       VerticalOptions="Center" />
+                                <Label Text="UNIQUES" Style="{StaticResource PillLabel}" />
+                            </HorizontalStackLayout>
+                        </Border>
+
                         <Button Text="ANALYZE"
                                 Style="{StaticResource GhostButton}"
                                 Command="{Binding AnalyzeSelectedSkillCommand}"

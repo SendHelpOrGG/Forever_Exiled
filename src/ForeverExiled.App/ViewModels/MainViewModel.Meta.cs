@@ -71,6 +71,7 @@ public partial class MainViewModel
         var maxCombo = global.TopCombos.Count > 0 ? global.TopCombos[0].BuildCount : 0;
         var comboRank = 1;
         var rows = global.TopCombos
+            .Where(combo => ShowUniqueJewels || !combo.IsUnique)
             .Take(6)
             .Select(combo => new ComboItem(
                 combo, comboRank++, global.CharactersSampled, maxCombo, showSkills: true, SelectCraftCombo))
@@ -94,7 +95,9 @@ public partial class MainViewModel
         }
 
         // ---- cluster lab side rail
-        var leader = global.LeaderCombo;
+        // a hidden unique cannot be the headline: it would name a jewel the lists refuse to show
+        var leader = global.TopCombos.FirstOrDefault(combo => ShowUniqueJewels || !combo.IsUnique)
+                     ?? global.LeaderCombo;
         GlobalLeaderLabel = leader is not null ? leader.Size.ToLabel() + " · " + leader.Label : "No data yet";
         GlobalLeaderValue = leader is not null ? DpsFormatter.Percent(leader.PercentOfBuilds) : "–";
         GlobalLeaderCaption = leader is not null

@@ -330,15 +330,48 @@ def pick(rng: random.Random, specs) -> tuple:
     return specs[-1]
 
 
+def make_unique_jewel(rng: random.Random, size: str, name: str, notables: list[str]) -> dict:
+    """
+    The two unique cluster jewels. They are fixed items rather than rolled combinations:
+    Voices is three jewel sockets, Megalomaniac is three notables. Both are what the lists
+    have to be able to hide, so the demo has to contain them.
+    """
+    return {
+        "size": size,
+        "baseType": f"{size} Cluster Jewel",
+        "itemName": name,
+        "rarity": "unique",
+        "passives": 3,
+        "jewelSockets": 3 if name == "Voices" else 0,
+        "grantType": "",
+        "effectPercent": 0,
+        "notables": notables,
+        "smallGrants": [],
+        "fractured": False,
+        "corrupted": False,
+        "itemLevel": rng.choice([83, 84, 85, 86]),
+    }
+
+
 def make_clusters(rng: random.Random, archetype: str, heavy: bool) -> list[dict]:
     pool = ARCHETYPES[archetype]
     jewels = []
 
-    if rng.random() < 0.85:
+    if rng.random() < 0.12:
+        # Voices has no notables at all: it is three jewel sockets, so its combination is
+        # the item itself and its picture carries no gold "1 Added Passive Skill is" lines
+        jewels.append(make_unique_jewel(rng, "Large", "Voices", []))
+    elif rng.random() < 0.85:
         jewels.append(make_jewel(rng, "Large", pick(rng, pool["large"]), unique_name=True))
+
     medium_count = rng.choices([0, 1, 2], weights=[10, 45, 45 if heavy else 25])[0]
     for _ in range(medium_count):
-        jewels.append(make_jewel(rng, "Medium", pick(rng, pool["medium"]), unique_name=False))
+        if rng.random() < 0.12:
+            pool_notables = [n for n in pick(rng, pool["medium"])[0].split(",") if n]
+            chosen = rng.sample(pool_notables, k=min(3, len(pool_notables)))
+            jewels.append(make_unique_jewel(rng, "Medium", "Megalomaniac", chosen))
+        else:
+            jewels.append(make_jewel(rng, "Medium", pick(rng, pool["medium"]), unique_name=False))
     if rng.random() < (0.5 if heavy else 0.25):
         jewels.append(make_jewel(rng, "Small", pick(rng, pool["small"]), unique_name=False))
     return jewels

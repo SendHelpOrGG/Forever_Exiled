@@ -339,12 +339,14 @@ setTimeout(async () => {
   };
 
   const allJewels = snapshot.characters.flatMap((c) => c.clusterJewels || []);
-  const poolMisses = allJewels.filter((j) => !poolFor(j));
+  // uniques are fixed items: they roll from no pool, so they are not expected to resolve
+  const pooledJewels = allJewels.filter((j) => j.rarity !== 'unique');
+  const poolMisses = pooledJewels.filter((j) => !poolFor(j));
   check('every jewel base resolves to a cluster pool', poolMisses.length === 0,
     poolMisses.length
       ? poolMisses.slice(0, 3).map((j) => j.size + ' / ' + j.grantType).join(', ')
-      : `${allJewels.length} jewels mapped`);
-  const orphans = allJewels.flatMap((j) => {
+      : `${pooledJewels.length} jewels mapped, ${allJewels.length - pooledJewels.length} unique`);
+  const orphans = pooledJewels.flatMap((j) => {
     const tag = poolFor(j);
     return (j.notables || []).filter((n) => !weightOf(n, tag)).map((n) => `${n} (${j.grantType})`);
   });
@@ -370,6 +372,18 @@ setTimeout(async () => {
   check('meta tab switches', !q('#view-meta').hidden && q('#view-lab').hidden);
   check('meta stat tiles', qa('#metaTiles .tile').length === 6, qa('#metaTiles .v').map((e) => e.textContent).join(' / '));
   check('meta combination list', qa('#metaComboList .meta-combo').length === 12, txt('#metaComboList .mc-title'));
+
+  /* ── the unique cluster jewels: Voices, Megalomaniac ── */
+  const uniquesShown = /Voices|Megalomaniac/.test(txt('#metaComboList'));
+  check('the list carries the unique cluster jewels', uniquesShown,
+    (txt('#metaComboList').match(/(Voices|Megalomaniac)[^A-Za-z]*\(\d+%\)/) || ['missing'])[0]);
+  click(q('#uniquePill'));
+  check('hiding uniques takes them out of the lists',
+    !/Voices|Megalomaniac/.test(txt('#metaComboList')) && !q('#uniquePill').classList.contains('on'),
+    txt('#metaComboList .mc-title'));
+  click(q('#uniquePill'));
+  check('showing uniques puts them back',
+    /Voices|Megalomaniac/.test(txt('#metaComboList')) && q('#uniquePill').classList.contains('on'));
   // the demo snapshot is synthetic, so the banner is the demo notice - never the
   // "ladder unreadable" variant that a live snapshot with no rows would show
   check('demo notice is the synthetic one',

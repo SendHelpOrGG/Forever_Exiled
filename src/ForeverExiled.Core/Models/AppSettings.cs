@@ -27,6 +27,13 @@ public sealed class AppSettings
     /// </summary>
     public bool PreferCharacterPages { get; set; } = true;
 
+    /// <summary>
+    /// Whether the unique cluster jewels (Voices, Megalomaniac) are listed alongside the rolled
+    /// ones. They are not combinations anyone can craft, so a reader comparing rollable bases
+    /// often wants them out - but they are also what some builds actually run.
+    /// </summary>
+    public bool ShowUniqueJewels { get; set; } = true;
+
     /// <summary>Characters to sample per skill when looking for cluster jewels.</summary>
     public int SampleDepth { get; set; } = 12;
 

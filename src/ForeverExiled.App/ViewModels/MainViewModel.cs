@@ -36,6 +36,7 @@ public partial class MainViewModel : ObservableObject
         _analyzer = analyzer;
         _store = store;
         _settings = _store.LoadSettings();
+        ShowUniqueJewels = _settings.ShowUniqueJewels;
         var pace = TimeSpan.FromSeconds(Math.Clamp(_settings.PacingSeconds, 2, 60));
         _sync.Client.Pacer.Interval = pace;
         _sync.Client.Pacer.Floor = pace;

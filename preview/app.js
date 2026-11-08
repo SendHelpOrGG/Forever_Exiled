@@ -338,6 +338,8 @@ const state = {
   metaSize: 'all',
   // the combination the Meta tab's crafting card prices (null = the global leader)
   metaCombo: null,
+  // Voices and Megalomaniac are fixed items, not rollable combinations
+  showUniques: true,
   ladderQuery: '',
   ladderSort: { key: 'dps', dir: -1 },
   settings: { depth: 12, pacing: 5, league: 'Allflame (current)' },
@@ -971,10 +973,24 @@ function renderHero() {
     </div>`;
 }
 
+const UNIQUE_NAMES = new Set(['voices', 'megalomaniac']);
+
+/** True for Voices, Megalomaniac and any other unique cluster jewel in a combination. */
+function isUniqueCombo(combo) {
+  const item = (combo && combo.representative) || {};
+  if (String(item.rarity || '').toLowerCase() === 'unique') return true;
+  return UNIQUE_NAMES.has(String(item.itemName || '').trim().toLowerCase());
+}
+
+function renderUniquePill() {
+  const pill = $('uniquePill');
+  if (pill) pill.classList.toggle('on', state.showUniques);
+}
+
 function renderPills() {
   const profile = selectedProfile();
   $('sizePills').innerHTML = SIZES.map((size) => {
-    const count = profile ? profile[size].length : 0;
+    const count = profile ? visibleCombos(profile[size]).length : 0;
     return `
       <button class="pill ${size === state.size ? 'on' : ''}" data-size="${size}">
         <img class="art" src="${SIZE_IMG[size]}" alt="">
@@ -982,6 +998,11 @@ function renderPills() {
         ${count > 0 ? `<span class="n">${count}</span>` : ''}
       </button>`;
   }).join('');
+}
+
+/** The combinations a list should show: uniques only when they are switched on. */
+function visibleCombos(combos) {
+  return state.showUniques ? combos : combos.filter((combo) => !isUniqueCombo(combo));
 }
 
 function renderCombos() {
@@ -997,7 +1018,7 @@ function renderCombos() {
     return;
   }
 
-  const combos = profile ? profile[state.size] : [];
+  const combos = visibleCombos(profile ? profile[state.size] : []);
   if (!combos.length) {
     $('comboHint').textContent = '';
     state.combos = [];
@@ -1093,7 +1114,7 @@ function panel(title, extra = '') {
 
 function renderGlobalRail() {
   const g = state.analysis.global;
-  const leader = g.leaderCombo;
+  const leader = visibleCombos(g.topCombos || [])[0] || g.leaderCombo;
 
   $('globalLeader').innerHTML = leader ? `
     ${panel('Global leader', '<svg class="ic sm" style="color:var(--green)"><use href="#i-crown"/></svg>')}
@@ -1419,13 +1440,13 @@ function renderMeta() {
       <div class="sub">${esc(sub)}</div>
     </div>`).join('');
 
-  const combos = (state.metaSize === 'all'
+  const combos = visibleCombos(state.metaSize === 'all'
     ? g.topCombos
-    : (state.metaSize === 'Large' ? g.largeCombos : g.mediumCombos).slice(0, 12));
+    : (state.metaSize === 'Large' ? g.largeCombos : g.mediumCombos)).slice(0, 12);
   const max = comboMax(combos);
 
   state.metaCombos = combos;
-  const pricedLabel = (state.metaCombo || g.leaderCombo || combos[0] || {}).label;
+  const pricedLabel = (state.metaCombo || combos[0] || g.leaderCombo || {}).label;
   $('metaComboList').innerHTML = combos.length ? combos.map((c, i) => `
     <div class="meta-combo ${c.label === pricedLabel ? 'on' : ''}" data-combo="${i}">
       <span class="mc-art">
@@ -1475,7 +1496,7 @@ function renderMeta() {
     </div>`;
 
   // ---- crafting: the combination tapped above, or the most popular one overall
-  const priced = state.metaCombo || g.leaderCombo || combos[0] || null;
+  const priced = state.metaCombo || visibleCombos(combos)[0] || null;
   renderCraftCard('metaCraftCard', priced);
 }
 
@@ -1562,6 +1583,7 @@ function renderSettings() {
 
 function renderAll() {
   renderShell();
+  renderUniquePill();
   renderSkillRail();
   renderHero();
   renderPills();
@@ -1691,6 +1713,14 @@ function wire() {
   $('skillList').addEventListener('click', (e) => {
     const row = e.target.closest('.skill');
     if (row) selectSkill(row.dataset.skill);
+  });
+
+  $('uniquePill').addEventListener('click', () => {
+    state.showUniques = !state.showUniques;
+    renderUniquePill();
+    renderPills();
+    renderCombos();
+    renderMeta();
   });
 
   $('sizePills').addEventListener('click', (e) => {

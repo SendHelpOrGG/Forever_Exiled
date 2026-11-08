@@ -69,6 +69,18 @@ public sealed class ClusterJewel
 
     public int? ItemLevel { get; set; }
 
+    /// <summary>
+    /// The unique cluster jewels: they carry a fixed name instead of rolled modifiers, and they
+    /// are the ones a reader either wants to see or wants out of a popularity ranking - Voices
+    /// is three jewel sockets, Megalomaniac is three notables, and neither is a "combination"
+    /// anyone can roll.
+    /// </summary>
+    private static readonly string[] UniqueNames = { "Voices", "Megalomaniac" };
+
+    public bool IsUnique =>
+        string.Equals(Rarity, "unique", StringComparison.OrdinalIgnoreCase) ||
+        UniqueNames.Any(unique => string.Equals(ItemName, unique, StringComparison.OrdinalIgnoreCase));
+
     /// <summary>Notables in a stable, case-insensitive alphabetical order.</summary>
     public string SortedNotables =>
         Notables.Count == 0
@@ -153,6 +165,9 @@ public sealed class ClusterCombo
     /// show the item card - rarity, name, item level, flags - exactly as the site does.
     /// </summary>
     public ClusterJewel? Representative { get; set; }
+
+    /// <summary>True for Voices, Megalomaniac and any other unique cluster jewel.</summary>
+    public bool IsUnique => Representative?.IsUnique ?? false;
 }
 
 /// <summary>Frequency of a single notable passive across the analysed sample.</summary>

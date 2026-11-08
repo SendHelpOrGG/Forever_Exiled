@@ -217,6 +217,16 @@ cards are already on screen does not rebuild them at all. The preview does the s
 instead of `indexOf` inside a comparator, and a debounce on the search field so typing does not
 rebuild every row per keystroke.
 
+### The unique cluster jewels
+
+Voices and Megalomaniac are cluster jewels too, but they are not combinations anyone can roll: one
+is three jewel sockets, the other is three notables on a fixed base. They would otherwise sit at
+the top of a popularity ranking and hide the bases people actually craft, so both lists carry a
+**UNIQUES** toggle, and the choice is saved in the settings file (`showUniqueJewels`, on by
+default). Hiding them also hides them from the size pill counts, from the Meta combination list
+and from the global leader card — a hidden jewel cannot be the headline. The bundled demo carries
+55 of them (21 Voices, 34 Megalomaniac) so the toggle is visible without live data.
+
 ### Crafting options
 
 Because the weights are known, the app can say what a jewel costs to craft. Picking a

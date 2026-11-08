@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ForeverExiled.App.Theming;
 using ForeverExiled.Core.Analysis;
@@ -149,7 +150,9 @@ public partial class MainViewModel
     {
         var skill = SelectedSkill;
         var profile = skill is null ? null : _analysis.FindProfile(skill.Stat.Name);
-        var combos = profile?.ForSize(CurrentSize) ?? new List<ClusterCombo>();
+        var combos = (profile?.ForSize(CurrentSize) ?? new List<ClusterCombo>())
+            .Where(combo => ShowUniqueJewels || !combo.IsUnique)
+            .ToList();
 
         RefreshSizePills(profile);
 
@@ -217,7 +220,7 @@ public partial class MainViewModel
                 continue;
             }
 
-            var count = profile?.ForSize(size).Count ?? 0;
+            var count = profile?.ForSize(size).Count(combo => ShowUniqueJewels || !combo.IsUnique) ?? 0;
             pill.CountText = count > 0 ? count.ToString() : string.Empty;
             pill.IsSelected = size == CurrentSize;
         }
@@ -302,6 +305,40 @@ public partial class MainViewModel
         {
             CraftRoutes.Add(route);
         }
+    }
+
+    /// <summary>Shows or hides the unique cluster jewels (Voices, Megalomaniac) in the lists.</summary>
+    [RelayCommand]
+    private void ToggleUniqueJewels() => ShowUniqueJewels = !ShowUniqueJewels;
+
+    /// <summary>
+    /// Whether Voices and Megalomaniac are listed. They are the two unique cluster jewels: a
+    /// fixed item, not a combination anyone can roll, so they distort a popularity ranking - but
+    /// they are what a good number of builds actually wear.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showUniqueJewels = true;
+
+    public string UniquesLabel => ShowUniqueJewels ? "UNIQUES" : "UNIQUES";
+
+    public string UniquesCaption => ShowUniqueJewels
+        ? "Voices and Megalomaniac listed"
+        : "Voices and Megalomaniac hidden";
+
+    partial void OnShowUniqueJewelsChanged(bool value)
+    {
+        OnPropertyChanged(nameof(UniquesCaption));
+
+        if (!_initialized)
+        {
+            return;
+        }
+
+        _settings.ShowUniqueJewels = value;
+        _store.SaveSettings(_settings);
+
+        RebuildCombos();
+        RebuildMetaView();
     }
 
     private void SelectSizePill(PillItem pill)

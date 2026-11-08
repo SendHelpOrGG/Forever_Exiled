@@ -73,9 +73,24 @@
                             <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Accent}" FontSize="14.5" />
                             <Label Text="MOST POPULAR CLUSTER COMBINATIONS" Style="{StaticResource Micro}" VerticalOptions="Center" />
                         </HorizontalStackLayout>
-                        <Label Grid.Column="1"
-                               Text="{Binding SampledBuildsText, StringFormat='across {0} sampled builds'}"
-                               Style="{StaticResource Caption}" />
+                        <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                            <Border Style="{StaticResource Pill}" Padding="10,5"
+                                    ToolTipProperties.Text="{Binding UniquesCaption}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleUniqueJewelsCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ShowUniqueJewels}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+                                        <Setter Property="Opacity" Value="0.72" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="UNIQUES" Style="{StaticResource PillLabel}" FontSize="10.5" />
+                            </Border>
+                            <Label Text="{Binding SampledBuildsText, StringFormat='across {0} sampled builds'}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </Grid>
 
                     <BoxView Color="{StaticResource BorderSoft}" />

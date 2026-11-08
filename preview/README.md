@@ -45,7 +45,8 @@ above the combination list already covers it.
 
 The numbers are produced by the same rules as `MetaAnalyzer.cs`, so they match what the
 Windows app shows for the bundled snapshot: 18 tracked skills, 234 characters,
-576 cluster jewels, 41 distinct combinations, Winter Orb → Medium → *Eye to Eye + Repeater*
+592 cluster jewels (55 of them the uniques Voices and Megalomaniac), 34 distinct combinations,
+Winter Orb → Medium → *Eye to Eye + Repeater*
 at 53.8 % of sampled builds — all of it invented demo data.
 
 ### Showing real data
