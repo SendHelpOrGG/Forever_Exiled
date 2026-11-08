@@ -359,8 +359,12 @@ only - the log says so and the JSON endpoint is asked instead, so the fallback i
 rather than a setting to get right. `--no-pages` (capture tool) and
 `AppSettings.PreferCharacterPages` force the endpoint.
 
-Other HTML on the same route (`/poe1/builds/{league}?sort=dps`) is the site's DPS-sorted builds
-table, which is what the search API's `sort=dps` now asks for as well.
+The builds table is scraped too. `/poe1/builds/{league}?skills={skill}&sort=dps` is the same
+table the search API describes, rendered as HTML, and it is what a skill falls back to when its
+search will not answer: instead of a silent dash, the skill's rows come from the page, DPS and
+character accounts included (the accounts are what the per-character scrape needs). The whole
+league page is the last resort when the ladder search returns no rows at all. Rows whose DPS
+cell cannot be identified are dropped rather than guessed at.
 
 ### Rate limiting is deliberate
 

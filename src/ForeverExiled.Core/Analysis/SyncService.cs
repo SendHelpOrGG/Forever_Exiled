@@ -99,6 +99,28 @@ public sealed class SyncService
                 "Run the capture tool with --diagnose to dump the payload.";
         }
 
+        if (unfilteredRows.Count == 0)
+        {
+            try
+            {
+                var scraped = await _client.ScrapeBuildsAsync(league, null, cancellationToken).ConfigureAwait(false);
+                if (scraped.Count > 0)
+                {
+                    unfilteredRows = scraped;
+                    ladderWarning = string.Empty;
+                    _client.Log?.Invoke($"ladder read from the league page ({scraped.Count} rows)");
+                }
+            }
+            catch (RateLimitedException)
+            {
+                throw;
+            }
+            catch (PoeDataException ex)
+            {
+                _client.Log?.Invoke($"builds page failed: {ex.Message}");
+            }
+        }
+
         // the ordering the whole app leans on is the ladder's own DPS. Without it the
         // sample is just the site's row order, and saying "top-DPS" would be a lie.
         var rowsWithDps = unfilteredRows.Count(row => row.Dps > 0);
@@ -237,6 +259,33 @@ public sealed class SyncService
                 {
                     ungraded.Add(candidate.Name);
                     _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                }
+            }
+
+            // a search that answered with nothing (or not at all) leaves this skill with no
+            // builds; the site's own page carries the same rows, so ask the page before giving up
+            if (rows.Count == 0 && !cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var scraped = await _client.ScrapeBuildsAsync(league, candidate.Name, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (scraped.Count > 0)
+                    {
+                        rows = scraped;
+                        buildCount = Math.Max(buildCount, scraped.Count);
+                        _client.Log?.Invoke($"skill {candidate.Name}: filled from its builds page ({scraped.Count} rows)");
+                    }
+                }
+                catch (RateLimitedException ex)
+                {
+                    pause = ex;
+                    _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                }
+                catch (PoeDataException ex)
+                {
+                    _client.Log?.Invoke($"skill {candidate.Name}: builds page failed ({ex.Message})");
                 }
             }
 

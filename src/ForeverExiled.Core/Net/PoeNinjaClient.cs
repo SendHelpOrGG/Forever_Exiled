@@ -413,6 +413,36 @@ public sealed class PoeNinjaClient : IDisposable
     }
 
     /// <summary>
+    /// Scrapes the builds table from the site's own HTML for one skill (or the whole league).
+    /// Used when the search API will not answer for a skill - the page is cached and shows the
+    /// same rows, so a failed request no longer means a skill with no builds.
+    /// </summary>
+    public async Task<List<BuildRef>> ScrapeBuildsAsync(
+        LeagueInfo league,
+        string? skill,
+        CancellationToken cancellationToken)
+    {
+        var path = BuildsPageScraper.PagePath(LeagueSlug(league), skill);
+        var payload = await GetBytesAsync(
+            path,
+            "text/html",
+            cancellationToken,
+            tolerateClientErrors: true,
+            pacer: PagePacer).ConfigureAwait(false);
+
+        var html = System.Text.Encoding.UTF8.GetString(payload);
+        var builds = BuildsPageScraper.ParseBuilds(html, skill);
+        Log?.Invoke($"builds page {skill ?? "all skills"}: {builds.Count} rows scraped");
+        return builds;
+    }
+
+    private static string LeagueSlug(LeagueInfo league)
+    {
+        var slug = league.Url.Trim('/');
+        return slug.Contains('/') ? slug[(slug.LastIndexOf('/') + 1)..] : slug;
+    }
+
+    /// <summary>
     /// Scrapes the character's own page. Returns null when the page cannot be read or carries
     /// no items, which is the signal to fall back to the JSON endpoint.
     /// </summary>
@@ -421,13 +451,7 @@ public sealed class PoeNinjaClient : IDisposable
         BuildRef build,
         CancellationToken cancellationToken)
     {
-        var slug = league.Url.Trim('/');
-        if (slug.Contains('/'))
-        {
-            slug = slug[(slug.LastIndexOf('/') + 1)..];
-        }
-
-        var path = CharacterPageScraper.PagePath(slug, build.Account, build.Name);
+        var path = CharacterPageScraper.PagePath(LeagueSlug(league), build.Account, build.Name);
 
         try
         {
