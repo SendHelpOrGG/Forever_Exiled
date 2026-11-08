@@ -286,14 +286,23 @@ function analyze(snapshot, floor) {
     .slice())
     .sort((a, b) => b.peakDps - a.peakDps || b.averageDps - a.averageDps || b.buildCount - a.buildCount);
 
+  // the same set on both sides of "x of y": a build counts as a sample only while it is one of
+  // the skill's tracked top builds, so the numerator can never outgrow its denominator
   const profiles = new Map();
+  const scoped = [];
   for (const skill of skills) {
-    const builds = snapshot.characters.filter(
+    const owned = snapshot.characters.filter(
       (c) => String(c.mainSkill || '').toLowerCase() === skill.name.toLowerCase());
+    const tracked = new Set((skill.topBuilds || [])
+      .map((b) => `${b.account}/${b.name}`.toLowerCase()));
+    const builds = tracked.size
+      ? owned.filter((c) => tracked.has(`${c.account}/${c.name}`.toLowerCase()))
+      : owned;
+    scoped.push(...builds);
     profiles.set(skill.name, buildProfile(skill, builds));
   }
 
-  const characters = snapshot.characters;
+  const characters = scoped;
   const allKeys = new Set();
   for (const c of characters) for (const j of c.clusterJewels || []) allKeys.add(comboKey(j));
 

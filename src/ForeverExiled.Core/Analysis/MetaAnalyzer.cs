@@ -24,12 +24,19 @@ public sealed class MetaAnalyzer
         var characters = snapshot.Characters;
         var profiles = new List<SkillClusterProfile>();
 
+        // only builds that belong to a tracked top-N set feed the statistics: the snapshot keeps
+        // every character ever read, so an earlier, deeper run can leave characters behind that
+        // are no longer among a skill's ranked builds
+        var scoped = new List<CharacterSnapshot>();
+
         foreach (var skill in skills)
         {
-            var builds = characters
+            var owned = characters
                 .Where(c => string.Equals(c.MainSkill, skill.Name, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
+            var builds = ScopeToTracked(skill, owned);
+            scoped.AddRange(builds);
             profiles.Add(BuildProfile(skill, builds));
         }
 
@@ -38,9 +45,34 @@ public sealed class MetaAnalyzer
             Snapshot = snapshot,
             Skills = skills,
             Profiles = profiles,
-            Global = BuildGlobalStats(snapshot, skills, characters, profiles),
+            Global = BuildGlobalStats(snapshot, skills, scoped, profiles),
             Ladder = BuildLadder(snapshot, skills, characters),
         };
+    }
+
+    /// <summary>
+    /// The builds a skill's statistics may be drawn from: its tracked top builds and nothing else.
+    ///
+    /// The snapshot keeps characters across syncs, so builds read in an earlier, deeper run stay
+    /// on disk after the ranking moves on. Counting them as samples is how a card could read
+    /// "52 of 40": the numerator was "everything ever read for this skill" while the denominator
+    /// was "the top builds right now". A rate that cannot exceed 100% must be drawn from one set.
+    ///
+    /// When the ladder produced no ranked builds for a skill there is nothing to scope to, so the
+    /// previously sampled builds are used as they are.
+    /// </summary>
+    private static List<CharacterSnapshot> ScopeToTracked(SkillStat skill, List<CharacterSnapshot> owned)
+    {
+        if (skill.TopBuilds.Count == 0)
+        {
+            return owned;
+        }
+
+        var tracked = new HashSet<string>(
+            skill.TopBuilds.Select(build => $"{build.Account}/{build.Name}"),
+            StringComparer.OrdinalIgnoreCase);
+
+        return owned.Where(character => tracked.Contains(character.Key)).ToList();
     }
 
     private static SkillClusterProfile BuildProfile(SkillStat skill, List<CharacterSnapshot> builds)
@@ -52,6 +84,7 @@ public sealed class MetaAnalyzer
         {
             Skill = skill.Name,
             SampledBuilds = builds.Count,
+            TrackedBuilds = skill.TopBuilds.Count,
             PendingBuilds = pending,
             Large = BuildCombos(builds, ClusterSize.Large, builds.Count, includeSkills: false),
             Medium = BuildCombos(builds, ClusterSize.Medium, builds.Count, includeSkills: false),

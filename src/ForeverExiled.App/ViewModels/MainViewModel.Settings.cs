@@ -91,7 +91,7 @@ public partial class MainViewModel
             _settings.SampleDepth = depth;
             _store.SaveSettings(_settings);
             RefreshSettingsSurface();
-            StatusMessage = $"Sample depth set to {depth} builds per skill.";
+            StatusMessage = $"Sample depth set to {depth} builds per skill — press SYNC to re-cut the ladder at that depth.";
         }
     }
 

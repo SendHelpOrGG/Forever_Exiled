@@ -106,8 +106,15 @@ public sealed class SkillClusterProfile
 {
     public string Skill { get; set; } = string.Empty;
 
-    /// <summary>Characters of this skill that were fetched and parsed.</summary>
+    /// <summary>
+    /// Characters of this skill that were fetched and parsed - always a subset of the tracked
+    /// builds below, never of "everything ever read for this skill", which is how a card ended up
+    /// reporting more samples than the set it was sampling.
+    /// </summary>
     public int SampledBuilds { get; set; }
+
+    /// <summary>The builds this skill is being sampled from: its tracked top builds.</summary>
+    public int TrackedBuilds { get; set; }
 
     /// <summary>Characters of this skill that still need a sample.</summary>
     public int PendingBuilds { get; set; }

@@ -98,13 +98,14 @@ public class MetaAnalyzerTests
         var profile = analysis.FindProfile("Molten Strike of the Zenith");
 
         Assert.NotNull(profile);
-        Assert.Equal(4, profile!.SampledBuilds);
+        Assert.Equal(3, profile!.TrackedBuilds);
+        Assert.Equal(3, profile.SampledBuilds);
         Assert.Equal(2, profile.Medium.Count);
 
         var top = profile.Medium[0];
         Assert.Equal("Cooked Alive + Sadist", top.Label);
         Assert.Equal(2, top.BuildCount);
-        Assert.Equal(50d, top.PercentOfBuilds, 3);
+        Assert.Equal(66.667d, top.PercentOfBuilds, 3);
         Assert.Equal("a", top.TopBuildName);
         Assert.Equal(350_000_000d, top.AverageDps, 3);
 
@@ -129,13 +130,16 @@ public class MetaAnalyzerTests
         var analysis = new MetaAnalyzer().Analyze(Snapshot());
         var global = analysis.Global;
 
-        Assert.Equal(5, global.CharactersSampled);
-        Assert.Equal(4, global.JewelsCatalogued);
-        Assert.Equal(3, global.CombosFound);
+        // four builds are in a tracked set (three Molten Strike, one Winter Orb); the fourth
+        // Molten Strike character is not among the ladder rows that skill tracks, so it counts
+        // towards nothing - the same rule that stopped "52 of 40"
+        Assert.Equal(4, global.CharactersSampled);
+        Assert.Equal(3, global.JewelsCatalogued);
+        Assert.Equal(2, global.CombosFound);
         Assert.NotNull(global.LeaderCombo);
         Assert.Equal("Cooked Alive + Sadist", global.LeaderCombo!.Label);
         Assert.Equal(ClusterSize.Medium, global.LeaderCombo.Size);
-        Assert.Equal(40d, global.LeaderCombo.PercentOfBuilds, 3);
+        Assert.Equal(50d, global.LeaderCombo.PercentOfBuilds, 3);
         Assert.Contains(global.LeaderCombo.Skills, s => s == "Molten Strike of the Zenith");
 
         Assert.NotEmpty(global.TopNotables);
@@ -143,9 +147,9 @@ public class MetaAnalyzerTests
 
         var medium = global.SizeMix.First(s => s.Size == ClusterSize.Medium);
         Assert.Equal(3, medium.Count);
-        Assert.Equal(60d, medium.Percent, 3);
+        Assert.Equal(75d, medium.Percent, 3);
 
-        Assert.Equal(5, global.TopDpsBuilds.Count);
+        Assert.Equal(4, global.TopDpsBuilds.Count);
         Assert.NotEmpty(analysis.Ladder);
         Assert.Equal("a", analysis.Ladder[0].Name);
     }
@@ -157,6 +161,61 @@ public class MetaAnalyzerTests
         var profile = analysis.FindProfile("Molten Strike of the Zenith")!;
 
         // three ladder rows, all of them already sampled
+        Assert.Equal(0, profile.PendingBuilds);
+    }
+
+    [Fact]
+    public void A_skill_never_reports_more_samples_than_the_builds_it_tracks()
+    {
+        // the reported state: 52 sampled against 40 tracked, a rate above 100% that could not be
+        // true of one set. The three extra characters were read in an earlier, deeper run and are
+        // no longer among the skill's top builds, so they are not samples of it any more.
+        var snapshot = Snapshot();
+        var skill = snapshot.Skills[0];
+        skill.TopBuilds = skill.TopBuilds.Take(2).ToList();
+
+        snapshot.Characters.Add(Character("stale1", "Molten Strike of the Zenith", 1_000_000, ClusterSize.Medium, new[] { "Cooked Alive", "Sadist" }));
+        snapshot.Characters.Add(Character("stale2", "Molten Strike of the Zenith", 900_000, ClusterSize.Medium, new[] { "Cooked Alive", "Sadist" }));
+
+        var analysis = new MetaAnalyzer().Analyze(snapshot);
+        var profile = analysis.FindProfile("Molten Strike of the Zenith")!;
+
+        Assert.Equal(2, profile.TrackedBuilds);
+        Assert.Equal(2, profile.SampledBuilds);
+        Assert.Equal(0, profile.PendingBuilds);
+        Assert.True(profile.SampledBuilds <= profile.TrackedBuilds);
+
+        // and the leftover jewels do not quietly inflate the combination counts
+        var combo = profile.Medium.Single(c => c.Notables.Contains("Cooked Alive"));
+        Assert.Equal(2, combo.BuildCount);
+    }
+
+    [Fact]
+    public void Global_totals_count_only_the_builds_inside_tracked_sets()
+    {
+        var snapshot = Snapshot();
+        snapshot.Characters.Add(Character("stale", "Molten Strike of the Zenith", 1_000_000, ClusterSize.Medium, new[] { "Eye to Eye" }));
+
+        var analysis = new MetaAnalyzer().Analyze(snapshot);
+        var tracked = analysis.Profiles.Sum(p => p.SampledBuilds);
+
+        Assert.Equal(tracked, analysis.Global.CharactersSampled);
+        Assert.True(analysis.Global.CharactersSampled < snapshot.Characters.Count);
+    }
+
+    [Fact]
+    public void Uses_the_builds_it_has_when_the_ladder_gave_no_ranking()
+    {
+        // no ranked rows: nothing to scope to, so the earlier sample still counts
+        var snapshot = Snapshot();
+        var skill = snapshot.Skills[0];
+        skill.TopBuilds.Clear();
+
+        var analysis = new MetaAnalyzer().Analyze(snapshot);
+        var profile = analysis.FindProfile("Molten Strike of the Zenith")!;
+
+        Assert.Equal(0, profile.TrackedBuilds);
+        Assert.True(profile.SampledBuilds > 0);
         Assert.Equal(0, profile.PendingBuilds);
     }
 

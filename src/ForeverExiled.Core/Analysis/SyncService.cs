@@ -344,7 +344,10 @@ public sealed class SyncService
                 // back empty still has builds, with classes, and showing "–" for them hid
                 // information that was right there
                 Classes = BuildClassShares(orderable, buildCount),
-                TopBuilds = orderable.Take(40).ToList(),
+                // The tracked set is exactly the depth chosen in Settings: 20 there means twenty
+                // builds per skill here. A fixed 40 ignored that number and produced a card that
+                // said "x of 40" beside a setting that said 20.
+                TopBuilds = orderable.Take(Math.Clamp(settings.SampleDepth, 1, 200)).ToList(),
             });
         }
 
@@ -565,7 +568,7 @@ public sealed class SyncService
                 _store.SaveSnapshot(document);
                 LastSamplingError =
                     $"{ex.Message} {i} of {skills.Count} skills were sampled this run, " +
-                    $"{document.Characters.Count} characters in total; the rest continues next time.";
+                    $"{document.Characters.Count} characters read in total; the rest continues next time.";
                 progress?.Report(new SyncProgress(
                     "Sampling",
                     $"paused by poe.ninja: {document.Characters.Count} characters saved",

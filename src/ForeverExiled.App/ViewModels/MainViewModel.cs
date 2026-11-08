@@ -476,8 +476,12 @@ public partial class MainViewModel : ObservableObject
                 }
                 else
                 {
+                    // the same figure the per-skill badges add up to, not every character ever read:
+                    // a count taken from the snapshot instead of the tracked sets is one more number
+                    // that fails to add up beside the others
                     StatusMessage =
-                        $"{_snapshot.Characters.Count} characters sampled across {_snapshot.Skills.Count} skills.";
+                        $"{_analysis.Global.CharactersSampled} characters sampled across {_snapshot.Skills.Count} skills " +
+                        $"— top {_settings.SampleDepth} builds each.";
                 }
             }
         }

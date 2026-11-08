@@ -167,11 +167,21 @@ Class art is never a thumbnail inside a line of text: it gets the same tile foot
 skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in the skill
 header), so a row reads as two pictures and a caption.
 
-Sampling walks *down* a skill's list. The first pass reads its top builds; pressing ANALYZE or
-SAMPLE ALL again reads the next ones instead of re-reading the same handful, so a skill progresses
-21 of 40 → 33 of 40 → 40 of 40 and stays put only when there is genuinely nothing left. Anything
-that claims a skill is finished now means "every build it lists has been read", not "at least one
-has".
+**Builds sampled per skill is the tracked set.** Choose 20 in Settings and SYNC tracks the twenty
+highest-DPS builds of every skill - not a fixed forty - so the badge on the hero card reads
+"12 of 20", never "x of 40" beside a setting of 20. Changing the depth re-cuts that set on the next
+SYNC; the settings pill says so.
+
+The badge counts builds **inside that set and nothing else**. The snapshot keeps every character
+ever read, so a deeper run from an earlier session can leave characters behind that have dropped out
+of a skill's ranked builds; they stay on disk and in the Ladder tab, but they are not samples of the
+skill any more. Counting them produced a numerator larger than its own denominator - "52 of 40" - and
+they no longer inflate the combination percentages either. The invariant, tested in both the Core
+analysis and the preview: `SampledBuilds <= TrackedBuilds`, always.
+
+Sampling walks *down* a skill's list: a pass reads whichever tracked builds are still unsampled, so a
+partial run tops itself up ("12 of 20" → "20 of 20") and stays put only when there is genuinely
+nothing left. "Finished" now means "every build it tracks has been read", not "at least one has".
 
 Each skill row carries **two** numbers: the peak DPS of its best build (the figure the site's own
 column shows, and what "by DPS" sorts on) and the average across the page of builds beside it. When

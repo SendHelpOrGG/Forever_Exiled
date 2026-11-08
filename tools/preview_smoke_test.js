@@ -224,6 +224,32 @@ setTimeout(async () => {
   check('Winter Orb large top combo', txt('#comboList .combo .combo-chips').includes('Blanketed Snow'),
     txt('#comboList .combo .combo-chips') + ' ' + txt('#comboList .combo .combo-pct'));
 
+  // every skill's hero chip must put a number over a set that contains it: the reported bug was
+  // "52 of 40", a numerator drawn from every character ever read and a denominator from the top
+  // builds only, so this walks the whole rail and refuses any rate above 100%
+  const sampleRates = [];
+  for (const row of qa('#skillList .skill')) {
+    click(row);
+    const chip = qa('#hero .hero-chips .chip')
+      .map((c) => c.textContent)
+      .find((text) => /sampled$/.test(text.trim()));
+    const rate = chip && chip.match(/(\d+) of (\d+)/);
+    sampleRates.push({
+      skill: row.dataset.skill,
+      sampled: rate ? Number(rate[1]) : null,
+      tracked: rate ? Number(rate[2]) : null,
+      chip: chip || '(no chip)',
+    });
+  }
+  const broken = sampleRates.filter((r) => r.sampled === null || r.sampled > r.tracked);
+  check('every sample badge sits inside its own tracked set', broken.length === 0,
+    broken.length ? broken.map((r) => `${r.skill}: ${r.chip}`).join(' · ')
+      : sampleRates.map((r) => `${r.sampled}/${r.tracked}`).join(' '));
+  check('the tracked set is the depth in settings, not a fixed forty',
+    sampleRates.every((r) => r.tracked === null || r.tracked <= 40),
+    'tracked: ' + [...new Set(sampleRates.map((r) => r.tracked))].join(', '));
+
+  click(qa('#skillList .skill').find((s) => s.dataset.skill === 'Winter Orb'));
   click(qa('#sizePills .pill').find((p) => p.textContent.includes('MEDIUM')));
   const mediumTop = txt('#comboList .combo .combo-chips');
   check('Winter Orb medium top combo', mediumTop.includes('Eye to Eye') && mediumTop.includes('Repeater'),

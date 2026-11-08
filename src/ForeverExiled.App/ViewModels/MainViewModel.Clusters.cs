@@ -106,12 +106,16 @@ public partial class MainViewModel
         SelectedSkillAccent = skill.AccentColor;
 
         var profile = _analysis.FindProfile(skill.Name);
+
+        // numerator and denominator come from the same set - the skill's tracked top builds -
+        // so the pair can never read "52 of 40" again
         var total = skill.Stat.TopBuilds.Count;
+        var sampled = profile?.SampledBuilds ?? 0;
         var rankWord = _snapshot.LadderDpsMissing ? "ladder-order builds" : "top-DPS builds";
-        SelectedSkillSampleText = profile is { SampledBuilds: > 0 }
+        SelectedSkillSampleText = sampled > 0
             ? total > 0
-                ? $"{profile.SampledBuilds} of {total} {rankWord} sampled"
-                : $"{profile.SampledBuilds} builds from an earlier sample"
+                ? $"{sampled} of {total} {rankWord} sampled"
+                : $"{sampled} builds from an earlier sample"
             : total > 0
                 ? $"0 of {total} {rankWord} sampled"
                 : _snapshot.HasLadderWarning
