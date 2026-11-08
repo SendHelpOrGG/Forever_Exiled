@@ -105,16 +105,13 @@ public static class SearchResponseParser
                 .Select(bytes => Encoding.UTF8.GetString(bytes))
                 .ToList();
 
-            var numbers = columnMessage.FirstBytes(6) is { } packed
-                ? ProtoWire.ReadPackedVarints(packed)
-                : columnMessage.FirstBytes(8) is { } packedFlags
-                    ? ProtoWire.ReadPackedVarints(packedFlags)
-                    : null;
+            var rowCount = (int)columnMessage.FirstInt(13);
+            var numbers = ReadColumnNumbers(columnMessage, rowCount);
 
             columns.Add(new SearchColumn
             {
                 Name = name,
-                Rows = (int)columnMessage.FirstInt(13),
+                Rows = rowCount,
                 DictionaryId = columnMessage.FirstString(11),
                 Strings = strings.Count > 0 ? strings : null,
                 Numbers = numbers is { Count: > 0 } ? numbers : null,
@@ -130,6 +127,55 @@ public static class SearchResponseParser
             Columns = columns,
             DictionaryHashes = dictionaryHashes,
         };
+    }
+
+    /// <summary>
+    /// Pulls a column's numeric payload. poe.ninja writes it as packed varints in field 6
+    /// (or 8 for flags), sometimes as several blobs per column, and - for some columns - in
+    /// a layout that is neither. The last resort matches any length-delimited field whose
+    /// packed decode has exactly one value per row: a column called <c>skills</c> that
+    /// reports rows but no values is useless to every consumer.
+    /// </summary>
+    private static List<long>? ReadColumnNumbers(ProtoMessage column, int rows)
+    {
+        var packed = new List<long>();
+        foreach (var blob in column.AllBytes(6).Concat(column.AllBytes(8)))
+        {
+            packed.AddRange(ProtoWire.ReadPackedVarints(blob));
+        }
+
+        if (packed.Count > 0)
+        {
+            return packed;
+        }
+
+        var unpacked = column.AllVarints(6).Concat(column.AllVarints(8)).Select(v => (long)v).ToList();
+        if (unpacked.Count > 0)
+        {
+            return unpacked;
+        }
+
+        if (rows <= 0)
+        {
+            return null;
+        }
+
+        foreach (var field in column.Fields)
+        {
+            // 1 is the column name and 11 the dictionary id; neither is a value array
+            if (field.WireType != 2 || field.Bytes is null || field.Number is 1 or 11)
+            {
+                continue;
+            }
+
+            var values = ProtoWire.ReadPackedVarints(field.Bytes);
+            if (values.Count == rows)
+            {
+                return values;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -170,13 +216,18 @@ public static class SearchResponseParser
             return rows;
         }
 
-        var nameColumn = response.FindColumn("name", "characterName", "character.name");
-        var accountColumn = response.FindColumn("account", "accountName", "character.account");
-        var classColumn = response.FindColumn("class", "className", "ascendancy");
-        var levelColumn = response.FindColumn("level", "character.level");
-        var dpsColumn = response.FindColumn("dps.total", "dps.totalWeighted", "dps", "dpsTotal")
+        var nameColumn = FindPopulatedColumn(response, "name", "characterName", "character.name");
+        var accountColumn = FindPopulatedColumn(response, "account", "accountName", "character.account");
+        var classColumn = FindPopulatedColumn(response, "class", "className", "ascendancy");
+        var levelColumn = FindPopulatedColumn(response, "level", "character.level");
+        var dpsColumn = FindPopulatedColumn(response, "dps_total", "dps.total", "dps", "dpsTotal",
+                                              "dps.totalWeighted", "dps_totalWeighted")
                         ?? GuessDpsColumn(response, log);
-        var skillColumn = response.FindColumn("skills", "mainSkill", "skill");
+
+        // the site names these with underscores and, on some responses, ships a populated
+        // dps_skill (gem index) where `skills` carries rows but no values
+        var skillColumn = FindPopulatedColumn(response, "skills", "mainSkill", "skill")
+                          ?? FindPopulatedColumn(response, "dps_skill", "dps.skill");
         var leagueColumn = response.FindColumn("league", "leagueName");
         var clusterColumn = response.FindColumn("cjewels", "clusterJewels", "clusterJewelCount");
 
@@ -277,6 +328,25 @@ public static class SearchResponseParser
     /// like damage numbers. A league's ladder has millions-to-billions in exactly one place,
     /// so the biggest numbers win, minus the columns that are plainly not damage.
     /// </summary>
+    /// <summary>
+    /// The first candidate column that exists and actually carries values. A column that
+    /// reports rows but no payload is worse than useless: it silently empties every row.
+    /// </summary>
+    private static SearchColumn? FindPopulatedColumn(SearchResponse response, params string[] candidates)
+    {
+        foreach (var candidate in candidates)
+        {
+            var column = response.Columns.FirstOrDefault(c =>
+                string.Equals(c.Name, candidate, StringComparison.OrdinalIgnoreCase));
+            if (column is { ValueCount: > 0 })
+            {
+                return column;
+            }
+        }
+
+        return null;
+    }
+
     private static SearchColumn? GuessDpsColumn(SearchResponse response, Action<string>? log)
     {
         string[] notDamage = { "level", "xp", "experience", "rank", "depth", "time", "life",

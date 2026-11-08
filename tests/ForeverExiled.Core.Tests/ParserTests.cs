@@ -90,6 +90,82 @@ public class SearchResponseParserTests
             ProtoFixture.FieldBytes(6, ProtoFixture.Packed(numbers)),
             ProtoFixture.FieldVarint(13, (ulong)numbers.Length));
 
+    private static byte[] RawColumn(string name, int fieldNumber, long[] values, string? dictionary = null)
+    {
+        var parts = new List<byte[]> { ProtoFixture.FieldString(1, name) };
+        if (dictionary is not null)
+        {
+            parts.Add(ProtoFixture.FieldString(11, dictionary));
+        }
+
+        if (values.Length > 0)
+        {
+            parts.Add(ProtoFixture.FieldBytes(fieldNumber, ProtoFixture.Packed(values)));
+        }
+
+        parts.Add(ProtoFixture.FieldVarint(13, (ulong)values.Length));
+        return ProtoFixture.Concat(parts.ToArray());
+    }
+
+    [Fact]
+    public void Reads_a_numeric_payload_from_an_unexpected_field()
+    {
+        // a column that reports rows but no values in fields 6/8 is not usable; the payload
+        // can arrive in another length-delimited field, one value per row
+        var payload = BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp"),
+            RawColumn("skills", 12, new long[] { 0, 1 }, dictionary: "gem"),
+            RawColumn("dps_total", 6, new long[] { 358_000_000, 120_000_000 }));
+
+        var response = SearchResponseParser.Parse(payload);
+        var rows = SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>
+        {
+            ["gem"] = new[] { "Winter Orb", "Fireball" },
+        });
+
+        Assert.Equal(2, rows.Count);
+        Assert.Equal("Winter Orb", rows[0].MainSkill);
+        Assert.Equal("Fireball", rows[1].MainSkill);
+        Assert.Equal(358_000_000d, rows[0].Dps, 3);
+    }
+
+    [Fact]
+    public void Falls_back_to_dps_skill_when_the_skills_column_is_empty()
+    {
+        var payload = BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp"),
+            RawColumn("skills", 6, Array.Empty<long>(), dictionary: "gem"),
+            RawColumn("dps_skill", 6, new long[] { 1, 0 }, dictionary: "gem"));
+
+        var response = SearchResponseParser.Parse(payload);
+        var rows = SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>
+        {
+            ["gem"] = new[] { "Winter Orb", "Fireball" },
+        });
+
+        Assert.Equal("Fireball", rows[0].MainSkill);
+        Assert.Equal("Winter Orb", rows[1].MainSkill);
+    }
+
+    [Fact]
+    public void Concatenates_every_packed_blob_of_a_column()
+    {
+        var column = ProtoFixture.Concat(
+            ProtoFixture.FieldString(1, "dps_total"),
+            ProtoFixture.FieldBytes(6, ProtoFixture.Packed(new long[] { 900_000_000 })),
+            ProtoFixture.FieldBytes(6, ProtoFixture.Packed(new long[] { 800_000_000 })),
+            ProtoFixture.FieldVarint(13, 2));
+
+        var response = SearchResponseParser.Parse(BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp"),
+            column));
+
+        var dps = response.FindColumn("dps_total");
+
+        Assert.NotNull(dps);
+        Assert.Equal(2, dps!.Numbers!.Count);
+    }
+
     [Fact]
     public void Guesses_the_dps_column_when_its_name_is_unfamiliar()
     {
