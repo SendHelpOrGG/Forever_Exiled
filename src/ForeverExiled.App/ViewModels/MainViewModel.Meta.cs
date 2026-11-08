@@ -48,7 +48,8 @@ public partial class MainViewModel
         // ---- notables
         TopNotables.Clear();
         var maxNotable = global.TopNotables.Count > 0 ? global.TopNotables[0].Count : 0;
-        foreach (var notable in global.TopNotables.Take(8))
+        // the card scrolls, so it can carry more of the trend without growing
+        foreach (var notable in global.TopNotables.Take(14))
         {
             var pool = NotableWeights.BestPoolFor(notable.Name, notable.Size.ToString());
             var weight = NotableWeights.WeightFor(notable.Name, pool);

@@ -1416,10 +1416,10 @@ function renderMeta() {
 
   bindItemTips('#metaComboList .mc-art', combos);
 
-  const notables = g.topNotables.slice(0, 9);
+  const notables = g.topNotables.slice(0, 14);
   $('notablesCard').innerHTML = `
     ${panel('Most used notables', '<span class="cap">share of builds</span>')}
-    <div class="panel-body">
+    <div class="panel-body notable-scroll">
       ${notables.map((n) => `
         <div class="notable-row">
           <div>

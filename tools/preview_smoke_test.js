@@ -363,7 +363,10 @@ setTimeout(() => {
   check('meta tab switches', !q('#view-meta').hidden && q('#view-lab').hidden);
   check('meta stat tiles', qa('#metaTiles .tile').length === 6, qa('#metaTiles .v').map((e) => e.textContent).join(' / '));
   check('meta combination list', qa('#metaComboList .meta-combo').length === 12, txt('#metaComboList .mc-title'));
-  check('notables card', qa('#notablesCard .notable-row').length === 9);
+  check('notables card rows', qa('#notablesCard .notable-row').length === 14);
+  // the card is height-capped and scrolls instead of pushing the page down
+  check('notables card scrolls', qa('#notablesCard .notable-scroll').length === 1);
+  check('notables card capped', /\.notable-scroll\s*\{[^}]*max-height:\s*252px[^}]*overflow-y:\s*auto/.test(read('styles.css')));
   check('the meta tab drops the DPS cards', !q('#skillLeadersCard') && !q('#topBuildsCard'),
     'DPS leaders and highest DPS builds removed');
   check('the meta tab carries the crafting card',

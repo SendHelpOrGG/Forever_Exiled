@@ -224,7 +224,7 @@
 
                 <VerticalStackLayout Grid.Column="1" Spacing="12">
 
-                    <Border Style="{StaticResource Card}" Padding="16">
+                    <Border Style="{StaticResource Card}" Padding="16" VerticalOptions="Start">
                         <VerticalStackLayout Spacing="10">
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Text="MOST USED NOTABLES" Style="{StaticResource Micro}" VerticalOptions="Center" />
@@ -232,44 +232,48 @@
                             </Grid>
                             <BoxView Color="{StaticResource BorderSoft}" />
 
-                            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TopNotables}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid ColumnDefinitions="22,*,Auto" RowDefinitions="Auto,Auto,Auto"
-                                              RowSpacing="3" ColumnSpacing="8">
-                                            <Image Grid.Row="0" Grid.Column="0"
-                                                   Source="{Binding Image}"
-                                                   WidthRequest="18" HeightRequest="18"
-                                                   Aspect="AspectFit"
-                                                   VerticalOptions="Center" />
-                                            <Label Grid.Row="0" Grid.Column="1"
-                                                   Text="{Binding Name}"
-                                                   Style="{StaticResource BodyStrong}"
-                                                   FontSize="14.5" />
-                                            <Label Grid.Row="0" Grid.Column="2"
-                                                   Text="{Binding PrimaryText}"
-                                                   Style="{StaticResource Caption}"
-                                                   FontSize="12.5"
-                                                   TextColor="{StaticResource AccentDeep}" />
-                                            <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HeightRequest="3">
-                                                <Border BackgroundColor="{StaticResource SurfaceRaised}"
-                                                        StrokeThickness="0"
-                                                        StrokeShape="RoundRectangle 2" />
-                                                <Border BackgroundColor="{Binding AccentColor}"
-                                                        StrokeThickness="0"
-                                                        StrokeShape="RoundRectangle 2"
-                                                        HorizontalOptions="Start"
-                                                        WidthRequest="{Binding BarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=230}" />
+                            <!-- capped height: a few rows read as a trend, the rest scrolls -->
+                            <ScrollView MaximumHeightRequest="252"
+                                        VerticalScrollBarVisibility="Always">
+                                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TopNotables}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="22,*,Auto" RowDefinitions="Auto,Auto,Auto"
+                                                  RowSpacing="3" ColumnSpacing="8">
+                                                <Image Grid.Row="0" Grid.Column="0"
+                                                       Source="{Binding Image}"
+                                                       WidthRequest="18" HeightRequest="18"
+                                                       Aspect="AspectFit"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Row="0" Grid.Column="1"
+                                                       Text="{Binding Name}"
+                                                       Style="{StaticResource BodyStrong}"
+                                                       FontSize="14.5" />
+                                                <Label Grid.Row="0" Grid.Column="2"
+                                                       Text="{Binding PrimaryText}"
+                                                       Style="{StaticResource Caption}"
+                                                       FontSize="12.5"
+                                                       TextColor="{StaticResource AccentDeep}" />
+                                                <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HeightRequest="3">
+                                                    <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 2" />
+                                                    <Border BackgroundColor="{Binding AccentColor}"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 2"
+                                                            HorizontalOptions="Start"
+                                                            WidthRequest="{Binding BarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=230}" />
+                                                </Grid>
+                                                <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                                       Text="{Binding SecondaryText}"
+                                                       Style="{StaticResource Caption}"
+                                                       FontSize="12"
+                                                       TextColor="{StaticResource TextMuted}" />
                                             </Grid>
-                                            <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                                   Text="{Binding SecondaryText}"
-                                                   Style="{StaticResource Caption}"
-                                                   FontSize="12"
-                                                   TextColor="{StaticResource TextMuted}" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </ScrollView>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>
