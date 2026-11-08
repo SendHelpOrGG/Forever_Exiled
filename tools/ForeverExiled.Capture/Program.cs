@@ -373,7 +373,8 @@ internal sealed record CaptureOptions
     public string DiagnoseDirectory { get; init; } = "diagnostics";
 
     /// <summary>One search request per skill instead of ranking from the single ladder window.</summary>
-    public bool GradeEverySkill { get; init; }
+    /// <summary>Matches the app's default: one page per skill, so DPS comes from the site's own table.</summary>
+    public bool GradeEverySkill { get; init; } = true;
 
     public bool Verbose { get; init; }
 
@@ -408,6 +409,7 @@ internal sealed record CaptureOptions
                 "--diagnose-dir" => options with { DiagnoseDirectory = Next(arg) },
                 "--no-sample" => options with { Depth = 0 },
                 "--grade-all" => options with { GradeEverySkill = true },
+                "--quick" => options with { GradeEverySkill = false },
                 "--no-pages" => options with { NoPages = true },
                 "--league" => options with { LeagueUrl = Next(arg) },
                 "--floor" => options with { Floor = ParseDouble(Next(arg), arg) },
@@ -478,6 +480,8 @@ internal sealed record CaptureOptions
               --no-sample         Ladder only, skip the per-character crawl
               --no-pages          Read characters from the JSON endpoint instead of scraping
                                   their pages (the pages are the lighter route)
+              --quick             Rank from the single unfiltered ladder window (default is one
+                                  page per skill, as the app does)
               --grade-all         One search per skill instead of ranking from the single
                                   ladder window (slower, more rows per skill)
               --verbose           Print every HTTP request the client makes

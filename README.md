@@ -101,7 +101,8 @@ dotnet run --project tools/ForeverExiled.Capture -- --preview
 It walks the ladder, samples the top builds per skill, prints the leader combination and
 writes `snapshot-allflame.json`; `--preview` also drops it in `preview/data/live-snapshot.json`
 so the browser preview shows **real** numbers (the synthetic banner disappears once the
-snapshot's `source` is `live`). Useful flags: `--skills 5 --depth 6 --pacing 3` for a quick
+snapshot's `source` is `live`). It grades the same way the app does (one page per skill) unless
+you pass `--quick`. Useful flags: `--skills 5 --depth 6 --pacing 3` for a quick
 look, `--no-sample` for the ladder alone, `--help` for the rest.
 
 ### Demo data is not league data
