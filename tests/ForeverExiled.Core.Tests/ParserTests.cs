@@ -167,6 +167,25 @@ public class SearchResponseParserTests
     }
 
     [Fact]
+    public void An_unreadable_payload_field_does_not_fail_the_parse()
+    {
+        // the probe walks unrecognised fields looking for a value array; a text blob there
+        // must be skipped, not thrown out of the whole sync
+        var column = ProtoFixture.Concat(
+            ProtoFixture.FieldString(1, "skills"),
+            ProtoFixture.FieldString(12, "this is not a packed varint array"),
+            ProtoFixture.FieldVarint(13, 3));
+
+        var response = SearchResponseParser.Parse(BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp", "Third"),
+            column));
+
+        Assert.NotNull(response.FindColumn("skills"));
+        Assert.Null(response.FindColumn("skills")!.Numbers);
+        Assert.Equal(3, SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>()).Count);
+    }
+
+    [Fact]
     public void Guesses_the_dps_column_when_its_name_is_unfamiliar()
     {
         // poe.ninja renames columns between seasons; the ladder's damage numbers are the

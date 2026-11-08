@@ -136,6 +136,24 @@ public static class ProtoWire
         return values;
     }
 
+    /// <summary>
+    /// Packed-varint decode for payloads we are only guessing about: reports failure instead
+    /// of throwing, so a text blob that happens to sit in a value field cannot fail a sync.
+    /// </summary>
+    public static bool TryReadPackedVarints(byte[] data, out List<long> values)
+    {
+        try
+        {
+            values = ReadPackedVarints(data);
+            return true;
+        }
+        catch (PoeDataException)
+        {
+            values = new List<long>();
+            return false;
+        }
+    }
+
     internal static ulong ReadVarint(byte[] data, ref int index)
     {
         ulong result = 0;

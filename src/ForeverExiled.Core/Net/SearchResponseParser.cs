@@ -141,7 +141,10 @@ public static class SearchResponseParser
         var packed = new List<long>();
         foreach (var blob in column.AllBytes(6).Concat(column.AllBytes(8)))
         {
-            packed.AddRange(ProtoWire.ReadPackedVarints(blob));
+            if (ProtoWire.TryReadPackedVarints(blob, out var values))
+            {
+                packed.AddRange(values);
+            }
         }
 
         if (packed.Count > 0)
@@ -168,8 +171,8 @@ public static class SearchResponseParser
                 continue;
             }
 
-            var values = ProtoWire.ReadPackedVarints(field.Bytes);
-            if (values.Count == rows)
+            // anything can live in an unrecognised field: text, a nested message, flags
+            if (ProtoWire.TryReadPackedVarints(field.Bytes, out var values) && values.Count == rows)
             {
                 return values;
             }
