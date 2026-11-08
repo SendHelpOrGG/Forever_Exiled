@@ -148,6 +148,13 @@
                             <Label Text="{Binding BusyTitle}" Style="{StaticResource H2}" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                         <Label Text="{Binding BusyMessage}" Style="{StaticResource Body}" MaxLines="2" LineBreakMode="WordWrap" />
+                        <Label Text="{Binding BusyDetail}"
+                               Style="{StaticResource Caption}"
+                               FontSize="12.5"
+                               TextColor="{StaticResource TextMuted}"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation"
+                               Margin="0,-6,0,0" />
                         <ProgressBar Progress="{Binding BusyFraction}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="{Binding BusyPercentText}" Style="{StaticResource Caption}" />

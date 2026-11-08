@@ -28,6 +28,12 @@ public sealed class SyncService
 
     public PoeNinjaClient Client => _client;
 
+    /// <summary>
+    /// Why the last <see cref="SampleSkillAsync"/> pass stopped early, if it did. Empty when
+    /// the pass either finished or had nothing to do.
+    /// </summary>
+    public string LastSamplingError { get; private set; } = string.Empty;
+
     public SnapshotStore Store => _store;
 
     public Task<IndexState> GetLeaguesAsync(CancellationToken cancellationToken) =>
@@ -269,6 +275,7 @@ public sealed class SyncService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(document);
+        LastSamplingError = string.Empty;
 
         var skill = document.Skills.FirstOrDefault(s =>
             string.Equals(s.Name, skillName, StringComparison.OrdinalIgnoreCase));
@@ -297,6 +304,8 @@ public sealed class SyncService
         var league = ToLeague(document);
         var sinceSave = 0;
         var completed = 0;
+        var added = 0;
+        var failedInARow = 0;
 
         foreach (var target in targets)
         {
@@ -327,10 +336,27 @@ public sealed class SyncService
                     _store.SaveSnapshot(document);
                     sinceSave = 0;
                 }
+
+                added++;
+                failedInARow = 0;
             }
             catch (PoeDataException ex)
             {
                 _client.Log?.Invoke($"character {target.Name}: {ex.Message}");
+
+                failedInARow++;
+                if (failedInARow >= 3 && added == 0)
+                {
+                    // every contract for this endpoint is failing: stop before the rate
+                    // limit punishes the app for requests that cannot succeed anyway
+                    LastSamplingError = ex.Message;
+                    progress?.Report(new SyncProgress(
+                        "Sampling",
+                        $"{skillName}: character sheets unreadable ({ex.Message})",
+                        targets.Count,
+                        targets.Count));
+                    return document;
+                }
             }
 
             completed++;

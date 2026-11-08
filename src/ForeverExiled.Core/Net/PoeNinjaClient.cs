@@ -37,6 +37,9 @@ public sealed class PoeNinjaClient : IDisposable
     private const string BaseAddress = "https://poe.ninja/";
     private const int MaxAttempts = 4;
 
+    /// <summary>Longest server-imposed wait the client will sit through.</summary>
+    private static readonly TimeSpan MaxRetryAfter = TimeSpan.FromMinutes(3);
+
     private static readonly string[] CharacterOverviewCandidates = { "snapshot", "slug" };
     private static readonly string[] CharacterTypeCandidates = { "exp", "0" };
 
@@ -323,6 +326,7 @@ public sealed class PoeNinjaClient : IDisposable
                 };
 
                 var path = $"poe1/api/builds/{league.Version}/character{ToQueryString(query)}";
+                Log?.Invoke($"character {build.Name}: asking overview={overviewMode} type={type}");
 
                 try
                 {
@@ -404,12 +408,31 @@ public sealed class PoeNinjaClient : IDisposable
             {
                 throw new PoeDataException($"Network error contacting poe.ninja: {ex.Message}", ex);
             }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                // HttpClient's own timeout also surfaces as TaskCanceledException; the
+                // difference matters, because one means "still trying" and the other "you
+                // pressed cancel"
+                throw new PoeDataException(
+                    $"poe.ninja did not answer {relativePath} within {_http.Timeout.TotalSeconds:0}s.");
+            }
 
             using (response)
             {
                 if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 {
                     var retryAfter = ReadRetryAfter(response);
+
+                    // the penalty escalates into the tens of minutes; parking the app that
+                    // long with a spinner is worse than saying so and stopping
+                    if (retryAfter > MaxRetryAfter)
+                    {
+                        throw new PoeDataException(
+                            $"poe.ninja rate-limited this client for {retryAfter.TotalMinutes:0} more minutes. " +
+                            "Stop, wait it out and sync again later; a lower sample depth or a slower pace " +
+                            "keeps future crawls under the limit.");
+                    }
+
                     Log?.Invoke($"429 from poe.ninja, waiting {retryAfter.TotalSeconds:0}s");
                     await gate.ThrottleAsync(retryAfter, cancellationToken).ConfigureAwait(false);
                     continue;

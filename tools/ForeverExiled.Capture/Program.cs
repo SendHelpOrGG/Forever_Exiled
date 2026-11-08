@@ -191,6 +191,9 @@ internal static class Program
         var target = Path.GetFullPath(directory);
         Directory.CreateDirectory(target);
 
+        // every request the client makes, printed as it happens
+        client.Log = message => Console.WriteLine("    " + message);
+
         Console.WriteLine($"diagnose · league \"{league.Url}\" · name \"{league.Name}\"");
         Console.WriteLine($"  snapshotName \"{league.SnapshotName}\" · version {league.Version} · type {league.Type}");
         Console.WriteLine($"  writing {target}");
@@ -202,6 +205,7 @@ internal static class Program
             .ToList();
 
         var found = 0;
+        var probe = new List<BuildRef>();
         foreach (var overview in overviews)
         {
             var raw = await client.SearchRawAsync(league, null, CancellationToken.None, overview).ConfigureAwait(false);
@@ -261,7 +265,35 @@ internal static class Program
             Console.WriteLine($"  wrote {stem}.bin and .txt");
             Console.WriteLine();
 
+            if (rows.Count > probe.Count)
+            {
+                probe = rows;
+            }
+
             found = Math.Max(found, rows.Count);
+        }
+
+        // the character endpoint is the other half of the pipeline: try it on two builds
+        var samples = probe.Where(r => r.Name.Length > 0 && r.Account.Length > 0).Take(2).ToList();
+        if (samples.Count > 0)
+        {
+            Console.WriteLine("Character sheets:");
+            foreach (var build in samples)
+            {
+                try
+                {
+                    var character = await client.GetCharacterAsync(league, build, CancellationToken.None)
+                        .ConfigureAwait(false);
+                    Console.WriteLine($"  {build.Name} ({build.Account}): {character.ClassName} lvl {character.Level}, " +
+                                      $"{character.ClusterJewels.Count} cluster jewels, {character.Dps:N0} dps");
+                }
+                catch (PoeDataException ex)
+                {
+                    Console.WriteLine($"  {build.Name} ({build.Account}): FAILED — {ex.Message}");
+                }
+            }
+
+            Console.WriteLine();
         }
 
         if (found == 0)
@@ -443,7 +475,7 @@ internal sealed record CaptureOptions
               # quick look: top 5 skills only, 6 builds each, 3s pacing
               dotnet run --project tools/ForeverExiled.Capture -- --skills 5 --depth 6 --pacing 3
 
-              # the ladder came back empty: what is poe.ninja actually sending?
+              # the ladder came back empty, or sampling hangs: what is poe.ninja sending?
               dotnet run --project tools/ForeverExiled.Capture -- --diagnose
 
             Etiquette: per-character requests are the ones poe.ninja throttles. The client

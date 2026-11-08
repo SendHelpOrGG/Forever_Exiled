@@ -38,6 +38,16 @@ public partial class MainViewModel : ObservableObject
         _settings = _store.LoadSettings();
         _sync.Client.Pacer.Interval = TimeSpan.FromSeconds(Math.Clamp(_settings.PacingSeconds, 2, 60));
 
+        // a crawl spends most of its time waiting on the server; say what it is waiting for
+        _sync.Client.Log = message => BusyDetail = message;
+        _sync.Client.Pacer.Waiting += (_, wait) =>
+        {
+            if (wait.TotalSeconds >= 2)
+            {
+                BusyDetail = $"waiting {wait.TotalSeconds:0}s for poe.ninja";
+            }
+        };
+
         NavItems = new ObservableCollection<NavItem>
         {
             new("\uE80F", string.Empty, "Meta", AppTab.Meta, SelectTab),
@@ -142,6 +152,10 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _busyMessage = string.Empty;
+
+    /// <summary>The client's last log line or pacer wait, shown under the busy message.</summary>
+    [ObservableProperty]
+    private string _busyDetail = string.Empty;
 
     [ObservableProperty]
     private double _busyFraction;
@@ -499,6 +513,7 @@ public partial class MainViewModel : ObservableObject
     {
         BusyTitle = title;
         BusyMessage = message;
+        BusyDetail = string.Empty;
         BusyFraction = 0;
         BusyPercentText = "0%";
         IsBusy = true;
@@ -507,6 +522,7 @@ public partial class MainViewModel : ObservableObject
     private void EndBusy()
     {
         IsBusy = false;
+        BusyDetail = string.Empty;
         BusyFraction = 0;
         BusyPercentText = string.Empty;
     }

@@ -336,7 +336,13 @@ public partial class MainViewModel
             Publish();
 
             var profile = _analysis.FindProfile(skillName);
-            if (updateStatus)
+            if (_sync.LastSamplingError.Length > 0)
+            {
+                LastError = $"{skillName}: sampling stopped — {_sync.LastSamplingError}";
+                HasError = true;
+                StatusMessage = LastError;
+            }
+            else if (updateStatus)
             {
                 StatusMessage = profile is { SampledBuilds: > 0 }
                     ? $"{skillName}: {profile.SampledBuilds} builds sampled, {profile.Large.Count + profile.Medium.Count + profile.Small.Count} combinations found."
