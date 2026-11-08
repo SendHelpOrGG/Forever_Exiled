@@ -10,7 +10,7 @@ public partial class MainViewModel
         var rank = 1;
         foreach (var build in _analysis.Ladder)
         {
-            _allLadderItems.Add(new BuildItem(build, rank++));
+            _allLadderItems.Add(new BuildItem(build, rank++, _snapshot.LeagueUrl));
         }
 
         ApplyLadderFilter();

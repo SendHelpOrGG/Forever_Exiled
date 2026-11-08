@@ -4,6 +4,7 @@ using ForeverExiled.App.Theming;
 using ForeverExiled.Core.Analysis;
 using ForeverExiled.Core.Formatting;
 using ForeverExiled.Core.Models;
+using ForeverExiled.Core.Net;
 
 namespace ForeverExiled.App.ViewModels;
 
@@ -452,7 +453,9 @@ public sealed partial class ComboItem : ObservableObject
 /// <summary>A build row (ladder table / highest DPS lists).</summary>
 public sealed class BuildItem
 {
-    public BuildItem(BuildRef build, int rank)
+    private const string PoeNinjaRoot = "https://poe.ninja/";
+
+    public BuildItem(BuildRef build, int rank, string leagueSlug = "")
     {
         RankText = rank.ToString("00");
         Name = build.Name.Length > 0 ? build.Name : build.Account;
@@ -466,6 +469,13 @@ public sealed class BuildItem
         SourceText = build.Sampled ? "sampled" : "top-DPS pick";
         IsSampled = build.Sampled;
         AccentColor = Palette.ForDamageType(DamageTypes.Classify(build.MainSkill));
+
+        // the same page the site's own table links each row to
+        PageUrl = build.Account.Length > 0 && build.Name.Length > 0 && leagueSlug.Length > 0
+            ? PoeNinjaRoot + CharacterPageScraper.PagePath(leagueSlug, build.Account, build.Name)
+            : string.Empty;
+
+        OpenPageCommand = new AsyncRelayCommand(OpenPageAsync);
     }
 
     public string RankText { get; }
@@ -496,6 +506,31 @@ public sealed class BuildItem
     public bool IsSampled { get; }
 
     public Color AccentColor { get; }
+
+    /// <summary>This character's page on poe.ninja, empty when the row carries no account.</summary>
+    public string PageUrl { get; }
+
+    public bool HasPage => PageUrl.Length > 0;
+
+    public IAsyncRelayCommand OpenPageCommand { get; }
+
+    private async Task OpenPageAsync()
+    {
+        if (PageUrl.Length == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri(PageUrl)).ConfigureAwait(true);
+        }
+        catch (Exception)
+        {
+            // no browser, no handler, or the shell refused: the row is still readable, and a
+            // failing link must never take the view down with it
+        }
+    }
 }
 
 /// <summary>A headline metric tile.</summary>

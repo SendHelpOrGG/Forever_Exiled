@@ -42,7 +42,8 @@ Winter Orb  →  Medium cluster  →  Eye to Eye + Repeater   53.8%   7 / 13 bui
 - The Ladder tab lists **every build the app is using**: the characters it has read (`sampled`,
   with their cluster counts) and the top-DPS ladder rows it picked to sample (`top-DPS pick`),
   highest DPS first, filterable by name, class or skill. It is the answer to "which builds are
-  behind these numbers".
+  behind these numbers", and each row has an icon button that opens that character's page on
+  poe.ninja.
 - Every sampled (or ladder-listed) character with class, main skill, DPS and how many
   cluster jewels they run; filterable.
 
