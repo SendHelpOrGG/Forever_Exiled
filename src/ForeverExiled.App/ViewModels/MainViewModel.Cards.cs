@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace ForeverExiled.App.ViewModels;
 
 /// <summary>
