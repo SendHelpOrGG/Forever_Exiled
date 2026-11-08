@@ -260,20 +260,28 @@ public partial class MainViewModel
             return;
         }
 
-        var pending = _analysis.Profiles
-            .Where(p => p.SampledBuilds == 0)
+        // a skill is only finished when every build it lists has been read - "has at least one
+        // sample" is not the same thing, and saying so while a hero card reads "21 of 40" was a
+        // contradiction on screen
+        var profiles = _analysis.Profiles.ToList();
+        var pending = profiles
+            .Where(p => p.PendingBuilds > 0)
             .Select(p => p.Skill)
             .ToList();
 
         if (pending.Count == 0)
         {
-            StatusMessage = "Every tracked skill already has sampled builds.";
+            StatusMessage = profiles.Count == 0
+                ? "Nothing tracked yet — press SYNC."
+                : $"Every tracked skill is sampled to its top builds ({profiles.Count} skills).";
             return;
         }
 
+        var outstanding = profiles.Sum(p => p.PendingBuilds);
+
         _cancellation = new CancellationTokenSource();
         var token = _cancellation.Token;
-        BeginBusy("SAMPLING ALL SKILLS", $"{pending.Count} skills queued");
+        BeginBusy("SAMPLING ALL SKILLS", $"{pending.Count} skills, {outstanding} builds outstanding");
         ClearError();
 
         var progress = new Progress<SyncProgress>(OnSyncProgress);

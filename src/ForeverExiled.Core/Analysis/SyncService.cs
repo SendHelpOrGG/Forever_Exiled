@@ -411,6 +411,28 @@ public sealed class SyncService
     }
 
     /// <summary>
+    /// The next builds to read for a skill: its top builds in DPS order, minus the ones already
+    /// sampled, capped at <paramref name="depth"/>.
+    ///
+    /// Dropping the sampled builds *before* taking depth is the whole point. Taking the top
+    /// depth first meant every later call looked at the same handful, found them sampled, and
+    /// reported "already sampled" while the rest of that skill's builds had never been visited -
+    /// which is how a hero card could read "21 of 40" while the app claimed everything was done.
+    /// </summary>
+    public static List<BuildRef> NextSampleTargets(IEnumerable<BuildRef> topBuilds, ISet<string> sampled, int depth)
+    {
+        ArgumentNullException.ThrowIfNull(topBuilds);
+        ArgumentNullException.ThrowIfNull(sampled);
+
+        return topBuilds
+            .Where(build => build.Name.Length > 0)
+            .OrderByDescending(build => build.Dps)
+            .Where(build => !sampled.Contains($"{build.Account}/{build.Name}"))
+            .Take(Math.Max(1, depth))
+            .ToList();
+    }
+
+    /// <summary>
     /// Phase 2 - samples the top-DPS builds of one skill and extracts cluster jewels.
     /// </summary>
     public async Task<SnapshotDocument> SampleSkillAsync(
@@ -434,12 +456,7 @@ public sealed class SyncService
             document.Characters.Select(c => c.Key),
             StringComparer.OrdinalIgnoreCase);
 
-        var targets = skill.TopBuilds
-            .Where(b => b.Name.Length > 0)
-            .OrderByDescending(b => b.Dps)
-            .Take(Math.Max(1, depth))
-            .Where(b => !sampled.Contains($"{b.Account}/{b.Name}"))
-            .ToList();
+        var targets = NextSampleTargets(skill.TopBuilds, sampled, depth);
 
         if (targets.Count == 0)
         {

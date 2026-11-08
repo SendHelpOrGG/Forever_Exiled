@@ -167,6 +167,12 @@ Class art is never a thumbnail inside a line of text: it gets the same tile foot
 skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in the skill
 header), so a row reads as two pictures and a caption.
 
+Sampling walks *down* a skill's list. The first pass reads its top builds; pressing ANALYZE or
+SAMPLE ALL again reads the next ones instead of re-reading the same handful, so a skill progresses
+21 of 40 → 33 of 40 → 40 of 40 and stays put only when there is genuinely nothing left. Anything
+that claims a skill is finished now means "every build it lists has been read", not "at least one
+has".
+
 Each skill row carries **two** numbers: the peak DPS of its best build (the figure the site's own
 column shows, and what "by DPS" sorts on) and the average across the page of builds beside it. When
 the site publishes nothing for a skill - some Vaal variants are measured under the gem they are
