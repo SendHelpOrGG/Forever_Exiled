@@ -23,7 +23,7 @@ public class CharacterPageScraperTests
         Assert.Equal("Veteran Defender Large Cluster Jewel", snapshot.ClusterJewels[0].BaseType);
         Assert.Contains("Veteran Defender", snapshot.ClusterJewels[0].Notables);
         Assert.Equal("Winter Orb", snapshot.MainSkill);
-        Assert.Equal(1_200_000_000, snapshot.Dps);
+        Assert.Equal(1_200_000_000d, snapshot.Dps);
     }
 
     [Fact]

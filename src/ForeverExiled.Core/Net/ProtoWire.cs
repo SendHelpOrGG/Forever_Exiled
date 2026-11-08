@@ -3,7 +3,7 @@ using System.Text;
 namespace ForeverExiled.Core.Net;
 
 /// <summary>Raised when poe.ninja returns something the parsers cannot understand.</summary>
-public sealed class PoeDataException : Exception
+public class PoeDataException : Exception
 {
     public PoeDataException(string message)
         : base(message)

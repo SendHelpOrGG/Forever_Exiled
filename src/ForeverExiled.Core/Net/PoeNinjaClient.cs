@@ -555,7 +555,7 @@ public sealed class PoeNinjaClient : IDisposable
     }
 
     /// <summary>"5m 41s" - the shape a person can read at a glance.</summary>
-    internal static string DescribeSpan(TimeSpan span) => span.TotalMinutes >= 1
+    public static string DescribeSpan(TimeSpan span) => span.TotalMinutes >= 1
         ? $"{(int)span.TotalMinutes}m {span.Seconds:00}s"
         : $"{Math.Max(1, (int)Math.Ceiling(span.TotalSeconds))}s";
 
