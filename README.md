@@ -27,8 +27,8 @@ Winter Orb  →  Medium cluster  →  Eye to Eye + Repeater   53.8%   7 / 13 bui
   minimum item level, the method routes with currency amounts, try counts and expected cost.
 
 **Cluster Lab (the main screen)**
-- Ranked main-skill rail: every skill above the popularity floor, sorted by average DPS
-  (or popularity), with a colour-coded damage-type accent and a DPS bar.
+- Ranked main-skill rail: every skill above the popularity floor, sorted by peak DPS (or
+  popularity), with a colour-coded damage-type accent and a DPS bar.
 - Skill hero: average DPS, peak DPS, ladder popularity, build count, sampled-build count,
   dominant classes.
 - Cluster-size switch (Large / Medium / Small) with live per-type counts.
@@ -267,20 +267,33 @@ GET /poe1/api/builds/dictionary/{hash}            NDIC   string tables for categ
 GET /poe1/api/builds/{version}/character          JSON   one character sheet (items, jewels)
 ```
 
-**Phase 1 — ladder (cheap: one request).**
-One unfiltered search returns the aggregate popularity buckets *and* the ladder rows. The
-`skills` bucket gives every main skill's share of the ladder — the same percentages the site
-prints in its own "main skills" panel — and the rows are grouped by skill to grade it by
-average / median / peak DPS. That is quick mode, the default: one request, a few seconds.
+**Phase 1 — ladder.**
+Every search is sent with `sort=dps`, the ordering the site's own builds page uses; without
+it the server answers in no particular order and a 100-row page can contain none of the
+league's top-DPS builds. The `skills` bucket that comes back gives every main skill's share of
+the ladder — the same percentages the site prints in its own "main skills" panel.
 
-Full grading (Settings → **skill grading → FULL**, `--grade-all` in the capture tool) asks
-poe.ninja again for every skill with `?skills=<name>`, which returns that skill's own window
-of builds: a slower sync (one request per tracked skill) and more rows per skill, which makes
-the per-skill DPS averages steadier.
+Full grading (the default: Settings → **skill grading → FULL**, `--grade-all` in the capture
+tool) then asks poe.ninja again for every skill with `?skills=<name>&sort=dps`, which returns
+that skill's own page of builds from the top of the DPS table — the rows the site shows. One
+request per tracked skill, paced, and the resulting DPS numbers are comparable to the site's
+column.
+
+Quick grading (Settings → **skill grading → QUICK**) skips those and groups the single
+unfiltered page of rows by skill. Faster, but twenty skills then share one page of builds, so
+a skill's top row is whatever happened to land on it: fine as a rough ordering, not
+comparable to the site's DPS figures. The sync escalates to full grading by itself when the
+unfiltered response carries no rows at all.
+
+The main-skill rail is ordered by **peak DPS** — the strongest build of that skill — and shows
+that same number, because it is the figure the site's DPS column and its "DPS" sort are about.
+The average is a mean over that skill's ladder page and lives in the skill hero and the
+cluster cards.
 
 **Phase 2 — cluster jewels (polite: rate-limited, cached).**
 For a skill, the top-N builds by DPS get one `/character` request each. The ordering is
-poe.ninja's `dps.total` per ladder row, sorted by us, descending. If no column carries that
+poe.ninja's DPS column per ladder row (`dps_total` in the current payload, and the site sorts
+on it too), highest first. If no column carries that
 name, the parser falls back to the column whose values look like damage (largest numbers,
 excluding level / experience / life and friends) and logs which one it picked; if nothing
 looks like damage at all, the snapshot is flagged and the UI stops calling the sample

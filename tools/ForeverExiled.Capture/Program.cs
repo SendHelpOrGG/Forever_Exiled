@@ -220,7 +220,7 @@ internal static class Program
             var summary = new List<string>
             {
                 $"overview={overview}",
-                $"url=/poe1/api/builds/{league.Version}/search?overview={overview}&type={league.Type}",
+                $"url=/poe1/api/builds/{league.Version}/search?overview={overview}&type={league.Type}&sort=dps",
                 $"payload={raw.Length} bytes",
                 SearchResponseParser.Describe(response),
                 $"rows extracted: {rows.Count}",
@@ -233,7 +233,9 @@ internal static class Program
                             $"numbers={column.Numbers?.Count ?? 0} dict={column.DictionaryId}");
             }
 
-            foreach (var row in rows.Take(5))
+            // ordered by DPS, so these are the rows the site's own DPS sort would put on top
+            var topRows = rows.OrderByDescending(r => r.Dps).Take(5).ToList();
+            foreach (var row in topRows)
             {
                 summary.Add($"row {row.Name} | {row.Account} | {row.ClassName} | " +
                             $"lvl {row.Level} | {row.Dps:N0} dps | {row.MainSkill}");
@@ -249,7 +251,12 @@ internal static class Program
 
             Console.WriteLine($"overview=\"{overview}\"");
             Console.WriteLine($"  {SearchResponseParser.Describe(response)}");
-            Console.WriteLine($"  rows extracted: {rows.Count}");
+            Console.WriteLine($"  rows extracted: {rows.Count}, highest DPS {rows.Select(r => r.Dps).DefaultIfEmpty(0).Max():N0}");
+            foreach (var row in topRows)
+            {
+                Console.WriteLine($"    top {row.Dps:N0} · {row.Name} · {row.MainSkill}");
+            }
+
             foreach (var column in response.Columns.Take(20))
             {
                 Console.WriteLine($"    column {column.Name}: rows={column.Rows} " +

@@ -12,11 +12,13 @@ public sealed class AppSettings
     public int MaxSkills { get; set; } = 24;
 
     /// <summary>
-    /// Grade each skill with its own search request (a request per skill, more rows per
-    /// skill) instead of ranking skills from the single unfiltered ladder window. Off means
-    /// one request for the whole ladder, at the cost of only a handful of rows per skill.
+    /// Grade each skill with its own search request (a request per skill, the site's own
+    /// top 100 builds for it) instead of ranking skills from the single unfiltered ladder
+    /// window. On by default: one shared page of builds cannot describe twenty skills, and
+    /// a skill's DPS is only comparable to the site's column when it comes from that skill's
+    /// own page. Turn it off for a cheaper refresh at the cost of partial DPS.
     /// </summary>
-    public bool GradeEverySkill { get; set; }
+    public bool GradeEverySkill { get; set; } = true;
 
     /// <summary>Characters to sample per skill when looking for cluster jewels.</summary>
     public int SampleDepth { get; set; } = 12;

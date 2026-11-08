@@ -141,7 +141,7 @@ public sealed partial class SkillCardItem : ObservableObject
         SkillStat stat,
         int rank,
         SkillClusterProfile? profile,
-        double maxAverageDps,
+        double maxPeakDps,
         Action<SkillCardItem> onSelected)
     {
         Stat = stat;
@@ -150,7 +150,7 @@ public sealed partial class SkillCardItem : ObservableObject
         Command = new RelayCommand(() => onSelected(this));
 
         AccentColor = Palette.ForDamageType(stat.DamageType);
-        DpsBarPercent = maxAverageDps > 0 ? stat.AverageDps * 100d / maxAverageDps : 0;
+        DpsBarPercent = maxPeakDps > 0 ? stat.PeakDps * 100d / maxPeakDps : 0;
 
         if (stat.TopClass.Length > 0)
         {
@@ -178,9 +178,13 @@ public sealed partial class SkillCardItem : ObservableObject
 
     public string RankText => Rank.ToString("00");
 
-    public string DpsText => DpsFormatter.Format(Stat.AverageDps);
+    /// <summary>
+    /// The best build's DPS, which is the number the site's DPS column shows and the one
+    /// "by DPS" orders by. An average over a page of builds is not comparable to it.
+    /// </summary>
+    public string DpsText => DpsFormatter.Format(Stat.PeakDps);
 
-    public string DpsCaption => "avg DPS";
+    public string DpsCaption => "peak DPS";
 
     public string PopText => DpsFormatter.Percent(Stat.PopularityPercent);
 

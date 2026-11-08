@@ -20,14 +20,15 @@ public partial class MainViewModel
         var ordered = string.Equals(_sortMode, "Popularity", StringComparison.Ordinal)
             ? _analysis.Skills
                 .OrderByDescending(s => s.PopularityPercent)
-                .ThenByDescending(s => s.AverageDps)
+                .ThenByDescending(s => s.PeakDps)
                 .ToList()
             : _analysis.Skills
-                .OrderByDescending(s => s.AverageDps)
+                .OrderByDescending(s => s.PeakDps)
+                .ThenByDescending(s => s.AverageDps)
                 .ThenByDescending(s => s.BuildCount)
                 .ToList();
 
-        var maxDps = ordered.Count > 0 ? ordered.Max(s => s.AverageDps) : 0;
+        var maxDps = ordered.Count > 0 ? ordered.Max(s => s.PeakDps) : 0;
 
         for (var index = 0; index < ordered.Count; index++)
         {

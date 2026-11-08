@@ -263,7 +263,7 @@ function analyze(snapshot, floor) {
   const skills = snapshot.skills
     .filter((s) => s.popularityPercent >= floor)
     .slice()
-    .sort((a, b) => b.averageDps - a.averageDps || b.buildCount - a.buildCount);
+    .sort((a, b) => b.peakDps - a.peakDps || b.averageDps - a.averageDps || b.buildCount - a.buildCount);
 
   const profiles = new Map();
   for (const skill of skills) {
@@ -729,7 +729,7 @@ function visibleSkills() {
     : list;
 
   if (state.sort === 'popularity') {
-    filtered.sort((a, b) => b.popularityPercent - a.popularityPercent || b.averageDps - a.averageDps);
+    filtered.sort((a, b) => b.popularityPercent - a.popularityPercent || b.peakDps - a.peakDps);
   }
   return filtered;
 }
@@ -752,8 +752,8 @@ function renderSkillRail() {
           <div class="skill-sub"><span>${esc(classTextOf(skill))} · ${esc(fmt.pct(skill.popularityPercent))}</span></div>
         </span>
         <span class="skill-side">
-          <div class="skill-dps">${esc(fmt.dps(skill.averageDps))}</div>
-          <div class="skill-cap">avg dps</div>
+          <div class="skill-dps">${esc(fmt.dps(skill.peakDps))}</div>
+          <div class="skill-cap">peak dps</div>
         </span>
       </button>`;
   }).join('') || `<div class="empty"><h3>No match</h3><p>Try another skill, class or damage type.</p></div>`;

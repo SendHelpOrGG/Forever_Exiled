@@ -232,17 +232,28 @@ public sealed class PoeNinjaClient : IDisposable
         return SearchResponseParser.Parse(payload);
     }
 
+    /// <param name="sort">
+    /// Value for the <c>sort</c> query parameter. The site's own builds page uses
+    /// <c>sort=dps</c>; without it the server answers in no particular order and a
+    /// 100-row page can easily contain none of the league's top-DPS builds.
+    /// </param>
     public async Task<byte[]> SearchRawAsync(
         LeagueInfo league,
         IReadOnlyDictionary<string, string>? filters,
         CancellationToken cancellationToken,
-        string? overviewOverride = null)
+        string? overviewOverride = null,
+        string? sort = "dps")
     {
         var query = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["overview"] = string.IsNullOrWhiteSpace(overviewOverride) ? league.SnapshotName : overviewOverride,
             ["type"] = string.IsNullOrEmpty(league.Type) ? "exp" : league.Type,
         };
+
+        if (!string.IsNullOrWhiteSpace(sort))
+        {
+            query["sort"] = sort;
+        }
 
         if (filters is not null)
         {

@@ -114,7 +114,9 @@ public sealed class SyncService
         }
         else if (unfilteredRows.Count > 0)
         {
-            _client.Log?.Invoke($"ladder rows: {unfilteredRows.Count}, with DPS: {rowsWithDps}");
+            _client.Log?.Invoke(
+                $"ladder rows: {unfilteredRows.Count}, with DPS: {rowsWithDps}, " +
+                $"highest {unfilteredRows.Max(r => r.Dps):N0} (sort=dps)");
         }
 
         if (ladderWarning.Length > 0)
@@ -280,7 +282,11 @@ public sealed class SyncService
             LadderRowCount = unfilteredRows.Count,
             LadderDpsRows = rowsWithDps,
             LadderResponseSummary = SearchResponseParser.Describe(first),
-            Skills = skills.OrderByDescending(s => s.AverageDps).ThenByDescending(s => s.BuildCount).ToList(),
+            Skills = skills
+                .OrderByDescending(s => s.PeakDps)
+                .ThenByDescending(s => s.AverageDps)
+                .ThenByDescending(s => s.BuildCount)
+                .ToList(),
             Characters = previous?.Characters ?? new List<CharacterSnapshot>(),
         };
 

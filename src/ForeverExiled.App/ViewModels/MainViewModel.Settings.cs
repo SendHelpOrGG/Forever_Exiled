@@ -46,8 +46,8 @@ public partial class MainViewModel
         SettingsPacingText = _settings.PacingSeconds + "s between requests";
         SettingsPopularityText = DpsFormatter.Percent(_settings.MinPopularityPercent) + " popularity floor";
         SettingsGradingText = _settings.GradeEverySkill
-            ? "one request per skill"
-            : "one request for the ladder";
+            ? "one request per skill · top builds"
+            : "one request for the ladder · partial DPS";
 
         foreach (var pill in GradingPills)
         {
@@ -101,8 +101,8 @@ public partial class MainViewModel
         _store.SaveSettings(_settings);
         RefreshSettingsSurface();
         StatusMessage = _settings.GradeEverySkill
-            ? "Full grading: one request per skill. Slower, but each skill is ranked on more of its own builds."
-            : "Quick grading: one request for the whole ladder. Fast, but each skill is ranked on the rows that request returned.";
+            ? "Full grading: one request per skill, so each skill is ranked on its own top builds - the numbers the site shows."
+            : "Quick grading: one request for the whole ladder. Fast, but the skills then share one page of builds and their DPS is not comparable to the site's.";
     }
 
     private void SelectPacingPill(PillItem pill)
