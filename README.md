@@ -289,10 +289,11 @@ league's top-DPS builds. The `skills` bucket that comes back gives every main sk
 the ladder — the same percentages the site prints in its own "main skills" panel.
 
 Full grading (the default: Settings → **skill grading → FULL**, `--grade-all` in the capture
-tool) then asks poe.ninja again for every skill with `?skills=<name>&sort=dps`, which returns
-that skill's own page of builds from the top of the DPS table — the rows the site shows. One
-request per tracked skill, paced, and the resulting DPS numbers are comparable to the site's
-column.
+tool) then reads every skill's own builds page — `?skills=<name>&sort=dps`, the table the site
+shows — with the search API as the fallback when a page cannot be read. One request per tracked
+skill, paced, and the DPS figures are the site's own column rather than a decode of it. That
+matters: the protobuf route answered per-skill searches with a DPS column that only carried the
+first row's value, so every other build looked like it had no damage.
 
 Quick grading (Settings → **skill grading → QUICK**) skips those and groups the single
 unfiltered page of rows by skill. Faster, but twenty skills then share one page of builds, so
