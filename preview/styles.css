@@ -674,6 +674,8 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .build-dps { font-size: 15.5px; font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ─────────────────────────── ladder ─────────────────────────── */
+/* off-screen rows skip layout and paint: a few hundred rows otherwise cost a frame each */
+.ladder .trow { content-visibility: auto; contain-intrinsic-size: 44px; }
 .ladder { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; height: 100%; }
 .ladder-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 

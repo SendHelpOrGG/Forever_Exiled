@@ -32,7 +32,7 @@
         <Border Grid.Row="1" Style="{StaticResource CardFlush}">
             <Grid RowDefinitions="Auto,1,*">
 
-                <Grid ColumnDefinitions="38,*,215,255,105,70"
+                <Grid ColumnDefinitions="38,*,215,255,105,70,32"
                       ColumnSpacing="10"
                       Padding="14,11"
                       BackgroundColor="{StaticResource SurfaceSunken}">
@@ -48,14 +48,33 @@
 
                 <BoxView Grid.Row="1" Color="{StaticResource BorderSoft}" />
 
-                <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Never">
-                    <VerticalStackLayout Padding="6,6,6,14" Spacing="1"
-                                         BindableLayout.ItemsSource="{Binding LadderItems}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="38,*,215,255,105,70,32"
-                                      ColumnSpacing="10"
-                                      Padding="8,7">
+                <CollectionView Grid.Row="2"
+                                ItemsSource="{Binding LadderItems}"
+                                SelectionMode="None"
+                                ItemSizingStrategy="MeasureFirstItem"
+                                VerticalScrollBarVisibility="Never"
+                                Margin="0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="1" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.EmptyView>
+                        <Label Text="No builds match that filter."
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,26" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.Header>
+                        <BoxView HeightRequest="6" Color="Transparent" />
+                    </CollectionView.Header>
+                    <CollectionView.Footer>
+                        <BoxView HeightRequest="12" Color="Transparent" />
+                    </CollectionView.Footer>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="38,*,215,255,105,70,32"
+                                  ColumnSpacing="10"
+                                  Padding="14,7"
+                                  HeightRequest="50">
                                     <Label Text="{Binding RankText}"
                                            FontFamily="Segoe UI Semibold"
                                            FontSize="14.5"
@@ -118,11 +137,11 @@
                                             ToolTipProperties.Text="Open this character on poe.ninja"
                                             HorizontalOptions="End"
                                             VerticalOptions="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                </ScrollView>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
             </Grid>
         </Border>
     </Grid>

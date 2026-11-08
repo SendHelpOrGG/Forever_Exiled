@@ -22,7 +22,7 @@ public partial class MainViewModel : ObservableObject
     private readonly SnapshotStore _store;
     private readonly AppSettings _settings;
     private readonly List<SkillCardItem> _allSkillCards = new();
-    private readonly List<BuildItem> _allLadderItems = new();
+    private List<BuildItem> _allLadderItems = new();
 
     private SnapshotDocument _snapshot = new();
     private MetaAnalysis _analysis = new();
@@ -109,7 +109,13 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<ComboItem> TopCombos { get; } = new();
 
-    public ObservableCollection<BuildItem> LadderItems { get; } = new();
+    /// <summary>
+    /// The ladder rows on screen. A plain list, replaced in one assignment per filter change:
+    /// with an ObservableCollection the view re-lays out once per added row, which is O(n^2)
+    /// over a few hundred rows and is exactly what made this tab feel stuck.
+    /// </summary>
+    [ObservableProperty]
+    private IReadOnlyList<BuildItem> _ladderItems = Array.Empty<BuildItem>();
 
     public ObservableCollection<string> LeagueNames { get; } = new();
 

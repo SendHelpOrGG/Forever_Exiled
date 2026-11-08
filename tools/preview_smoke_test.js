@@ -63,11 +63,13 @@ const type = (node, value) => {
   node.dispatchEvent(new window.Event('input', { bubbles: true }));
 };
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const results = [];
 const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
-setTimeout(() => {
+setTimeout(async () => {
   /* ── the snapshot must announce itself as synthetic ── */
   check('synthetic banner visible', !q('#notice').hidden, txt('#noticeText').slice(0, 60) + '…');
   check('banner says the data is not the ladder',
@@ -410,9 +412,11 @@ setTimeout(() => {
   check('ladder rows', qa('#ladderBody .trow').length === snapshot.characters.length,
     qa('#ladderBody .trow').length + ' rows');
   type(q('#ladderSearch'), 'occultist');
+  await wait(220); // the search is debounced: typing should not re-render per keystroke
   check('ladder filter', qa('#ladderBody .trow').length > 0 && qa('#ladderBody .trow').length < snapshot.characters.length,
     qa('#ladderBody .trow').length + ' rows');
   type(q('#ladderSearch'), '');
+  await wait(220);
   click(qa('.th').find((t) => t.dataset.key === 'name'));
   check('ladder sorting', qa('#ladderBody .trow .nm b')[0].textContent.length > 0,
     qa('#ladderBody .trow .nm b')[0].textContent);

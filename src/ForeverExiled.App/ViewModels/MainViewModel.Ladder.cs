@@ -5,13 +5,11 @@ public partial class MainViewModel
 {
     private void RebuildLadderView()
     {
-        _allLadderItems.Clear();
-
+        // a fresh list every time, so the view sees one change instead of a clear plus N adds
         var rank = 1;
-        foreach (var build in _analysis.Ladder)
-        {
-            _allLadderItems.Add(new BuildItem(build, rank++, _snapshot.LeagueUrl));
-        }
+        _allLadderItems = _analysis.Ladder
+            .Select(build => new BuildItem(build, rank++, _snapshot.LeagueUrl))
+            .ToList();
 
         ApplyLadderFilter();
     }
@@ -20,19 +18,14 @@ public partial class MainViewModel
     {
         var query = (LadderFilter ?? string.Empty).Trim();
 
-        LadderItems.Clear();
-        foreach (var item in _allLadderItems)
-        {
-            if (query.Length > 0 &&
-                !item.Name.Contains(query, StringComparison.OrdinalIgnoreCase) &&
-                !item.ClassText.Contains(query, StringComparison.OrdinalIgnoreCase) &&
-                !item.SkillText.Contains(query, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
+        var visible = query.Length == 0
+            ? _allLadderItems
+            : _allLadderItems.Where(item =>
+                item.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                item.ClassText.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                item.SkillText.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            LadderItems.Add(item);
-        }
+        LadderItems = visible;
 
         var sampled = _allLadderItems.Count(item => item.IsSampled);
 
@@ -40,7 +33,7 @@ public partial class MainViewModel
             ? "No builds yet — press SYNC"
             : query.Length == 0
                 ? $"{_allLadderItems.Count} builds in use · {sampled} sampled"
-                : $"{LadderItems.Count} of {_allLadderItems.Count} builds · {sampled} sampled";
+                : $"{visible.Count} of {_allLadderItems.Count} builds · {sampled} sampled";
     }
 
     partial void OnLadderFilterChanged(string value) => ApplyLadderFilter();

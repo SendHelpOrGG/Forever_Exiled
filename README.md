@@ -203,6 +203,17 @@ lives in `preview/assets/tag_colors.json` and is mirrored into `Theming/TagColor
 `tools/sync_tag_colors.py`, so the app and the preview paint a tag the same way. Colour is
 decoration: no odds or cost number ever reads it.
 
+### Lists stay cheap
+
+The ladder holds a few hundred rows, each with a class portrait, a gem icon and seven cells. Two
+things keep that from costing frames: the rows live in a virtualising `CollectionView` (only the
+visible dozen exist as controls, so scrolling does not re-lay-out hundreds of them), and the rows
+themselves are handed over as one freshly built list per filter change rather than appended one by
+one to an observable collection - appending re-lays-out the whole stack per row, which is
+quadratic. The preview does the same job with `content-visibility: auto`, a rank lookup table
+instead of `indexOf` inside a comparator, and a debounce on the search field so typing does not
+rebuild every row per keystroke.
+
 ### Crafting options
 
 Because the weights are known, the app can say what a jewel costs to craft. Picking a

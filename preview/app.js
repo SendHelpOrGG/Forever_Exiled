@@ -1493,11 +1493,16 @@ function renderLadder() {
         String(b.mainSkill).toLowerCase().includes(query))
     : all.slice();
 
+  // the rank is the row's place in the unsorted ladder; looking it up inside the comparator
+  // turned a sort into n^2 index scans
+  const rankOf = new Map();
+  all.forEach((build, index) => rankOf.set(build, index + 1));
+
   const { key, dir } = state.ladderSort;
   rows.sort((a, b) => {
-    const av = key === 'rank' ? all.indexOf(a) + 1 : key === 'clusterJewelCount'
+    const av = key === 'rank' ? rankOf.get(a) : key === 'clusterJewelCount'
       ? (a.clusterJewelCount || 0) : a[key];
-    const bv = key === 'rank' ? all.indexOf(b) + 1 : key === 'clusterJewelCount'
+    const bv = key === 'rank' ? rankOf.get(b) : key === 'clusterJewelCount'
       ? (b.clusterJewelCount || 0) : b[key];
     if (typeof av === 'string') return dir * String(av).localeCompare(String(bv));
     return dir * ((av || 0) - (bv || 0));
@@ -1508,7 +1513,7 @@ function renderLadder() {
     `${key === 'clusterJewelCount' ? 'cluster count' : key}`;
 
   $('ladderBody').innerHTML = rows.map((b) => {
-    const rank = all.indexOf(b) + 1;
+    const rank = rankOf.get(b);
     const accent = DAMAGE_COLOR[damageOf(b.mainSkill)] || DAMAGE_COLOR.Physical;
     return `
       <div class="trow ${rank <= 3 ? 'top' : ''}">
@@ -1739,9 +1744,12 @@ function wire() {
     });
   });
 
+  // every keystroke re-rendered every row, images included; wait for a pause in typing
+  let ladderSearchTimer = null;
   $('ladderSearch').addEventListener('input', (e) => {
     state.ladderQuery = e.target.value;
-    renderLadder();
+    clearTimeout(ladderSearchTimer);
+    ladderSearchTimer = setTimeout(renderLadder, 130);
   });
 
   document.querySelectorAll('.th').forEach((th) => {
