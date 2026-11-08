@@ -49,6 +49,8 @@ public sealed class PoeNinjaClient : IDisposable
 
     private readonly HttpClient _http;
     private readonly bool _ownsHttpClient;
+    private readonly Dictionary<string, string[]> _dictionaries = new(StringComparer.Ordinal);
+    private readonly object _dictionaryLock = new();
 
     public PoeNinjaClient(HttpClient? httpClient = null, TimeSpan? minInterval = null)
     {
@@ -302,9 +304,27 @@ public sealed class PoeNinjaClient : IDisposable
 
     public async Task<string[]> GetDictionaryAsync(string hash, CancellationToken cancellationToken)
     {
+        // every per-skill response references the same handful of dictionaries; fetching and
+        // decoding them again per skill is a request per skill spent on data we already hold
+        lock (_dictionaryLock)
+        {
+            if (_dictionaries.TryGetValue(hash, out var known))
+            {
+                return known;
+            }
+        }
+
         var payload = await GetBytesAsync($"poe1/api/builds/dictionary/{hash}", null, cancellationToken, pacer: SearchPacer)
             .ConfigureAwait(false);
-        return DictionaryDecoder.Decode(payload, Log);
+
+        var entries = DictionaryDecoder.Decode(payload, Log);
+
+        lock (_dictionaryLock)
+        {
+            _dictionaries[hash] = entries;
+        }
+
+        return entries;
     }
 
     /// <summary>

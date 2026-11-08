@@ -395,7 +395,8 @@ poe.ninja throttles the character endpoint hard and the `Retry-After` penalty es
   characters it has already sampled, so each run continues where the last one stopped.
 
 Ladder and dictionary calls use a separate, faster gate (~1.2 s) because they are served from an
-aggregate cache — a full sync is ~30–40 s. Only per-character calls use the configurable pacing,
+aggregate cache, and a dictionary is fetched once per hash per session - every per-skill response
+references the same handful — a full sync is ~30–40 s. Only per-character calls use the configurable pacing,
 so sampling one skill at depth 12 takes about a minute.
 
 ---
