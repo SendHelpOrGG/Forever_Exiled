@@ -166,7 +166,9 @@ grant: ...", one gold "1 Added Passive Skill is X" per notable, then each notabl
 its own blue modifier lines and a row of coloured mod-tag chips - closed by the jewel art at the
 foot. The game's "Place into an allocated ... Jewel Socket" instruction is left out: it is the same
 seven lines on every jewel and tells a reader of a table nothing. The body is set in a serif face on near-black, every line
-centred, and nothing else: no build counts, no DPS, no odds. The preview positions the card against
+centred, and nothing else: no build counts, no DPS, no odds. The card is 348px wide - a
+notable's modifier lines should wrap at most once - and it is measured before it is placed, so a
+tall jewel flips above the pointer instead of having its last notable cut off by the window edge. The preview positions the card against
 the cursor in `preview/app.js`; the app builds the same card from the same model
 (`ViewModels/JewelCard.cs` → `Views/Controls/ClusterJewelCard.cs`) and floats it under the pointer.
 The modifier text comes from Path of Building's tree data (`preview/assets/notables.json`, 300

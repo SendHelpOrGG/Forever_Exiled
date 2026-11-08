@@ -6,8 +6,12 @@ public partial class MetaView : ContentView
 {
     private const double CardOffsetX = 18;
     private const double CardOffsetY = 14;
-    private const double CardWidth = 292;
-    private const double CardHeight = 380;
+    private const double CardWidth = 348;
+    private const double CardHeightFallback = 380;
+
+    private ComboItem? _hovered;
+
+    private double _cardHeight;
 
     public MetaView() => InitializeComponent();
 
@@ -15,8 +19,11 @@ public partial class MetaView : ContentView
 
     private void OnJewelPointerMoved(object? sender, PointerEventArgs e) => ShowCard(sender, e);
 
-    private void OnJewelPointerExited(object? sender, PointerEventArgs e) =>
+    private void OnJewelPointerExited(object? sender, PointerEventArgs e)
+    {
+        _hovered = null;
         (BindingContext as MainViewModel)?.HideItemCard();
+    }
 
     private void ShowCard(object? sender, PointerEventArgs e)
     {
@@ -31,8 +38,29 @@ public partial class MetaView : ContentView
             return;
         }
 
+        if (!ReferenceEquals(item, _hovered))
+        {
+            _hovered = item;
+            viewModel.ShowItemCard(item.ItemCard, 0, 0);
+            _cardHeight = MeasureCard();
+        }
+
         var x = ItemCardPlacement.Place(point.X, CardOffsetX, MetaRoot.Width, CardWidth);
-        var y = ItemCardPlacement.Place(point.Y, CardOffsetY, MetaRoot.Height, CardHeight);
-        viewModel.ShowItemCard(item.ItemCard, x, y);
+        var y = ItemCardPlacement.PlaceVertical(point.Y, CardOffsetY, MetaRoot.Height, _cardHeight);
+        viewModel.MoveItemCard(x, y);
+    }
+
+    private double MeasureCard()
+    {
+        if (ItemCardHost.Content is VisualElement card)
+        {
+            var measured = card.Measure(CardWidth, double.PositiveInfinity);
+            if (measured.Request.Height > 0)
+            {
+                return measured.Request.Height;
+            }
+        }
+
+        return CardHeightFallback;
     }
 }

@@ -293,7 +293,7 @@
     
 </ScrollView>
 
-        <Border ZIndex="90"
+        <Border x:Name="ItemCardHost" ZIndex="90"
                 InputTransparent="True"
                 StrokeThickness="0"
                 BackgroundColor="Transparent"

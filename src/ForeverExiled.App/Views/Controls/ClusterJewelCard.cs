@@ -26,7 +26,8 @@ public sealed class ClusterJewelCard : ContentView
 
     public ClusterJewelCard()
     {
-        WidthRequest = 292;
+        // wide enough that a notable's modifier lines wrap at most once, as on the site
+        WidthRequest = 348;
         InputTransparent = true;
     }
 

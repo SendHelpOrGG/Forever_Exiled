@@ -513,7 +513,7 @@
         </ScrollView>
     
         <!-- the hover card: one floating jewel card, positioned under the pointer -->
-        <Border Grid.ColumnSpan="3"
+        <Border x:Name="ItemCardHost" Grid.ColumnSpan="3"
                 ZIndex="90"
                 InputTransparent="True"
                 StrokeThickness="0"
