@@ -149,7 +149,18 @@ public sealed class SyncService
         // Quick mode: one request already returned every ladder row poe.ninja is willing to
         // hand over, so group those by skill instead of asking again per skill. Full mode
         // spends a request per skill to see more of that skill's builds.
-        if (!settings.GradeEverySkill)
+        //
+        // Some deployments answer the unfiltered call with the aggregate buckets alone. Quick
+        // mode is then pointless - there is nothing to group - so fall back to per-skill
+        // requests rather than producing skills with no builds behind them.
+        var gradeEverySkill = settings.GradeEverySkill;
+        if (!gradeEverySkill && unfilteredRows.Count == 0)
+        {
+            gradeEverySkill = true;
+            _client.Log?.Invoke("unfiltered search returned no rows: grading skills one request at a time");
+        }
+
+        if (!gradeEverySkill)
         {
             progress?.Report(new SyncProgress(
                 "Ladder",
@@ -163,7 +174,7 @@ public sealed class SyncService
             cancellationToken.ThrowIfCancellationRequested();
 
             var candidate = candidates[index];
-            if (settings.GradeEverySkill)
+            if (gradeEverySkill)
             {
                 progress?.Report(new SyncProgress(
                     "Ladder",
@@ -177,7 +188,7 @@ public sealed class SyncService
                 .ToList();
             var buildCount = candidate.Count;
 
-            if (settings.GradeEverySkill)
+            if (gradeEverySkill)
             {
                 try
                 {
@@ -240,6 +251,18 @@ public sealed class SyncService
             });
         }
 
+        // rows on disk but no skill owns them: the skills column did not resolve, so every
+        // build is invisible to the lab even though the ladder answered
+        if (ladderWarning.Length == 0 && unfilteredRows.Count > 0 && skills.All(s => s.TopBuilds.Count == 0))
+        {
+            var unattributed = unfilteredRows.Count(r => r.MainSkill.Length == 0);
+            ladderWarning =
+                $"Read {unfilteredRows.Count} ladder rows but could not attribute them to a skill " +
+                $"({unattributed} had no resolvable main skill), so there are no builds to sample. " +
+                $"Response: {SearchResponseParser.Describe(first)}";
+            _client.Log?.Invoke(ladderWarning);
+        }
+
         var previous = _store.LoadSnapshot(league.Url);
 
         var document = new SnapshotDocument
@@ -254,6 +277,9 @@ public sealed class SyncService
             TotalBuildsInLeague = totalBuilds,
             LadderWarning = ladderWarning,
             LadderDpsMissing = dpsMissing,
+            LadderRowCount = unfilteredRows.Count,
+            LadderDpsRows = rowsWithDps,
+            LadderResponseSummary = SearchResponseParser.Describe(first),
             Skills = skills.OrderByDescending(s => s.AverageDps).ThenByDescending(s => s.BuildCount).ToList(),
             Characters = previous?.Characters ?? new List<CharacterSnapshot>(),
         };

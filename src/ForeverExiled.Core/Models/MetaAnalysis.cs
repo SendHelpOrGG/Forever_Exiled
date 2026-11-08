@@ -80,6 +80,15 @@ public sealed class SnapshotDocument
     /// </summary>
     public bool LadderDpsMissing { get; set; }
 
+    /// <summary>Ladder rows the sync could read, for diagnostics.</summary>
+    public int LadderRowCount { get; set; }
+
+    /// <summary>How many of those rows carried a DPS value.</summary>
+    public int LadderDpsRows { get; set; }
+
+    /// <summary>What the search response contained, as the parser described it.</summary>
+    public string LadderResponseSummary { get; set; } = string.Empty;
+
     public List<SkillStat> Skills { get; set; } = new();
 
     public List<CharacterSnapshot> Characters { get; set; } = new();

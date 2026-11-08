@@ -103,7 +103,9 @@ public partial class MainViewModel
         var total = skill.Stat.TopBuilds.Count;
         var rankWord = _snapshot.LadderDpsMissing ? "ladder-order builds" : "top-DPS builds";
         SelectedSkillSampleText = profile is { SampledBuilds: > 0 }
-            ? $"{profile.SampledBuilds} of {total} {rankWord} sampled"
+            ? total > 0
+                ? $"{profile.SampledBuilds} of {total} {rankWord} sampled"
+                : $"{profile.SampledBuilds} builds from an earlier sample"
             : total > 0
                 ? $"0 of {total} {rankWord} sampled"
                 : _snapshot.HasLadderWarning

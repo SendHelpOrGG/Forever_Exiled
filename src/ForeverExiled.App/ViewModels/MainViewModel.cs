@@ -598,12 +598,19 @@ public partial class MainViewModel : ObservableObject
 
         HasLadderWarning = _snapshot.HasLadderWarning || ladderEmpty || ladderDpsMissing;
 
+        var sampled = _snapshot.Characters.Count;
+        var summary = _snapshot.LadderResponseSummary;
+        var summaryTail = summary.Length > 0 ? " Response: " + summary : string.Empty;
+
         LadderWarningText = _snapshot.HasLadderWarning
             ? _snapshot.LadderWarning
             : ladderEmpty
-                ? "poe.ninja listed this league's skills and their popularity, but returned no ladder rows, "
-                  + "so there are no characters to sample. Press SYNC to retry; if it stays empty, run "
-                  + "tools/ForeverExiled.Capture with --diagnose and send the dump."
+                ? sampled > 0
+                    ? $"This sync returned no ladder rows, so the {sampled} builds on screen are the characters "
+                      + "sampled earlier and the skills carry no DPS. Press SYNC to refresh them." + summaryTail
+                    : "poe.ninja listed this league's skills and their popularity, but returned no ladder rows, "
+                      + "so there are no characters to sample. Press SYNC to retry; if it stays empty, run "
+                      + "tools/ForeverExiled.Capture with --diagnose and send the dump." + summaryTail
                 : ladderDpsMissing
                     ? "The ladder rows carried no DPS value, so builds are sampled in poe.ninja's order "
                       + "instead of by DPS. The cluster numbers are real, but the sample is not the top-DPS "
