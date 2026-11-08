@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using ForeverExiled.App.Theming;
 using ForeverExiled.Core.Analysis;
 using ForeverExiled.Core.Formatting;
 using ForeverExiled.Core.Models;
