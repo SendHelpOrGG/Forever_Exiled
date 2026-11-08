@@ -11,6 +11,13 @@ public sealed class AppSettings
     /// <summary>How many of the most popular skills to track per refresh.</summary>
     public int MaxSkills { get; set; } = 24;
 
+    /// <summary>
+    /// Grade each skill with its own search request (a request per skill, more rows per
+    /// skill) instead of ranking skills from the single unfiltered ladder window. Off means
+    /// one request for the whole ladder, at the cost of only a handful of rows per skill.
+    /// </summary>
+    public bool GradeEverySkill { get; set; }
+
     /// <summary>Characters to sample per skill when looking for cluster jewels.</summary>
     public int SampleDepth { get; set; } = 12;
 

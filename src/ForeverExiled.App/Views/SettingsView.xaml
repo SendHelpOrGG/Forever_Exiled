@@ -74,6 +74,30 @@
 
                     <VerticalStackLayout Spacing="6">
                         <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Skill grading" Style="{StaticResource Body}" />
+                            <Label Grid.Column="1" Text="{Binding SettingsGradingText}" Style="{StaticResource Caption}" />
+                        </Grid>
+                        <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding GradingPills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Pill}" Padding="14,6">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Command}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                        <Label Text="Quick reads the ladder once and ranks each skill on the rows that request returned. Full asks poe.ninja again for every skill: slower, but each skill is ranked on more of its own builds."
+                               Style="{StaticResource Caption}"
+                               FontSize="12.5"
+                               TextColor="{StaticResource TextMuted}"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Popularity floor" Style="{StaticResource Body}" />
                             <Label Grid.Column="1" Text="{Binding SettingsPopularityText}" Style="{StaticResource Caption}" />
                         </Grid>

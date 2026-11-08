@@ -84,6 +84,9 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<PillItem> PacingPills { get; } = new();
 
+    /// <summary>Quick (one ladder request) or full (one request per skill) grading.</summary>
+    public ObservableCollection<PillItem> GradingPills { get; } = new();
+
     public ObservableCollection<PillItem> PopularityPills { get; } = new();
 
     public ObservableCollection<StatCardItem> StatCards { get; } = new();
@@ -291,6 +294,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _settingsSampleDepthText = string.Empty;
+
+    [ObservableProperty]
+    private string _settingsGradingText = string.Empty;
 
     [ObservableProperty]
     private string _settingsPacingText = string.Empty;

@@ -16,6 +16,7 @@ namespace ForeverExiled.Core.Analysis;
 /// </summary>
 public sealed class SyncService
 {
+
     private readonly PoeNinjaClient _client;
     private readonly SnapshotStore _store;
 
@@ -139,48 +140,66 @@ public sealed class SyncService
         var denominator = candidates.Count + 1;
         var skills = new List<SkillStat>(candidates.Count);
 
+        // Quick mode: one request already returned every ladder row poe.ninja is willing to
+        // hand over, so group those by skill instead of asking again per skill. Full mode
+        // spends a request per skill to see more of that skill's builds.
+        if (!settings.GradeEverySkill)
+        {
+            progress?.Report(new SyncProgress(
+                "Ladder",
+                $"Grouping {unfilteredRows.Count} ladder rows by skill",
+                1,
+                2));
+        }
+
         for (var index = 0; index < candidates.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var candidate = candidates[index];
-            progress?.Report(new SyncProgress(
-                "Ladder",
-                $"Grading {candidate.Name}",
-                index + 1,
-                denominator));
+            if (settings.GradeEverySkill)
+            {
+                progress?.Report(new SyncProgress(
+                    "Ladder",
+                    $"Grading {candidate.Name}",
+                    index + 1,
+                    denominator));
+            }
 
             var rows = unfilteredRows
                 .Where(r => string.Equals(r.MainSkill, candidate.Name, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             var buildCount = candidate.Count;
 
-            try
+            if (settings.GradeEverySkill)
             {
-                var filtered = await _client.SearchAsync(
-                    league,
-                    new Dictionary<string, string>(StringComparer.Ordinal) { ["skills"] = candidate.Name },
-                    cancellationToken,
-                    overview).ConfigureAwait(false);
-
-                var filteredDictionaries = filtered.DictionaryHashes.Count > 0
-                    ? await _client.GetDictionariesAsync(filtered, cancellationToken).ConfigureAwait(false)
-                    : dictionaries;
-
-                var filteredRows = SearchResponseParser.ExtractRows(filtered, filteredDictionaries, _client.Log);
-                if (filteredRows.Count > 0)
+                try
                 {
-                    rows = filteredRows;
-                }
+                    var filtered = await _client.SearchAsync(
+                        league,
+                        new Dictionary<string, string>(StringComparer.Ordinal) { ["skills"] = candidate.Name },
+                        cancellationToken,
+                        overview).ConfigureAwait(false);
 
-                if (filtered.Total > 0)
-                {
-                    buildCount = filtered.Total;
+                    var filteredDictionaries = filtered.DictionaryHashes.Count > 0
+                        ? await _client.GetDictionariesAsync(filtered, cancellationToken).ConfigureAwait(false)
+                        : dictionaries;
+
+                    var filteredRows = SearchResponseParser.ExtractRows(filtered, filteredDictionaries, _client.Log);
+                    if (filteredRows.Count > 0)
+                    {
+                        rows = filteredRows;
+                    }
+
+                    if (filtered.Total > 0)
+                    {
+                        buildCount = filtered.Total;
+                    }
                 }
-            }
-            catch (PoeDataException ex)
-            {
-                _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                catch (PoeDataException ex)
+                {
+                    _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                }
             }
 
             foreach (var row in rows)

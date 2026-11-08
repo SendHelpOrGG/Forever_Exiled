@@ -267,11 +267,16 @@ GET /poe1/api/builds/dictionary/{hash}            NDIC   string tables for categ
 GET /poe1/api/builds/{version}/character          JSON   one character sheet (items, jewels)
 ```
 
-**Phase 1 — ladder (cheap: ~1 request per tracked skill).**
+**Phase 1 — ladder (cheap: one request).**
 One unfiltered search returns the aggregate popularity buckets *and* the ladder rows. The
-`skills` bucket gives every main skill's share of the ladder; each skill above the floor
-is then queried with `?skills=<name>` to collect its top-100 builds and grade them by
-average / median / peak DPS.
+`skills` bucket gives every main skill's share of the ladder — the same percentages the site
+prints in its own "main skills" panel — and the rows are grouped by skill to grade it by
+average / median / peak DPS. That is quick mode, the default: one request, a few seconds.
+
+Full grading (Settings → **skill grading → FULL**, `--grade-all` in the capture tool) asks
+poe.ninja again for every skill with `?skills=<name>`, which returns that skill's own window
+of builds: a slower sync (one request per tracked skill) and more rows per skill, which makes
+the per-skill DPS averages steadier.
 
 **Phase 2 — cluster jewels (polite: rate-limited, cached).**
 For a skill, the top-N builds by DPS get one `/character` request each. The ordering is

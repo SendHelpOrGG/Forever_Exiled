@@ -89,6 +89,7 @@ internal static class Program
             MinPopularityPercent = options.Floor,
             MaxSkills = options.MaxSkills,
             SampleDepth = options.Depth,
+            GradeEverySkill = options.GradeEverySkill,
             PacingSeconds = options.PacingSeconds,
         };
 
@@ -327,6 +328,9 @@ internal sealed record CaptureOptions
 
     public string DiagnoseDirectory { get; init; } = "diagnostics";
 
+    /// <summary>One search request per skill instead of ranking from the single ladder window.</summary>
+    public bool GradeEverySkill { get; init; }
+
     public bool Verbose { get; init; }
 
     public bool ShowHelp { get; init; }
@@ -359,6 +363,7 @@ internal sealed record CaptureOptions
                 "--diagnose" => options with { Diagnose = true },
                 "--diagnose-dir" => options with { DiagnoseDirectory = Next(arg) },
                 "--no-sample" => options with { Depth = 0 },
+                "--grade-all" => options with { GradeEverySkill = true },
                 "--league" => options with { LeagueUrl = Next(arg) },
                 "--floor" => options with { Floor = ParseDouble(Next(arg), arg) },
                 "--depth" => options with { Depth = ParseInt(Next(arg), arg) },
@@ -426,6 +431,8 @@ internal sealed record CaptureOptions
               --diagnose          Dump the raw search response + column summary, then exit
               --diagnose-dir <d>  Where --diagnose writes its files (default: diagnostics)
               --no-sample         Ladder only, skip the per-character crawl
+              --grade-all         One search per skill instead of ranking from the single
+                                  ladder window (slower, more rows per skill)
               --verbose           Print every HTTP request the client makes
               -h, --help          This text
 

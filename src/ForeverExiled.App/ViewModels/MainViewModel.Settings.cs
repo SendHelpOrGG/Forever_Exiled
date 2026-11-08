@@ -27,6 +27,9 @@ public partial class MainViewModel
             PacingPills.Add(new PillItem(pacing.ToString(), pacing + "s", string.Empty, SelectPacingPill));
         }
 
+        GradingPills.Add(new PillItem("quick", "QUICK", string.Empty, SelectGradingPill));
+        GradingPills.Add(new PillItem("full", "FULL", string.Empty, SelectGradingPill));
+
         foreach (var popularity in new[] { 0.5, 1.0, 2.0, 3.0, 5.0 })
         {
             PopularityPills.Add(new PillItem(
@@ -42,6 +45,14 @@ public partial class MainViewModel
         SettingsSampleDepthText = _settings.SampleDepth + " builds per skill";
         SettingsPacingText = _settings.PacingSeconds + "s between requests";
         SettingsPopularityText = DpsFormatter.Percent(_settings.MinPopularityPercent) + " popularity floor";
+        SettingsGradingText = _settings.GradeEverySkill
+            ? "one request per skill"
+            : "one request for the ladder";
+
+        foreach (var pill in GradingPills)
+        {
+            pill.IsSelected = (pill.Key == "full") == _settings.GradeEverySkill;
+        }
 
         foreach (var pill in DepthPills)
         {
@@ -82,6 +93,16 @@ public partial class MainViewModel
             RefreshSettingsSurface();
             StatusMessage = $"Sample depth set to {depth} builds per skill.";
         }
+    }
+
+    private void SelectGradingPill(PillItem pill)
+    {
+        _settings.GradeEverySkill = string.Equals(pill.Key, "full", StringComparison.Ordinal);
+        _store.SaveSettings(_settings);
+        RefreshSettingsSurface();
+        StatusMessage = _settings.GradeEverySkill
+            ? "Full grading: one request per skill. Slower, but each skill is ranked on more of its own builds."
+            : "Quick grading: one request for the whole ladder. Fast, but each skill is ranked on the rows that request returned.";
     }
 
     private void SelectPacingPill(PillItem pill)
