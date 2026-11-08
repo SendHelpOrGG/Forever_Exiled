@@ -350,6 +350,9 @@ public sealed class BuildItem
 
     public BuildItem(BuildRef build, int rank, string leagueSlug = "")
     {
+        RankValue = rank;
+        DpsValue = build.Dps;
+        ClusterValue = build.ClusterJewelCount;
         RankText = rank.ToString("00");
         Name = build.Name.Length > 0 ? build.Name : build.Account;
         ClassText = build.ClassName.Length > 0 ? build.ClassName : "–";
@@ -392,6 +395,13 @@ public sealed class BuildItem
     public string LevelText { get; }
 
     public string ClusterText { get; }
+
+    /// <summary>The ladder position, so a column sort can still show where a build really ranks.</summary>
+    public int RankValue { get; }
+
+    public double DpsValue { get; }
+
+    public int ClusterValue { get; }
 
     /// <summary>"sampled" once the character sheet was read, else "top-DPS pick".</summary>
     public string SourceText { get; }

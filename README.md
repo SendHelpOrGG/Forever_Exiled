@@ -222,6 +222,10 @@ lives in `preview/assets/tag_colors.json` and is mirrored into `Theming/TagColor
 `tools/sync_tag_colors.py`, so the app and the preview paint a tag the same way. Colour is
 decoration: no odds or cost number ever reads it.
 
+The ladder's column headers sort it: click a column to order by it, click it again to flip the
+direction, and a caret names the column in force. Rank keeps showing each build's real ladder
+position, so sorting by DPS does not renumber the league - it reorders the view of it.
+
 ### Lists stay cheap
 
 The ladder holds a few hundred rows, each with a class portrait, a gem icon and seven cells. Two
