@@ -24,18 +24,19 @@ public enum JewelLineKind
     /// <summary>"Corrupted".</summary>
     Corrupt,
 
-    /// <summary>The "Place into an allocated..." line.</summary>
-    Flavour,
+    /// <summary>A row of coloured mod-tag chips.</summary>
+    Tags,
 }
 
 /// <summary>One printed line of the cluster jewel card.</summary>
 public sealed class JewelLine
 {
-    private JewelLine(string text, JewelLineKind kind, bool divider)
+    private JewelLine(string text, JewelLineKind kind, bool divider, IReadOnlyList<TagChipItem>? chips = null)
     {
         Text = text;
         Kind = kind;
         ShowDivider = divider;
+        Chips = chips ?? Array.Empty<TagChipItem>();
     }
 
     public string Text { get; }
@@ -45,12 +46,21 @@ public sealed class JewelLine
     /// <summary>True for the hairline the card draws above this line, false for the line itself.</summary>
     public bool ShowDivider { get; }
 
-    public bool IsLine => !ShowDivider;
+    public bool IsLine => !ShowDivider && !IsTags;
+
+    /// <summary>The mod tags this line prints as coloured chips, empty for a plain line.</summary>
+    public IReadOnlyList<TagChipItem> Chips { get; }
+
+    public bool IsTags => Chips.Count > 0;
 
     public static JewelLine Line(string text, JewelLineKind kind = JewelLineKind.Modifier) =>
         new(text, kind, false);
 
     public static JewelLine Separator() => new(string.Empty, JewelLineKind.Property, true);
+
+    /// <summary>A row of chips for the mod tags a notable is gated by.</summary>
+    public static JewelLine TagRow(IReadOnlyList<TagChipItem> chips) =>
+        new(string.Empty, JewelLineKind.Tags, false, chips);
 
     /// <summary>Magic blue, the game's colour for modifiers.</summary>
     public Color Color => Kind switch
@@ -60,19 +70,13 @@ public sealed class JewelLine
         JewelLineKind.Faint => Color.FromArgb("#6F7A86"),
         JewelLineKind.Fractured => Color.FromArgb("#A29162"),
         JewelLineKind.Corrupt => Color.FromArgb("#D20000"),
-        JewelLineKind.Flavour => Color.FromArgb("#8A8A80"),
         _ => Color.FromArgb("#8888FF"),
     };
 
-    public double FontSize => Kind switch
-    {
-        JewelLineKind.Flavour => 14,
-        JewelLineKind.Faint => 14,
-        _ => 15,
-    };
+    public double FontSize => Kind is JewelLineKind.Faint ? 14 : 15;
 
     public FontAttributes Attributes =>
-        Kind is JewelLineKind.Flavour or JewelLineKind.Faint ? FontAttributes.Italic : FontAttributes.None;
+        Kind is JewelLineKind.Faint ? FontAttributes.Italic : FontAttributes.None;
 }
 
 /// <summary>
@@ -101,8 +105,6 @@ public sealed class JewelCard
     public bool HasIcon => IconSource.Length > 0;
 
     public IReadOnlyList<JewelLine> Lines { get; private init; } = Array.Empty<JewelLine>();
-
-    public string Flavour { get; private init; } = string.Empty;
 
     public static JewelCard For(ClusterCombo combo)
     {
@@ -181,7 +183,8 @@ public sealed class JewelCard
         {
             var stats = NotableText.StatsFor(notable);
             var reminders = NotableText.RemindersFor(notable);
-            if (stats.Count == 0 && reminders.Count == 0)
+            var tags = TagChipItem.ForNotables(new[] { notable });
+            if (stats.Count == 0 && reminders.Count == 0 && tags.Count == 0)
             {
                 continue;
             }
@@ -189,6 +192,12 @@ public sealed class JewelCard
             details.Add(Gold(notable));
             details.AddRange(stats.Select(Mod));
             details.AddRange(reminders.Select(reminder => JewelLine.Line(reminder, JewelLineKind.Faint)));
+
+            // the mod tags the game gates this notable with
+            if (tags.Count > 0)
+            {
+                details.Add(JewelLine.TagRow(tags));
+            }
         }
 
         AddBlock(details);
@@ -217,8 +226,6 @@ public sealed class JewelCard
             lines.AddRange(block);
         }
 
-        var size = combo.Size.ToLabel();
-
         return new JewelCard
         {
             Name = name,
@@ -226,8 +233,6 @@ public sealed class JewelCard
             NameColor = Color.FromArgb(RarityColor(item?.Rarity, name)),
             IconSource = Palette.ImageForClusterSize(combo.Size),
             Lines = lines,
-            Flavour = $"Place into an allocated {size} Jewel Socket on the Passive Skill Tree. " +
-                      "Added passives do not interact with jewel radiuses. Right click to remove from the Socket.",
         };
     }
 

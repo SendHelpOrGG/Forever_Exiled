@@ -895,10 +895,15 @@ img.art.tiny { width: 13px; height: 13px; margin-right: 4px; }
 }
 .item-tip .tip-notable:first-child { margin-top: 0; }
 
-.item-tip .tip-flavour {
-  text-align: center; color: #8a8a80; font-size: 14px; line-height: 1.4; padding: 0 2px;
+/* the mod tags each notable is gated by: coloured chips, centred under its mods */
+.item-tip .tip-tags {
+  display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 3px 0 4px;
 }
-.item-tip .tip-foot { display: grid; place-items: center; padding-top: 3px; }
+.item-tip .tip-tags .tagchip { font-family: 'Segoe UI', system-ui, sans-serif; }
+.item-tip .tip-foot {
+  display: grid; place-items: center; padding-top: 6px;
+  border-top: 1px solid #4b4a40; margin-top: 6px;
+}
 .item-tip .tip-foot img { width: 34px; height: 34px; object-fit: contain; }
 
 

@@ -163,8 +163,9 @@ opens the item card exactly as poe.ninja prints it: a gold band carrying the rar
 over the base type with the jewel's art pinned to its left, then centred blocks separated by
 hairlines - item level, "Adds N Passive Skills" and the jewel sockets, "Added Small Passive Skills
 grant: ...", one gold "1 Added Passive Skill is X" per notable, then each notable spelled out with
-its own blue modifier lines - closed by the grey "Place into an allocated ... Jewel Socket" line
-and the jewel art again at the foot. The body is set in a serif face on near-black, every line
+its own blue modifier lines and a row of coloured mod-tag chips - closed by the jewel art at the
+foot. The game's "Place into an allocated ... Jewel Socket" instruction is left out: it is the same
+seven lines on every jewel and tells a reader of a table nothing. The body is set in a serif face on near-black, every line
 centred, and nothing else: no build counts, no DPS, no odds. The preview positions the card against
 the cursor in `preview/app.js`; the app builds the same card from the same model
 (`ViewModels/JewelCard.cs` → `Views/Controls/ClusterJewelCard.cs`) and floats it under the pointer.

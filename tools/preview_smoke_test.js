@@ -148,15 +148,18 @@ setTimeout(() => {
   check('every notable is then spelled out with its own modifiers',
     notablesOnCard.length > 0 && qa('.item-tip .tip-line.blue').length > notablesOnCard.length,
     `${notablesOnCard.length} notable blocks · ${qa('.item-tip .tip-line.blue').length} blue lines`);
-  check('the card is closed by the flavour line and the jewel art',
-    /Place into an allocated \w+ Jewel Socket/.test(txt('.item-tip .tip-flavour')) &&
-      qa('.item-tip .tip-foot img').length === 1,
-    txt('.item-tip .tip-flavour').slice(0, 60));
+  check('the card ends with the jewel art, no socket instructions',
+    qa('.item-tip .tip-foot img').length === 1 && !/Place into an allocated/.test(tip.textContent),
+    qa('.item-tip .tip-foot img').length + ' art · flavour text: ' +
+      (/Place into an allocated/.test(tip.textContent) ? 'still there' : 'removed'));
+  const tagHues = (nodes) => nodes.map((n) => (n.getAttribute('style') || '').toLowerCase());
+  const cardTags = qa('.item-tip .tip-tags .tagchip');
+  check('each notable carries its coloured mod tags on the card',
+    cardTags.length > 0 && tagHues(cardTags).every((style) => /color:#[0-9a-f]{6}/.test(style)),
+    cardTags.map((n) => n.textContent).join(', '));
   check('the card draws the hairlines between blocks',
     qa('.item-tip .tip-sep').length >= 3,
     qa('.item-tip .tip-sep').length + ' separators');
-  /* colours, not one grey chip: the tag hue comes from assets/tag_colors.json */
-  const tagHues = (nodes) => nodes.map((n) => (n.getAttribute('style') || '').toLowerCase());
   const itemTagNodes = qa('#metaCraftCard .craft-tags .tagchip');
   const itemHues = tagHues(itemTagNodes);
   check('mod tags are coloured, not one neutral grey',

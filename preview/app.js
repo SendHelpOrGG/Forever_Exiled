@@ -826,19 +826,25 @@ function itemTipHtml(combo) {
   const details = [];
   for (const notable of notables) {
     const lines = notableLines(notable);
-    if (!lines) continue;
+    // the mod tags the game gates this notable with, as coloured chips
+    const tags = notableTags(notable);
+    const tagRow = tags.length
+      ? `<div class="tip-tags">${tags.map((tag) => tagChip(tag)).join('')}</div>`
+      : '';
+
+    if (!lines && !tagRow) continue;
+
     details.push(`<div class="tip-notable">${esc(notable)}</div>`);
-    for (const stat of lines.stats || []) details.push(blue(stat));
-    for (const reminder of lines.reminder || []) details.push(`<div class="tip-line faint">${esc(reminder)}</div>`);
+    for (const stat of (lines && lines.stats) || []) details.push(blue(stat));
+    for (const reminder of (lines && lines.reminder) || []) {
+      details.push(`<div class="tip-line faint">${esc(reminder)}</div>`);
+    }
+    if (tagRow) details.push(tagRow);
   }
 
   const flags = [];
   if (item.fractured) flags.push('<div class="tip-line fractured">Fractured Item</div>');
   if (item.corrupted) flags.push('<div class="tip-line corrupt">Corrupted</div>');
-
-  const flavour =
-    `Place into an allocated ${combo.size} Jewel Socket on the Passive Skill Tree. ` +
-    'Added passives do not interact with jewel radiuses. Right click to remove from the Socket.';
 
   const blocks = [
     head.join(''),
@@ -858,8 +864,6 @@ function itemTipHtml(combo) {
     </div>
     <div class="tip-body">
       ${blocks.map((block) => `<div class="tip-block">${block}</div>`).join(sep)}
-      ${sep}
-      <div class="tip-flavour">${esc(flavour)}</div>
       <div class="tip-foot">${icon ? `<img src="${icon}" alt="">` : ''}</div>
     </div>`;
 }

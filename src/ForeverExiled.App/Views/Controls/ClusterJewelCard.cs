@@ -34,6 +34,40 @@ public sealed class ClusterJewelCard : ContentView
         set => SetValue(CardProperty, value);
     }
 
+    /// <summary>The mod tags a notable is gated by, as the same coloured chips the tables use.</summary>
+    private static FlexLayout BuildTags(IReadOnlyList<TagChipItem> chips)
+    {
+        var row = new FlexLayout
+        {
+            Direction = FlexDirection.Row,
+            Wrap = FlexWrap.Wrap,
+            JustifyContent = FlexJustify.Center,
+            Margin = new Thickness(0, 3, 0, 4),
+        };
+
+        foreach (var chip in chips)
+        {
+            row.Add(new Border
+            {
+                BackgroundColor = chip.TintColor,
+                Stroke = chip.BorderColor,
+                StrokeThickness = 1,
+                StrokeShape = new RoundRectangle { CornerRadius = 3 },
+                Padding = new Thickness(5, 0),
+                Margin = new Thickness(2, 0),
+                Content = new Label
+                {
+                    Text = chip.Label,
+                    TextColor = chip.TextColor,
+                    FontSize = 11.5,
+                    FontFamily = "Segoe UI",
+                },
+            });
+        }
+
+        return row;
+    }
+
     private void Rebuild()
     {
         if (Card is not { } card)
@@ -57,6 +91,12 @@ public sealed class ClusterJewelCard : ContentView
                 continue;
             }
 
+            if (line.IsTags)
+            {
+                body.Add(BuildTags(line.Chips));
+                continue;
+            }
+
             body.Add(new Label
             {
                 Text = line.Text,
@@ -69,23 +109,9 @@ public sealed class ClusterJewelCard : ContentView
             });
         }
 
-        if (card.Flavour.Length > 0)
-        {
-            body.Add(new BoxView { HeightRequest = 1, Color = DividerColor, Margin = new Thickness(0, 6) });
-            body.Add(new Label
-            {
-                Text = card.Flavour,
-                TextColor = Color.FromArgb("#8A8A80"),
-                FontSize = 14,
-                FontFamily = "Palatino Linotype",
-                HorizontalTextAlignment = TextAlignment.Center,
-                LineBreakMode = LineBreakMode.WordWrap,
-            });
-        }
-
         if (card.HasIcon)
         {
-            body.Add(new BoxView { HeightRequest = 1, Color = DividerColor, Margin = new Thickness(0, 6) });
+            body.Add(new BoxView { HeightRequest = 1, Color = DividerColor, Margin = new Thickness(0, 8, 0, 4) });
             body.Add(new Image
             {
                 Source = card.IconSource,
