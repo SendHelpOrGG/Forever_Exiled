@@ -99,6 +99,16 @@ def check_file(path: Path, keys: set[str], properties: set[str], commands: set[s
         fail(f"{relative}: XML is not well formed -> {error}")
         return
 
+    # single-child containers: a second child is silently dropped at runtime, which is how an
+    # overlay ended up inside a ScrollView and never appeared
+    single_child = {"ScrollView", "ContentView", "Frame", "RefreshView"}
+    for element in tree.iter():
+        tag = local_name(element.tag)
+        if tag in single_child:
+            children = [child for child in list(element) if isinstance(child.tag, str)]
+            if len(children) > 1:
+                fail(f"{relative}:{tag} holds {len(children)} children - it accepts exactly one")
+
     for element in tree.iter():
         tag = local_name(element.tag)
         for attribute, value in element.attrib.items():

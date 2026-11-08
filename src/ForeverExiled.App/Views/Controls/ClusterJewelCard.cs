@@ -1,5 +1,6 @@
 using ForeverExiled.App.ViewModels;
 using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Layouts;
 
 namespace ForeverExiled.App.Views.Controls;
 
@@ -101,7 +102,7 @@ public sealed class ClusterJewelCard : ContentView
             body.Add(new Label
             {
                 Text = line.Text,
-                TextColor = line.Color,
+                TextColor = line.TextColor,
                 FontSize = line.FontSize,
                 FontAttributes = line.Attributes,
                 FontFamily = "Palatino Linotype",

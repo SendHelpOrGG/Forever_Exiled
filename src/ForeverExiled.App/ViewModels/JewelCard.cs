@@ -62,8 +62,9 @@ public sealed class JewelLine
     public static JewelLine TagRow(IReadOnlyList<TagChipItem> chips) =>
         new(string.Empty, JewelLineKind.Tags, false, chips);
 
-    /// <summary>Magic blue, the game's colour for modifiers.</summary>
-    public Color Color => Kind switch
+    /// <summary>Magic blue, the game's colour for modifiers. Named TextColor, not Color, so the
+    /// class never has to rely on the compiler's "Color Color" rule to find Color.FromArgb.</summary>
+    public Color TextColor => Kind switch
     {
         JewelLineKind.Notable => Color.FromArgb("#C9A24C"),
         JewelLineKind.Property => Color.FromArgb("#8F8B80"),
