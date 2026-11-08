@@ -223,8 +223,7 @@ public static class SearchResponseParser
         var accountColumn = FindPopulatedColumn(response, "account", "accountName", "character.account");
         var classColumn = FindPopulatedColumn(response, "class", "className", "ascendancy");
         var levelColumn = FindPopulatedColumn(response, "level", "character.level");
-        var dpsColumn = FindPopulatedColumn(response, "dps_total", "dps.total", "dps", "dpsTotal",
-                                              "dps.totalWeighted", "dps_totalWeighted")
+        var dpsColumn = FindPopulatedColumn(response, DpsNameCandidates)
                         ?? GuessDpsColumn(response, log);
 
         // the site names these with underscores and, on some responses, ships a populated
@@ -245,6 +244,24 @@ public static class SearchResponseParser
         }
 
         var rowCount = response.RowCount;
+
+        if (dpsColumn is { } shortColumn && shortColumn.ValueCount > 0 && shortColumn.ValueCount != rowCount)
+        {
+            // a DPS column that carries fewer values than there are rows silently zeroes the
+            // rest, which looks exactly like a league where nobody deals damage. Look for a
+            // sibling column with one value per row before accepting that.
+            log?.Invoke($"dps column {shortColumn.Name}: {shortColumn.ValueCount} values for {rowCount} rows");
+
+            var alternative = response.Columns.FirstOrDefault(column =>
+                column.ValueCount == rowCount &&
+                DpsNameCandidates.Any(name => string.Equals(name, column.Name, StringComparison.OrdinalIgnoreCase)));
+
+            if (alternative is not null)
+            {
+                log?.Invoke($"using dps column {alternative.Name} instead ({alternative.ValueCount} values)");
+                dpsColumn = alternative;
+            }
+        }
         for (var i = 0; i < rowCount; i++)
         {
             var name = CellString(nameColumn, i);
@@ -349,6 +366,11 @@ public static class SearchResponseParser
 
         return null;
     }
+
+    private static readonly string[] DpsNameCandidates =
+    {
+        "dps_total", "dps.total", "dps", "dpsTotal", "dps.totalWeighted", "dps_totalWeighted", "dps.full",
+    };
 
     private static SearchColumn? GuessDpsColumn(SearchResponse response, Action<string>? log)
     {

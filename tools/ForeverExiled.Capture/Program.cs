@@ -49,6 +49,7 @@ internal static class Program
 
         using var client = new PoeNinjaClient(minInterval: TimeSpan.FromSeconds(options.PacingSeconds));
         client.PreferCharacterPages = !options.NoPages;
+        client.DumpDirectory = Path.GetFullPath(options.DiagnoseDirectory);
         client.Log = message =>
         {
             if (options.Verbose)

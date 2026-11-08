@@ -8,9 +8,14 @@ namespace ForeverExiled.Core.Net;
 /// <summary>
 /// Reads the builds table out of poe.ninja's own HTML. The search API hands back protobuf and
 /// rate-limits a per-skill crawl; the page is server-rendered, cached, and shows the same rows
-/// with the same DPS column - so when a skill's search will not answer, this is the fallback
-/// that keeps the rail honest instead of showing a dash.
+/// with the same DPS column - so it is what a skill's ladder is read from.
 /// </summary>
+/// <remarks>
+/// Parsing works off the character links rather than a table structure: each row is the slice
+/// of markup between one character link and the next, and the numbers are found inside it. The
+/// site's markup has changed shape before (table cells, then grid divs), and anchoring on the
+/// one thing a row cannot do without - its link to the character - survives that.
+/// </remarks>
 public static partial class BuildsPageScraper
 {
     /// <summary>The page the site itself shows for a league, optionally filtered to one skill.</summary>
@@ -33,7 +38,7 @@ public static partial class BuildsPageScraper
     }
 
     /// <summary>
-    /// The ladder rows in the page, highest DPS first. A row without a recognisable DPS cell is
+    /// The ladder rows in the page, highest DPS first. A row whose DPS cannot be identified is
     /// dropped rather than guessed: a list sorted on a wrong number is worse than a short one.
     /// </summary>
     public static List<BuildRef> ParseBuilds(string html, string? skillFallback = null)
@@ -45,9 +50,21 @@ public static partial class BuildsPageScraper
             return builds;
         }
 
-        foreach (Match row in TableRow().Matches(html))
+        var links = CharacterLink().Matches(html);
+        for (var index = 0; index < links.Count; index++)
         {
-            var build = ParseRow(row.Value, skillFallback);
+            var link = links[index];
+            var start = link.Index + link.Length;
+            var end = index + 1 < links.Count
+                ? links[index + 1].Index
+                : Math.Min(html.Length, start + 800);
+
+            if (end <= start)
+            {
+                continue;
+            }
+
+            var build = ParseRow(html[start..end], link, skillFallback);
             if (build is not null)
             {
                 builds.Add(build);
@@ -59,52 +76,64 @@ public static partial class BuildsPageScraper
             .ToList();
     }
 
-    private static BuildRef? ParseRow(string rowHtml, string? skillFallback)
+    private static BuildRef? ParseRow(string rowHtml, Match link, string? skillFallback)
     {
-        var link = CharacterLink().Match(rowHtml);
-        if (!link.Success)
-        {
-            return null;
-        }
+        // the gem icon sits at the end of the DPS cell, so the number just before it is the
+        // DPS - the life / ES / EHP cells also carry "8.6k" style values and come first
+        var gemIndex = rowHtml.IndexOf("/Gems/", StringComparison.OrdinalIgnoreCase);
 
-        var cells = Cell().Matches(rowHtml)
-            .Select(match => new TableCell(match.Groups["inner"].Value))
+        var tokens = TextToken().Matches(rowHtml)
+            .Select(match => new Token(match.Groups["value"].Value.Trim(), match.Index))
+            .Where(token => token.Value.Length > 0)
             .ToList();
 
-        if (cells.Count < 3)
+        double dps = 0;
+        if (gemIndex >= 0)
         {
-            return null;
+            var before = tokens.LastOrDefault(token => token.Index < gemIndex);
+            if (before is not null)
+            {
+                dps = DpsParser.Parse(before.Value);
+            }
         }
 
-        // the DPS cell is the one holding the skill's gem icon; the keystone column carries
-        // icons too, but those live under SkillIcons, not Gems
-        var dpsIndex = cells.FindIndex(cell => cell.Html.Contains("/Gems/", StringComparison.OrdinalIgnoreCase));
-        if (dpsIndex < 0)
+        // without a gem icon there is no anchor for the DPS cell, so fall back to the first
+        // number with a size suffix - but only then: with an anchor, a suffixed number is
+        // likelier to be the EHP cell than a DPS value, and guessing there is how a ladder
+        // ends up ordered by hit points
+        if (dps <= 0 && gemIndex < 0)
         {
-            return null;
+            var suffixed = tokens.FirstOrDefault(token => UnitSuffix().IsMatch(token.Value));
+            if (suffixed is not null)
+            {
+                dps = DpsParser.Parse(suffixed.Value);
+            }
         }
 
-        var dps = DpsParser.Parse(FirstToken(cells[dpsIndex].Text));
         if (dps <= 0)
         {
             return null;
         }
 
-        var skill = ImageAltContaining("/Gems/", cells[dpsIndex].Html);
+        var level = 0;
+        foreach (var token in tokens)
+        {
+            if (int.TryParse(token.Value, out var parsed) && parsed is >= 1 and <= 100)
+            {
+                level = parsed;
+                break;
+            }
+        }
+
+        var skill = ImageAltContaining("/Gems/", rowHtml);
         if (skill.Length == 0)
         {
-            skill = ImageNameContaining("/Gems/", cells[dpsIndex].Html);
+            skill = ImageNameContaining("/Gems/", rowHtml);
         }
 
         if (skill.Length == 0)
         {
             skill = skillFallback ?? string.Empty;
-        }
-
-        var level = 0;
-        if (dpsIndex >= 4 && int.TryParse(cells[dpsIndex - 4].Text, out var parsedLevel))
-        {
-            level = parsedLevel;
         }
 
         var className = ImageAltContaining("/classes/", rowHtml);
@@ -129,13 +158,12 @@ public static partial class BuildsPageScraper
     {
         foreach (Match image in ImageTag().Matches(html))
         {
-            var src = Attribute(image.Value, "src");
-            if (!src.Contains(pathPart, StringComparison.OrdinalIgnoreCase))
+            if (!Src(image.Value).Contains(pathPart, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            var alt = Clean(Attribute(image.Value, "alt"));
+            var alt = Clean(Alt(image.Value));
             if (alt.Length > 0)
             {
                 return alt;
@@ -145,12 +173,12 @@ public static partial class BuildsPageScraper
         return string.Empty;
     }
 
-    /// <summary>"WinterOrb.png" for an image with no alt text - readable, if not perfect.</summary>
+    /// <summary>"FrostFury" for an image with no alt text - readable, if not perfect.</summary>
     private static string ImageNameContaining(string pathPart, string html)
     {
         foreach (Match image in ImageTag().Matches(html))
         {
-            var src = Attribute(image.Value, "src");
+            var src = Src(image.Value);
             if (!src.Contains(pathPart, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
@@ -167,36 +195,34 @@ public static partial class BuildsPageScraper
         return string.Empty;
     }
 
-    private static string Attribute(string tag, string name) =>
-        AttributePattern(name).Match(tag) is { Success: true } match ? match.Groups["value"].Value : string.Empty;
+    private static string Src(string tag) => Attribute(tag, "src");
 
-    private static Regex AttributePattern(string name) => new(
-        "\\b" + Regex.Escape(name) + "\\s*=\\s*\"(?<value>[^\"]*)\"",
-        RegexOptions.IgnoreCase);
+    private static string Alt(string tag) => Attribute(tag, "alt");
 
-    private static string FirstToken(string text) =>
-        text.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
+    private static string Attribute(string tag, string name)
+    {
+        var match = Regex.Match(
+            tag,
+            "\\b" + Regex.Escape(name) + "\\s*=\\s*\"(?<value>[^\"]*)\"",
+            RegexOptions.IgnoreCase);
+
+        return match.Success ? match.Groups["value"].Value : string.Empty;
+    }
 
     private static string Clean(string text) =>
         Regex.Replace(WebUtility.HtmlDecode(text).Replace('\u00A0', ' '), @"\s+", " ").Trim();
 
-    /// <summary>One table cell: its markup for image lookups, its text for numbers.</summary>
-    private sealed record TableCell(string Html)
-    {
-        public string Text { get; } = Clean(Tag().Replace(Html, " "));
-    }
-
-    [GeneratedRegex(@"<tr\b[^>]*>(?<row>.*?)</tr>", RegexOptions.Singleline | RegexOptions.IgnoreCase)]
-    private static partial Regex TableRow();
-
-    [GeneratedRegex(@"<td\b[^>]*>(?<inner>.*?)</td>", RegexOptions.Singleline | RegexOptions.IgnoreCase)]
-    private static partial Regex Cell();
-
-    [GeneratedRegex(@"<[^>]+>", RegexOptions.Singleline)]
-    private static partial Regex Tag();
+    private sealed record Token(string Value, int Index);
 
     [GeneratedRegex(@"/character/(?<account>[^/""#?]+)/(?<name>[^/""#?]+)", RegexOptions.IgnoreCase)]
     private static partial Regex CharacterLink();
+
+    /// <summary>The visible text between two tags - one cell's worth of markup.</summary>
+    [GeneratedRegex(@">\s*(?<value>[^<>]+?)\s*<", RegexOptions.Singleline)]
+    private static partial Regex TextToken();
+
+    [GeneratedRegex(@"[\d.,]+\s*[kmbgKMBG]\b")]
+    private static partial Regex UnitSuffix();
 
     [GeneratedRegex(@"<img\b[^>]*>", RegexOptions.Singleline | RegexOptions.IgnoreCase)]
     private static partial Regex ImageTag();

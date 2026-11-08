@@ -313,6 +313,12 @@ public sealed class PoeNinjaClient : IDisposable
     /// </summary>
     public bool PreferCharacterPages { get; set; } = true;
 
+    /// <summary>Where unreadable pages are saved for diagnosis; empty means do not save.</summary>
+    public string DumpDirectory { get; set; } = string.Empty;
+
+    private static string Slug(string text) =>
+        new(text.Select(c => char.IsLetterOrDigit(c) ? char.ToLowerInvariant(c) : '-').ToArray());
+
     /// <summary>Fetches one character sheet. Reads the character page first, then the JSON endpoint.</summary>
     public async Task<CharacterSnapshot> GetCharacterAsync(
         LeagueInfo league,
@@ -432,7 +438,28 @@ public sealed class PoeNinjaClient : IDisposable
 
         var html = System.Text.Encoding.UTF8.GetString(payload);
         var builds = BuildsPageScraper.ParseBuilds(html, skill);
-        Log?.Invoke($"builds page {skill ?? "all skills"}: {builds.Count} rows scraped");
+        Log?.Invoke(
+            $"builds page {skill ?? "all skills"}: {payload.Length:N0} bytes, {builds.Count} rows");
+
+        if (builds.Count == 0 && DumpDirectory.Length > 0)
+        {
+            // a page we cannot read is worth keeping: the markup is the only way to tell
+            // "no rows were sent" from "rows were sent in a shape this parser did not expect"
+            try
+            {
+                Directory.CreateDirectory(DumpDirectory);
+                var file = Path.Combine(
+                    DumpDirectory,
+                    $"builds-{Slug(skill ?? "all")}-{DateTimeOffset.Now:HHmmss}.html");
+                await File.WriteAllTextAsync(file, html, cancellationToken).ConfigureAwait(false);
+                Log?.Invoke($"no rows recognised in that page - saved it to {file}");
+            }
+            catch (IOException ex)
+            {
+                Log?.Invoke($"could not save the page: {ex.Message}");
+            }
+        }
+
         return builds;
     }
 

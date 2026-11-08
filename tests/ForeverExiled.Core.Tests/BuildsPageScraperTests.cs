@@ -82,6 +82,44 @@ public class BuildsPageScraperTests
         Assert.Empty(BuildsPageScraper.ParseBuilds(string.Empty));
     }
 
+    // the same rows in grid markup - the site has shipped both shapes, and the parser anchors
+    // on the character link rather than on table cells for exactly this reason
+    private const string GridPage = """
+        <html><body><div class="rows">
+        <div class="row">
+          <div class="name"><a href="/poe1/builds/allflame/character/Inkaros-6726/LilUglyMane#i=0">LilUglyMane</a></div>
+          <div class="level">100</div>
+          <div class="class"><img src="https://assets.poe.ninja/poe1/classes/berserker.webp" alt="Berserker"></div>
+          <div class="life">1670</div><div class="es">42686</div><div class="ehp">8.6k</div>
+          <div class="dps">417.9B<img src="https://web.poecdn.com/gen/image/xyz/TectonicSlam.png" alt="Tectonic Slam of Cataclysm"></div>
+        </div>
+        <div class="row">
+          <div class="name"><a href="/poe1/builds/allflame/character/noMercy-9122/Allflame_Yas#i=1">Allflame_Yas</a></div>
+          <div class="level">100</div>
+          <div class="class"><img src="https://assets.poe.ninja/poe1/classes/slayer.webp" alt="Slayer"></div>
+          <div class="life">2178</div><div class="es">81</div><div class="ehp">19k</div>
+          <div class="dps">5.2B<img src="https://web.poecdn.com/gen/image/xyz/Frenzy.png" alt="Frenzy of Onslaught"></div>
+        </div>
+        </div></body></html>
+        """;
+
+    [Fact]
+    public void Reads_grid_markup_as_well_as_a_table()
+    {
+        var builds = BuildsPageScraper.ParseBuilds(GridPage);
+
+        Assert.Equal(2, builds.Count);
+        Assert.Equal("LilUglyMane", builds[0].Name);
+        Assert.Equal(417_900_000_000d, builds[0].Dps);
+        Assert.Equal("Berserker", builds[0].ClassName);
+        Assert.Equal("Tectonic Slam of Cataclysm", builds[0].MainSkill);
+        Assert.Equal(100, builds[0].Level);
+
+        // the EHP cell reads 19k; the DPS cell is 5.2B, and the row must not be sorted on EHP
+        Assert.Equal("Allflame_Yas", builds[1].Name);
+        Assert.Equal(5_250_000_000d, builds[1].Dps);
+    }
+
     [Fact]
     public void Builds_the_page_the_site_shows_for_a_skill()
     {

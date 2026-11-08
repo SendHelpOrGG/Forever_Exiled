@@ -365,6 +365,10 @@ only - the log says so and the JSON endpoint is asked instead, so the fallback i
 rather than a setting to get right. `--no-pages` (capture tool) and
 `AppSettings.PreferCharacterPages` force the endpoint.
 
+A page the parser cannot read is never silently empty: the log reports its size and how many rows
+were recognised, and the HTML is saved to `diagnostics/builds-<skill>-<time>.html` so the markup
+can be inspected rather than guessed at.
+
 The builds table is scraped too. `/poe1/builds/{league}?skills={skill}&sort=dps` is the same
 table the search API describes, rendered as HTML, and it is what a skill falls back to when its
 search will not answer: instead of a silent dash, the skill's rows come from the page, DPS and

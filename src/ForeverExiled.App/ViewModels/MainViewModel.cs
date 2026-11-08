@@ -40,6 +40,7 @@ public partial class MainViewModel : ObservableObject
         _sync.Client.Pacer.Interval = pace;
         _sync.Client.Pacer.Floor = pace;
         _sync.Client.PreferCharacterPages = _settings.PreferCharacterPages;
+        _sync.Client.DumpDirectory = System.IO.Path.Combine(_store.Root, "diagnostics");
 
         // a crawl spends most of its time waiting on the server; say what it is waiting for
         _sync.Client.Log = message => BusyDetail = message;
