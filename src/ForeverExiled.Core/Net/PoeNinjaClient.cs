@@ -37,8 +37,12 @@ public sealed class PoeNinjaClient : IDisposable
     private const string BaseAddress = "https://poe.ninja/";
     private const int MaxAttempts = 4;
 
-    /// <summary>Longest server-imposed wait the client will sit through.</summary>
-    private static readonly TimeSpan MaxRetryAfter = TimeSpan.FromMinutes(3);
+    /// <summary>
+    /// Longest server-imposed pause the client will sit through. poe.ninja states these in
+    /// minutes and they escalate, so a crawl has to be able to absorb one; beyond this the
+    /// run stops instead of parking the app for half an hour.
+    /// </summary>
+    private static readonly TimeSpan MaxRateLimitWait = TimeSpan.FromMinutes(10);
 
     private static readonly string[] CharacterOverviewCandidates = { "snapshot", "slug" };
     private static readonly string[] CharacterTypeCandidates = { "exp", "0" };
@@ -436,16 +440,23 @@ public sealed class PoeNinjaClient : IDisposable
 
                     // the penalty escalates into the tens of minutes; parking the app that
                     // long with a spinner is worse than saying so and stopping
-                    if (retryAfter > MaxRetryAfter)
+                    if (retryAfter > MaxRateLimitWait)
                     {
-                        throw new PoeDataException(
-                            $"poe.ninja rate-limited this client for {retryAfter.TotalMinutes:0} more minutes. " +
-                            "Stop, wait it out and sync again later; a lower sample depth or a slower pace " +
-                            "keeps future crawls under the limit.");
+                        throw new RateLimitedException(
+                            $"poe.ninja paused this client for {DescribeSpan(retryAfter)} " +
+                            $"(until about {DateTimeOffset.Now + retryAfter:HH:mm}); every request would " +
+                            "be refused until then. What was already sampled is saved - press ANALYZE " +
+                            "again after that time to carry on.",
+                            retryAfter);
                     }
 
-                    Log?.Invoke($"429 from poe.ninja, waiting {retryAfter.TotalSeconds:0}s");
-                    await gate.ThrottleAsync(retryAfter, cancellationToken).ConfigureAwait(false);
+                    await gate.PauseAsync(
+                            retryAfter,
+                            left => Log?.Invoke(left > TimeSpan.Zero
+                                ? $"poe.ninja paused this client: {DescribeSpan(left)} left"
+                                : "poe.ninja pause over, resuming"),
+                            cancellationToken)
+                        .ConfigureAwait(false);
                     continue;
                 }
 
@@ -473,6 +484,11 @@ public sealed class PoeNinjaClient : IDisposable
 
         throw new PoeDataException($"poe.ninja kept rate-limiting {relativePath}.");
     }
+
+    /// <summary>"5m 41s" - the shape a person can read at a glance.</summary>
+    internal static string DescribeSpan(TimeSpan span) => span.TotalMinutes >= 1
+        ? $"{(int)span.TotalMinutes}m {span.Seconds:00}s"
+        : $"{Math.Max(1, (int)Math.Ceiling(span.TotalSeconds))}s";
 
     private static TimeSpan ReadRetryAfter(HttpResponseMessage response)
     {

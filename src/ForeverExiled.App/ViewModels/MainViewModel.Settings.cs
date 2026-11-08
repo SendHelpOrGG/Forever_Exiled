@@ -113,6 +113,7 @@ public partial class MainViewModel
         }
 
         _settings.PacingSeconds = seconds;
+        _sync.Client.Pacer.Floor = TimeSpan.FromSeconds(seconds);
         _sync.Client.Pacer.Interval = TimeSpan.FromSeconds(seconds);
         _store.SaveSettings(_settings);
         RefreshSettingsSurface();

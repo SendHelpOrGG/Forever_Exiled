@@ -372,6 +372,11 @@ public sealed class SyncService
                 added++;
                 failedInARow = 0;
             }
+            catch (RateLimitedException)
+            {
+                // not this character's fault, and retrying the next one cannot help
+                throw;
+            }
             catch (PoeDataException ex)
             {
                 _client.Log?.Invoke($"character {target.Name}: {ex.Message}");
@@ -417,8 +422,26 @@ public sealed class SyncService
             var inner = new Progress<SyncProgress>(tick => progress?.Report(
                 new SyncProgress("Sampling", $"[{i + 1}/{skills.Count}] {tick.Message}", tick.Completed, tick.Total)));
 
-            document = await SampleSkillAsync(document, skills[i], depth, inner, cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                document = await SampleSkillAsync(document, skills[i], depth, inner, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (RateLimitedException ex)
+            {
+                // everything sampled so far is on disk; stopping here is what keeps the next
+                // run from earning a longer penalty on requests that cannot succeed
+                _store.SaveSnapshot(document);
+                LastSamplingError =
+                    $"{ex.Message} {i} of {skills.Count} skills were sampled this run, " +
+                    $"{document.Characters.Count} characters in total; the rest continues next time.";
+                progress?.Report(new SyncProgress(
+                    "Sampling",
+                    $"paused by poe.ninja: {document.Characters.Count} characters saved",
+                    i,
+                    skills.Count));
+                break;
+            }
         }
 
         return document;

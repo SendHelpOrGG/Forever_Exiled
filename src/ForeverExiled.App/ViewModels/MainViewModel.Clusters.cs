@@ -356,6 +356,12 @@ public partial class MainViewModel
         {
             StatusMessage = "Sampling cancelled.";
         }
+        catch (RateLimitedException ex)
+        {
+            LastError = ex.Message;
+            HasError = true;
+            StatusMessage = LastError;
+        }
         catch (Exception ex) when (ex is PoeDataException or HttpRequestException or TaskCanceledException)
         {
             ReportError("Sampling failed", ex);

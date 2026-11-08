@@ -339,9 +339,16 @@ Those two files are what a parser fix needs.
 poe.ninja throttles the character endpoint hard and the `Retry-After` penalty escalates
 (observed 81s → 168s → 865s → 3294s). The app therefore:
 
-- serialises every request through a pacer (default one request every 5 s, configurable);
-- honours `Retry-After` exactly and widens the steady pace by 1.5× after each 429;
-- saves after every few characters so a long crawl can be cancelled and resumed.
+- serialises every request through a pacer (default one request every 5 s, configurable) and
+  never crawls faster than the pace you set — relaxing only closes in on it;
+- honours `Retry-After` with a visible countdown on the busy panel, and widens the steady pace
+  by 1.5× after each 429;
+- sits out a stated pause of up to 10 minutes (the penalties are stated in minutes, so a crawl
+  has to be able to absorb one) and stops cleanly beyond that: what was sampled is already
+  saved, and the status line says when to press ANALYZE again. A pause is reported as a
+  status, not as a failure — the ladder and the characters you already have stay usable;
+- saves after every few characters so a long crawl can be cancelled and resumed, and skips
+  characters it has already sampled, so each run continues where the last one stopped.
 
 Ladder and dictionary calls use a separate, faster gate (~1.2 s) because they are served from an
 aggregate cache — a full sync is ~30–40 s. Only per-character calls use the configurable pacing,
