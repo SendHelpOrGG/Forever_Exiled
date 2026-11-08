@@ -237,11 +237,6 @@ public static class SearchResponseParser
             return rows;
         }
 
-        if (dpsColumn is not null)
-        {
-            log?.Invoke($"dps column: {dpsColumn.Name}");
-        }
-
         var rowCount = response.RowCount;
 
         for (var i = 0; i < rowCount; i++)
@@ -374,6 +369,7 @@ public static class SearchResponseParser
             name => string.Equals(name, column.Name, StringComparison.OrdinalIgnoreCase)));
         if (named is not null)
         {
+            log?.Invoke($"dps column: {named.Name}");
             return named;
         }
 

@@ -304,7 +304,7 @@ public sealed class PoeNinjaClient : IDisposable
     {
         var payload = await GetBytesAsync($"poe1/api/builds/dictionary/{hash}", null, cancellationToken, pacer: SearchPacer)
             .ConfigureAwait(false);
-        return DictionaryDecoder.Decode(payload);
+        return DictionaryDecoder.Decode(payload, Log);
     }
 
     /// <summary>

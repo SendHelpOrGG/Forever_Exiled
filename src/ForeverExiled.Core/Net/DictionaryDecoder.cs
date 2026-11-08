@@ -19,20 +19,20 @@ public static class DictionaryDecoder
 {
     private const int HeaderLength = 44;
 
-    public static string[] Decode(byte[] payload)
+    public static string[] Decode(byte[] payload, Action<string>? log = null)
     {
         ArgumentNullException.ThrowIfNull(payload);
 
         if (payload.Length >= HeaderLength &&
             payload[0] == (byte)'N' && payload[1] == (byte)'D' && payload[2] == (byte)'I' && payload[3] == (byte)'C')
         {
-            return DecodeNdic(payload);
+            return DecodeNdic(payload, log);
         }
 
         return DecodeLegacyProtobuf(payload);
     }
 
-    private static string[] DecodeNdic(byte[] payload)
+    private static string[] DecodeNdic(byte[] payload, Action<string>? log)
     {
         try
         {
@@ -62,8 +62,11 @@ public static class DictionaryDecoder
 
             if (cursor != payload.Length)
             {
-                throw new PoeDataException(
-                    $"Malformed NDIC dictionary: consumed {cursor} of {payload.Length} bytes.");
+                // some dictionaries carry a tail this decoder does not model (mastery: 557 bytes,
+                // vestigialmod: 13). The entries themselves parsed cleanly, and a dictionary the
+                // app skips entirely is worse than one it reads and mentions.
+                log?.Invoke(
+                    $"dictionary: {count} entries read, {payload.Length - cursor} trailing bytes ignored");
             }
 
             return strings.ToArray();

@@ -185,6 +185,51 @@ public class SearchResponseParserTests
         Assert.Equal(3, SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>()).Count);
     }
 
+    private static byte[] Ndic(string[] entries, int trailingBytes = 0)
+    {
+        var strings = entries.Select(System.Text.Encoding.UTF8.GetBytes).ToList();
+        var buffer = new List<byte>();
+        buffer.AddRange(System.Text.Encoding.ASCII.GetBytes("NDIC"));
+        buffer.AddRange(BitConverter.GetBytes(1u));           // version
+        buffer.AddRange(BitConverter.GetBytes(0u));           // reserved
+        buffer.AddRange(BitConverter.GetBytes((uint)entries.Length)); // count
+        buffer.AddRange(BitConverter.GetBytes(0ul));          // hash
+        buffer.AddRange(BitConverter.GetBytes(16u));          // 16
+        buffer.AddRange(BitConverter.GetBytes(1u));           // n = 1 block
+        buffer.AddRange(BitConverter.GetBytes((uint)entries.Length));
+        buffer.AddRange(BitConverter.GetBytes(0ul));          // no ancillary blocks
+        buffer.AddRange(entries.Select(entry => (byte)System.Text.Encoding.UTF8.GetByteCount(entry)));
+        foreach (var text in strings)
+        {
+            buffer.AddRange(text);
+        }
+
+        buffer.AddRange(new byte[trailingBytes]);
+        return buffer.ToArray();
+    }
+
+    [Fact]
+    public void Reads_a_dictionary_that_carries_an_unmodelled_tail()
+    {
+        // mastery and vestigialmod arrive with a few hundred trailing bytes this decoder does
+        // not model; skipping the whole dictionary because of them loses every name in it
+        var payload = Ndic(new[] { "Mastery of the Blade", "Mastery of the Shield" }, trailingBytes: 13);
+
+        var entries = DictionaryDecoder.Decode(payload);
+
+        Assert.Equal(2, entries.Length);
+        Assert.Equal("Mastery of the Shield", entries[1]);
+    }
+
+    [Fact]
+    public void Still_rejects_a_truncated_dictionary()
+    {
+        var payload = Ndic(new[] { "Alpha", "Beta" });
+        var truncated = payload[..^2];
+
+        Assert.Throws<PoeDataException>(() => DictionaryDecoder.Decode(truncated));
+    }
+
     [Fact]
     public void Uses_the_skills_own_dps_column_for_a_filtered_ladder()
     {
