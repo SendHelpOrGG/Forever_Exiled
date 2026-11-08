@@ -67,6 +67,41 @@
     <SolidColorBrush x:Key="PoeMagicTintBrush" Color="{StaticResource PoeMagicTint}" />
     <SolidColorBrush x:Key="PoeMagicDimBrush" Color="{StaticResource PoeMagicDim}" />
 
+    <!-- Depth pass: the page is a lit room, the cards are glass over it -->
+    <Color x:Key="SurfaceGlass">#C0161E27</Color>
+    <Color x:Key="SurfaceGlassAlt">#C81B242E</Color>
+    <Color x:Key="StrokeHighlight">#14FFFFFF</Color>
+    <SolidColorBrush x:Key="SurfaceGlassBrush" Color="{StaticResource SurfaceGlass}" />
+    <SolidColorBrush x:Key="SurfaceGlassAltBrush" Color="{StaticResource SurfaceGlassAlt}" />
+
+    <LinearGradientBrush x:Key="CardGradient" StartPoint="0.12,0" EndPoint="0.88,1">
+        <GradientStop Color="#A6263342" Offset="0.0" />
+        <GradientStop Color="#B3141C25" Offset="0.46" />
+        <GradientStop Color="#C00D1319" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PanelGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#8C2C3A4B" Offset="0.0" />
+        <GradientStop Color="#40182029" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PageGradient" StartPoint="0,0" EndPoint="0.6,1">
+        <GradientStop Color="#0E1A22" Offset="0.0" />
+        <GradientStop Color="#0A0F14" Offset="0.55" />
+        <GradientStop Color="#070B0F" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ButtonGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#8C3A4C60" Offset="0.0" />
+        <GradientStop Color="#8C1A242F" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#4CC98E" Offset="0.0" />
+        <GradientStop Color="#35A173" Offset="0.52" />
+        <GradientStop Color="#2A8A61" Offset="1.0" />
+    </LinearGradientBrush>
+
     <!-- Gradients -->
     <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#161E27" Offset="0.0" />

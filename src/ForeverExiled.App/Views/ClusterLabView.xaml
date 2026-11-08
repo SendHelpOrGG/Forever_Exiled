@@ -2,7 +2,8 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ForeverExiled.App.Views.ClusterLabView"
-             xmlns:controls="clr-namespace:ForeverExiled.App.Views.Controls">
+             xmlns:controls="clr-namespace:ForeverExiled.App.Views.Controls"
+             xmlns:behaviors="clr-namespace:ForeverExiled.App.Behaviors">
 
     <Grid x:Name="LabRoot" ColumnDefinitions="470,*,276" ColumnSpacing="12" Padding="12">
 
@@ -80,13 +81,22 @@
                                                Style="{StaticResource BodyStrong}"
                                                FontSize="16" />
 
-                                        <Label Grid.Row="0" Grid.Column="3"
-                                               Text="{Binding DpsText}"
-                                               FontFamily="Segoe UI Semibold"
-                                               FontSize="19"
-                                               TextColor="{StaticResource Accent}"
-                                               HorizontalTextAlignment="End"
-                                               VerticalOptions="Center" />
+                                        <VerticalStackLayout Grid.Row="0" Grid.Column="3" Spacing="-1" VerticalOptions="Center">
+                                            <Label Text="{Binding DpsText}"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   FontSize="19"
+                                                   TextColor="{StaticResource Accent}"
+                                                   HorizontalTextAlignment="End" />
+                                            <HorizontalStackLayout Spacing="4" HorizontalOptions="End"
+                                                                   IsVisible="{Binding HasAverage}">
+                                                <Label Text="AVG" Style="{StaticResource Micro}" FontSize="9.5"
+                                                       VerticalOptions="Center" />
+                                                <Label Text="{Binding AverageDpsText}"
+                                                       Style="{StaticResource Caption}"
+                                                       FontSize="11.5"
+                                                       VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
 
                                         <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="6" Margin="0,4,0,0">
                                             <Label Text="{Binding ClassText}"
@@ -250,6 +260,9 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="14,12">
+                                <Border.Behaviors>
+                                    <behaviors:RiseOnLoadBehavior Delay="40" />
+                                </Border.Behaviors>
                                 <Border.Style>
                                     <Style TargetType="Border" BasedOn="{StaticResource Card}">
                                         <Style.Triggers>

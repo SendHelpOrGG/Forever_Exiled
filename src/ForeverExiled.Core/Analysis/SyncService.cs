@@ -340,10 +340,15 @@ public sealed class SyncService
                 PeakDps = dpsValues.Count > 0 ? dpsValues[0] : 0,
                 MedianDps = Median(dpsValues),
                 DamageType = DamageTypes.Classify(candidate.Name),
-                Classes = BuildClassShares(graded, buildCount),
+                // class shares over the rows we actually have: a skill whose DPS column came
+                // back empty still has builds, with classes, and showing "–" for them hid
+                // information that was right there
+                Classes = BuildClassShares(orderable, buildCount),
                 TopBuilds = orderable.Take(40).ToList(),
             });
         }
+
+        BorrowBaseGemDps(skills);
 
         var missing = skills
             .Where(s => s.TopBuilds.Count == 0)
@@ -615,6 +620,46 @@ public sealed class SyncService
             .OrderByDescending(c => c.Count)
             .Take(6)
             .ToList();
+    }
+
+    /// <summary>
+    /// poe.ninja publishes no DPS of its own for some Vaal variants - the damage belongs to the
+    /// gem it is socketed beside - so their column is zero. Borrowing the base gem's figures is
+    /// what the site is effectively showing, provided the UI says where they came from.
+    /// </summary>
+    private static void BorrowBaseGemDps(List<SkillStat> skills)
+    {
+        if (skills.Count == 0)
+        {
+            return;
+        }
+
+        var byName = skills.ToDictionary(skill => skill.Name, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var skill in skills.Where(skill => skill.PeakDps <= 0))
+        {
+            var baseName = BaseGemName(skill.Name);
+            if (baseName is null ||
+                !byName.TryGetValue(baseName, out var source) ||
+                source.PeakDps <= 0)
+            {
+                continue;
+            }
+
+            skill.AverageDps = source.AverageDps;
+            skill.PeakDps = source.PeakDps;
+            skill.MedianDps = source.MedianDps;
+            skill.DpsFromSkill = source.Name;
+        }
+    }
+
+    /// <summary>"Vaal Reap" measures as "Reap"; anything else has no base gem to borrow from.</summary>
+    private static string? BaseGemName(string name)
+    {
+        const string prefix = "Vaal ";
+        return name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && name.Length > prefix.Length
+            ? name[prefix.Length..]
+            : null;
     }
 
     private static double Median(List<double> values)

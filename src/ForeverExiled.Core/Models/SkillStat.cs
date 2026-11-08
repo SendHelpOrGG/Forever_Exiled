@@ -85,6 +85,15 @@ public sealed class SkillStat
 
     public double PeakDps { get; set; }
 
+    /// <summary>
+    /// Set when the site published no DPS for this skill and the figures were taken from the
+    /// gem it belongs to - "Vaal Reap" is measured as "Reap". The UI has to say so: a borrowed
+    /// number presented as this skill's own would be a lie.
+    /// </summary>
+    public string DpsFromSkill { get; set; } = string.Empty;
+
+    public bool HasBorrowedDps => DpsFromSkill.Length > 0;
+
     public double MedianDps { get; set; }
 
     /// <summary>Damage type used for colouring the UI (fire, cold, lightning, chaos, physical).</summary>

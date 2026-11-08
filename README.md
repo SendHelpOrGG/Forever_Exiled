@@ -152,11 +152,28 @@ for selection and primary actions, a horizontal tab bar across the top, hairline
 own rarity colours are used where they carry meaning (mod text in magic blue, unique items in
 orange), and cluster jewels use tile-framed icons instead of text labels.
 
+Surfaces are translucent: the page is a lit room (three soft coloured lights over near-black,
+fixed behind the content) and the cards are glass over it - a diagonal gradient at ~70% opacity,
+a backdrop blur, a 1px highlight along the top edge and a soft drop shadow. Controls are outlined
+objects with their own gradient and a shadow, buttons lift a pixel and brighten on hover, pills
+glow green when selected, and lists rise into place 10px with a short fade. The MAUI themes carry
+the same treatment through `Themes/Colors.xaml` (gradient brushes for cards, panels, page and
+buttons) and `Themes/Styles.xaml` (shadowed gradient cards, outlined gradient buttons), with
+`Behaviors/RiseOnLoadBehavior.cs` for the entrance animation.
+
 Every skill, cluster jewel and class is identified by its real in-game artwork rather than a
 label, so the interface reads as pictures with captions rather than text with decorations.
 Class art is never a thumbnail inside a line of text: it gets the same tile footprint as the
 skill gem it sits next to (40px in the rail, 30px in the ladder table, 78px in the skill
 header), so a row reads as two pictures and a caption.
+
+Each skill row carries **two** numbers: the peak DPS of its best build (the figure the site's own
+column shows, and what "by DPS" sorts on) and the average across the page of builds beside it. When
+the site publishes nothing for a skill - some Vaal variants are measured under the gem they are
+socketed next to - the row borrows the base gem's figures and says so ("peak · Reap") rather than
+showing a dash over a skill the site visibly has data for. Class shares are computed from every row
+a skill has, not only the graded ones, so a skill without a DPS column still carries its ascendancy
+portrait.
 
 Hovering any cluster jewel - in the combination list, the meta table or the global-leader card -
 opens the item card exactly as poe.ninja prints it: a gold band carrying the rarity-coloured name

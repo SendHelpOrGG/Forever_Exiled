@@ -89,25 +89,35 @@
     <!-- ============================== Cards =============================== -->
 
     <Style x:Key="Card" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="Background" Value="{StaticResource CardGradient}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Padding" Value="12" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="4" />
+                <RoundRectangle CornerRadius="6" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="#000000" Offset="0,8" Radius="22" Opacity="0.42" />
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style x:Key="CardFlush" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="Background" Value="{StaticResource CardGradient}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="4" />
+                <RoundRectangle CornerRadius="6" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="#000000" Offset="0,8" Radius="22" Opacity="0.42" />
             </Setter.Value>
         </Setter>
     </Style>
@@ -198,7 +208,7 @@
     <!-- ========================= Selectable pills ========================= -->
 
     <Style x:Key="Pill" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}" />
+        <Setter Property="Background" Value="{StaticResource ButtonGradient}" />
         <Setter Property="Stroke" Value="{StaticResource BorderSoftBrush}" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Padding" Value="12,6" />
@@ -338,23 +348,30 @@
         <Setter Property="FontFamily" Value="Segoe UI" />
         <Setter Property="FontSize" Value="15.5" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="TextColor" Value="#EAFBF2" />
+        <Setter Property="TextColor" Value="#F2FFF9" />
+        <Setter Property="Background" Value="{StaticResource PrimaryGradient}" />
         <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
-        <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="CornerRadius" Value="3" />
-        <Setter Property="Padding" Value="14,7" />
+        <Setter Property="BorderColor" Value="#66D9F7E3" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="16,7" />
         <Setter Property="MinimumHeightRequest" Value="36" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="#3FAE7A" Offset="0,6" Radius="16" Opacity="0.35" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="GhostButton" TargetType="Button">
         <Setter Property="FontFamily" Value="Segoe UI" />
         <Setter Property="FontSize" Value="15" />
         <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="BorderColor" Value="{StaticResource Border}" />
+        <Setter Property="Background" Value="{StaticResource ButtonGradient}" />
+        <Setter Property="BorderColor" Value="{StaticResource BorderSoft}" />
         <Setter Property="BorderWidth" Value="1" />
-        <Setter Property="CornerRadius" Value="3" />
-        <Setter Property="Padding" Value="11,6" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="12,6" />
         <Setter Property="MinimumHeightRequest" Value="32" />
     </Style>
 

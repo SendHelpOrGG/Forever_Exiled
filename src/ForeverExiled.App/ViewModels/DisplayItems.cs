@@ -185,7 +185,16 @@ public sealed partial class SkillCardItem : ObservableObject
     /// </summary>
     public string DpsText => DpsFormatter.Format(Stat.PeakDps);
 
-    public string DpsCaption => Stat.TopBuilds.Count == 0 ? "not graded" : "peak DPS";
+    /// <summary>The same page of builds averaged - a fairer idea of what the skill usually does.</summary>
+    public string AverageDpsText => DpsFormatter.Format(Stat.AverageDps);
+
+    public bool HasAverage => Stat.AverageDps > 0;
+
+    public string DpsCaption => Stat.TopBuilds.Count == 0
+        ? "not graded"
+        : Stat.HasBorrowedDps
+            ? "peak DPS · borrowed from " + Stat.DpsFromSkill
+            : "peak DPS";
 
     public string PopText => DpsFormatter.Percent(Stat.PopularityPercent);
 

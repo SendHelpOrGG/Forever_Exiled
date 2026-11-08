@@ -259,10 +259,31 @@ function toBuildRef(c) {
   };
 }
 
+/**
+ * poe.ninja publishes no DPS of its own for some Vaal variants - the damage belongs to the gem
+ * it is socketed beside - so their column reads zero. Borrowing the base gem's figures is what
+ * the site is effectively showing, as long as the row says where they came from.
+ */
+function borrowBaseGemDps(skills) {
+  const byName = new Map(skills.map((skill) => [String(skill.name).toLowerCase(), skill]));
+  for (const skill of skills) {
+    if (skill.peakDps > 0) continue;
+    const name = String(skill.name);
+    if (!/^vaal /i.test(name)) continue;
+    const source = byName.get(name.slice(5).toLowerCase());
+    if (!source || source.peakDps <= 0) continue;
+    skill.averageDps = source.averageDps;
+    skill.peakDps = source.peakDps;
+    skill.medianDps = source.medianDps;
+    skill.dpsFromSkill = source.name;
+  }
+  return skills;
+}
+
 function analyze(snapshot, floor) {
-  const skills = snapshot.skills
+  const skills = borrowBaseGemDps(snapshot.skills
     .filter((s) => s.popularityPercent >= floor)
-    .slice()
+    .slice())
     .sort((a, b) => b.peakDps - a.peakDps || b.averageDps - a.averageDps || b.buildCount - a.buildCount);
 
   const profiles = new Map();
@@ -736,6 +757,11 @@ function visibleSkills() {
   return filtered;
 }
 
+/** Where a skill's number came from, said plainly - Vaal gems borrow the base gem's DPS. */
+function dpsCaption(skill) {
+  return skill.dpsFromSkill ? `peak · ${skill.dpsFromSkill}` : 'peak dps';
+}
+
 function renderSkillRail() {
   const list = visibleSkills();
   $('skillCount').textContent = list.length;
@@ -755,7 +781,10 @@ function renderSkillRail() {
         </span>
         <span class="skill-side">
           <div class="skill-dps">${esc(fmt.dps(skill.peakDps))}</div>
-          <div class="skill-cap">peak dps</div>
+          <div class="skill-avg">
+            <span class="k">AVG</span>${esc(fmt.dps(skill.averageDps))}
+          </div>
+          <div class="skill-cap">${esc(dpsCaption(skill))}</div>
         </span>
       </button>`;
   }).join('') || `<div class="empty"><h3>No match</h3><p>Try another skill, class or damage type.</p></div>`;

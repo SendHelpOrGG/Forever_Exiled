@@ -124,6 +124,11 @@ setTimeout(async () => {
         .replace(/[^a-z0-9 ]+/g, '').trim().replace(/\s+/g, '_');
       return !gemIndex.slugs.some((candidate) => candidate === slug || candidate.startsWith(slug + '_'));
     }).join(', ') || 'all 18 mapped');
+  check('the rail shows a peak and an average for every skill',
+    qa('#skillList .skill .skill-dps').length === qa('#skillList .skill').length &&
+      qa('#skillList .skill .skill-avg').length === qa('#skillList .skill').length,
+    qa('#skillList .skill').length + ' skills · ' +
+      (qa('#skillList .skill .skill-avg')[0] || {}).textContent);
   check('combo cards', qa('#comboList .combo').length > 0,
     qa('#comboList .combo').length + ' cards · ' + txt('#comboList .combo .combo-pct'));
   /* ── hover card: the cluster jewel as an item, like the site ── */
