@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ForeverExiled.App.Views.LadderView">
+
+    <Grid Padding="14" RowDefinitions="Auto,*" RowSpacing="12">
+
+        <Grid ColumnDefinitions="*,Auto">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="LADDER" Style="{StaticResource H1}" />
+                <Label Text="{Binding LadderSummary}" Style="{StaticResource Caption}" />
+            </VerticalStackLayout>
+
+            <Border Grid.Column="1"
+                    BackgroundColor="{StaticResource SurfaceSunken}"
+                    Stroke="{StaticResource BorderSoft}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 9"
+                    Padding="9,2"
+                    VerticalOptions="Center"
+                    WidthRequest="270">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                    <Label Text="&#xE721;" Style="{StaticResource GlyphSmall}" FontSize="15.5" VerticalOptions="Center" />
+                    <Entry Grid.Column="1"
+                           Text="{Binding LadderFilter}"
+                           Placeholder="Filter builds, class or skill"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardFlush}">
+            <Grid RowDefinitions="Auto,1,*">
+
+                <Grid ColumnDefinitions="38,*,215,255,105,70,32"
+                      ColumnSpacing="10"
+                      Padding="14,11"
+                      BackgroundColor="{StaticResource SurfaceSunken}">
+                    <!-- every column sorts: click to order by it, click again to flip -->
+                    <HorizontalStackLayout Spacing="4">
+                        <Label Text="#" Style="{StaticResource Micro}" FontSize="11" VerticalOptions="Center" />
+                        <Label Text="{Binding RankSortGlyph}" Style="{StaticResource Micro}" FontSize="8" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SortLadderCommand}" CommandParameter="Rank" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="CHARACTER" Style="{StaticResource Micro}" FontSize="11" VerticalOptions="Center" />
+                        <Label Text="{Binding NameSortGlyph}" Style="{StaticResource Micro}" FontSize="8" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SortLadderCommand}" CommandParameter="Name" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="2" Spacing="4">
+                        <Label Text="CLASS" Style="{StaticResource Micro}" FontSize="11" VerticalOptions="Center" />
+                        <Label Text="{Binding ClassSortGlyph}" Style="{StaticResource Micro}" FontSize="8" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SortLadderCommand}" CommandParameter="Class" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="3" Spacing="4">
+                        <Label Text="MAIN SKILL" Style="{StaticResource Micro}" FontSize="11" VerticalOptions="Center" />
+                        <Label Text="{Binding SkillSortGlyph}" Style="{StaticResource Micro}" FontSize="8" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SortLadderCommand}" CommandParameter="Skill" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="End">
+                        <Label Text="DPS" Style="{StaticResource Micro}" FontSize="11" VerticalOptions="Center" />
+                        <Label Text="{Binding DpsSortGlyph}" Style="{StaticResource Micro}" FontSize="8" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SortLadderCommand}" CommandParameter="Dps" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="5" Spacing="4" HorizontalOptions="End">
+                        <Label Text="CLUSTERS" Style="{StaticResource Micro}" FontSize="11" VerticalOptions="Center" />
+                        <Label Text="{Binding ClusterSortGlyph}" Style="{StaticResource Micro}" FontSize="8" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SortLadderCommand}" CommandParameter="Cluster" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                    </HorizontalStackLayout>
+                    <Label Grid.Column="6" Text="&#xE8A7;" Style="{StaticResource Micro}" FontSize="11"
+                           FontFamily="Segoe MDL2 Assets" HorizontalTextAlignment="Center" />
+                </Grid>
+
+                <BoxView Grid.Row="1" Color="{StaticResource BorderSoft}" />
+
+                <CollectionView Grid.Row="2"
+                                ItemsSource="{Binding LadderItems}"
+                                SelectionMode="None"
+                                ItemSizingStrategy="MeasureFirstItem"
+                                VerticalScrollBarVisibility="Never"
+                                Margin="0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="1" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.EmptyView>
+                        <Label Text="No builds match that filter."
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,26" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.Header>
+                        <BoxView HeightRequest="6" Color="Transparent" />
+                    </CollectionView.Header>
+                    <CollectionView.Footer>
+                        <BoxView HeightRequest="12" Color="Transparent" />
+                    </CollectionView.Footer>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="38,*,215,255,105,70,32"
+                                  ColumnSpacing="10"
+                                  Padding="14,7"
+                                  HeightRequest="50">
+                                    <Label Text="{Binding RankText}"
+                                           FontFamily="Segoe UI Semibold"
+                                           FontSize="14.5"
+                                           TextColor="{StaticResource TextFaint}"
+                                           VerticalOptions="Center" />
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="7" VerticalOptions="Center">
+                                        <Border WidthRequest="5" HeightRequest="5"
+                                                StrokeThickness="0"
+                                                BackgroundColor="{Binding AccentColor}"
+                                                StrokeShape="RoundRectangle 3"
+                                                VerticalOptions="Center" />
+                                        <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="15" VerticalOptions="Center" />
+                                        <Label Text="{Binding SourceText}"
+                                               Style="{StaticResource Micro}"
+                                               FontSize="10.5"
+                                               TextColor="{StaticResource TextFaint}"
+                                               VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                                        <Border Style="{StaticResource ClassTile}"
+                                                WidthRequest="36" HeightRequest="36"
+                                                StrokeShape="RoundRectangle 3"
+                                                VerticalOptions="Center"
+                                                IsVisible="{Binding HasClassImage}">
+                                            <Image Source="{Binding ClassImage}" Aspect="AspectFill" />
+                                        </Border>
+                                        <Label Text="{Binding ClassText}" Style="{StaticResource Caption}" FontSize="13.5"
+                                               VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Grid.Column="3" Spacing="8" VerticalOptions="Center">
+                                        <Border Style="{StaticResource GemTile}"
+                                                WidthRequest="36" HeightRequest="36"
+                                                Padding="2"
+                                                VerticalOptions="Center"
+                                                IsVisible="{Binding HasGemImage}">
+                                            <Image Source="{Binding GemImage}" Aspect="AspectFit" />
+                                        </Border>
+                                        <Label Text="{Binding SkillText}" Style="{StaticResource Body}" FontSize="14.5"
+                                               VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                    </HorizontalStackLayout>
+                                    <Label Grid.Column="4" Text="{Binding DpsText}"
+                                           FontFamily="Segoe UI Semibold"
+                                           FontSize="16"
+                                           TextColor="{StaticResource Accent}"
+                                           HorizontalTextAlignment="End"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="5" Text="{Binding ClusterText}"
+                                           Style="{StaticResource Caption}"
+                                           FontSize="13.5"
+                                           HorizontalTextAlignment="End"
+                                           VerticalOptions="Center" />
+                                    <Button Grid.Column="6"
+                                            Style="{StaticResource IconButton}"
+                                            Text="&#xE8A7;"
+                                            FontSize="13"
+                                            WidthRequest="28"
+                                            HeightRequest="28"
+                                            IsVisible="{Binding HasPage}"
+                                            Command="{Binding OpenPageCommand}"
+                                            ToolTipProperties.Text="Open this character on poe.ninja"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </Grid>
+        </Border>
+    </Grid>
+
+</ContentView>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:ForeverExiled.App.Views"
+             x:Class="ForeverExiled.App.Views.MainPage"
+             Background="{StaticResource PageGradient}">
+
+    <Grid RowDefinitions="52,Auto,*,Auto">
+
+        <!-- ============================== Header ============================== -->
+        <Grid Grid.Row="0"
+              Background="{StaticResource HeaderGradient}"
+              ColumnDefinitions="Auto,Auto,*,Auto"
+              ColumnSpacing="14"
+              Padding="14,0">
+
+            <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center" Margin="0,0,6,0">
+                <Image Source="logo.png" WidthRequest="24" HeightRequest="24" Aspect="AspectFit" VerticalOptions="Center" />
+                <Label Text="forever exiled"
+                       FontFamily="Segoe UI Semibold"
+                       FontSize="15"
+                       CharacterSpacing="0"
+                       TextColor="{StaticResource TextPrimary}"
+                       VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <!-- tab bar — mirrors the poe.ninja site header -->
+            <HorizontalStackLayout Grid.Column="1"
+                                   Spacing="2"
+                                   VerticalOptions="Center"
+                                   BindableLayout.ItemsSource="{Binding NavItems}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource NavTile}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Command}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Image Source="{Binding Image}"
+                                       WidthRequest="14"
+                                       HeightRequest="14"
+                                       Aspect="AspectFit"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding HasImage}" />
+                                <Label Text="{Binding Glyph}"
+                                       Style="{StaticResource NavGlyph}"
+                                       FontSize="13"
+                                       IsVisible="{Binding HasGlyph}"
+                                       VerticalOptions="Center" />
+                                <Label Text="{Binding Caption}" Style="{StaticResource NavCaption}" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
+                <Border BackgroundColor="{StaticResource SurfaceAlt}"
+                        Stroke="{StaticResource Border}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 3"
+                        Padding="8,4">
+                    <HorizontalStackLayout Spacing="6">
+                        <Label Text="&#xE774;" Style="{StaticResource GlyphSmall}" FontSize="11" />
+                        <Label Text="{Binding LeagueName}" Style="{StaticResource BodyStrong}" VerticalOptions="Center" />
+                        <Label Text="·" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                        <Label Text="{Binding SnapshotText}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border BackgroundColor="{StaticResource SurfaceSunken}"
+                        Stroke="{Binding DataSourceColor}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 3"
+                        Padding="7,4">
+                    <HorizontalStackLayout Spacing="6">
+                        <Border WidthRequest="6" HeightRequest="6" StrokeThickness="0"
+                                BackgroundColor="{Binding DataSourceColor}"
+                                StrokeShape="RoundRectangle 3"
+                                VerticalOptions="Center" />
+                        <Label Text="{Binding DataSourceText}"
+                               FontSize="9.5"
+                               CharacterSpacing="1.4"
+                               FontAttributes="Bold"
+                               TextColor="{Binding DataSourceColor}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- which build is on screen: rebuilds are the only way changes arrive -->
+                <Label Text="{Binding BuildLabel}"
+                       Style="{StaticResource Caption}"
+                       FontSize="10.5"
+                       TextColor="{StaticResource TextFaint}"
+                       VerticalOptions="Center"
+                       ToolTipProperties.Text="Version, sync pipeline revision and build time of this executable" />
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Grid.Column="3" Spacing="10" VerticalOptions="Center">
+                <Label Text="{Binding LastSyncText}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                <Button Text="SYNC"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding RefreshCommand}"
+                        IsEnabled="{Binding IsNotBusy}" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- ========================== Ladder warning ========================== -->
+        <Border Grid.Row="1"
+                IsVisible="{Binding HasLadderWarning}"
+                BackgroundColor="{StaticResource SurfaceSunken}"
+                Stroke="{StaticResource Warning}"
+                StrokeThickness="1"
+                StrokeShape="Rectangle"
+                Padding="18,8">
+            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="9">
+                <Label Text="&#xE7BA;"
+                       Style="{StaticResource GlyphSmall}"
+                       FontSize="13"
+                       TextColor="{StaticResource Warning}"
+                       VerticalOptions="Start"
+                       Margin="0,2,0,0" />
+                <Label Grid.Column="1"
+                       Text="LADDER WARNING"
+                       Style="{StaticResource Micro}"
+                       TextColor="{StaticResource Warning}"
+                       VerticalOptions="Start"
+                       Margin="0,3,0,0" />
+                <Label Grid.Column="2"
+                       Text="{Binding LadderWarningText}"
+                       Style="{StaticResource Caption}"
+                       FontSize="12.5"
+                       MaxLines="4"
+                       LineBreakMode="WordWrap" />
+            </Grid>
+        </Border>
+
+        <!-- ============================= Content ============================= -->
+        <Grid Grid.Row="2" BackgroundColor="{StaticResource Bg}">
+
+            <views:ClusterLabView IsVisible="{Binding IsClustersActive}" />
+            <views:MetaView IsVisible="{Binding IsMetaActive}" />
+            <views:LadderView IsVisible="{Binding IsLadderActive}" />
+            <views:SettingsView IsVisible="{Binding IsSettingsActive}" />
+
+            <!-- busy overlay -->
+            <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#E605070A">
+                <Border Style="{StaticResource Card}"
+                        WidthRequest="420"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Padding="22">
+                    <VerticalStackLayout Spacing="14">
+                        <HorizontalStackLayout Spacing="10">
+                            <ActivityIndicator IsRunning="{Binding IsBusy}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                            <Label Text="{Binding BusyTitle}" Style="{StaticResource H2}" TextColor="{StaticResource Accent}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding BusyMessage}" Style="{StaticResource Body}" MaxLines="2" LineBreakMode="WordWrap" />
+                        <Label Text="{Binding BusyDetail}"
+                               Style="{StaticResource Caption}"
+                               FontSize="12.5"
+                               TextColor="{StaticResource TextMuted}"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation"
+                               Margin="0,-6,0,0" />
+                        <ProgressBar Progress="{Binding BusyFraction}" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding BusyPercentText}" Style="{StaticResource Caption}" />
+                            <Button Grid.Column="1"
+                                    Text="CANCEL"
+                                    Style="{StaticResource GhostButton}"
+                                    Command="{Binding CancelBusyCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ============================ Status bar =========================== -->
+        <Grid Grid.Row="3" RowDefinitions="1,30" BackgroundColor="{StaticResource Bg}">
+            <BoxView Grid.Row="0" Color="{StaticResource BorderSoft}" />
+            <Grid Grid.Row="1" Padding="18,0" ColumnDefinitions="*,Auto">
+                <HorizontalStackLayout Spacing="7" VerticalOptions="Center">
+                    <Label Text="&#xE946;" Style="{StaticResource GlyphSmall}" FontSize="10" VerticalOptions="Center" />
+                    <Label Text="{Binding StatusMessage}"
+                           Style="{StaticResource Caption}"
+                           VerticalOptions="Center"
+                           LineBreakMode="TailTruncation"
+                           ToolTipProperties.Text="{Binding StatusMessage}" />
+                </HorizontalStackLayout>
+                <Label Grid.Column="1"
+                       Text="DATA · POE.NINJA BUILD API"
+                       Style="{StaticResource Micro}"
+                       VerticalOptions="Center" />
+            </Grid>
+        </Grid>
+    </Grid>
+
+</ContentPage>

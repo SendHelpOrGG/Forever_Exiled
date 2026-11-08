@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Surfaces -->
+    <Color x:Key="BgDeep">#0A0F14</Color>
+    <Color x:Key="Bg">#0D1319</Color>
+    <Color x:Key="Surface">#161E27</Color>
+    <Color x:Key="SurfaceAlt">#1B242E</Color>
+    <Color x:Key="SurfaceRaised">#222D38</Color>
+    <Color x:Key="SurfaceSunken">#0B1116</Color>
+
+    <!-- Lines -->
+    <Color x:Key="Border">#26313D</Color>
+    <Color x:Key="BorderSoft">#1F2833</Color>
+    <Color x:Key="BorderStrong">#33404E</Color>
+
+    <!-- Type -->
+    <Color x:Key="TextPrimary">#E7ECF2</Color>
+    <Color x:Key="TextSecondary">#A2AEBB</Color>
+    <Color x:Key="TextMuted">#6C7A89</Color>
+    <Color x:Key="TextFaint">#4A5663</Color>
+
+    <!-- Accents -->
+    <Color x:Key="Accent">#3FAE7A</Color>
+    <Color x:Key="AccentDeep">#2F8B60</Color>
+    <Color x:Key="AccentDim">#245C43</Color>
+    <Color x:Key="AccentTint">#12241C</Color>
+
+    <Color x:Key="Cold">#6CB8E8</Color>
+    <Color x:Key="Fire">#E8794A</Color>
+    <Color x:Key="Lightning">#E7C55E</Color>
+    <Color x:Key="Chaos">#A17FE0</Color>
+    <Color x:Key="Physical">#B6BEC8</Color>
+    <Color x:Key="Minion">#74C6A2</Color>
+
+    <!-- PoE item rarity / mod colours -->
+    <Color x:Key="PoeRare">#FFFF77</Color>
+    <Color x:Key="PoeMagic">#8888FF</Color>
+    <Color x:Key="PoeMagicDim">#668888FF</Color>
+    <Color x:Key="PoeMagicTint">#238888FF</Color>
+    <Color x:Key="PoeUnique">#AF6025</Color>
+    <Color x:Key="PoeGem">#1BA29B</Color>
+
+    <Color x:Key="Success">#3FAE7A</Color>
+    <Color x:Key="Warning">#D59D40</Color>
+    <Color x:Key="Danger">#E0605E</Color>
+    <Color x:Key="Info">#4A90E2</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="BgBrush" Color="{StaticResource Bg}" />
+    <SolidColorBrush x:Key="BgDeepBrush" Color="{StaticResource BgDeep}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}" />
+    <SolidColorBrush x:Key="SurfaceAltBrush" Color="{StaticResource SurfaceAlt}" />
+    <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="{StaticResource SurfaceRaised}" />
+    <SolidColorBrush x:Key="SurfaceSunkenBrush" Color="{StaticResource SurfaceSunken}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Border}" />
+    <SolidColorBrush x:Key="BorderSoftBrush" Color="{StaticResource BorderSoft}" />
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BorderStrong}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}" />
+    <SolidColorBrush x:Key="AccentDeepBrush" Color="{StaticResource AccentDeep}" />
+    <SolidColorBrush x:Key="AccentTintBrush" Color="{StaticResource AccentTint}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+    <SolidColorBrush x:Key="PoeMagicBrush" Color="{StaticResource PoeMagic}" />
+    <SolidColorBrush x:Key="PoeMagicTintBrush" Color="{StaticResource PoeMagicTint}" />
+    <SolidColorBrush x:Key="PoeMagicDimBrush" Color="{StaticResource PoeMagicDim}" />
+
+    <!-- Depth pass: the page is a lit room, the cards are glass over it -->
+    <Color x:Key="SurfaceGlass">#C0161E27</Color>
+    <Color x:Key="SurfaceGlassAlt">#C81B242E</Color>
+    <Color x:Key="StrokeHighlight">#14FFFFFF</Color>
+    <SolidColorBrush x:Key="SurfaceGlassBrush" Color="{StaticResource SurfaceGlass}" />
+    <SolidColorBrush x:Key="SurfaceGlassAltBrush" Color="{StaticResource SurfaceGlassAlt}" />
+
+    <LinearGradientBrush x:Key="CardGradient" StartPoint="0.12,0" EndPoint="0.88,1">
+        <GradientStop Color="#A6263342" Offset="0.0" />
+        <GradientStop Color="#B3141C25" Offset="0.46" />
+        <GradientStop Color="#C00D1319" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PanelGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#8C2C3A4B" Offset="0.0" />
+        <GradientStop Color="#40182029" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PageGradient" StartPoint="0,0" EndPoint="0.6,1">
+        <GradientStop Color="#0E1A22" Offset="0.0" />
+        <GradientStop Color="#0A0F14" Offset="0.55" />
+        <GradientStop Color="#070B0F" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ButtonGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#8C3A4C60" Offset="0.0" />
+        <GradientStop Color="#8C1A242F" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#4CC98E" Offset="0.0" />
+        <GradientStop Color="#35A173" Offset="0.52" />
+        <GradientStop Color="#2A8A61" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Gradients -->
+    <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#161E27" Offset="0.0" />
+        <GradientStop Color="#111820" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#4CC38A" Offset="0.0" />
+        <GradientStop Color="#2F8B60" Offset="1.0" />
+    </LinearGradientBrush>
+
+</ResourceDictionary>

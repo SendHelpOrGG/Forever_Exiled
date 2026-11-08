@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ForeverExiled.App.Views.MetaView"
+             xmlns:controls="clr-namespace:ForeverExiled.App.Views.Controls">
+
+    <Grid x:Name="MetaRoot">
+    <ScrollView VerticalScrollBarVisibility="Never">
+        <VerticalStackLayout Padding="14" Spacing="12">
+
+            <!-- ============================= Headline ============================= -->
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="META OVERVIEW" Style="{StaticResource H1}" />
+                    <Label Text="{Binding LeagueName, StringFormat='{0} · PoE 1 ladder · every tracked build'}"
+                           Style="{StaticResource Caption}" />
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                    <Button Text="RESYNC"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding RefreshCommand}"
+                            IsEnabled="{Binding IsNotBusy}" />
+                    <Button Text="EXPORT CSV"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding ExportReportCommand}" />
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- ============================ Stat cards ============================ -->
+            <FlexLayout Direction="Row" Wrap="Wrap" BindableLayout.ItemsSource="{Binding StatCards}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" WidthRequest="262" Margin="0,0,12,12" Padding="14">
+                            <Grid ColumnDefinitions="38,*" ColumnSpacing="12">
+                                <Grid WidthRequest="38" HeightRequest="38" VerticalOptions="Start">
+                                    <Border BackgroundColor="{StaticResource SurfaceSunken}"
+                                            Stroke="{StaticResource BorderSoft}"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 11" />
+                                    <Image Source="{Binding Image}"
+                                           WidthRequest="24" HeightRequest="24"
+                                           Aspect="AspectFit"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding HasImage}" />
+                                    <Label Text="{Binding Glyph}"
+                                           Style="{StaticResource Glyph}"
+                                           FontSize="21"
+                                           TextColor="{Binding AccentColor}"
+                                           IsVisible="{Binding HasImage, Converter={StaticResource InverseBool}}" />
+                                </Grid>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                    <Label Text="{Binding Caption}" Style="{StaticResource Micro}" FontSize="11" />
+                                    <Label Text="{Binding Value}" Style="{StaticResource StatValue}" FontSize="28.5" />
+                                    <Label Text="{Binding Hint}"
+                                           Style="{StaticResource Caption}"
+                                           FontSize="12.5"
+                                           IsVisible="{Binding HasHint}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+
+            <!-- ======================= Popular combinations ======================= -->
+            <Border Style="{StaticResource Card}" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label Text="&#xE734;" Style="{StaticResource GlyphSmall}" TextColor="{StaticResource Accent}" FontSize="14.5" />
+                            <Label Text="MOST POPULAR CLUSTER COMBINATIONS" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                            <Border Style="{StaticResource Pill}" Padding="10,5"
+                                    ToolTipProperties.Text="{Binding UniquesCaption}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleUniqueJewelsCommand}" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ShowUniqueJewels}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+                                        <Setter Property="Opacity" Value="0.72" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="UNIQUES" Style="{StaticResource PillLabel}" FontSize="10.5" />
+                            </Border>
+                            <Label Text="{Binding SampledBuildsText, StringFormat='across {0} sampled builds'}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <BoxView Color="{StaticResource BorderSoft}" />
+
+                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding TopCombos}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeShape="RoundRectangle 10"
+                                        Padding="12,9">
+                                    <Border.GestureRecognizers>
+                                        <PointerGestureRecognizer PointerEntered="OnJewelPointerEntered"
+                                                                  PointerMoved="OnJewelPointerMoved"
+                                                                  PointerExited="OnJewelPointerExited" />
+                                    </Border.GestureRecognizers>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+                                            <Setter Property="Stroke" Value="{StaticResource BorderSoft}" />
+                                            <Setter Property="StrokeThickness" Value="1" />
+                                            <Style.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsCrafted}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource AccentBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid ColumnDefinitions="34,Auto,*,Auto" ColumnSpacing="12">
+                                        <Label Text="{Binding RankText}"
+                                               FontFamily="Segoe UI Semibold"
+                                               FontSize="15.5"
+                                               TextColor="{StaticResource TextFaint}"
+                                               VerticalOptions="Center"
+                                               HorizontalTextAlignment="Center" />
+
+                                        <Image Grid.Column="1"
+                                               Source="{Binding SizeImage}"
+                                               WidthRequest="34" HeightRequest="34"
+                                               Aspect="AspectFit"
+                                               VerticalOptions="Center" />
+
+                                        <VerticalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Label}" Style="{StaticResource BodyStrong}" FontSize="15.5" />
+                                            <Label Text="{Binding SkillsText}"
+                                                   Style="{StaticResource Caption}"
+                                                   FontSize="12.5"
+                                                   IsVisible="{Binding ShowSkills}" />
+                                            <Label Text="{Binding TopBuildText, StringFormat='top build · {0}'}"
+                                                   Style="{StaticResource Caption}"
+                                                   FontSize="11.5"
+                                                   TextColor="{StaticResource TextFaint}"
+                                                   IsVisible="{Binding HasTopBuild}" />
+                                        </VerticalStackLayout>
+
+                                        <VerticalStackLayout Grid.Column="3" Spacing="0" HorizontalOptions="End" VerticalOptions="Center">
+                                            <Label Text="{Binding PercentText}"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   FontSize="21"
+                                                   TextColor="{StaticResource Accent}"
+                                                   HorizontalTextAlignment="End" />
+                                            <Label Text="{Binding BuildsText}"
+                                                   Style="{StaticResource Caption}"
+                                                   FontSize="11.5"
+                                                   HorizontalTextAlignment="End" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ======================== Crafting / notables ======================== -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                <Border Style="{StaticResource Card}" Padding="14">
+                    <VerticalStackLayout Spacing="9">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="CRAFTING" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="expected cost" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                        </Grid>
+
+                        <Label Text="{Binding CraftTargetText}" Style="{StaticResource BodyStrong}"
+                               FontSize="14.5" LineBreakMode="TailTruncation" MaxLines="2" />
+
+                        <Label Text="{Binding CraftLevelText}" Style="{StaticResource Caption}"
+                               FontSize="12" TextColor="{StaticResource TextMuted}" Margin="0,-4,0,0" />
+
+                        <FlexLayout Direction="Row" Wrap="Wrap"
+                                    BindableLayout.ItemsSource="{Binding CraftTags}"
+                                    Margin="0,0,0,-3">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,5,5" Padding="5,0"
+                                            BackgroundColor="{Binding TintColor}"
+                                            Stroke="{Binding BorderColor}"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 3">
+                                        <Label Text="{Binding Label}"
+                                               FontSize="11.5"
+                                               TextColor="{Binding TextColor}"
+                                               VerticalOptions="Center" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding CraftRoutes}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource CraftRoute}">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}" FontSize="15" />
+                                                <Label Grid.Column="1" Text="{Binding TriesText}" Style="{StaticResource Caption}"
+                                                       FontSize="12.5" VerticalOptions="Center" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                <Label Text="{Binding CurrencyText}" Style="{StaticResource Caption}"
+                                                       FontSize="13" LineBreakMode="TailTruncation" />
+                                                <Label Grid.Column="1" Text="{Binding ChaosText}" Style="{StaticResource BodyStrong}"
+                                                       FontSize="14" HorizontalTextAlignment="End" />
+                                            </Grid>
+                                            <Grid HeightRequest="3">
+                                                <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                                        StrokeThickness="0" StrokeShape="RoundRectangle 2" />
+                                                <Border BackgroundColor="{StaticResource Accent}"
+                                                        StrokeThickness="0" StrokeShape="RoundRectangle 2"
+                                                        HorizontalOptions="Start"
+                                                        WidthRequest="{Binding BarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=180}" />
+                                            </Grid>
+                                            <Label Text="{Binding Note}" Style="{StaticResource Caption}" FontSize="11.5"
+                                                   TextColor="{StaticResource TextMuted}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <Label Text="{Binding CraftPoolText}" Style="{StaticResource Caption}" FontSize="11.5"
+                               TextColor="{StaticResource TextMuted}" LineBreakMode="WordWrap" />
+
+                        <Label Text="{Binding CraftEndgameText}" Style="{StaticResource Caption}" FontSize="11.5"
+                               TextColor="{StaticResource TextMuted}" LineBreakMode="WordWrap"
+                               Margin="0,-4,0,0" />
+
+                        <Label Text="Odds come from the game's spawn weights. Prices are placeholders in Theming/CurrencyPrices.cs."
+                               Style="{StaticResource Caption}" FontSize="11.5" TextColor="{StaticResource TextMuted}"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="12">
+
+                    <Border Style="{StaticResource Card}" Padding="16" VerticalOptions="Start">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="MOST USED NOTABLES" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="share of sample" Style="{StaticResource Caption}" />
+                            </Grid>
+                            <BoxView Color="{StaticResource BorderSoft}" />
+
+                            <!-- capped height: a few rows read as a trend, the rest scrolls -->
+                            <ScrollView MaximumHeightRequest="252"
+                                        VerticalScrollBarVisibility="Always">
+                                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TopNotables}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="22,*,Auto" RowDefinitions="Auto,Auto,Auto"
+                                                  RowSpacing="3" ColumnSpacing="8">
+                                                <Image Grid.Row="0" Grid.Column="0"
+                                                       Source="{Binding Image}"
+                                                       WidthRequest="18" HeightRequest="18"
+                                                       Aspect="AspectFit"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Row="0" Grid.Column="1"
+                                                       Text="{Binding Name}"
+                                                       Style="{StaticResource BodyStrong}"
+                                                       FontSize="14.5" />
+                                                <Label Grid.Row="0" Grid.Column="2"
+                                                       Text="{Binding PrimaryText}"
+                                                       Style="{StaticResource Caption}"
+                                                       FontSize="12.5"
+                                                       TextColor="{StaticResource AccentDeep}" />
+                                                <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HeightRequest="3">
+                                                    <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 2" />
+                                                    <Border BackgroundColor="{Binding AccentColor}"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 2"
+                                                            HorizontalOptions="Start"
+                                                            WidthRequest="{Binding BarPercent, Converter={StaticResource PercentWidth}, ConverterParameter=230}" />
+                                                </Grid>
+                                                <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                                       Text="{Binding SecondaryText}"
+                                                       Style="{StaticResource Caption}"
+                                                       FontSize="12"
+                                                       TextColor="{StaticResource TextMuted}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </ScrollView>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="Popularity comes from poe.ninja's ladder aggregate; cluster combinations come from each character's equipped jewels."
+                   Style="{StaticResource Caption}"
+                   FontSize="12.5"
+                   Margin="2,0,0,8" />
+        </VerticalStackLayout>
+    
+</ScrollView>
+
+        <Border x:Name="ItemCardHost" ZIndex="90"
+                InputTransparent="True"
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Start"
+                VerticalOptions="Start"
+                TranslationX="{Binding ItemCardX}"
+                TranslationY="{Binding ItemCardY}"
+                IsVisible="{Binding IsItemCardVisible}">
+            <controls:ClusterJewelCard Card="{Binding ItemCard}" />
+        </Border>
+
+    </Grid>
+</ContentView>
