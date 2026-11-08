@@ -183,11 +183,33 @@ public sealed class SyncService
         // mode is then pointless - there is nothing to group - so fall back to per-skill
         // requests rather than producing skills with no builds behind them.
         var gradeEverySkill = settings.GradeEverySkill;
-        if (!gradeEverySkill && unfilteredRows.Count == 0)
+
+        // One shared ladder page describes almost nothing: with sort=dps it holds the league's
+        // top builds, which belong to a handful of skills, so grouping it leaves twenty skills
+        // with no builds and no DPS. Quick mode therefore grades per skill as soon as the shared
+        // page fails to cover a quarter of them - a fast path, not a broken one.
+        if (!gradeEverySkill)
         {
-            gradeEverySkill = true;
-            _client.Log?.Invoke("unfiltered search returned no rows: grading skills one request at a time");
+            var covered = new HashSet<string>(
+                unfilteredRows.Select(row => row.MainSkill),
+                StringComparer.OrdinalIgnoreCase);
+
+            var blind = candidates.Count(candidate => !covered.Contains(candidate.Name));
+
+            if (unfilteredRows.Count == 0 || blind * 4 >= candidates.Count)
+            {
+                gradeEverySkill = true;
+                _client.Log?.Invoke(
+                    unfilteredRows.Count == 0
+                        ? "unfiltered search returned no rows: grading one request at a time"
+                        : $"one ladder page covered {candidates.Count - blind} of {candidates.Count} skills: " +
+                          "grading the rest one request at a time");
+            }
         }
+
+        _client.Log?.Invoke(
+            $"grading {(gradeEverySkill ? "each skill from its own page" : "from the single ladder page")} " +
+            $"({candidates.Count} skills, {unfilteredRows.Count} ladder rows)");
 
         if (!gradeEverySkill)
         {

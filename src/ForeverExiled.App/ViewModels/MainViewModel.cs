@@ -564,6 +564,9 @@ public partial class MainViewModel : ObservableObject
 
     // --------------------------------------------------------------- publishing
 
+    /// <summary>Version, pipeline revision and build time - see <see cref="BuildInfo"/>.</summary>
+    public string BuildLabel => BuildInfo.Label;
+
     private void Publish()
     {
         var previousName = SelectedSkill?.Stat.Name;

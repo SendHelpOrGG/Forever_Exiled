@@ -78,6 +78,10 @@ first network call. It is generated, not scraped: the header shows `SYNTHETIC SA
 the league reads `Allflame (demo)`, and the snapshot version reads `demo — not the live
 ladder`. Press **SYNC** to replace it with the real ladder for the selected league.
 
+The header shows which build is running — `v1.0.0 · pipeline 9 · built 2026-11-08 17:32`. The
+pipeline revision is bumped whenever sync behaviour changes, so "is this build new enough to have
+the fix" is a question the screen answers.
+
 **SYNC is the whole pipeline**: it grades the ladder, then reads the top builds of every
 tracked skill so the cluster lab has characters to work with. One button, two phases, with the
 phase named on the busy panel. The lab's **ANALYZE** / **SAMPLE ALL** buttons remain for
@@ -297,7 +301,9 @@ matters: the protobuf route answered per-skill searches with a DPS column that o
 first row's value, so every other build looked like it had no damage.
 
 Quick grading (Settings → **skill grading → QUICK**) skips those and groups the single
-unfiltered page of rows by skill. Faster, but twenty skills then share one page of builds, so
+unfiltered page of rows by skill — and escalates to per-skill grading by itself as soon as that
+one page fails to cover a quarter of the tracked skills, because it never covers more than a
+handful. Faster, but twenty skills then share one page of builds, so
 a skill's top row is whatever happened to land on it: fine as a rough ordering, not
 comparable to the site's DPS figures. The sync escalates to full grading by itself when the
 unfiltered response carries no rows at all.

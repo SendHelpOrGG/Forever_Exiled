@@ -86,6 +86,14 @@
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </Border>
+
+                <!-- which build is on screen: rebuilds are the only way changes arrive -->
+                <Label Text="{Binding BuildLabel}"
+                       Style="{StaticResource Caption}"
+                       FontSize="10.5"
+                       TextColor="{StaticResource TextFaint}"
+                       VerticalOptions="Center"
+                       ToolTipProperties.Text="Version, sync pipeline revision and build time of this executable" />
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Grid.Column="3" Spacing="10" VerticalOptions="Center">
