@@ -105,6 +105,12 @@ public partial class MainViewModel : ObservableObject
     private string _snapshotText = string.Empty;
 
     [ObservableProperty]
+    private bool _hasLadderWarning;
+
+    [ObservableProperty]
+    private string _ladderWarningText = string.Empty;
+
+    [ObservableProperty]
     private string _dataSourceText = "SAMPLE DATA";
 
     [ObservableProperty]
@@ -553,6 +559,13 @@ public partial class MainViewModel : ObservableObject
         {
             SnapshotText = "no snapshot version";
         }
+
+        // a live snapshot with skills but no ladder rows: the lab would look empty for no
+        // stated reason, so say it in a strip above the content as well as the status bar
+        HasLadderWarning = _snapshot.HasLadderWarning;
+        LadderWarningText = HasLadderWarning
+            ? _snapshot.LadderWarning + " The Cluster Lab stays empty until the ladder parses again."
+            : string.Empty;
 
         LastSyncText = Humanize(_snapshot.GeneratedAt);
         LeaguesText = LeagueNames.Count == 0 ? LeaguesText : $"{ LeagueNames.Count} leagues available";
