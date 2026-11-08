@@ -370,12 +370,13 @@ A page the parser cannot read is never silently empty: the log reports its size 
 were recognised, and the HTML is saved to `diagnostics/builds-<skill>-<time>.html` so the markup
 can be inspected rather than guessed at.
 
-The builds table is scraped too. `/poe1/builds/{league}?skills={skill}&sort=dps` is the same
-table the search API describes, rendered as HTML, and it is what a skill falls back to when its
-search will not answer: instead of a silent dash, the skill's rows come from the page, DPS and
-character accounts included (the accounts are what the per-character scrape needs). The whole
-league page is the last resort when the ladder search returns no rows at all. Rows whose DPS
-cell cannot be identified are dropped rather than guessed at.
+The **builds table is not scraped**: `/poe1/builds/{league}?skills={skill}&sort=dps` arrives as
+a 46 KB client-rendered shell with no rows in the HTML (measured), so the ladder comes from the
+search API, whose per-skill responses name their DPS column after the skill -
+`dps-Righteous Fire.total`. That column, not `dps.total`, is what a filtered table is sorted and
+displayed on, and the parser matches it by name before falling back to magnitude guessing. The
+page scraper survives only as a last resort for a skill the API leaves empty (and reports what
+it found when that happens).
 
 ### Rate limiting is deliberate
 

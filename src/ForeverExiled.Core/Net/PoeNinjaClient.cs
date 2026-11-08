@@ -452,7 +452,9 @@ public sealed class PoeNinjaClient : IDisposable
                     DumpDirectory,
                     $"builds-{Slug(skill ?? "all")}-{DateTimeOffset.Now:HHmmss}.html");
                 await File.WriteAllTextAsync(file, html, cancellationToken).ConfigureAwait(false);
-                Log?.Invoke($"no rows recognised in that page - saved it to {file}");
+                Log?.Invoke(
+                    $"that page is client-rendered (no rows in the HTML) - saved it to {file}; " +
+                    "the ladder has to come from the API");
             }
             catch (IOException ex)
             {

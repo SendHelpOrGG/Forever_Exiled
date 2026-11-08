@@ -186,6 +186,44 @@ public class SearchResponseParserTests
     }
 
     [Fact]
+    public void Uses_the_skills_own_dps_column_for_a_filtered_ladder()
+    {
+        // a skill-filtered response names its DPS column after the skill; the site's table is
+        // sorted and displayed on that number, not on the build's total
+        var payload = BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp"),
+            NumericColumn("dps_total", 999_000_000, 999_000_000),
+            NumericColumn("dps-Righteous Fire.total", 36_000_000, 24_000_000));
+
+        var response = SearchResponseParser.Parse(payload);
+        var rows = SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>());
+
+        Assert.Equal(36_000_000d, rows[0].Dps, 3);
+        Assert.Equal(24_000_000d, rows[1].Dps, 3);
+    }
+
+    [Fact]
+    public void Ignores_a_partly_filled_dps_column_when_a_complete_one_exists()
+    {
+        // the failure that showed only the first build with a DPS: a column carrying one value
+        var partial = ProtoFixture.Concat(
+            ProtoFixture.FieldString(1, "dps_total"),
+            ProtoFixture.FieldBytes(6, ProtoFixture.Packed(new long[] { 1_200_000_000 })),
+            ProtoFixture.FieldVarint(13, 2));
+
+        var payload = BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp"),
+            partial,
+            NumericColumn("dps-Righteous Fire.total", 36_000_000, 24_000_000));
+
+        var response = SearchResponseParser.Parse(payload);
+        var rows = SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>());
+
+        Assert.Equal(36_000_000d, rows[0].Dps, 3);
+        Assert.Equal(24_000_000d, rows[1].Dps, 3);
+    }
+
+    [Fact]
     public void Guesses_the_dps_column_when_its_name_is_unfamiliar()
     {
         // poe.ninja renames columns between seasons; the ladder's damage numbers are the

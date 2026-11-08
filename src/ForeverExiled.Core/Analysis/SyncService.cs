@@ -217,44 +217,10 @@ public sealed class SyncService
                 .ToList();
             var buildCount = candidate.Count;
 
-            // The site's own builds page carries the same rows with the same DPS column, and
-            // it is the table people check the numbers against. Ask it first: the protobuf
-            // route produced pages where only the first build had a DPS at all, which is how
-            // the rail ended up sorted by a number that only one row carried.
-            if (gradeEverySkill && settings.PreferCharacterPages)
-            {
-                try
-                {
-                    var scraped = await _client.ScrapeBuildsAsync(league, candidate.Name, cancellationToken)
-                        .ConfigureAwait(false);
-
-                    if (scraped.Count > 0)
-                    {
-                        rows = scraped;
-                        buildCount = Math.Max(buildCount, scraped.Count);
-                        _client.Log?.Invoke(
-                            $"skill {candidate.Name}: {scraped.Count} builds from its page, top {scraped[0].Dps:N0}");
-                    }
-                }
-                catch (RateLimitedException ex)
-                {
-                    pause = ex;
-                    for (var rest = index; rest < candidates.Count; rest++)
-                    {
-                        ungraded.Add(candidates[rest].Name);
-                    }
-
-                    _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
-                    break;
-                }
-                catch (PoeDataException ex)
-                {
-                    _client.Log?.Invoke($"skill {candidate.Name}: builds page failed ({ex.Message})");
-                }
-            }
-
-            // the page is authoritative in full mode; the API is the fallback now
-            if (gradeEverySkill && rows.Count == 0 && !cancellationToken.IsCancellationRequested)
+            // The search API is the ladder: its per-skill responses carry a column named after
+            // the skill ("dps-Righteous Fire.total"), which is the number the site's own table
+            // shows once a skill is selected.
+            if (gradeEverySkill)
             {
                 try
                 {
@@ -281,8 +247,8 @@ public sealed class SyncService
                 }
                 catch (RateLimitedException ex)
                 {
-                    // splitting the ladder page over twenty requests is exactly what earns a
-                    // pause; keep what was graded and stop asking
+                    // splitting the ladder over twenty requests is exactly what earns a pause;
+                    // keep what was graded and stop asking
                     pause = ex;
                     for (var rest = index; rest < candidates.Count; rest++)
                     {
@@ -296,6 +262,32 @@ public sealed class SyncService
                 {
                     ungraded.Add(candidate.Name);
                     _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                }
+            }
+
+            // The builds page is a client-rendered shell - it arrives with no rows in it - so it
+            // is only worth one request when the API left this skill with nothing at all.
+            if (rows.Count == 0 && settings.PreferCharacterPages && !cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var scraped = await _client.ScrapeBuildsAsync(league, candidate.Name, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (scraped.Count > 0)
+                    {
+                        rows = scraped;
+                        buildCount = Math.Max(buildCount, scraped.Count);
+                    }
+                }
+                catch (RateLimitedException ex)
+                {
+                    pause = ex;
+                    _client.Log?.Invoke($"skill {candidate.Name}: {ex.Message}");
+                }
+                catch (PoeDataException ex)
+                {
+                    _client.Log?.Invoke($"skill {candidate.Name}: builds page failed ({ex.Message})");
                 }
             }
 

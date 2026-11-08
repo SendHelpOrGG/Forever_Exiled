@@ -223,8 +223,7 @@ public static class SearchResponseParser
         var accountColumn = FindPopulatedColumn(response, "account", "accountName", "character.account");
         var classColumn = FindPopulatedColumn(response, "class", "className", "ascendancy");
         var levelColumn = FindPopulatedColumn(response, "level", "character.level");
-        var dpsColumn = FindPopulatedColumn(response, DpsNameCandidates)
-                        ?? GuessDpsColumn(response, log);
+        var dpsColumn = ResolveDpsColumn(response, response.RowCount, log);
 
         // the site names these with underscores and, on some responses, ships a populated
         // dps_skill (gem index) where `skills` carries rows but no values
@@ -245,23 +244,6 @@ public static class SearchResponseParser
 
         var rowCount = response.RowCount;
 
-        if (dpsColumn is { } shortColumn && shortColumn.ValueCount > 0 && shortColumn.ValueCount != rowCount)
-        {
-            // a DPS column that carries fewer values than there are rows silently zeroes the
-            // rest, which looks exactly like a league where nobody deals damage. Look for a
-            // sibling column with one value per row before accepting that.
-            log?.Invoke($"dps column {shortColumn.Name}: {shortColumn.ValueCount} values for {rowCount} rows");
-
-            var alternative = response.Columns.FirstOrDefault(column =>
-                column.ValueCount == rowCount &&
-                DpsNameCandidates.Any(name => string.Equals(name, column.Name, StringComparison.OrdinalIgnoreCase)));
-
-            if (alternative is not null)
-            {
-                log?.Invoke($"using dps column {alternative.Name} instead ({alternative.ValueCount} values)");
-                dpsColumn = alternative;
-            }
-        }
         for (var i = 0; i < rowCount; i++)
         {
             var name = CellString(nameColumn, i);
@@ -366,6 +348,52 @@ public static class SearchResponseParser
 
         return null;
     }
+
+    /// <summary>
+    /// Picks the column that describes each row's damage. A skill-filtered response does not use
+    /// <c>dps.total</c>: it names the column after the skill - <c>dps-Righteous Fire.total</c> -
+    /// because the DPS of a filtered table is that skill's, not the build's. Matching that shape
+    /// by name beats guessing by magnitude, which is what put a 1.9M minion skill ahead of a
+    /// 36M one before.
+    /// </summary>
+    private static SearchColumn? ResolveDpsColumn(SearchResponse response, int rowCount, Action<string>? log)
+    {
+        var populated = response.Columns.Where(column => column.ValueCount > 0).ToList();
+        var perRow = populated.Where(column => rowCount <= 0 || column.ValueCount == rowCount).ToList();
+
+        // a skill-filtered table is sorted and shown on that skill's DPS, so when both columns
+        // are present the skill's own one is the number the site is displaying
+        var perSkill = perRow.FirstOrDefault(column => IsPerSkillDpsName(column.Name));
+        if (perSkill is not null)
+        {
+            log?.Invoke($"dps column: {perSkill.Name} (the skill's own DPS)");
+            return perSkill;
+        }
+
+        var named = perRow.FirstOrDefault(column => DpsNameCandidates.Any(
+            name => string.Equals(name, column.Name, StringComparison.OrdinalIgnoreCase)));
+        if (named is not null)
+        {
+            return named;
+        }
+
+        var partial = populated.FirstOrDefault(column => DpsNameCandidates.Any(
+            name => string.Equals(name, column.Name, StringComparison.OrdinalIgnoreCase)));
+
+        if (partial is not null)
+        {
+            log?.Invoke($"dps column {partial.Name} carries {partial.ValueCount} values for {rowCount} rows");
+            return partial;
+        }
+
+        return GuessDpsColumn(response, log);
+    }
+
+    private static bool IsPerSkillDpsName(string name) =>
+        (name.StartsWith("dps-", StringComparison.OrdinalIgnoreCase) ||
+         name.StartsWith("dps_", StringComparison.OrdinalIgnoreCase)) &&
+        (name.Contains("total", StringComparison.OrdinalIgnoreCase) ||
+         name.EndsWith(".dps", StringComparison.OrdinalIgnoreCase));
 
     private static readonly string[] DpsNameCandidates =
     {
