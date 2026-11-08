@@ -46,7 +46,7 @@ public sealed class SyncService
 
         var first = await _client.SearchAsync(league, null, cancellationToken).ConfigureAwait(false);
         var dictionaries = await _client.GetDictionariesAsync(first, cancellationToken).ConfigureAwait(false);
-        var unfilteredRows = SearchResponseParser.ExtractRows(first, dictionaries);
+        var unfilteredRows = SearchResponseParser.ExtractRows(first, dictionaries, _client.Log);
 
         // poe.ninja answers the same call with the aggregate buckets only when the
         // `overview` value it wants is not the one we sent, and the site's own pages use
@@ -64,7 +64,7 @@ public sealed class SyncService
             var retryDictionaries = retry.DictionaryHashes.Count > 0
                 ? await _client.GetDictionariesAsync(retry, cancellationToken).ConfigureAwait(false)
                 : dictionaries;
-            var retryRows = SearchResponseParser.ExtractRows(retry, retryDictionaries);
+            var retryRows = SearchResponseParser.ExtractRows(retry, retryDictionaries, _client.Log);
 
             if (retryRows.Count > 0)
             {
@@ -90,6 +90,24 @@ public sealed class SyncService
                 $"so there are no per-build DPS values or characters to sample. " +
                 $"Response: {SearchResponseParser.Describe(first)}. " +
                 "Run the capture tool with --diagnose to dump the payload.";
+        }
+
+        // the ordering the whole app leans on is the ladder's own DPS. Without it the
+        // sample is just the site's row order, and saying "top-DPS" would be a lie.
+        var rowsWithDps = unfilteredRows.Count(row => row.Dps > 0);
+        var dpsMissing = unfilteredRows.Count > 0 && rowsWithDps == 0;
+
+        if (dpsMissing)
+        {
+            var detail = $"no ladder row carried a DPS value ({unfilteredRows.Count} rows read), " +
+                         $"so builds are sampled in poe.ninja's order instead of by DPS. " +
+                         $"Response: {SearchResponseParser.Describe(first)}";
+            ladderWarning = ladderWarning.Length > 0 ? ladderWarning : detail;
+            _client.Log?.Invoke(detail);
+        }
+        else if (unfilteredRows.Count > 0)
+        {
+            _client.Log?.Invoke($"ladder rows: {unfilteredRows.Count}, with DPS: {rowsWithDps}");
         }
 
         if (ladderWarning.Length > 0)
@@ -149,7 +167,7 @@ public sealed class SyncService
                     ? await _client.GetDictionariesAsync(filtered, cancellationToken).ConfigureAwait(false)
                     : dictionaries;
 
-                var filteredRows = SearchResponseParser.ExtractRows(filtered, filteredDictionaries);
+                var filteredRows = SearchResponseParser.ExtractRows(filtered, filteredDictionaries, _client.Log);
                 if (filteredRows.Count > 0)
                 {
                     rows = filteredRows;
@@ -210,6 +228,7 @@ public sealed class SyncService
             MinPopularityPercent = settings.MinPopularityPercent,
             TotalBuildsInLeague = totalBuilds,
             LadderWarning = ladderWarning,
+            LadderDpsMissing = dpsMissing,
             Skills = skills.OrderByDescending(s => s.AverageDps).ThenByDescending(s => s.BuildCount).ToList(),
             Characters = previous?.Characters ?? new List<CharacterSnapshot>(),
         };

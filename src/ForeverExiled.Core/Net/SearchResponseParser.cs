@@ -146,7 +146,8 @@ public static class SearchResponseParser
             ? "none"
             : string.Join(", ", response.Columns.Select(c =>
                 $"{c.Name}(rows:{c.Rows} strings:{c.Strings?.Count ?? 0} numbers:{c.Numbers?.Count ?? 0}" +
-                (c.DictionaryId.Length > 0 ? $" dict:{c.DictionaryId}" : string.Empty) + ")"));
+                (c.DictionaryId.Length > 0 ? $" dict:{c.DictionaryId}" : string.Empty) +
+                (ColumnMaxValue(c) > 0 ? $" max:{ColumnMaxValue(c):N0}" : string.Empty) + ")"));
 
         return $"total={response.Total} dimensions={response.Dimensions.Count} " +
                $"dictionaries={response.DictionaryHashes.Count} rows={response.RowCount} columns=[{columns}]";
@@ -157,9 +158,11 @@ public static class SearchResponseParser
     /// matched with tolerant candidates because poe.ninja renames them between
     /// seasons (e.g. <c>dps</c> vs <c>dps.total</c>).
     /// </summary>
+    /// <param name="log">Optional sink for what the column matching decided.</param>
     public static List<BuildRef> ExtractRows(
         SearchResponse response,
-        IReadOnlyDictionary<string, string[]> dictionaries)
+        IReadOnlyDictionary<string, string[]> dictionaries,
+        Action<string>? log = null)
     {
         var rows = new List<BuildRef>();
         if (response.Columns.Count == 0)
@@ -171,7 +174,8 @@ public static class SearchResponseParser
         var accountColumn = response.FindColumn("account", "accountName", "character.account");
         var classColumn = response.FindColumn("class", "className", "ascendancy");
         var levelColumn = response.FindColumn("level", "character.level");
-        var dpsColumn = response.FindColumn("dps.total", "dps.totalWeighted", "dps", "dpsTotal");
+        var dpsColumn = response.FindColumn("dps.total", "dps.totalWeighted", "dps", "dpsTotal")
+                        ?? GuessDpsColumn(response, log);
         var skillColumn = response.FindColumn("skills", "mainSkill", "skill");
         var leagueColumn = response.FindColumn("league", "leagueName");
         var clusterColumn = response.FindColumn("cjewels", "clusterJewels", "clusterJewelCount");
@@ -179,6 +183,11 @@ public static class SearchResponseParser
         if (nameColumn is null && accountColumn is null)
         {
             return rows;
+        }
+
+        if (dpsColumn is not null)
+        {
+            log?.Invoke($"dps column: {dpsColumn.Name}");
         }
 
         var rowCount = response.RowCount;
@@ -261,6 +270,50 @@ public static class SearchResponseParser
 
         var index = (int)column.Numbers[row];
         return index >= 0 && index < names.Length ? names[index] : string.Empty;
+    }
+
+    /// <summary>
+    /// Last resort when no column carries a name we recognise: take the column that looks
+    /// like damage numbers. A league's ladder has millions-to-billions in exactly one place,
+    /// so the biggest numbers win, minus the columns that are plainly not damage.
+    /// </summary>
+    private static SearchColumn? GuessDpsColumn(SearchResponse response, Action<string>? log)
+    {
+        string[] notDamage = { "level", "xp", "experience", "rank", "depth", "time", "life",
+                               "ehp", "es", "mana", "ward", "armour", "evasion", "count" };
+
+        var candidates = response.Columns
+            .Where(c => !notDamage.Any(word => c.Name.Contains(word, StringComparison.OrdinalIgnoreCase)))
+            .Select(c => (Column: c, Max: ColumnMaxValue(c)))
+            .Where(x => x.Max >= 100_000)
+            .OrderByDescending(x => x.Max)
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            log?.Invoke("no dps column found: builds will keep the site's order");
+            return null;
+        }
+
+        var picked = candidates[0];
+        log?.Invoke($"dps column guessed as \"{picked.Column.Name}\" (largest values: {picked.Max:N0})");
+        return picked.Column;
+    }
+
+    private static double ColumnMaxValue(SearchColumn column)
+    {
+        if (column.Numbers is { Count: > 0 })
+        {
+            return column.Numbers.Max();
+        }
+
+        if (column.Strings is { Count: > 0 })
+        {
+            // ladder DPS arrives as a printed string ("425.0M") as often as a number
+            return column.Strings.Max(DpsParser.Parse);
+        }
+
+        return 0;
     }
 
     private static double ParseDps(SearchColumn? column, int row)

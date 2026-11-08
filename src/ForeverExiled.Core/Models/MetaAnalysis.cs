@@ -74,6 +74,12 @@ public sealed class SnapshotDocument
 
     public bool HasLadderWarning => LadderWarning.Length > 0;
 
+    /// <summary>
+    /// True when the ladder rows carried no DPS value, so build order is the site's own
+    /// rather than a DPS ranking. The UI must not call that sample "top-DPS".
+    /// </summary>
+    public bool LadderDpsMissing { get; set; }
+
     public List<SkillStat> Skills { get; set; } = new();
 
     public List<CharacterSnapshot> Characters { get; set; } = new();

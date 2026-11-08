@@ -275,7 +275,11 @@ average / median / peak DPS.
 
 **Phase 2 — cluster jewels (polite: rate-limited, cached).**
 For a skill, the top-N builds by DPS get one `/character` request each. The ordering is
-poe.ninja's `dps.total` per ladder row, sorted by us, descending — and the rows we ever see
+poe.ninja's `dps.total` per ladder row, sorted by us, descending. If no column carries that
+name, the parser falls back to the column whose values look like damage (largest numbers,
+excluding level / experience / life and friends) and logs which one it picked; if nothing
+looks like damage at all, the snapshot is flagged and the UI stops calling the sample
+"top-DPS". The rows we ever see
 are capped: one `search` call returns at most ~100 rows for the site's current sort, so a
 skill's sample is its DPS leaders, not a random or complete slice of the ladder. The sample
 size is `SampleDepth` (default 12, Settings → sample depth). Cluster jewels are

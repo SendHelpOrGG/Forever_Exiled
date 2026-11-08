@@ -68,6 +68,61 @@ public class SearchResponseParserTests
         Assert.Equal(138_500_000d, rows[3].Dps, 3);
     }
 
+    private static byte[] BuildColumnResponse(params byte[][] columns)
+    {
+        var result = ProtoFixture.Concat(
+            ProtoFixture.FieldVarint(1, 2),
+            columns.Select(c => ProtoFixture.FieldBytes(12, c)).ToArray());
+        return ProtoFixture.FieldBytes(1, result);
+    }
+
+    private static byte[] Column(string name, params string[] strings)
+    {
+        var parts = new List<byte[]> { ProtoFixture.FieldString(1, name) };
+        parts.AddRange(strings.Select(value => ProtoFixture.FieldString(7, value)));
+        parts.Add(ProtoFixture.FieldVarint(13, (ulong)strings.Length));
+        return ProtoFixture.Concat(parts.ToArray());
+    }
+
+    private static byte[] NumericColumn(string name, params long[] numbers) =>
+        ProtoFixture.Concat(
+            ProtoFixture.FieldString(1, name),
+            ProtoFixture.FieldBytes(6, ProtoFixture.Packed(numbers)),
+            ProtoFixture.FieldVarint(13, (ulong)numbers.Length));
+
+    [Fact]
+    public void Guesses_the_dps_column_when_its_name_is_unfamiliar()
+    {
+        // poe.ninja renames columns between seasons; the ladder's damage numbers are the
+        // ones in the millions, so they identify themselves
+        var payload = BuildColumnResponse(
+            Column("name", "TopDog", "RunnerUp"),
+            Column("league", "Allflame", "Allflame"),
+            NumericColumn("level", 100, 99),
+            Column("damage_per_second", "900.0M", "850.0M"));
+
+        var response = SearchResponseParser.Parse(payload);
+        var rows = SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>());
+
+        Assert.Equal(2, rows.Count);
+        Assert.Equal(900_000_000d, rows[0].Dps, 3);
+        Assert.Equal(850_000_000d, rows[1].Dps, 3);
+    }
+
+    [Fact]
+    public void Leaves_dps_at_zero_when_nothing_looks_like_damage()
+    {
+        var payload = BuildColumnResponse(
+            Column("name", "TopDog"),
+            NumericColumn("level", 100));
+
+        var response = SearchResponseParser.Parse(payload);
+        var rows = SearchResponseParser.ExtractRows(response, new Dictionary<string, string[]>());
+
+        Assert.Single(rows);
+        Assert.Equal(0d, rows[0].Dps, 3);
+    }
+
     [Fact]
     public void Describe_reports_an_aggregate_only_response()
     {

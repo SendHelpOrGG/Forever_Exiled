@@ -567,14 +567,26 @@ public partial class MainViewModel : ObservableObject
                           _snapshot.Skills.Count > 0 &&
                           _snapshot.Skills.All(skill => skill.TopBuilds.Count == 0);
 
-        HasLadderWarning = _snapshot.HasLadderWarning || ladderEmpty;
+        // older snapshots predate both fields: no DPS anywhere in the sample says the same thing
+        var ladderDpsMissing = _snapshot.LadderDpsMissing ||
+                               (!_snapshot.IsSample &&
+                                _snapshot.Skills.Count > 0 &&
+                                _snapshot.Skills.All(skill => skill.TopBuilds.All(build => build.Dps <= 0)) &&
+                                _snapshot.Skills.Any(skill => skill.TopBuilds.Count > 0));
+
+        HasLadderWarning = _snapshot.HasLadderWarning || ladderEmpty || ladderDpsMissing;
+
         LadderWarningText = _snapshot.HasLadderWarning
-            ? _snapshot.LadderWarning + " The Cluster Lab stays empty until the ladder parses again."
+            ? _snapshot.LadderWarning
             : ladderEmpty
                 ? "poe.ninja listed this league's skills and their popularity, but returned no ladder rows, "
                   + "so there are no characters to sample. Press SYNC to retry; if it stays empty, run "
                   + "tools/ForeverExiled.Capture with --diagnose and send the dump."
-                : string.Empty;
+                : ladderDpsMissing
+                    ? "The ladder rows carried no DPS value, so builds are sampled in poe.ninja's order "
+                      + "instead of by DPS. The cluster numbers are real, but the sample is not the top-DPS "
+                      + "builds. Press SYNC to retry, or run the capture tool with --diagnose."
+                    : string.Empty;
 
         LastSyncText = Humanize(_snapshot.GeneratedAt);
         LeaguesText = LeagueNames.Count == 0 ? LeaguesText : $"{ LeagueNames.Count} leagues available";

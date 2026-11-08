@@ -113,7 +113,7 @@
                        VerticalOptions="Start"
                        Margin="0,2,0,0" />
                 <Label Grid.Column="1"
-                       Text="LADDER UNREADABLE"
+                       Text="LADDER WARNING"
                        Style="{StaticResource Micro}"
                        TextColor="{StaticResource Warning}"
                        VerticalOptions="Start"
