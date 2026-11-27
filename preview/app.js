@@ -355,7 +355,8 @@ function analyze(snapshot, floor) {
 /* ─────────────────────────── state ─────────────────────────── */
 
 const state = {
-  tab: 'lab',
+  tab: 'clusters',
+  pane: 'lab',
   snapshot: null,
   analysis: null,
   query: '',
@@ -1656,12 +1657,51 @@ function selectSkill(name) {
   }
 }
 
-function setTab(tab) {
-  state.tab = tab;
-  for (const key of ['lab', 'meta', 'ladder', 'settings']) {
-    $('view-' + key).hidden = key !== tab;
+const TAB_LABELS = {
+  clusters: 'Cluster Jewels',
+  watchers: "Watcher's Eyes",
+  rare: 'Rare Items',
+  flasks: 'Flasks',
+  economy: 'Economy',
+  settings: 'Settings',
+};
+
+const PANE_LABELS = { lab: 'Lab', meta: 'Meta', ladder: 'Ladder' };
+
+function setCrumb() {
+  const crumb = $('crumb');
+  const label = esc(TAB_LABELS[state.tab] || TAB_LABELS.clusters);
+  crumb.innerHTML = state.tab === 'clusters'
+    ? `${label}<span class="sep">/</span><em>${esc(PANE_LABELS[state.pane] || 'Lab')}</em>`
+    : label;
+}
+
+/** Cluster Jewels carries three panes; they share one sidebar destination. */
+function setPane(pane) {
+  if (!PANE_LABELS[pane]) pane = 'lab';
+  state.pane = pane;
+  for (const key of Object.keys(PANE_LABELS)) {
+    const el = $('view-' + key);
+    if (el) el.hidden = key !== pane;
   }
-  document.querySelectorAll('.nav-tile').forEach((t) => t.classList.toggle('on', t.dataset.tab === tab));
+  document.querySelectorAll('#paneNav button').forEach((b) => b.classList.toggle('on', b.dataset.pane === pane));
+  setCrumb();
+}
+
+function setTab(tab) {
+  // a pane name is shorthand for "that pane of Cluster Jewels"
+  if (PANE_LABELS[tab]) { state.pane = tab; tab = 'clusters'; }
+  if (!TAB_LABELS[tab]) tab = 'clusters';
+
+  state.tab = tab;
+  for (const key of Object.keys(TAB_LABELS)) {
+    const el = $('view-' + key);
+    if (el) el.hidden = key !== tab;
+  }
+  document.querySelectorAll('.nav-item').forEach((t) => t.classList.toggle('on', t.dataset.tab === tab));
+
+  if (tab === 'clusters') setPane(state.pane || 'lab');
+  setCrumb();
 }
 
 /* ─────────────────────────── simulated work ─────────────────────────── */
@@ -1726,8 +1766,12 @@ function simulateAnalyze() {
 /* ─────────────────────────── wiring ─────────────────────────── */
 
 function wire() {
-  document.querySelectorAll('.nav-tile').forEach((tile) => {
+  document.querySelectorAll('.nav-item').forEach((tile) => {
     tile.addEventListener('click', () => setTab(tile.dataset.tab));
+  });
+
+  document.querySelectorAll('#paneNav button').forEach((btn) => {
+    btn.addEventListener('click', () => { setTab('clusters'); setPane(btn.dataset.pane); });
   });
 
   $('skillSearch').addEventListener('input', (e) => {
@@ -1860,9 +1904,11 @@ function wire() {
 
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input, select, textarea')) return;
-    const map = { 1: 'meta', 2: 'lab', 3: 'ladder', 4: 'settings' };
+    const map = { 1: 'clusters', 2: 'watchers', 3: 'rare', 4: 'flasks', 5: 'economy', 6: 'settings' };
     if (map[e.key]) setTab(map[e.key]);
-    if (e.key === '/' && state.tab === 'lab') { e.preventDefault(); $('skillSearch').focus(); }
+    if (e.key === '/' && state.tab === 'clusters' && state.pane === 'lab') {
+      e.preventDefault(); $('skillSearch').focus();
+    }
   });
 }
 
@@ -1930,7 +1976,8 @@ async function boot() {
   state.selectedSkill = visibleSkills()[0] ? visibleSkills()[0].name : null;
 
   wire();
-  setTab('lab');
+  setTab('clusters');
+  setPane('lab');
   renderAll();
   setStatus(isSynthetic()
     ? `Loaded the bundled demo snapshot — synthetic data, not the live ladder (${state.analysis.skills.length} tracked skills)`

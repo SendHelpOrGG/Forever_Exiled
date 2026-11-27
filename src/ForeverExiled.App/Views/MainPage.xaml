@@ -5,56 +5,110 @@
              x:Class="ForeverExiled.App.Views.MainPage"
              Background="{StaticResource PageGradient}">
 
-    <Grid RowDefinitions="52,Auto,*,Auto">
+    <ContentPage.Resources>
+        <DataTemplate x:Key="SidebarRowTemplate">
+            <Border Style="{StaticResource NavTile}" Padding="9,3">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Command}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="16,*,Auto" ColumnSpacing="9">
+                    <Image Source="{Binding Image}"
+                           WidthRequest="15"
+                           HeightRequest="15"
+                           Aspect="AspectFit"
+                           IsVisible="{Binding HasImage}"
+                           VerticalOptions="Center" />
+                    <Label Text="{Binding Glyph}"
+                           Style="{StaticResource NavGlyph}"
+                           FontSize="15"
+                           IsVisible="{Binding HasGlyph}"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="1"
+                           Text="{Binding Caption}"
+                           Style="{StaticResource NavCaption}"
+                           FontSize="12.5"
+                           LineBreakMode="TailTruncation"
+                           VerticalOptions="Center" />
+                    <Border Grid.Column="2" Style="{StaticResource SoonBadge}" IsVisible="{Binding HasBadge}">
+                        <Label Text="{Binding Badge}"
+                               Style="{StaticResource Micro}"
+                               FontSize="9"
+                               TextColor="{StaticResource TextFaint}"
+                               CharacterSpacing="1.2" />
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="52,Auto,*,Auto" ColumnDefinitions="214,*">
+
+        <!-- ============================= Sidebar ============================= -->
+        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Background="{StaticResource SidebarGradient}">
+            <Grid RowDefinitions="52,*,Auto" Padding="10,0,10,10">
+
+                <Grid Grid.Row="0">
+                    <HorizontalStackLayout Spacing="9" Padding="4,0" VerticalOptions="Center">
+                        <Image Source="logo.png" WidthRequest="24" HeightRequest="24" Aspect="AspectFit" VerticalOptions="Center" />
+                        <Label Text="forever exiled"
+                               FontFamily="Segoe UI Semibold"
+                               FontSize="14.5"
+                               CharacterSpacing="0"
+                               TextColor="{StaticResource TextPrimary}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <BoxView HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="End" />
+                </Grid>
+
+                <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+                    <VerticalStackLayout Spacing="2" Margin="0,6,0,0">
+                        <Label Text="ANALYSIS" Style="{StaticResource SideCaption}" />
+
+                        <VerticalStackLayout Spacing="2"
+                                             BindableLayout.ItemsSource="{Binding ToolNavItems}"
+                                             BindableLayout.ItemTemplate="{StaticResource SidebarRowTemplate}" />
+
+                        <Label Text="COMING SOON" Style="{StaticResource SideCaption}" Margin="8,14,8,4" />
+
+                        <VerticalStackLayout Spacing="2"
+                                             BindableLayout.ItemsSource="{Binding PlannedNavItems}"
+                                             BindableLayout.ItemTemplate="{StaticResource SidebarRowTemplate}" />
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- settings is a destination, not a feature: it sits at the foot -->
+                <VerticalStackLayout Grid.Row="2" Spacing="8">
+                    <BoxView HeightRequest="1" Color="{StaticResource Border}" />
+                    <VerticalStackLayout Spacing="2"
+                                         BindableLayout.ItemsSource="{Binding SettingsNavItems}"
+                                         BindableLayout.ItemTemplate="{StaticResource SidebarRowTemplate}" />
+                    <Label Text="{Binding BuildLabel}"
+                           Style="{StaticResource Caption}"
+                           FontSize="10"
+                           TextColor="{StaticResource TextFaint}"
+                           Margin="6,0,6,2"
+                           LineBreakMode="TailTruncation"
+                           ToolTipProperties.Text="Version, sync pipeline revision and build time of this executable" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <BoxView WidthRequest="1" Color="{StaticResource Border}" HorizontalOptions="End" />
+        </Grid>
 
         <!-- ============================== Header ============================== -->
-        <Grid Grid.Row="0"
+        <Grid Grid.Column="1"
+              Grid.Row="0"
               Background="{StaticResource HeaderGradient}"
-              ColumnDefinitions="Auto,Auto,*,Auto"
+              ColumnDefinitions="*,Auto,Auto"
               ColumnSpacing="14"
-              Padding="14,0">
+              Padding="16,0">
 
-            <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center" Margin="0,0,6,0">
-                <Image Source="logo.png" WidthRequest="24" HeightRequest="24" Aspect="AspectFit" VerticalOptions="Center" />
-                <Label Text="forever exiled"
-                       FontFamily="Segoe UI Semibold"
-                       FontSize="15"
-                       CharacterSpacing="0"
-                       TextColor="{StaticResource TextPrimary}"
-                       VerticalOptions="Center" />
-            </HorizontalStackLayout>
+            <Label Text="{Binding ActiveCrumb}"
+                   Style="{StaticResource H2}"
+                   FontSize="14.5"
+                   VerticalOptions="Center" />
 
-            <!-- tab bar — mirrors the poe.ninja site header -->
-            <HorizontalStackLayout Grid.Column="1"
-                                   Spacing="2"
-                                   VerticalOptions="Center"
-                                   BindableLayout.ItemsSource="{Binding NavItems}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate>
-                        <Border Style="{StaticResource NavTile}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Command}" />
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                                <Image Source="{Binding Image}"
-                                       WidthRequest="14"
-                                       HeightRequest="14"
-                                       Aspect="AspectFit"
-                                       VerticalOptions="Center"
-                                       IsVisible="{Binding HasImage}" />
-                                <Label Text="{Binding Glyph}"
-                                       Style="{StaticResource NavGlyph}"
-                                       FontSize="13"
-                                       IsVisible="{Binding HasGlyph}"
-                                       VerticalOptions="Center" />
-                                <Label Text="{Binding Caption}" Style="{StaticResource NavCaption}" />
-                            </HorizontalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
+            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
                 <Border BackgroundColor="{StaticResource SurfaceAlt}"
                         Stroke="{StaticResource Border}"
                         StrokeThickness="1"
@@ -87,16 +141,9 @@
                     </HorizontalStackLayout>
                 </Border>
 
-                <!-- which build is on screen: rebuilds are the only way changes arrive -->
-                <Label Text="{Binding BuildLabel}"
-                       Style="{StaticResource Caption}"
-                       FontSize="10.5"
-                       TextColor="{StaticResource TextFaint}"
-                       VerticalOptions="Center"
-                       ToolTipProperties.Text="Version, sync pipeline revision and build time of this executable" />
             </HorizontalStackLayout>
 
-            <HorizontalStackLayout Grid.Column="3" Spacing="10" VerticalOptions="Center">
+            <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
                 <Label Text="{Binding LastSyncText}" Style="{StaticResource Caption}" VerticalOptions="Center" />
                 <Button Text="SYNC"
                         Style="{StaticResource PrimaryButton}"
@@ -106,7 +153,8 @@
         </Grid>
 
         <!-- ========================== Ladder warning ========================== -->
-        <Border Grid.Row="1"
+        <Border Grid.Column="1"
+                Grid.Row="1"
                 IsVisible="{Binding HasLadderWarning}"
                 BackgroundColor="{StaticResource SurfaceSunken}"
                 Stroke="{StaticResource Warning}"
@@ -136,12 +184,85 @@
         </Border>
 
         <!-- ============================= Content ============================= -->
-        <Grid Grid.Row="2" BackgroundColor="{StaticResource Bg}">
+        <Grid Grid.Column="1" Grid.Row="2" BackgroundColor="{StaticResource Bg}">
 
-            <views:ClusterLabView IsVisible="{Binding IsClustersActive}" />
-            <views:MetaView IsVisible="{Binding IsMetaActive}" />
-            <views:LadderView IsVisible="{Binding IsLadderActive}" />
+            <!-- Cluster Jewels: the three old tabs, now panes behind one destination -->
+            <Grid IsVisible="{Binding IsClusterJewelsActive}" RowDefinitions="40,*">
+
+                <Grid Padding="16,0">
+                    <HorizontalStackLayout Spacing="2"
+                                           VerticalOptions="Center"
+                                           BindableLayout.ItemsSource="{Binding PanePills}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Pill}" Padding="12,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Command}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding Label}"
+                                           Style="{StaticResource PillLabel}"
+                                           FontSize="11.5"
+                                           CharacterSpacing="1.2" />
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                    <BoxView HeightRequest="1" Color="{StaticResource BorderSoft}" VerticalOptions="End" />
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <views:ClusterLabView IsVisible="{Binding IsLabPaneActive}" />
+                    <views:MetaView IsVisible="{Binding IsMetaPaneActive}" />
+                    <views:LadderView IsVisible="{Binding IsLadderPaneActive}" />
+                </Grid>
+            </Grid>
+
             <views:SettingsView IsVisible="{Binding IsSettingsActive}" />
+
+            <!-- the screens still to be built: empty, and honest about it -->
+            <Grid IsVisible="{Binding IsPlannedTabActive}" Padding="24">
+                <VerticalStackLayout HorizontalOptions="Center"
+                                     VerticalOptions="Center"
+                                     Spacing="0"
+                                     MaximumWidthRequest="430">
+                    <Border WidthRequest="64"
+                            HeightRequest="64"
+                            StrokeShape="RoundRectangle 12"
+                            Background="{StaticResource PanelGradient}"
+                            Stroke="{StaticResource Border}"
+                            StrokeThickness="1"
+                            HorizontalOptions="Center">
+                        <Image Source="{Binding PlannedImage}"
+                               WidthRequest="26"
+                               HeightRequest="26"
+                               Aspect="AspectFit"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                    </Border>
+                    <Label Text="{Binding PlannedTitle}"
+                           Style="{StaticResource H2}"
+                           FontSize="19"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,15,0,0" />
+                    <Label Text="{Binding PlannedSubtitle}"
+                           Style="{StaticResource Body}"
+                           FontSize="13"
+                           TextColor="{StaticResource TextMuted}"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap"
+                           Margin="0,7,0,0" />
+                    <Border Style="{StaticResource SoonBadge}"
+                            Padding="9,3"
+                            HorizontalOptions="Center"
+                            Margin="0,14,0,0">
+                        <Label Text="PLANNED"
+                               Style="{StaticResource Micro}"
+                               FontSize="9.5"
+                               TextColor="{StaticResource TextFaint}"
+                               CharacterSpacing="1.5" />
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
 
             <!-- busy overlay -->
             <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#E605070A">
@@ -177,7 +298,7 @@
         </Grid>
 
         <!-- ============================ Status bar =========================== -->
-        <Grid Grid.Row="3" RowDefinitions="1,30" BackgroundColor="{StaticResource Bg}">
+        <Grid Grid.Column="1" Grid.Row="3" RowDefinitions="1,30" BackgroundColor="{StaticResource Bg}">
             <BoxView Grid.Row="0" Color="{StaticResource BorderSoft}" />
             <Grid Grid.Row="1" Padding="18,0" ColumnDefinitions="*,Auto">
                 <HorizontalStackLayout Spacing="7" VerticalOptions="Center">

@@ -99,51 +99,117 @@ input, select { font-family: inherit; color: inherit; }
 /* ─────────────────────────── shell ─────────────────────────── */
 .app {
   display: grid;
+  grid-template-columns: 214px minmax(0, 1fr);
   grid-template-rows: 50px auto minmax(0, 1fr) 26px;
-  height: 100vh; min-width: 880px;
+  height: 100vh; min-width: 940px;
   background: var(--bg);
 }
-.topnav { grid-row: 1; }
+.sidebar { grid-column: 1; grid-row: 1 / -1; }
+.topnav { grid-column: 2; grid-row: 1; }
 
 .stage { min-height: 0; }
 .view { min-height: 0; }
 .view[hidden] { display: none !important; }
-.notice { grid-row: 2; }
-.stage { grid-row: 3; }
-.statusbar { grid-row: 4; }
+.notice { grid-column: 2; grid-row: 2; }
+.stage { grid-column: 2; grid-row: 3; }
+.statusbar { grid-column: 2; grid-row: 4; }
 
-/* top navigation — mirrored on poe.ninja's site header */
-.topnav {
-  display: flex; align-items: stretch; gap: 4px;
-  padding: 0 14px 0 12px;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--line);
-  grid-column: 1 / -1;
+/* ───────────────────────────── sidebar ───────────────────────────── */
+.sidebar {
+  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, #0c141b 0%, #0a1016 55%, #080d12 100%);
+  border-right: 1px solid var(--line);
+  box-shadow: 1px 0 0 rgba(255,255,255,.02);
+  padding: 0 10px 10px;
+  min-height: 0;
 }
 
-.brand {
-  display: flex; align-items: center; gap: 8px;
-  padding-right: 18px; margin-right: 6px;
-  border-right: 1px solid var(--line);
+.side-brand {
+  display: flex; align-items: center; gap: 9px;
+  height: 50px; padding: 0 4px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
   user-select: none;
 }
+
+.side-nav { display: flex; flex-direction: column; gap: 2px; padding-top: 10px; }
+
+.side-cap {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--text-3); opacity: .75;
+  padding: 8px 8px 5px;
+}
+
+.nav-item {
+  position: relative;
+  display: flex; align-items: center; gap: 9px;
+  height: 33px; padding: 0 9px;
+  border: 1px solid transparent; border-radius: var(--r-sm);
+  background: transparent; text-align: left;
+  font-size: 15px; font-weight: 500; color: var(--text-2);
+  transition: background .12s ease, color .12s ease, border-color .12s ease;
+  white-space: nowrap;
+}
+.nav-item .ic { width: 15px; height: 15px; opacity: .8; flex: none; }
+.nav-item span { overflow: hidden; text-overflow: ellipsis; }
+.nav-item:hover { background: rgba(255,255,255,.035); color: var(--text); }
+.nav-item.on {
+  color: #e8f6ee;
+  background: linear-gradient(180deg, rgba(63,174,122,.16), rgba(63,174,122,.07));
+  border-color: rgba(63,174,122,.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.nav-item.on .ic { opacity: 1; color: var(--green); }
+.nav-item.on::before {
+  content: ""; position: absolute; left: -10px; top: 7px; bottom: 7px;
+  width: 2px; border-radius: 0 2px 2px 0; background: var(--green);
+  box-shadow: 0 0 8px rgba(63,174,122,.55);
+}
+.nav-item.planned { color: var(--text-3); }
+.nav-item.planned:hover { color: var(--text-2); }
+.nav-item .soon {
+  margin-left: auto;
+  font-size: 8.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-3); padding: 1px 4px; border-radius: 3px;
+  border: 1px solid var(--line-2); opacity: .85;
+}
+.nav-item.on .soon { color: #9fd8b9; border-color: rgba(63,174,122,.35); }
+
+.side-foot { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); }
+.side-build {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 9px 0;
+  font-size: 10px; color: var(--text-3); opacity: .8;
+  font-variant-numeric: tabular-nums;
+}
+.side-build::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); opacity: .75;
+}
+
+/* breadcrumb in the top bar */
+.crumb {
+  display: flex; align-items: center; gap: 7px;
+  align-self: center; margin-left: 4px;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  letter-spacing: .01em; white-space: nowrap;
+}
+.crumb em { font-style: normal; color: var(--text-3); font-weight: 500; }
+.crumb .sep { color: var(--text-3); opacity: .6; }
+
+/* top bar — mirrored on poe.ninja's site header */
+.topnav {
+  display: flex; align-items: stretch; gap: 4px;
+  padding: 0 14px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+
 .brand-logo { width: 24px; height: 24px; object-fit: contain; }
 .brand-word {
   font-size: 15px; font-weight: 600; letter-spacing: -.02em; color: var(--text);
 }
 .brand-word span { color: var(--green); }
-
-.tabs { display: flex; align-items: stretch; gap: 2px; }
-.tab {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 0 12px; border: 0; background: transparent;
-  font-size: 12.5px; font-weight: 500; color: var(--text-2);
-  border-bottom: 2px solid transparent; transition: color .12s ease, border-color .12s ease;
-  white-space: nowrap;
-}
-.tab:hover { color: var(--text); }
-.tab.on { color: var(--text); border-bottom-color: var(--green); }
-.tab .ic { color: currentColor; opacity: .85; }
 
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .game-pills { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
@@ -832,6 +898,12 @@ input[type="range"]::-moz-range-thumb {
   .hero-stats .hero-stat:nth-child(2) { display: none; }
   .table-head, .trow { grid-template-columns: 40px minmax(0, 1.2fr) minmax(0, .8fr) minmax(0, 1fr) 76px 56px; }
 }
+@media (max-width: 1020px) {
+  .app { grid-template-columns: 60px minmax(0, 1fr); min-width: 0; }
+  .nav-item span, .nav-item .soon, .side-cap, .side-build, .brand-word { display: none; }
+  .nav-item { justify-content: center; padding: 0; }
+  .side-brand { justify-content: center; }
+}
 @media (max-width: 940px) {
   .app { min-width: 0; }
   .game-pills, .nav-right .cap { display: none; }
@@ -844,6 +916,44 @@ input[type="range"]::-moz-range-thumb {
   .table-head, .trow { grid-template-columns: 36px minmax(0, 1.4fr) 70px 50px; }
   .table-head .th:nth-child(3), .table-head .th:nth-child(4),
   .trow > :nth-child(3), .trow > :nth-child(4) { display: none; }
+}
+
+/* ─────────────────── cluster jewels: one tab, three panes ─────────────────── */
+.clusters {
+  display: grid; grid-template-rows: 40px minmax(0, 1fr);
+  min-height: 0; height: 100%;
+}
+.cluster-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255,255,255,.045);
+}
+.pane-nav button { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; letter-spacing: .02em; }
+/* the pane's summary line is a lead, not a title: the pill above already names the pane */
+.pane > .page-head .sub,
+.pane > .meta-head .sub,
+.pane > .ladder-head .sub { font-size: 13.5px; }
+.pane-nav .ic { width: 11px; height: 11px; opacity: .7; }
+.pane-nav button.on .ic { opacity: 1; color: var(--green); }
+.pane { min-height: 0; }
+.pane[hidden] { display: none !important; }
+
+/* ─────────────────── planned tabs: empty, and say so ─────────────────── */
+.empty-view { display: grid; place-items: center; height: 100%; padding: 24px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 400px; }
+.empty-art {
+  width: 62px; height: 62px; display: grid; place-items: center;
+  border-radius: 10px; color: var(--text-3);
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 10px 26px rgba(0,0,0,.35);
+}
+.empty-art .ic { width: 26px; height: 26px; opacity: .85; }
+.empty-title { margin-top: 15px; font-size: 19px; font-weight: 600; letter-spacing: -.01em; color: var(--text); }
+.empty-sub { margin-top: 7px; font-size: 13px; line-height: 1.6; color: var(--text-3); }
+.empty-tag {
+  margin-top: 14px; font-size: 9.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-3); padding: 3px 9px; border-radius: 999px; border: 1px dashed var(--line-2);
 }
 
 /* cluster jewel art inside pills and chips */

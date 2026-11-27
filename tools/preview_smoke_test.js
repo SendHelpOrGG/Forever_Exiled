@@ -80,6 +80,43 @@ setTimeout(async () => {
   check('ladder-builds tile is marked as a demo figure',
     txt('#metaTiles .tile .sub').includes('demo'), txt('#metaTiles .tile .sub'));
 
+  /* ── the shell: a sidebar of destinations, one tab for the cluster jewels ── */
+  const navRows = qa('#sideNav .nav-item').map((n) => n.dataset.tab);
+  check('sidebar lists the cluster tab plus the four planned features',
+    JSON.stringify(navRows) === JSON.stringify(['clusters', 'watchers', 'rare', 'flasks', 'economy']),
+    navRows.join(' · '));
+  check('settings pins to the sidebar footer',
+    !!q('.side-foot .nav-item[data-tab="settings"]'), txt('.side-foot .nav-item'));
+  check('the cluster sub-views are no longer top-level tabs',
+    !qa('.nav-item').some((n) => ['lab', 'meta', 'ladder'].includes(n.dataset.tab)),
+    qa('.nav-item').map((n) => n.dataset.tab).join(' · '));
+  check('the four planned rows are marked as such', qa('.nav-item.planned').length === 4,
+    qa('.nav-item.planned .soon').length + ' badges');
+  check('cluster jewels opens on the lab pane',
+    !q('#view-clusters').hidden && !q('#view-lab').hidden && q('#view-meta').hidden,
+    txt('#crumb'));
+  check('the crumb names tab and pane', /Cluster Jewels/.test(txt('#crumb')) && /Lab/.test(txt('#crumb')),
+    txt('#crumb'));
+
+  for (const [tab, label, fallback] of [
+    ['watchers', "Watcher's Eyes", 'aura modifiers'],
+    ['rare', 'Rare Items', 'rare gear'],
+    ['flasks', 'Flasks', 'flask lineups'],
+    ['economy', 'Economy', 'Currency'],
+  ]) {
+    click(qa('.nav-item').find((n) => n.dataset.tab === tab));
+    const view = q('#view-' + tab);
+    const empty = view && q('#' + view.id + ' .empty-state');
+    check(`${label} opens an empty view that explains itself`,
+      !!view && !view.hidden && q('#view-clusters').hidden &&
+      !!empty && txt('#' + view.id + ' .empty-title') === label &&
+      txt('#' + view.id + ' .empty-sub').includes(fallback) &&
+      q('#' + view.id + ' .empty-tag').textContent.trim().toLowerCase() === 'planned',
+      view ? txt('#' + view.id + ' .empty-sub').slice(0, 52) + '…' : 'missing');
+  }
+
+  click(qa('.nav-item').find((n) => n.dataset.tab === 'clusters'));
+
   /* ── cluster lab ── */
   const skills = qa('#skillList .skill');
   check('skill rail populated', skills.length === snapshot.skills.length, skills.length + ' skills');
@@ -398,9 +435,10 @@ setTimeout(async () => {
   check('empty search state', txt('#comboList').includes('Nothing matches'));
   type(q('#skillSearch'), '');
 
-  /* ── meta ── */
-  click(qa('.nav-tile').find((t) => t.dataset.tab === 'meta'));
-  check('meta tab switches', !q('#view-meta').hidden && q('#view-lab').hidden);
+  /* ── meta pane of the Cluster Jewels tab ── */
+  click(qa('#paneNav button').find((b) => b.dataset.pane === 'meta'));
+  check('meta pane switches', !q('#view-meta').hidden && q('#view-lab').hidden
+    && !q('#view-clusters').hidden, txt('#crumb'));
   check('meta stat tiles', qa('#metaTiles .tile').length === 6, qa('#metaTiles .v').map((e) => e.textContent).join(' / '));
   check('meta combination list', qa('#metaComboList .meta-combo').length === 12, txt('#metaComboList .mc-title'));
 
@@ -446,8 +484,8 @@ setTimeout(async () => {
   check('meta Large filter', qa('#metaComboList .size-tag').every((e) => e.textContent === 'LARGE'),
     qa('#metaComboList .meta-combo').length + ' large combinations');
 
-  /* ── ladder ── */
-  click(qa('.nav-tile').find((t) => t.dataset.tab === 'ladder'));
+  /* ── ladder pane ── */
+  click(qa('#paneNav button').find((b) => b.dataset.pane === 'ladder'));
   check('ladder skill cells carry gem art',
     qa('#ladderBody .trow .skl .gem-slot img').length === qa('#ladderBody .trow').length,
     qa('#ladderBody .trow .skl .gem-slot img').length + ' gems');
@@ -467,7 +505,8 @@ setTimeout(async () => {
     qa('#ladderBody .trow .nm b')[0].textContent);
 
   /* ── settings + live floor ── */
-  click(qa('.nav-tile').find((t) => t.dataset.tab === 'settings'));
+  click(qa('.nav-item').find((t) => t.dataset.tab === 'settings'));
+  check('settings is a sidebar destination, not a cluster pane', q('#view-clusters').hidden && !q('#view-settings').hidden);
   check('settings defaults', txt('#floorVal') === '1.0%', txt('#floorHint'));
   type(q('#floorRange'), '6');
   check('popularity floor re-runs the analysis', txt('#floorHint').includes('of 18') && !txt('#floorHint').includes('18 of 18'),
@@ -477,7 +516,8 @@ setTimeout(async () => {
   type(q('#floorRange'), '1');
 
   /* ── busy overlay ── */
-  click(qa('.nav-tile').find((t) => t.dataset.tab === 'lab'));
+  click(qa('.nav-item').find((t) => t.dataset.tab === 'clusters'));
+  click(qa('#paneNav button').find((b) => b.dataset.pane === 'lab'));
   click(q('#analyzeBtn'));
   check('analyze shows the busy overlay', !q('#busy').hidden, txt('#busyTitle'));
 

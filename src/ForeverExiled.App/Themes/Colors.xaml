@@ -103,6 +103,13 @@
     </LinearGradientBrush>
 
     <!-- Gradients -->
+    <!-- the sidebar sits a shade under the page so it reads as chrome, not content -->
+    <LinearGradientBrush x:Key="SidebarGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#0C141B" Offset="0.0" />
+        <GradientStop Color="#0A1016" Offset="0.55" />
+        <GradientStop Color="#080D12" Offset="1.0" />
+    </LinearGradientBrush>
+
     <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#161E27" Offset="0.0" />
         <GradientStop Color="#111820" Offset="1.0" />

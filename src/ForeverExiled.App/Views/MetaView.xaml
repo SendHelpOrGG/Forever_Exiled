@@ -11,7 +11,6 @@
             <!-- ============================= Headline ============================= -->
             <Grid ColumnDefinitions="*,Auto">
                 <VerticalStackLayout Spacing="2">
-                    <Label Text="META OVERVIEW" Style="{StaticResource H1}" />
                     <Label Text="{Binding LeagueName, StringFormat='{0} · PoE 1 ladder · every tracked build'}"
                            Style="{StaticResource Caption}" />
                 </VerticalStackLayout>

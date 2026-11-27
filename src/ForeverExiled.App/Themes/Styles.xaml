@@ -310,6 +310,27 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="SideCaption" TargetType="Label">
+        <Setter Property="FontSize" Value="9.5" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CharacterSpacing" Value="1.6" />
+        <Setter Property="TextColor" Value="{StaticResource TextFaint}" />
+        <Setter Property="Margin" Value="8,10,8,4" />
+    </Style>
+
+    <Style x:Key="SoonBadge" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="Stroke" Value="{StaticResource Border}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="4,1" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="3" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ============================= Skill row ============================ -->
 
     <Style x:Key="SkillRow" TargetType="Border">

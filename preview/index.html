@@ -35,22 +35,53 @@
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.6"/><path d="M4.8 20.4a7.2 7.2 0 0 1 14.4 0"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.8 3 20.2h18z"/><path d="M12 9.6v4.6M12 17.2h.01"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.8 12h14.4M13.4 6.2 19.2 12l-5.8 5.8"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.7 12S6.2 6.3 12 6.3 21.3 12 21.3 12 17.8 17.7 12 17.7 2.7 12 2.7 12z"/><circle cx="12" cy="12" r="2.9"/></symbol>
+  <symbol id="i-ring" viewBox="0 0 24 24"><circle cx="12" cy="14" r="5.8"/><path d="M8.9 8.9 10.2 4.6h3.6l1.3 4.3M9.2 4.6h5.6"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.3 3.6h5.4M10.5 3.6v5.1L6.1 18a2 2 0 0 0 1.8 2.9h8.2a2 2 0 0 0 1.8-2.9l-4.4-9.3V3.6"/><path d="M7.9 14.2h8.2"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.7"/><circle cx="12" cy="12" r="3.3"/></symbol>
 </svg>
 
 <div class="app" id="app">
 
-  <!-- ───────────────────────── top navigation ───────────────────────── -->
-  <header class="topnav">
-    <div class="brand">
+  <!-- ───────────────────────── sidebar ───────────────────────── -->
+  <aside class="sidebar">
+    <div class="side-brand">
       <img src="assets/logo.png" alt="" class="brand-logo">
       <div class="brand-word">forever<span> </span>exiled</div>
     </div>
 
-    <div class="tabs">
-      <button class="tab nav-tile" data-tab="lab"><svg class="ic"><use href="#i-lab"/></svg>Cluster Lab</button>
-      <button class="tab nav-tile" data-tab="meta"><svg class="ic"><use href="#i-meta"/></svg>Meta</button>
-      <button class="tab nav-tile" data-tab="ladder"><svg class="ic"><use href="#i-ladder"/></svg>Ladder</button>
+    <nav class="side-nav" id="sideNav">
+      <div class="side-cap">Analysis</div>
+      <button class="nav-item on" data-tab="clusters">
+        <svg class="ic"><use href="#i-lab"/></svg><span>Cluster Jewels</span>
+      </button>
+
+      <div class="side-cap">Coming soon</div>
+      <button class="nav-item planned" data-tab="watchers">
+        <svg class="ic"><use href="#i-eye"/></svg><span>Watcher's Eyes</span><b class="soon">soon</b>
+      </button>
+      <button class="nav-item planned" data-tab="rare">
+        <svg class="ic"><use href="#i-ring"/></svg><span>Rare Items</span><b class="soon">soon</b>
+      </button>
+      <button class="nav-item planned" data-tab="flasks">
+        <svg class="ic"><use href="#i-flask"/></svg><span>Flasks</span><b class="soon">soon</b>
+      </button>
+      <button class="nav-item planned" data-tab="economy">
+        <svg class="ic"><use href="#i-coin"/></svg><span>Economy</span><b class="soon">soon</b>
+      </button>
+    </nav>
+
+    <div class="side-foot">
+      <button class="nav-item" data-tab="settings">
+        <svg class="ic"><use href="#i-settings"/></svg><span>Settings</span>
+      </button>
+      <div class="side-build" id="sideBuild" title="Preview build of the .NET MAUI application">v1.0.0 · preview</div>
     </div>
+  </aside>
+
+  <!-- ───────────────────────── top bar ───────────────────────── -->
+  <header class="topnav">
+    <div class="crumb" id="crumb"></div>
 
     <div class="nav-right">
       <div class="game-pills" title="Path of Exile 1 only">
@@ -70,7 +101,6 @@
 
       <span class="cap" id="lastSync">never synced</span>
 
-      <button class="icon-btn nav-tile" data-tab="settings" title="Settings"><svg class="ic"><use href="#i-settings"/></svg></button>
       <button class="btn primary" id="syncBtn"><svg class="ic sm"><use href="#i-sync"/></svg>SYNC</button>
     </div>
   </header>
@@ -84,12 +114,22 @@
   <!-- ───────────────────────── stage ───────────────────────── -->
   <main class="stage">
 
+    <!-- ===================== CLUSTER JEWELS ===================== -->
+    <section class="view clusters" id="view-clusters">
+
+      <div class="cluster-head">
+        <div class="segmented pane-nav" id="paneNav">
+          <button data-pane="lab" class="on"><svg class="ic sm"><use href="#i-lab"/></svg>LAB</button>
+          <button data-pane="meta"><svg class="ic sm"><use href="#i-meta"/></svg>META</button>
+          <button data-pane="ladder"><svg class="ic sm"><use href="#i-ladder"/></svg>LADDER</button>
+        </div>
+      </div>
+
     <!-- ===================== CLUSTER LAB ===================== -->
-    <section class="view lab" id="view-lab">
+    <div class="pane lab" id="view-lab">
 
       <div class="page-head">
         <div>
-          <div class="h1">Cluster Lab</div>
           <div class="sub" id="labSub"></div>
         </div>
         <div class="btn-row">
@@ -145,13 +185,12 @@
         <div class="card" id="dpsCard"></div>
         <div class="card" id="coverageCard"></div>
       </aside>
-    </section>
+    </div>
 
     <!-- ===================== META ===================== -->
-    <section class="view meta" id="view-meta" hidden>
+    <div class="pane meta" id="view-meta" hidden>
       <div class="meta-head">
         <div>
-          <div class="h1">Meta overview</div>
           <div class="sub" id="metaSub"></div>
         </div>
         <div class="btn-row">
@@ -180,13 +219,12 @@
           <div class="card" id="metaCraftCard"></div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ===================== LADDER ===================== -->
-    <section class="view ladder" id="view-ladder" hidden>
+    <div class="pane ladder" id="view-ladder" hidden>
       <div class="ladder-head">
         <div>
-          <div class="h1">Ladder</div>
           <div class="sub" id="ladderSub"></div>
         </div>
         <label class="field search wide">
@@ -205,6 +243,44 @@
           <button class="th num" data-key="clusterJewelCount">CLUSTERS</button>
         </div>
         <div class="table-body" id="ladderBody"></div>
+      </div>
+    </div>
+    </section>
+
+    <!-- ===================== PLANNED TABS ===================== -->
+    <section class="view empty-view" id="view-watchers" hidden>
+      <div class="empty-state">
+        <div class="empty-art"><svg class="ic"><use href="#i-eye"/></svg></div>
+        <div class="empty-title">Watcher's Eyes</div>
+        <div class="empty-sub">Which aura modifiers the ladder's Watcher's Eye jewels actually roll, and what each combination is worth.</div>
+        <div class="empty-tag">Planned</div>
+      </div>
+    </section>
+
+    <section class="view empty-view" id="view-rare" hidden>
+      <div class="empty-state">
+        <div class="empty-art"><svg class="ic"><use href="#i-ring"/></svg></div>
+        <div class="empty-title">Rare Items</div>
+        <div class="empty-sub">The rare gear behind the top builds — slot by slot, mod by mod, with the cost of making it.</div>
+        <div class="empty-tag">Planned</div>
+      </div>
+    </section>
+
+    <section class="view empty-view" id="view-flasks" hidden>
+      <div class="empty-state">
+        <div class="empty-art"><svg class="ic"><use href="#i-flask"/></svg></div>
+        <div class="empty-title">Flasks</div>
+        <div class="empty-sub">Life, mana and utility flask lineups the sampled builds settle on, with suffixes and the enchants they carry.</div>
+        <div class="empty-tag">Planned</div>
+      </div>
+    </section>
+
+    <section class="view empty-view" id="view-economy" hidden>
+      <div class="empty-state">
+        <div class="empty-art"><svg class="ic"><use href="#i-coin"/></svg></div>
+        <div class="empty-title">Economy</div>
+        <div class="empty-sub">Currency behind every recommended craft, tracked across syncs so a price move is visible before it bites.</div>
+        <div class="empty-tag">Planned</div>
       </div>
     </section>
 

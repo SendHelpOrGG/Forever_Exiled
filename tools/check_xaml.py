@@ -133,9 +133,11 @@ def check_file(path: Path, keys: set[str], properties: set[str], commands: set[s
                 if target.endswith("Command") and target not in commands and target not in properties:
                     fail(f"{relative}:{tag} {attribute_name}: command '{target}' is not generated")
 
-            # 5. images
+            # 5. images - an .svg counts too: MauiImage turns Resources/Images/*.svg into
+            #    <name>.png at build time, so nav_eye.png is real when nav_eye.svg exists
             if attribute_name == "Source" and IMAGE_RE.match(value):
-                if not (APP / "Resources" / "Images" / value).exists():
+                image = APP / "Resources" / "Images" / value
+                if not image.exists() and not image.with_suffix(".svg").exists():
                     fail(f"{relative}: missing image Resources/Images/{value}")
 
 
@@ -164,8 +166,14 @@ def check_custom_prefixes(properties: set[str], commands: set[str], keys: set[st
         text = xaml.read_text(encoding="utf-8")
         prefixes = dict(re.findall(r"xmlns:(\w+)=\"clr-namespace:([^\"]+)\"", text))
         for prefix, namespace in prefixes.items():
+            # resolve the namespace by its path, not its last segment: Controls lives at
+            # Views/Controls, and looking for a top-level "Controls" folder failed on files
+            # that had always been fine
+            relative = namespace.split(";")[0]
+            if relative.startswith("ForeverExiled.App."):
+                relative = relative[len("ForeverExiled.App."):]
+            directory = APP / relative.replace(".", "/")
             cls = namespace.split(";")[0].split(".")[-1]
-            directory = APP / cls
             if not directory.exists() and not list(APP.rglob(cls + ".cs")):
                 fail(f"{xaml.relative_to(ROOT)}: prefix '{prefix}' -> namespace '{namespace}' has no types in the tree")
 

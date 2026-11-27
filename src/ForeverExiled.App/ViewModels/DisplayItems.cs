@@ -8,23 +8,38 @@ using ForeverExiled.Core.Net;
 
 namespace ForeverExiled.App.ViewModels;
 
+/// <summary>
+/// The sidebar's destinations. The cluster jewel screens are one tab with three panes inside
+/// it, so Lab/Meta/Ladder are not tabs of their own any more.
+/// </summary>
 public enum AppTab
 {
-    Meta,
-    Clusters,
-    Ladder,
+    ClusterJewels,
+    WatchersEyes,
+    RareItems,
+    Flasks,
+    Economy,
     Settings,
 }
 
-/// <summary>A left-rail navigation tile.</summary>
+/// <summary>The three views inside the Cluster Jewels tab.</summary>
+public enum ClusterPane
+{
+    Lab,
+    Meta,
+    Ladder,
+}
+
+/// <summary>A sidebar navigation tile.</summary>
 public sealed partial class NavItem : ObservableObject
 {
-    public NavItem(string glyph, string image, string caption, AppTab tab, Action<AppTab> onSelected)
+    public NavItem(string glyph, string image, string caption, AppTab tab, Action<AppTab> onSelected, string badge = "")
     {
         Glyph = glyph;
         Image = image;
         Caption = caption;
         Tab = tab;
+        Badge = badge;
         Command = new RelayCommand(() => onSelected(tab));
     }
 
@@ -37,6 +52,11 @@ public sealed partial class NavItem : ObservableObject
     public bool HasGlyph => Glyph.Length > 0;
 
     public string Caption { get; }
+
+    /// <summary>A short marker beside the caption — "SOON" for the screens still to be built.</summary>
+    public string Badge { get; }
+
+    public bool HasBadge => Badge.Length > 0;
 
     public AppTab Tab { get; }
 

@@ -11,9 +11,10 @@ using ForeverExiled.Core.Net;
 namespace ForeverExiled.App.ViewModels;
 
 /// <summary>
-/// Single screen view model for the desktop shell. The four child views (Meta, Cluster
-/// Lab, Ladder, Settings) all bind against this instance, which keeps selection, busy
-/// state and the persisted snapshot in one place. Split across partial files by screen.
+/// Single screen view model for the desktop shell. Every screen behind the sidebar binds
+/// against this instance, which keeps selection, busy state and the persisted snapshot in one
+/// place. The cluster jewel screens (Lab, Meta, Ladder) are three panes of one destination.
+/// Split across partial files by screen.
 /// </summary>
 public partial class MainViewModel : ObservableObject
 {
@@ -53,13 +54,36 @@ public partial class MainViewModel : ObservableObject
             }
         };
 
-        NavItems = new ObservableCollection<NavItem>
+        // one destination per screen. The cluster jewel screens are panes inside the first
+        // destination, switched by the pills above them, not separate sidebar rows.
+        ToolNavItems = new ObservableCollection<NavItem>
         {
-            new("\uE80F", string.Empty, "Meta", AppTab.Meta, SelectTab),
-            new(string.Empty, "cluster_medium.png", "Clusters", AppTab.Clusters, SelectTab),
-            new("\uE8FD", string.Empty, "Ladder", AppTab.Ladder, SelectTab),
+            new(string.Empty, "cluster_medium.png", "Cluster Jewels", AppTab.ClusterJewels, SelectTab),
+        };
+
+        // the screens that do not exist yet still open, onto a page that says what will live there
+        PlannedNavItems = new ObservableCollection<NavItem>
+        {
+            new(string.Empty, "nav_eye.png", "Watcher's Eyes", AppTab.WatchersEyes, SelectTab, "SOON"),
+            new(string.Empty, "nav_ring.png", "Rare Items", AppTab.RareItems, SelectTab, "SOON"),
+            new(string.Empty, "nav_flask.png", "Flasks", AppTab.Flasks, SelectTab, "SOON"),
+            new(string.Empty, "nav_coin.png", "Economy", AppTab.Economy, SelectTab, "SOON"),
+        };
+
+        SettingsNavItems = new ObservableCollection<NavItem>
+        {
             new("\uE713", string.Empty, "Settings", AppTab.Settings, SelectTab),
         };
+
+        PanePills = new ObservableCollection<PillItem>
+        {
+            new("Lab", "LAB", string.Empty, SelectPanePill),
+            new("Meta", "META", string.Empty, SelectPanePill),
+            new("Ladder", "LADDER", string.Empty, SelectPanePill),
+        };
+
+        // ActivePane starts on Lab, so the change handler never runs for it: mark the pill here
+        PanePills[0].IsSelected = true;
 
         SizePills = new ObservableCollection<PillItem>
         {
@@ -75,10 +99,20 @@ public partial class MainViewModel : ObservableObject
         };
 
         BuildPillCollections();
-        SelectTab(AppTab.Clusters);
+        SelectTab(AppTab.ClusterJewels);
     }
 
-    public ObservableCollection<NavItem> NavItems { get; }
+    /// <summary>Sidebar rows: the one destination that has a screen behind it today.</summary>
+    public ObservableCollection<NavItem> ToolNavItems { get; }
+
+    /// <summary>Sidebar rows for the features still to be built, marked SOON.</summary>
+    public ObservableCollection<NavItem> PlannedNavItems { get; }
+
+    /// <summary>The settings row, pinned to the foot of the sidebar.</summary>
+    public ObservableCollection<NavItem> SettingsNavItems { get; }
+
+    /// <summary>Lab / Meta / Ladder — the three panes of the Cluster Jewels tab.</summary>
+    public ObservableCollection<PillItem> PanePills { get; }
 
     /// <summary>
     /// The skill rail's rows, replaced in one assignment per filter change. Each row is a gem
@@ -351,28 +385,20 @@ public partial class MainViewModel : ObservableObject
     // ------------------------------------------------------------------- tabs
 
     [ObservableProperty]
-    private AppTab _activeTab = AppTab.Clusters;
-
-    public bool IsMetaActive => ActiveTab == AppTab.Meta;
-
-    public bool IsClustersActive => ActiveTab == AppTab.Clusters;
-
-    public bool IsLadderActive => ActiveTab == AppTab.Ladder;
-
-    public bool IsSettingsActive => ActiveTab == AppTab.Settings;
+    private AppTab _activeTab = AppTab.ClusterJewels;
 
     partial void OnActiveTabChanged(AppTab value)
     {
-        OnPropertyChanged(nameof(IsMetaActive));
-        OnPropertyChanged(nameof(IsClustersActive));
-        OnPropertyChanged(nameof(IsLadderActive));
+        OnPropertyChanged(nameof(IsClusterJewelsActive));
         OnPropertyChanged(nameof(IsSettingsActive));
+        OnPropertyChanged(nameof(IsPlannedTabActive));
+        ApplyShellCopy();
     }
 
     public void SelectTab(AppTab tab)
     {
         ActiveTab = tab;
-        foreach (var item in NavItems)
+        foreach (var item in ToolNavItems.Concat(PlannedNavItems).Concat(SettingsNavItems))
         {
             item.IsSelected = item.Tab == tab;
         }

@@ -7,7 +7,6 @@
 
         <Grid ColumnDefinitions="*,Auto">
             <VerticalStackLayout Spacing="2">
-                <Label Text="LADDER" Style="{StaticResource H1}" />
                 <Label Text="{Binding LadderSummary}" Style="{StaticResource Caption}" />
             </VerticalStackLayout>
 

@@ -143,11 +143,25 @@ synthetic demo snapshot and carries an unmissable banner saying so; drop a real 
 `preview/data/live-snapshot.json` and the banner disappears. See
 [`preview/README.md`](preview/README.md) for the real-vs-simulated breakdown.
 
+### Shell and tabs
+
+The app is one window with a 214 px sidebar on the left; everything that used to be a top tab bar
+now lives there. **Cluster Jewels** is a single destination holding the three cluster screens as
+panes — LAB / META / LADDER pills sit above them, and the panes no longer repeat their own titles,
+so the old triple header collapses to one 40 px strip. The top bar keeps only the crumb
+(`Cluster Jewels / Lab`), the league and source chips, and SYNC.
+
+Four more destinations are already listed for the features that come next — **Watcher's Eyes**,
+**Rare Items**, **Flasks**, **Economy** — each marked `SOON`. They open, and each says in one line
+what will live there: an empty screen that explains itself, not a dead row. Settings is pinned to
+the foot of the sidebar. Sidebar icons are SVG line art (`Resources/Images/nav_*.svg`, served as
+PNGs through `MauiImage`), matched by the same shapes inline in the browser preview.
+
 ### Visual language
 
 The UI deliberately reuses poe.ninja's own look so it feels like part of the site rather than
 a fan tool bolted onto it: slate-grey panels on a near-black background, a single green accent
-for selection and primary actions, a horizontal tab bar across the top, hairline 1px borders,
+for selection and primary actions, a left sidebar of destinations, hairline 1px borders,
 3-4px corner radii, compact 26-32px rows and right-aligned tabular numbers. Path of Exile's
 own rarity colours are used where they carry meaning (mod text in magic blue, unique items in
 orange), and cluster jewels use tile-framed icons instead of text labels.

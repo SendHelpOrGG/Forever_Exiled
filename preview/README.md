@@ -13,19 +13,29 @@ interface long before the first `dotnet build`.
 python3 preview/serve.py        # → http://localhost:8080
 ```
 
-Open the URL, press `1`–`4` to jump between screens, `/` to focus the skill search.
+Open the URL, press `1`–`6` to walk the sidebar, `/` to focus the skill search.
+
+## The shell
+
+One sidebar on the left, one screen per destination. **Cluster Jewels** is the only destination
+with a screen behind it today; the three old tabs — Cluster Lab, Meta, Ladder — are now panes of
+it, switched by the LAB / META / LADDER pills at the top. Settings sits at the foot of the
+sidebar, away from the features. The four remaining destinations (Watcher's Eyes, Rare Items,
+Flasks, Economy) are marked **SOON** and open onto an empty state that says in one line what will
+live there — a row that does nothing when clicked reads as a bug.
 
 ## What each screen shows
 
 | Screen | Cards |
 | --- | --- |
-| `1` Cluster Lab | skill rail · skill hero · size switch · combination list · right rail: top combination, **Crafting**, DPS spread, coverage |
-| `2` Meta | league tiles · most popular combinations (tap a row to price it) · right rail: most used notables, **Crafting** |
+| `1` Cluster Jewels → Lab | skill rail · skill hero · size switch · combination list · right rail: top combination, **Crafting**, DPS spread, coverage |
+| `1` Cluster Jewels → Meta | league tiles · most popular combinations (tap a row to price it) · right rail: most used notables, **Crafting** |
+| `1` Cluster Jewels → Ladder | searchable character table |
+| `2`–`5` Watcher's Eyes · Rare Items · Flasks · Economy | empty — the screens are not built yet, and say so |
+| `6` Settings | data source, thresholds, cache |
 
-Both screens carry a **Crafting** card: pick a combination on either and the card prices it,
-and the row you picked stays highlighted.
-| `3` Ladder | searchable character table |
-| `4` Settings | data source, thresholds, cache |
+Both cluster screens carry a **Crafting** card: pick a combination on either and the card prices
+it, and the row you picked stays highlighted.
 
 The Meta tab carries no DPS-leaders or highest-DPS-builds card: the leaders are already the
 skill rail on the lab screen, and the crafting card is the more useful occupant. The lab does
