@@ -372,6 +372,32 @@ const token = (sel, name) => {
 check('the generic row rule excludes the background layers',
   /\.m-atrium > \*:not\(\.a-backdrop\):not\(\.a-shade\):not\(\.a-veil\)/.test(css));
 
+/* the chosen background: the grove plate, in every palette, above the wash, at the subtle step */
+const artOf = (id) => mockOf(id).querySelector('.a-photo');
+check('every palette hangs the same grove plate behind the frame',
+  THEMES.every((t) => {
+    const photo = artOf(t.id);
+    const img = photo && photo.querySelector('img');
+    return !!img && /\/assets\/splash\/bleed_grove\.jpg$/.test(img.getAttribute('src') || '');
+  }),
+  THEMES.filter((t) => !/bleed_grove/.test((artOf(t.id) || { innerHTML: '' }).innerHTML.replace(/&quot;/g, ''))).map((t) => t.id).join(' ') || 'all ten');
+check('the art sits above the wash and below the layout',
+  THEMES.every((t) => {
+    const photo = artOf(t.id);
+    const shade = mockOf(t.id).querySelector('.a-shade');
+    const bar = mockOf(t.id).querySelector('.a-bar');
+    if (!photo || !shade || !bar) return false;
+    const follows = (a, b) => !!(a.compareDocumentPosition(b) & 4);
+    return follows(shade, photo) && follows(photo, bar);
+  }),
+  'shade · art · bar');
+check('the palette owns the colour and the grade is the subtle step',
+  /\.m-atrium \.a-photo \{[^}]*opacity:\s*\.7/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-photo i \{[^}]*background:\s*var\(--accent\)/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-photo img \{[^}]*filter:\s*grayscale\(\.86\)/.test(css.replace(/\n/g, ' ')));
+check('the art layer is masked away from the type column',
+  /\.m-atrium \.a-photo img \{[^}]*mask-image:\s*radial-gradient/.test(css.replace(/\n/g, ' ')));
+
 check('the layout is written in palette tokens',
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].every((n) => token('.m-atrium', n) !== null),
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].filter((n) => !token('.m-atrium', n)).join(', ') || 'all present');
@@ -730,9 +756,10 @@ check('every palette declares a pale, legal action colour',
           groups: [...d.querySelectorAll('.bg-group')].map((g) => g.textContent.trim()),
           mocks: d.querySelectorAll('.mock').length,
           photos: photos.length,
-          portraits: d.querySelectorAll('img.a-backdrop').length,
-          strengths: d.querySelectorAll('[data-strength]').length,
-          srcs: photos.map((p) => p.querySelector('img').getAttribute('src')),
+          portraits: d.querySelectorAll('.a-photo.is-portrait').length,
+          strengths: d.querySelectorAll('button[data-strength]').length,
+          strengthDefault: d.body.getAttribute('data-strength'),
+          srcs: photos.filter((p) => !p.classList.contains('is-portrait')).map((p) => p.querySelector('img').getAttribute('src')),
           photoPosition: photos.map((p) => dom.window.getComputedStyle(p).position),
           masked: photos.filter((p) => {
             const cs = dom.window.getComputedStyle(p.querySelector('img'));
@@ -766,7 +793,7 @@ check('every palette declares a pale, legal action colour',
     (study.groups || []).join(' |') === 'Actual art |Baseline',
     (study.groups || []).join(' · ') || 'no groups');
   check('seven directions use real art and one keeps the portrait',
-    study.photos === 7 && study.portraits === 1,
+    study.photos === 8 && study.portraits === 1,
     `${study.photos} art layers · ${study.portraits} portrait`);
   check('every art layer loads a file that exists, at real resolution',
     (study.srcs || []).length === 7 && (study.srcs || []).every((src) => {
@@ -788,10 +815,12 @@ check('every palette declares a pale, legal action colour',
   check('every art layer is masked away from the type column, but the wordmark',
     study.masked === 6, `${study.masked} of ${study.photos} masked`);
   check('every art layer wears the palette, and none of them sits in the mock grid',
-    study.tinted === 7 && (study.photoHeading || study.photoPosition || []).every((p) => p === 'absolute'),
+    study.tinted === 7 && (study.photoPosition || []).every((p) => p === 'absolute'),
     `${study.tinted} tinted · ${(study.photoPosition || []).join(' ')}`);
   check('every art layer carries its own scrim', study.scrim === 7, `${study.scrim} scrims`);
-  check('the study has a three-step strength control', study.strengths === 3);
+  check('the study has a three-step strength control',
+    study.strengths === 3 && study.strengthDefault === 'medium',
+    `${study.strengths} steps · default ${study.strengthDefault}`);
   check('the study page runs without errors', study.errors.length === 0,
     study.errors.slice(0, 3).join(' | ') || 'none');
 }

@@ -116,19 +116,32 @@ Nothing there is wired to the app, and the app does not link to it.
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
                                              #   /designs/backdrops.html is the background study
-NODE_PATH=… node tools/designs_check.js      # 114 checks: ten dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 118 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
+
+### The frame — the grove plate, in all ten palettes
+
+Every mock in `/designs/` now hangs **Oshabi in the Sacred Grove** behind it
+(`assets/splash/bleed_grove.jpg`, 1440 × 810) at the **subtle** step of the study. One layer, three
+parts: the `<img>`, an `<i>` that blends that palette's own `--accent` into the picture with
+`mix-blend-mode: color`, and a `<b>` scrim. Because the tint reads the palette token, the ten frames
+re-colour the same file — crimson gives a plum night, noir a silver one, honey an amber one — and
+the markup is identical in all ten, so a palette still changes colour only.
+
+Layout constraints it obeys: the layer sits **above** `.a-shade` (underneath it a 1440 px painting
+survives at about 4 % and vanishes), and it is masked with a soft core over the one open band —
+x 470–900, y 64–368, beside the title, above the cards, left of the panel — that never drops below
+30 %. The panel (`z-index: 1`) and the layout (`z-index: 2`) paint over the top of it.
+
+The portrait that used to be here (`assets/asc/<class>.jpg`, 127–152 px scaled to the frame) is
+still in the study as the baseline it is measured against.
 
 ### Background study — `/designs/backdrops.html`
 
-The frame behind each mock is the ascendancy portrait (`assets/asc/<class>.jpg`): 127–152 px of
-jpeg, scaled to 1280, held at half opacity under three gradient washes, and graded per palette. It
-is atmosphere, and it says *class*, not *Path of Exile*. `backdrops.html` puts eight directions on
-the same frame: seven built on **real Path of Exile art**, and the portrait kept as the baseline.
-
-Three earlier passes drew their way to it — geometry, then game-adjacent texture, then the game's
-own heraldry part by part. All three were rejected, and rightly: a hand-drawn copy of a painted
-asset is a copy. This pass uses the art.
+`backdrops.html` puts eight directions on the same frame: seven built on **real Path of Exile art**,
+and the portrait kept as the baseline. Three earlier passes drew their way to it — geometry, then
+game-adjacent texture, then the game's own heraldry part by part. All three were rejected, and
+rightly: a hand-drawn copy of a painted asset is a copy. This pass uses the art.
 
 **Where the art is allowed to be.** Atrium's UI covers almost the whole 1280 × 720 frame. The bar is
 64 px, the body runs `1fr 344px` with a 30 px gutter and 32 px padding, so the main column ends at

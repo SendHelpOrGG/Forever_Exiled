@@ -32,37 +32,16 @@
   border-top: 1px solid var(--hair);
 }
 
-/* ── the art layer ─────────────────────────────────────────────────────────────
-   Atrium's UI covers almost the whole 1280 × 720 frame: the main column runs to x 874 and the
-   glass panel takes x 904–1248 full height, with the card stack filling everything below y 368.
-   The one genuinely open band is x 470–900, y 64–368 — beside the title, above the cards, left of
-   the panel. So every picture is recut to put its subject there, and the layer is masked with a
-   soft core over that band that never falls below 30 %: the art reads across the whole frame and
-   the subject reads where nothing else is written.
+/* ── the study's overrides ─────────────────────────────────────────────────────
+   The base layer (image, palette tint, scrim, mask, the subtle step) lives in designs.css, because
+   the gallery now ships it. What is left here is what the study adds on top: the per-direction
+   crop and grade, the portrait baseline, and the strength control. */
 
-   The layer sits *above* the mock's gradient wash — underneath it a 1440 px painting survives at
-   about 4 % — and the panel (z-index 1) and layout (z-index 2) still paint over the top. */
-
-.m-atrium .a-photo { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; z-index: 0; }
-
-.m-atrium .a-photo img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: 50% 50%;
-  filter: grayscale(.8) saturate(.95) contrast(1.06) brightness(.8);
-  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
-  mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
-}
-
-.m-atrium .a-photo i {
-  position: absolute; inset: 0; background: var(--accent); opacity: .3;
-  mix-blend-mode: color;
-  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
-  mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
-}
-
-.m-atrium .a-photo b {
-  position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(0, 0, 0, .08) 0%, rgba(0, 0, 0, .14) 55%, var(--bg) 98%);
+/* 08 — the baseline, exactly as it shipped: the 152 px portrait at half opacity under the wash */
+.m-atrium .a-photo.is-portrait { z-index: auto; opacity: .5; }
+.m-atrium .a-photo.is-portrait img {
+  filter: none; object-position: 62% 18%;
+  -webkit-mask-image: none; mask-image: none;
 }
 
 /* 02 — the heroine is already centred by the crop; a touch more presence, a touch less grey */

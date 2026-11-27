@@ -130,8 +130,12 @@ L.atrium = () => {
   const top = D.combos[0];
 
   return `
-  <img class="a-backdrop" src="${art.asc(D.skill.asc)}" alt="">
   <div class="a-shade"></div>
+  <div class="a-photo" aria-hidden="true">
+    <img src="${A}/splash/bleed_grove.jpg" alt="">
+    <i></i>
+    <b></b>
+  </div>
 
   <header class="a-bar">
     <span class="a-brand"><img src="${A}/logo.png" alt="">forever exiled</span>

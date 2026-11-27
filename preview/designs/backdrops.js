@@ -24,11 +24,13 @@
    * the palette tint — it blends `--accent` into the desaturated art with mix-blend-mode: color,
    * so the picture wears the palette instead of fighting it.
    */
-  const art = (d) => `<div class="a-photo ${d.cls || ''}" aria-hidden="true">
+  const art = (d) => (d.kind === 'portrait'
+    ? `<div class="a-photo is-portrait" aria-hidden="true"><img src="../assets/asc/${d.asc}.jpg" alt=""></div>`
+    : `<div class="a-photo ${d.cls || ''}" aria-hidden="true">
         <img src="../assets/splash/${d.file}" alt="">
         <i></i>
         <b></b>
-      </div>`;
+      </div>`);
 
   /* ── the directions ───────────────────────────────────────────────────────── */
 
@@ -76,8 +78,9 @@
       tags: ['environment', 'low', 'safest'],
     },
     {
-      id: 'bg-portrait', group: 'Baseline', name: 'Portrait wash', tag: 'what ships today', kind: 'portrait',
-      note: 'The ascendancy portrait at 127–152 px scaled to the frame, held at 50 % and buried under the gradient. Kept as the baseline the seven above are judged against.',
+      id: 'bg-portrait', group: 'Baseline', name: 'Portrait wash', tag: 'what shipped before', kind: 'portrait',
+      asc: 'occultist',
+      note: 'The ascendancy portrait at 152 px scaled to the frame, held at 50 % and buried under the gradient — the frame every palette had before this pass. Kept as the baseline the seven above are judged against.',
       tags: ['jpeg', 'soft', 'baseline'],
     },
   ];
@@ -128,11 +131,13 @@
     [...list.querySelectorAll('.bg-sec')].forEach((sec) => {
       const d = DIRECTIONS.find((x) => x.id === sec.id);
       const mock = sec.querySelector('.mock');
-      if (d.kind === 'photo') {
-        const img = mock.querySelector('.a-backdrop');
-        if (img) img.remove();
-        const shade = mock.querySelector('.a-shade');
-        if (shade) shade.insertAdjacentHTML('afterend', art(d));
+      const base = mock.querySelector('.a-photo');
+      const shade = mock.querySelector('.a-shade');
+      if (base) base.remove();
+      if (shade) {
+        /* the portrait baseline goes under the wash, where it used to live; the art goes above it */
+        if (d.kind === 'portrait') shade.insertAdjacentHTML('beforebegin', art(d));
+        else shade.insertAdjacentHTML('afterend', art(d));
       }
       wireMock(mock);
     });

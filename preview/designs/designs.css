@@ -199,7 +199,33 @@ img { display: block; }
   display: grid; grid-template-rows: 64px minmax(0, 1fr) 30px;
   background: var(--bg); color: var(--text); overflow: hidden; position: relative;
 }
-.m-atrium .a-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 18%; opacity: .5; }
+/* ── the background ────────────────────────────────────────────────────────────
+   The grove plate, at the subtle step of the study: one <img> carrying the art, an <i> that blends
+   the palette's own accent into it with mix-blend-mode: color, and a <b> scrim. It sits above the
+   gradient wash (below it the picture survives at about 4 % and disappears) and is masked with a
+   soft core over the open band — beside the title, above the cards, left of the panel — that never
+   falls below 30 %, so the art is present across the frame and strongest where no text is written.
+   The panel (z-index 1) and the layout (z-index 2) still paint over the top. */
+
+.m-atrium .a-photo { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; z-index: 0; opacity: .7; }
+
+.m-atrium .a-photo img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%;
+  filter: grayscale(.86) saturate(.9) contrast(1.04) brightness(.95);
+  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+  mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+}
+
+.m-atrium .a-photo i {
+  position: absolute; inset: 0; background: var(--accent); opacity: .26; mix-blend-mode: color;
+  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+  mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+}
+
+.m-atrium .a-photo b {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .08) 0%, rgba(0, 0, 0, .14) 55%, var(--bg) 98%);
+}
 .m-atrium .a-shade { position: absolute; inset: 0; background:
   radial-gradient(70% 60% at 78% 20%, var(--halo), transparent 60%),
   linear-gradient(100deg, var(--bg) 26%, var(--v55) 60%, var(--v86) 100%),
@@ -556,7 +582,6 @@ img { display: block; }
 }
 
 /* the splash art is desaturated as well — otherwise the frame is not black and white */
-.m-atrium.t-noir .a-backdrop { filter: grayscale(1) contrast(1.1); }
 
 /* 06 · neon — three hues, three jobs, on a neutral near-black field: magenta for chrome and
    active fills, cyan for every value and every ranking bar, amber for the one action worth taking.
@@ -572,7 +597,6 @@ img { display: block; }
   --gold: #ffd79a; --gold-soft: #ffeccb;
   --text: #f6f2fb; --muted: #b3aec6; --faint: #8a86a0;
 }
-.m-atrium.t-neon .a-backdrop { filter: saturate(1.28) contrast(1.05); }
 .m-atrium.t-neon .a-kicker { color: var(--note); }
 .m-atrium.t-neon .a-target,
 .m-atrium.t-neon .fx-route.best b { color: var(--gold); }
@@ -594,7 +618,6 @@ img { display: block; }
 .m-atrium.t-ember .a-target,
 .m-atrium.t-ember .fx-route.best b { color: var(--gold); }
 .m-atrium.t-ember .a-gem { border-color: rgba(195, 162, 255, .42); }
-.m-atrium.t-ember .a-backdrop { filter: sepia(.26) saturate(1.35) hue-rotate(-12deg) contrast(1.04); }
 
 /* 08 · rose gold — a rose chrome on plum-black, gold on the notables, periwinkle on the
    modifiers: warm metal against a cold field, and no hue used twice. */
@@ -609,7 +632,6 @@ img { display: block; }
   --gold: #ff9d84; --gold-soft: #ffc9b6;
   --text: #fbf0f4; --muted: #c4aeb8; --faint: #998494;
 }
-.m-atrium.t-rose .a-backdrop { filter: saturate(1.12) hue-rotate(-8deg) brightness(1.02); }
 .m-atrium.t-rose .a-target,
 .m-atrium.t-rose .fx-route.best b { color: var(--gold); }
 .m-atrium.t-rose .a-gem { border-color: rgba(255, 157, 132, .42); }
@@ -630,7 +652,6 @@ img { display: block; }
 .m-atrium.t-honey .a-target,
 .m-atrium.t-honey .fx-route.best b { color: var(--gold); }
 .m-atrium.t-honey .a-gem { border-color: rgba(255, 179, 193, .42); }
-.m-atrium.t-honey .a-backdrop { filter: sepia(.3) saturate(1.22) brightness(1.02); }
 
 /* 10 · steel — the matte one. A desaturated blue-grey chrome, thin hairlines, almost no glow
    and greyscale art: the screen the data has to carry on its own. */
@@ -649,4 +670,3 @@ img { display: block; }
 .m-atrium.t-steel .a-target,
 .m-atrium.t-steel .fx-route.best b { color: var(--gold); }
 .m-atrium.t-steel .a-gem { border-color: rgba(255, 207, 138, .42); }
-.m-atrium.t-steel .a-backdrop { filter: saturate(.32) contrast(1.08) brightness(.95); }
