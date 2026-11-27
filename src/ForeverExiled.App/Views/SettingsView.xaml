@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ForeverExiled.App.Views.SettingsView">
+
+    <ScrollView VerticalScrollBarVisibility="Never">
+        <VerticalStackLayout Padding="14" Spacing="12" MaximumWidthRequest="920" HorizontalOptions="Start">
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="SETTINGS" Style="{StaticResource H1}" />
+                <Label Text="League, sampling depth and the local cache" Style="{StaticResource Caption}" />
+            </VerticalStackLayout>
+
+            <!-- ========================== Data source ========================== -->
+            <Border Style="{StaticResource Card}" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="DATA SOURCE" Style="{StaticResource Micro}" />
+
+                    <Grid ColumnDefinitions="150,*" ColumnSpacing="12">
+                        <Label Text="League" Style="{StaticResource Body}" VerticalOptions="Center" />
+                        <Picker Grid.Column="1"
+                                ItemsSource="{Binding LeagueNames}"
+                                SelectedItem="{Binding SelectedLeagueName}"
+                                Title="Select a league"
+                                TextColor="{StaticResource TextPrimary}"
+                                BackgroundColor="{StaticResource SurfaceSunken}"
+                                WidthRequest="280"
+                                HorizontalOptions="Start" />
+                    </Grid>
+
+                    <Label Text="{Binding LeaguesText}" Style="{StaticResource Caption}" FontSize="13" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="SYNC LADDER"
+                                Style="{StaticResource PrimaryButton}"
+                                Command="{Binding RefreshCommand}"
+                                IsEnabled="{Binding IsNotBusy}" />
+                        <Button Text="RELOAD LEAGUES"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding RefreshLeaguesCommand}"
+                                IsEnabled="{Binding IsNotBusy}" />
+                    </HorizontalStackLayout>
+
+                    <Label Text="Syncing reads poe.ninja's PoE 1 build ladder: every main skill above the popularity floor, graded by average and peak DPS."
+                           Style="{StaticResource Caption}"
+                           FontSize="13"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============================ Sampling ============================ -->
+            <Border Style="{StaticResource Card}" Padding="16">
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="SAMPLING" Style="{StaticResource Micro}" />
+
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Builds sampled per skill" Style="{StaticResource Body}" />
+                            <Label Grid.Column="1" Text="{Binding SettingsSampleDepthText}" Style="{StaticResource Caption}" />
+                        </Grid>
+                        <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding DepthPills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Pill}" Padding="14,6">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Command}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Skill grading" Style="{StaticResource Body}" />
+                            <Label Grid.Column="1" Text="{Binding SettingsGradingText}" Style="{StaticResource Caption}" />
+                        </Grid>
+                        <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding GradingPills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Pill}" Padding="14,6">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Command}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                        <Label Text="Quick reads the ladder once and ranks each skill on the rows that request returned. Full asks poe.ninja again for every skill: slower, but each skill is ranked on more of its own builds."
+                               Style="{StaticResource Caption}"
+                               FontSize="12.5"
+                               TextColor="{StaticResource TextMuted}"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Popularity floor" Style="{StaticResource Body}" />
+                            <Label Grid.Column="1" Text="{Binding SettingsPopularityText}" Style="{StaticResource Caption}" />
+                        </Grid>
+                        <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding PopularityPills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Pill}" Padding="14,6">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Command}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Character request pacing" Style="{StaticResource Body}" />
+                            <Label Grid.Column="1" Text="{Binding SettingsPacingText}" Style="{StaticResource Caption}" />
+                        </Grid>
+                        <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding PacingPills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Pill}" Padding="14,6">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Command}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding Label}" Style="{StaticResource PillLabel}" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                        <Label Text="Ladder and dictionary calls are pooled and fast; per-character calls are the ones poe.ninja throttles, and the penalty grows on repeated hits. Slower pacing is kinder and more reliable."
+                               Style="{StaticResource Caption}"
+                               FontSize="12.5"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+
+                    <Button Text="SAMPLE EVERY TRACKED SKILL"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding AnalyzeAllCommand}"
+                            IsEnabled="{Binding IsNotBusy}"
+                            HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============================ Storage ============================ -->
+            <Border Style="{StaticResource Card}" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="LOCAL CACHE" Style="{StaticResource Micro}" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding CacheSizeText}" Style="{StaticResource Caption}" />
+                    </Grid>
+
+                    <Border Style="{StaticResource CardSunken}" Padding="10">
+                        <Label Text="{Binding DataFolderText}"
+                               Style="{StaticResource Caption}"
+                               FontSize="13"
+                               LineBreakMode="CharacterWrap" />
+                    </Border>
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="OPEN FOLDER"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding OpenDataFolderCommand}" />
+                        <Button Text="COPY PATH"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding CopyDataPathCommand}" />
+                        <Button Text="EXPORT CSV"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding ExportReportCommand}" />
+                        <Button Text="CLEAR CACHE"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding ClearCacheCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============================= About ============================= -->
+            <Border Style="{StaticResource CardSunken}" Padding="14">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="ABOUT THE DATA" Style="{StaticResource Micro}" />
+                    <Label Text="Forever Exiled reads poe.ninja's PoE 1 build API directly: the ladder aggregate for popularity and DPS, the per-character sheet for equipped cluster jewels. Requests are paced, cached and resumable. The bundled dataset is a sample and is labelled as such in the header."
+                           Style="{StaticResource Caption}"
+                           FontSize="13"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource CardSunken}" Padding="12" IsVisible="{Binding HasError}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="LAST ERROR" Style="{StaticResource Micro}" TextColor="{StaticResource Danger}" />
+                    <Label Text="{Binding LastError}" Style="{StaticResource Caption}" FontSize="13" TextColor="{StaticResource Danger}" LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentView>

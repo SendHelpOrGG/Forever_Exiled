@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:ForeverExiled.App.Converters"
+             x:Class="ForeverExiled.App.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Colors.xaml" />
+                <ResourceDictionary Source="Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:PercentWidthConverter x:Key="PercentWidth" />
+            <converters:InverseBoolConverter x:Key="InverseBool" />
+            <converters:HasTextConverter x:Key="HasText" />
+            <converters:ClusterSizeImageConverter x:Key="ClusterSizeImage" />
+            <converters:ClusterSizeBrushConverter x:Key="ClusterSizeBrush" />
+            <converters:DamageTypeBrushConverter x:Key="DamageTypeBrush" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
