@@ -46,12 +46,11 @@ above the combination list already covers it.
 ## Design gallery
 
 `/designs/` holds **ten directions for the interface**, built to be compared rather than used.
-They are ten different layouts, not ten colour schemes of one: an instrument bench with a scope
-trace, a kanban board with one column per cluster size, a chronicle timeline of the ladder, a
-radial graph around the skill, a cinematic full-bleed hero, a three-plan comparison table, a card
-deck, a command palette over blurred art, a tree browser and an art wall. **All ten are dark, and
-no palette uses brown or green** — the accents run cyan, violet, crimson, magenta, rose, azure,
-ice, indigo, steel and blush.
+They are ten different layouts, not ten colour schemes of one: an item inspection screen, a dense
+data grid, an editorial spread, a radial graph around the skill, a cinematic full-bleed hero, a
+three-plan comparison page, a game HUD with corner clusters, a command palette over blurred art, an
+A/B diff of two combinations, and a museum case with a plaque. **All ten are dark, and no palette
+uses brown or green.**
 
 Each shows the same screen, and the same *whole* cluster-jewel surface, so the comparison is fair:
 share, average and peak DPS, the three combinations with their notables (rose) and their cluster
@@ -61,9 +60,9 @@ cost, and the all-builds totals (124,363 builds · 234 characters · 592 jewels)
 
 The frames are interactive, because a direction has to be judged by using it: every control lifts
 and glows on hover, presses under the cursor and takes focus; clicking a skill rewrites the build
-name; clicking a combination rewrites the crafting target; the size chips in the first two frames
-really narrow the list; bars grow to their share when a frame scrolls into view; `1:1` opens a
-frame at full size. Nothing there is wired to the app, and the app does not link to it.
+name; clicking a combination rewrites the crafting target; the size chips in the grid really narrow
+the list; bars grow to their share when a frame scrolls into view; `1:1` opens a frame at full size.
+Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/

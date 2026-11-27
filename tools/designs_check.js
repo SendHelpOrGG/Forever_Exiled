@@ -49,22 +49,22 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Waveform', 'Board', 'Chronicle', 'Orbit', 'Nocturne',
-  'Tiers', 'Deck', 'Prism', 'Outline', 'Trophy',
+  'Dossier', 'Sheet', 'Broadsheet', 'Orbit', 'Nocturne',
+  'Tiers', 'HUD', 'Prism', 'Compare', 'Vitrine',
 ];
 
 /* every layout shares the same contract; only its class namespace differs */
 const LAYOUTS = [
-  { id: 'waveform', prefix: 'q' },
-  { id: 'board', prefix: 'k' },
-  { id: 'chronicle', prefix: 'c' },
+  { id: 'dossier', prefix: 'd' },
+  { id: 'sheet', prefix: 's' },
+  { id: 'broadsheet', prefix: 'b' },
   { id: 'orbit', prefix: 'r' },
   { id: 'nocturne', prefix: 'e' },
   { id: 'tiers', prefix: 't' },
-  { id: 'deck', prefix: 'd' },
+  { id: 'hud', prefix: 'u' },
   { id: 'prism', prefix: 'p' },
-  { id: 'outline', prefix: 'n' },
-  { id: 'trophy', prefix: 'w' },
+  { id: 'compare', prefix: 'g' },
+  { id: 'vitrine', prefix: 'z' },
 ];
 
 const HERO = '[data-hero-name]';
@@ -207,8 +207,8 @@ for (const l of LAYOUTS) {
 
 /* the size chips are a real filter, not decoration */
 {
-  const rows = () => [...section('waveform').querySelectorAll('[data-combo][data-cluster-size]')];
-  const pills = [...section('waveform').querySelectorAll('[data-size]')];
+  const rows = () => [...section('sheet').querySelectorAll('[data-combo][data-cluster-size]')];
+  const pills = [...section('sheet').querySelectorAll('[data-size]')];
   const large = pills.find((p) => p.dataset.size === 'large');
   click(large);
   const onlyLarge = rows().filter((r) => !r.classList.contains('off')).map((r) => r.dataset.clusterSize);
@@ -259,9 +259,8 @@ check('each layout declares its own accent', LAYOUTS.every((l) => {
 
 /* every variant must react in its own idiom, so each block needs its own hover rules */
 const perLayoutHover = LAYOUTS.map((l) => {
-  const start = css.indexOf('.m-' + l.id);
-  const end = LAYOUTS.map((o) => css.indexOf('.m-' + o.id)).filter((i) => i > start).sort((a, b) => a - b)[0] || css.length;
-  return [l.id, (css.slice(start, end).match(/:hover/g) || []).length];
+  const sel = new RegExp('\\.m-' + l.id + '[^{},]*:hover', 'g');
+  return [l.id, (css.match(sel) || []).length];
 });
 check('every direction has bespoke hover states',
   perLayoutHover.every(([, n]) => n >= 4),

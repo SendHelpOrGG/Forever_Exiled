@@ -95,192 +95,191 @@ const L = {};
 
 /* ═══════════════════════════════════════════════════════════ 01 · WAVEFORM ═══ */
 
-L.waveform = () => `
-  <header class="q-bar">
-    <span class="q-mark"><img src="${A}/logo.png" alt=""><i class="q-led"></i>WAVEFORM</span>
-    <nav class="q-tabs">${navLinks('')}</nav>
-    <span class="q-readout">CH1 · 20.5 % · 240 Sa/s</span>
-    <button class="q-sync" data-press>ACQUIRE</button>
+
+/* ══════════════════════════════════════════════════════════ 01 · DOSSIER ════ */
+
+L.dossier = () => `
+  <header class="d-bar">
+    <span class="d-mark"><img src="${A}/logo.png" alt="">DOSSIER</span>
+    <nav class="d-tabs">${navLinks('')}</nav>
+    <div class="d-picks">${D.skills.map((s, i) => `<button class="d-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""><span>${s.short}</span></button>`).join('')}</div>
+    <button class="d-sync" data-press>SYNC</button>
   </header>
 
-  <div class="q-bench">
-    <aside class="q-trace">
-      <p class="q-cap">Channels · 5 of 18</p>
-      ${D.skills.map((s, i) => `<button class="q-chan${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}"><img src="${art.gem(s.gem)}" alt=""><span class="q-chan-name">${s.short}</span><b>${s.pop}%</b></button>`).join('')}
-      <p class="q-cap">Window — cluster size</p>
-      <div class="q-window">${sizeChips()}</div>
-    </aside>
-
-    <section class="q-scope">
-      <div class="q-scope-head">
-        <div><h1 data-hero-name>${D.skill.name}</h1><p>${D.skill.damage} · ${D.skill.classes} · ${D.skill.builds} builds</p></div>
-        <div class="q-scope-stats" data-stats>${stat('AVERAGE DPS', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
+  <div class="d-layout">
+    <section class="d-portrait">
+      <div class="d-frame">
+        <img class="d-cluster" src="${art.cluster('cluster_large')}" alt="">
+        <img class="d-gem" src="${art.gem(D.skill.gem)}" alt="">
+        <span class="d-rarity">${D.combos[0].size} cluster</span>
       </div>
-      <div class="q-grid">
-        <svg class="q-wave" viewBox="0 0 600 160" preserveAspectRatio="none" aria-hidden="true">
-          <polyline class="q-trace-a" points="0,120 40,98 80,106 120,74 160,86 200,54 240,68 280,42 320,60 360,36 400,50 440,30 480,46 520,24 560,38 600,20"></polyline>
-          <polyline class="q-trace-b" points="0,142 40,134 80,122 120,128 160,112 200,118 240,100 280,106 320,90 360,98 400,80 440,88 480,72 520,80 560,62 600,70"></polyline>
-        </svg>
-        ${D.combos.map((c, i) => `<button class="q-marker m${i}" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}"><i></i><span>${c.notables.join(' + ')}</span><b>${c.pct}%</b></button>`).join('')}
-      </div>
-      <div class="q-measure">
-        <p class="q-cap">Selected combination — notables, modifiers, socketing</p>
-        ${notablesOf(D.combos[0])}
-        ${modsOf(D.combos[0])}
-        <span class="q-gear">${gearOf(D.combos[0])}</span>
-      </div>
+      <h1 data-hero-name>${D.skill.name}</h1>
+      <p class="d-sub">${D.skill.damage} · ${D.skill.classes}</p>
+      <ul class="d-facts">
+        <li><span>Passives</span><b>${D.combos[0].passives}</b></li>
+        <li><span>Item level</span><b>${D.combos[0].ilvl}+</b></li>
+        <li><span>Price</span><b>${D.combos[0].price}</b></li>
+        <li><span>Builds</span><b>${D.skill.builds}</b></li>
+      </ul>
+      <span class="d-sharebar">${bar(D.combos[0].pct)}</span>
     </section>
 
-    <aside class="q-panel">
-      <p class="q-cap">Notables — share of builds</p>
-      <div class="q-notlist">${D.notables.map(([n, p]) => `<div class="q-notrow"><span>${n}</span><i style="--p:${p}%"></i><b>${p}%</b></div>`).join('')}</div>
-      <p class="q-cap">Unique cluster jewels</p>
+    <section class="d-main">
+      <div class="d-stats" data-stats>${stat('AVERAGE DPS', D.skill.avg)}${stat('PEAK DPS', D.skill.peak)}</div>
+      <div class="d-block">
+        <p class="d-cap">Notables — this combination</p>
+        ${notablesOf(D.combos[0])}
+      </div>
+      <div class="d-block">
+        <p class="d-cap">Cluster modifiers</p>
+        ${modsOf(D.combos[0])}
+      </div>
+      <div class="d-block">
+        <p class="d-cap">Socketing</p>
+        ${gearOf(D.combos[0])}
+        <span class="d-barline">${bar(D.combos[0].pct)}</span>
+      </div>
+      <p class="d-note">${D.combos[0].builds} builds run this combination · ${D.skill.pop} of the ladder · ${D.skill.sampled} sampled</p>
+    </section>
+
+    <aside class="d-side">
+      <p class="d-cap">Combinations · 3 of ${D.totals.combos}</p>
+      ${D.combos.map((c) => `
+        <button class="d-combo" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}">
+          <img src="${art.cluster(c.art)}" alt="">
+          <span class="d-combobody"><b>${c.notables.join(' + ')}</b><em>${c.size} · ${c.builds} builds · ${c.avg}</em></span>
+          <span class="d-combopct">${c.pct}%</span>
+        </button>`).join('')}
+      <div class="d-craft">
+        <p class="d-cap">Crafting — 3 routes</p>
+        <b class="d-target" data-craft-combo>Prism Weave + Snowstorm</b>
+        ${routesOf('d-routes')}
+        <button class="d-plan" data-press>Open crafting</button>
+      </div>
+      <p class="d-cap">Unique cluster jewels</p>
       ${uniquesOf()}
-      <p class="q-cap">Crafting — 3 routes</p>
-      <p class="q-target" data-craft-combo>Prism Weave + Snowstorm</p>
-      ${routesOf('q-routes')}
-      <dl class="q-totals">
+      <dl class="d-totals">
+        <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd><dt>Jewels</dt><dd>${D.totals.jewels}</dd>
+      </dl>
+    </aside>
+  </div>
+
+  <footer class="d-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>inspect · demo-2026-11-07</span></footer>
+`;
+
+/* ════════════════════════════════════════════════════════════ 02 · SHEET ═══ */
+
+L.sheet = () => `
+  <header class="s-bar">
+    <span class="s-mark"><img src="${A}/logo.png" alt="">SHEET</span>
+    <nav class="s-tabs">${navLinks('')}</nav>
+    <span class="s-find"><i></i>Filter skills, jewels, modifiers</span>
+    <span class="s-sizes">${sizeChips()}</span>
+    <button class="s-sync" data-press>SYNC</button>
+  </header>
+
+  <div class="s-grid">
+    <div class="s-head"><span>#</span><span>Skill</span><span>Share</span><span>Avg DPS</span><span>Peak</span><span>Combos</span></div>
+    ${D.skills.map((s, i) => `
+      <button class="s-row${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}">
+        <span class="s-i">${String(i + 1).padStart(2, '0')}</span>
+        <span class="s-name"><img src="${art.gem(s.gem)}" alt="">${s.name}</span>
+        <span class="s-share">${s.pop}%</span>
+        <span>${s.avg}</span>
+        <span class="s-peak">${s.dps}</span>
+        <span class="s-dim">${i === 0 ? D.combos.length : '—'}</span>
+      </button>`).join('')}
+
+    <div class="s-head s-chead"><span></span><span>Combination</span><span>Size</span><span>Builds</span><span>Share</span><span>Avg DPS</span></div>
+    ${D.combos.map((c) => `
+      <button class="s-row s-crow" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}">
+        <span class="s-i"><img class="s-thumb" src="${art.cluster(c.art)}" alt=""></span>
+        <span class="s-cname"><b>${c.notables.join(' + ')}</b>${modsOf(c)}${gearOf(c)}</span>
+        <span>${c.size}</span>
+        <span>${c.builds}</span>
+        <span class="s-cshare">${c.pct}%</span>
+        <span>${c.avg}</span>
+      </button>`).join('')}
+  </div>
+
+  <div class="s-band">
+    <div class="s-picked">
+      <span class="s-cap">Selected build</span>
+      <b class="s-pickedname" data-hero-name>${D.skill.name}</b>
+      <div class="s-pickedstats" data-stats>${stat('AVG', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
+    </div>
+    <div class="s-craft">
+      <span class="s-cap">Craft target</span>
+      <b class="s-target" data-craft-combo>Prism Weave + Snowstorm</b>
+      ${routesOf('s-routes')}
+    </div>
+    <div class="s-uniques">
+      <span class="s-cap">Unique cluster jewels</span>
+      ${uniquesOf()}
+      ${notablesOf(D.combos[0])}
+    </div>
+    <dl class="s-totals">
+      <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd>
+      <dt>Jewels</dt><dd>${D.totals.jewels}</dd><dt>Combinations</dt><dd>${D.totals.combos}</dd>
+    </dl>
+  </div>
+
+  <footer class="s-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>5 of 18 skills · 3 of 34 combinations</span></footer>
+`;
+
+/* ════════════════════════════════════════════════════════ 03 · BROADSHEET ═══ */
+
+L.broadsheet = () => `
+  <header class="b-mast">
+    <div class="b-word">Forever Exiled</div>
+    <nav class="b-tabs">${navLinks('')}</nav>
+    <span class="b-date">Allflame · 07 Nov 2026</span>
+    <button class="b-sync" data-press>SYNC</button>
+  </header>
+
+  <div class="b-spread">
+    <article class="b-story">
+      <p class="b-kicker">Cluster jewels · the winter league</p>
+      <h1 data-hero-name>${D.skill.name}</h1>
+      <p class="b-deck">${D.skill.damage} damage across ${D.skill.classes.toLowerCase()} — ${D.skill.pop} of every ladder we sample.</p>
+      <p class="b-lead"><span class="b-dropcap">T</span>he build is not one jewel but three, and the ledger says the same thing every week: a large cluster carrying ${D.combos[0].notables.join(', ')} is what ${D.combos[0].builds} characters socket first. The modifiers underneath — ${D.combos[0].mods.join('; ')} — are what make the small passives pay.</p>
+
+      <div class="b-pull" data-stats>
+        <span class="b-pullnum">${stat('AVERAGE DPS', D.skill.avg)}${stat('PEAK DPS', D.skill.peak)}</span>
+        <em>Both numbers read off ${D.skill.sampled} sampled builds.</em>
+      </div>
+
+      <p class="b-runin"><span>Notables.</span> ${notablesOf(D.combos[0])}</p>
+      <p class="b-runin"><span>Socketing.</span> ${gearOf(D.combos[0])}</p>
+
+      <div class="b-entries">
+        ${D.combos.map((c) => `
+          <button class="b-entry" data-combo data-label="${c.notables.join(' + ')}">
+            <span class="b-entryhead"><b>${c.notables.join(' + ')}</b><i>${c.pct}%</i></span>
+            ${notablesOf(c)}
+            ${modsOf(c)}
+            ${bar(c.pct)}
+          </button>`).join('')}
+      </div>
+    </article>
+
+    <aside class="b-rail">
+      <p class="b-cap">The ladder</p>
+      <div class="b-picks">${D.skills.map((s, i) => `<button class="b-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}"><img src="${art.gem(s.gem)}" alt=""><span>${s.short}</span><b>${s.pop}%</b></button>`).join('')}</div>
+      <p class="b-cap">Crafting — 3 routes</p>
+      <b class="b-target" data-craft-combo>Prism Weave + Snowstorm</b>
+      ${routesOf('b-routes')}
+      <p class="b-cap">Unique cluster jewels</p>
+      ${uniquesOf()}
+      <dl class="b-totals">
         <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd>
         <dt>Jewels</dt><dd>${D.totals.jewels}</dd><dt>Combinations</dt><dd>${D.totals.combos}</dd>
       </dl>
     </aside>
   </div>
 
-  <footer class="q-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>ACQ 12:07 · snapshot demo-2026-11-07</span></footer>
+  <footer class="b-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>compiled from the poe.ninja build API · synthetic sample</span></footer>
 `;
-
-/* ═══════════════════════════════════════════════════════════ 02 · BOARD ══════ */
-
-L.board = () => {
-  const COLS = [
-    { size: 'Large', meta: '12 passives · iLvl 75+' },
-    { size: 'Medium', meta: '8 and 6 passives · iLvl 68+' },
-    { size: 'Small', meta: '2 passives · iLvl 68+' },
-  ];
-  return `
-  <header class="k-bar">
-    <span class="k-mark"><img src="${A}/logo.png" alt="">BOARD</span>
-    <nav class="k-tabs">${navLinks('')}</nav>
-    <span class="k-filter">${sizeChips()}</span>
-    <button class="k-sync" data-press>REFRESH</button>
-  </header>
-
-  <section class="k-head">
-    <div class="k-headtitle">
-      <img src="${art.gem(D.skill.gem)}" alt="">
-      <div><h1 data-hero-name>${D.skill.name}</h1><p>${D.skill.damage} · ${D.skill.classes} · ${D.skill.builds} builds</p></div>
-    </div>
-    <div class="k-headpicks">${D.skills.map((s, i) => `<button class="k-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}"><img src="${art.gem(s.gem)}" alt=""><span>${s.short}</span></button>`).join('')}</div>
-    <div class="k-headstats" data-stats>${stat('AVG DPS', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
-  </section>
-
-  <div class="k-board">
-    ${COLS.map((col) => {
-      const rows = D.combos.filter((c) => c.size === col.size);
-      return `
-      <section class="k-col">
-        <header class="k-colhead"><i class="k-dot"></i><b>${col.size}</b><span>${col.meta}</span><em>${rows.length}</em></header>
-        <div class="k-tickets">
-          ${rows.map((c) => `
-            <button class="k-ticket" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}">
-              <span class="k-ticktop"><img src="${art.cluster(c.art)}" alt=""><b>${c.notables.join(' + ')}</b><i>${c.pct}%</i></span>
-              ${notablesOf(c)}
-              ${modsOf(c)}
-              ${gearOf(c)}
-              <span class="k-tickfoot"><span>${c.builds} builds</span><span>${c.avg}</span></span>
-              ${bar(c.pct)}
-            </button>`).join('')}
-          ${rows.length === 0 ? `<div class="k-empty"><b>No tickets</b><p>Nothing sampled in this column yet — 2 builds sit at iLvl 68+.</p></div>` : ''}
-        </div>
-      </section>`;
-    }).join('')}
-
-    <aside class="k-rail">
-      <p class="k-cap">Craft target</p>
-      <p class="k-target" data-craft-combo>Prism Weave + Snowstorm</p>
-      <p class="k-cap">Most used notables</p>
-      <div class="k-notlist">${D.notables.map(([n, p]) => `<div class="k-notrow"><span>${n}</span><i style="--p:${p}%"></i><b>${p}%</b></div>`).join('')}</div>
-      <p class="k-cap">Unique cluster jewels</p>
-      ${uniquesOf()}
-      <p class="k-cap">Crafting — 3 routes</p>
-      ${routesOf('k-routes')}
-      <dl class="k-totals">
-        <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd>
-        <dt>Jewels</dt><dd>${D.totals.jewels}</dd><dt>Skills</dt><dd>${D.totals.skills}</dd>
-      </dl>
-    </aside>
-  </div>
-
-  <footer class="k-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>3 columns · 3 tickets · 1 empty</span></footer>
-`;
-};
-
-/* ════════════════════════════════════════════════════════ 03 · CHRONICLE ═══ */
-
-L.chronicle = () => `
-  <header class="c-bar">
-    <span class="c-mark"><img src="${A}/logo.png" alt="">CHRONICLE</span>
-    <nav class="c-tabs">${navLinks('')}</nav>
-    <span class="c-stamp">SNAPSHOT 12 · 2026-11-07</span>
-    <button class="c-sync" data-press>SYNC</button>
-  </header>
-
-  <section class="c-hero">
-    <div class="c-titlerow">
-      <img class="c-gem" src="${art.gem(D.skill.gem)}" alt="">
-      <div class="c-titlebody">
-        <p class="c-kicker">Cluster Jewels · ${D.combos[0].size} · iLvl ${D.combos[0].ilvl}+</p>
-        <h1 data-hero-name>${D.skill.name}</h1>
-        <p class="c-sub">${D.skill.damage} · ${D.skill.classes}</p>
-        <p class="c-notarow">${notablesOf(D.combos[0])}</p>
-      </div>
-    </div>
-    <div class="c-herostats" data-stats>${stat('AVERAGE DPS', D.skill.avg)}${stat('PEAK DPS', D.skill.peak)}</div>
-    <div class="c-pills">${D.skills.map((s, i) => `<button class="c-pill${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}"><img src="${art.gem(s.gem)}" alt=""><span>${s.short}</span></button>`).join('')}</div>
-  </section>
-
-  <section class="c-time">
-    <div class="c-axis"><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span class="c-axis-now">NOW</span></div>
-    <div class="c-plot">
-      <svg class="c-chart" viewBox="0 0 900 150" preserveAspectRatio="none" aria-hidden="true">
-        <polyline points="0,128 75,120 150,112 225,96 300,102 375,84 450,88 525,66 600,72 675,50 750,58 825,32 900,26"></polyline>
-      </svg>
-      ${[0, 1, 2].map((i) => `<button class="c-flag f${i}" data-combo data-label="${D.combos[i].notables.join(' + ')}"><b>${D.combos[i].notables.join(' + ')}</b><span>${D.combos[i].pct}%</span></button>`).join('')}
-    </div>
-    <div class="c-entries">
-      ${D.combos.map((c) => `
-        <button class="c-entry" data-combo data-label="${c.notables.join(' + ')}">
-          <span class="c-entrytop"><b>${c.notables.join(' + ')}</b><i>${c.pct}%</i></span>
-          ${notablesOf(c)}
-          ${modsOf(c)}
-          ${gearOf(c)}
-          ${bar(c.pct)}
-        </button>`).join('')}
-    </div>
-  </section>
-
-  <section class="c-band">
-    <div class="c-craftband">
-      <p class="c-cap">Crafting — 3 routes</p>
-      <b class="c-target" data-craft-combo>Prism Weave + Snowstorm</b>
-      ${routesOf('c-routes')}
-    </div>
-    <div class="c-uniqueband">
-      <p class="c-cap">Unique cluster jewels</p>
-      ${uniquesOf()}
-      <p class="c-cap">Most used notables</p>
-      <div class="c-notlist">${D.notables.map(([n, p]) => `<div class="c-notrow"><span>${n}</span><b>${p}%</b></div>`).join('')}</div>
-    </div>
-    <dl class="c-totals">
-      <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd>
-      <dt>Jewels</dt><dd>${D.totals.jewels}</dd><dt>Combinations</dt><dd>${D.totals.combos}</dd>
-    </dl>
-  </section>
-
-  <footer class="c-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>12 snapshots · demo-2026-11-07</span></footer>
-`;
-
-/* ════════════════════════════════════════════════════════════ 04 · ORBIT ════ */
 
 L.orbit = () => `
   <header class="r-bar">
@@ -341,9 +340,7 @@ L.tiers = () => {
   const FEATS = (c) => `
     <li><span>Notables</span><div>${notablesOf(c)}</div></li>
     <li><span>Modifiers</span><div>${modsOf(c)}</div></li>
-    <li><span>Socketing</span><div>${gearOf(c)}</div></li>
-    <li><span>Builds</span><b>${c.builds}</b></li>
-    <li><span>Average DPS</span><b>${c.avg}</b></li>`;
+    <li><span>Socketing</span><div>${gearOf(c)}</div></li>`;
   return `
   <header class="t-bar">
     <span class="t-mark"><img src="${A}/logo.png" alt="">TIERS</span>
@@ -353,19 +350,17 @@ L.tiers = () => {
   </header>
 
   <section class="t-head">
-    <div><h1 data-hero-name>${D.skill.name}</h1><p>${D.skill.damage} · ${D.skill.classes} · ${D.skill.builds} builds · ${D.skill.sampled} sampled</p></div>
+    <div><h1 data-hero-name>${D.skill.name}</h1><p>${D.skill.damage} · ${D.skill.classes}</p></div>
     <div class="t-headstats" data-stats>${stat('AVERAGE', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
-    <p class="t-note">Three ways to socket the same skill — pick the one that pays for itself.</p>
   </section>
 
   <div class="t-plans">
     ${D.combos.map((c, i) => `
       <article class="t-plan${i === 1 ? ' feat' : ''}">
         ${i === 1 ? '<span class="t-ribbon">Most built</span>' : ''}
-        <div class="t-planart"><img src="${art.cluster(c.art)}" alt=""></div>
-        <p class="t-tier">${c.size} cluster · ${c.passives} passives</p>
+        <p class="t-tier">${c.size} cluster · ${c.passives} passives · iLvl ${c.ilvl}+</p>
         <h2>${c.notables.join(' + ')}</h2>
-        <p class="t-price">${c.price}<em>${c.pct}% of builds · iLvl ${c.ilvl}+</em></p>
+        <p class="t-price">${c.price}<em>${c.pct}% of builds · ${c.builds} builds · ${c.avg} avg</em></p>
         <ul class="t-feats">${FEATS(c)}</ul>
         <button class="t-cta" data-combo data-label="${c.notables.join(' + ')}">Socket this jewel</button>
       </article>`).join('')}
@@ -396,133 +391,6 @@ L.tiers = () => {
 };
 
 /* ═════════════════════════════════════════════════════════════ 07 · DECK ═══ */
-
-L.deck = () => `
-  <header class="d-bar">
-    <span class="d-mark"><img src="${A}/logo.png" alt="">DECK</span>
-    <nav class="d-tabs">${navLinks('')}</nav>
-    <span class="d-count">card 1 of 3</span>
-    <button class="d-sync" data-press>SYNC</button>
-  </header>
-
-  <div class="d-layout">
-    <section class="d-stage">
-      <div class="d-stack">
-        <span class="d-sheet s2"></span>
-        <span class="d-sheet s1"></span>
-        <article class="d-card">
-          <img class="d-art" src="${art.cluster('cluster_large')}" alt="">
-          <img class="d-gem" src="${art.gem(D.skill.gem)}" alt="">
-          <div class="d-cardbody">
-            <p class="d-kicker">${D.combos[0].size} · ${D.combos[0].passives} passives · iLvl ${D.combos[0].ilvl}+</p>
-            <h1 data-hero-name>${D.skill.name}</h1>
-            <p class="d-sub">${D.skill.damage} · ${D.skill.classes}</p>
-            <div class="d-stats" data-stats>${stat('AVG DPS', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
-            ${notablesOf(D.combos[0])}
-            ${modsOf(D.combos[0])}
-            ${gearOf(D.combos[0])}
-          </div>
-        </article>
-      </div>
-      <div class="d-controls">
-        <button class="d-arrow" data-press aria-label="previous">‹</button>
-        ${D.combos.map((c, i) => `<button class="d-dot${i === 0 ? ' on' : ''}" data-combo data-label="${c.notables.join(' + ')}" aria-label="${c.notables.join(' + ')}">${i + 1}</button>`).join('')}
-        <button class="d-arrow" data-press aria-label="next">›</button>
-        <span class="d-dotslabel">3 combinations · 34 total</span>
-      </div>
-    </section>
-
-    <aside class="d-queue">
-      <p class="d-cap">In the deck</p>
-      ${D.combos.map((c) => `
-        <button class="d-row" data-combo data-label="${c.notables.join(' + ')}">
-          <span class="d-rowtop"><b>${c.notables.join(' + ')}</b><i>${c.pct}%</i></span>
-          ${notablesOf(c)}
-          ${modsOf(c)}
-          ${bar(c.pct)}
-        </button>`).join('')}
-      <p class="d-cap">Crafting — 3 routes</p>
-      <b class="d-target" data-craft-combo>Prism Weave + Snowstorm</b>
-      ${routesOf('d-routes')}
-      <div class="d-picks">${D.skills.map((s, i) => `<button class="d-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}</div>
-      <p class="d-cap">Unique cluster jewels</p>
-      ${uniquesOf()}
-      <dl class="d-totals"><dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd><dt>Jewels</dt><dd>${D.totals.jewels}</dd></dl>
-    </aside>
-  </div>
-
-  <footer class="d-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>3 of 34 combinations</span></footer>
-`;
-
-/* ════════════════════════════════════════════════════════════ 09 · OUTLINE ═══ */
-
-L.outline = () => `
-  <header class="n-bar">
-    <span class="n-mark"><img src="${A}/logo.png" alt="">OUTLINE</span>
-    <nav class="n-tabs">${navLinks('')}</nav>
-    <span class="n-crumbs"><b>Cluster Jewels</b><i>/</i>Combinations<i>/</i>Winter Orb</span>
-    <button class="n-sync" data-press>SYNC</button>
-  </header>
-
-  <div class="n-panes">
-    <aside class="n-tree">
-      <p class="n-cap">Tree</p>
-      ${D.skills.map((s, i) => `
-        <div class="n-branch">
-          <button class="n-skill${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}">
-            <i class="n-twist${i === 0 ? ' open' : ''}"></i><img src="${art.gem(s.gem)}" alt=""><span>${s.short}</span><b>${s.pop}%</b>
-          </button>
-          ${i === 0 ? D.combos.map((c) => `<button class="n-leaf" data-combo data-label="${c.notables.join(' + ')}"><i class="n-leafmark"></i><img src="${art.cluster(c.art)}" alt=""><span>${c.notables.join(' + ')}</span><b>${c.pct}%</b></button>`).join('') : ''}
-          ${i === 0 ? D.notables.slice(0, 3).map(([n, p]) => `<div class="n-node"><i class="n-leafmark"></i><span>${n}</span><b>${p}%</b></div>`).join('') : ''}
-        </div>`).join('')}
-      <p class="n-cap">Unique cluster jewels</p>
-      ${uniquesOf()}
-    </aside>
-
-    <section class="n-detail">
-      <div class="n-detailhead">
-        <img src="${art.cluster('cluster_large')}" alt="">
-        <div>
-          <p class="n-kicker">${D.combos[0].size} · ${D.combos[0].passives} passives · iLvl ${D.combos[0].ilvl}+ · ${D.combos[0].price}</p>
-          <h1 data-hero-name>${D.skill.name}</h1>
-          <p class="n-sub">${D.skill.damage} · ${D.skill.classes} · ${D.skill.builds} builds</p>
-        </div>
-        <div class="n-detailstats" data-stats>${stat('AVG DPS', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
-      </div>
-
-      <div class="n-pairs">
-        <div class="n-block">
-          <p class="n-cap">Notables — this combination</p>
-          ${notablesOf(D.combos[0])}
-        </div>
-        <div class="n-block">
-          <p class="n-cap">Cluster modifiers</p>
-          ${modsOf(D.combos[0])}
-        </div>
-        <div class="n-block">
-          <p class="n-cap">Socketing</p>
-          <span class="n-gear">${gearOf(D.combos[0])}</span>
-          <span class="n-selbar">${bar(D.combos[0].pct)}</span>
-        </div>
-      </div>
-
-      <div class="n-craftbox">
-        <p class="n-cap">Crafting — 3 routes</p>
-        <b class="n-target" data-craft-combo>Prism Weave + Snowstorm</b>
-        ${routesOf('n-routes')}
-      </div>
-
-      <dl class="n-totals">
-        <div><dt>Builds</dt><dd>${D.totals.builds}</dd></div>
-        <div><dt>Characters</dt><dd>${D.totals.chars}</dd></div>
-        <div><dt>Jewels</dt><dd>${D.totals.jewels}</dd></div>
-        <div><dt>Notables</dt><dd>${D.notables.length} tracked</dd></div>
-      </dl>
-    </section>
-  </div>
-
-  <footer class="n-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>tree: 5 skills · 3 combinations expanded</span></footer>
-`;
 
 L.nocturne = () => `
   <img class="e-backdrop" src="${art.asc(D.skill.asc)}" alt="">
@@ -658,136 +526,261 @@ L.prism = () => `
 
 /* ── 09 · LEDGER — dense master/detail ────────────────────────────────────── */
 
-L.trophy = () => `
-  <nav class="w-nav">
-    <span class="w-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
-    <nav class="w-links">${navLinks('')}</nav>
-    <button class="w-sync" data-press>SYNC</button>
-  </nav>
+/* ═══════════════════════════════════════════════════════════════ 07 · HUD ═══ */
 
-  <div class="w-wall">
-    <figure class="w-plate">
-      <div class="w-frame">
-        <img class="w-arte" src="${art.cluster('cluster_large')}" alt="">
-        <img class="w-gem" src="${art.gem(D.skill.gem)}" alt="">
-        <span class="w-framelabel">${D.combos[0].size} · ${D.combos[0].passives}p · iLvl ${D.combos[0].ilvl}+</span>
-      </div>
-      <figcaption>
-        <p class="w-kicker">${D.skill.damage} · ${D.skill.pop} of the ladder</p>
-        <h1 data-hero-name>${D.skill.name}</h1>
-        <p class="w-sub">${D.skill.classes}</p>
-        <p class="w-notarow">${notablesOf(D.combos[0])}</p>
-        <div class="w-platestats" data-stats>
-          ${stat('Average', D.skill.avg)}${stat('Peak', D.skill.peak)}
-        </div>
-      </figcaption>
-    </figure>
+L.hud = () => `
+  <div class="u-field"></div>
+  <div class="u-frame"><i class="u-c tl"></i><i class="u-c tr"></i><i class="u-c bl"></i><i class="u-c br"></i></div>
 
-    <div class="w-tiles">
-      ${D.combos.map((c) => `
-        <button class="w-tile" data-combo data-label="${c.notables.join(' + ')}">
-          <img src="${art.cluster(c.art)}" alt="">
-          <span class="w-tilebody">
-            <b>${c.notables.join(' + ')}</b>
-            ${gearOf(c)}
-            <em class="fx-mod w-tilemod">${c.mods[0]}</em>
-          </span>
-          <span class="w-pct">${c.pct}%</span>
-        </button>`).join('')}
-      <button class="w-tile small" data-combo data-label="Small clusters">
-        <img src="${art.cluster('cluster_small')}" alt="">
-        <span class="w-tilebody"><b>Small clusters</b><em>2 builds · 9% · iLvl 68+</em></span>
-        <span class="w-pct">9%</span>
-      </button>
+  <header class="u-topleft">
+    <span class="u-mark"><img src="${A}/logo.png" alt="">SCAN</span>
+    <div class="u-skill">
+      <img src="${art.gem(D.skill.gem)}" alt="">
+      <div><h1 data-hero-name>${D.skill.name}</h1><p>${D.skill.damage} · ${D.skill.pop} of the ladder</p></div>
     </div>
+    <div class="u-picks">${D.skills.map((s, i) => `<button class="u-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}</div>
+  </header>
 
-    <aside class="w-side">
-      <p class="w-cap">On the wall</p>
-      <div class="w-skills">
-        ${D.skills.slice(0, 4).map((s, i) => `<button class="w-skill${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}"><img src="${art.gem(s.gem)}" alt=""><span>${s.short}</span></button>`).join('')}
+  <section class="u-topright">
+    <nav class="u-tabs">${navLinks('')}</nav>
+    <div class="u-stats" data-stats>${stat('AVERAGE', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
+  </section>
+
+  <section class="u-centre">
+    <img class="u-jewel" src="${art.cluster('cluster_large')}" alt="">
+    <img class="u-core" src="${art.gem(D.skill.gem)}" alt="">
+    <span class="u-gearline">${gearOf(D.combos[0])}</span>
+  </section>
+
+  <section class="u-tabsrow">
+    ${D.combos.map((c) => `<button class="u-combo" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}"><b>${c.notables.join(' + ')}</b><span>${c.pct}%</span></button>`).join('')}
+  </section>
+
+  <section class="u-bottomleft">
+    <p class="u-cap">Notables in play</p>
+    ${notablesOf(D.combos[0])}
+    <p class="u-cap">Cluster modifiers</p>
+    ${modsOf(D.combos[0])}
+  </section>
+
+  <section class="u-bottomright">
+    <p class="u-cap">Crafting — 3 routes</p>
+    <b class="u-target" data-craft-combo>Prism Weave + Snowstorm</b>
+    ${routesOf('u-routes')}
+    <p class="u-cap">Unique cluster jewels</p>
+    ${uniquesOf()}
+  </section>
+
+  <footer class="u-strip" data-status>
+    <span>124,363 builds</span><span>234 characters</span><span>592 jewels</span><span>34 combinations</span>
+    <span class="u-stripend">snapshot demo-2026-11-07</span>
+  </footer>
+`;
+
+/* ═══════════════════════════════════════════════════════════ 09 · COMPARE ═══ */
+
+L.compare = () => {
+  const [CA, CB] = D.combos;
+  const rows = [
+    ['Notables', CA.notables.join(', '), CB.notables.join(', ')],
+    ['Modifiers', CA.mods.join(' · '), CB.mods.join(' · ')],
+    ['Socketing', `${CA.size} · ${CA.passives} passives · iLvl ${CA.ilvl}+`, `${CB.size} · ${CB.passives} passives · iLvl ${CB.ilvl}+`],
+    ['Price', CA.price, CB.price],
+    ['Builds running it', CA.builds, CB.builds],
+    ['Share of builds', `${CA.pct}%`, `${CB.pct}%`],
+    ['Average DPS', CA.avg, CB.avg],
+  ];
+  return `
+  <header class="g-bar">
+    <span class="g-mark"><img src="${A}" alt="">COMPARE</span>
+    <nav class="g-tabs">${navLinks('')}</nav>
+    <span class="g-hint">socketing the same skill two ways</span>
+    <button class="g-sync" data-press>SYNC</button>
+  </header>
+
+  <div class="g-panes">
+    <aside class="g-rail">
+      <p class="g-cap">Skill</p>
+      <div class="g-switch">${D.skills.map((s, i) => `<button class="g-switchgem${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}</div>
+      <p class="g-cap">Pick a combination</p>
+      ${D.combos.map((c, i) => `
+        <button class="g-pick${i === 0 ? ' on' : ''}" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}">
+          <img src="${art.cluster(c.art)}" alt="">
+          <span class="g-pickbody"><b>${c.notables.join(' + ')}</b><em>${c.size} · ${c.passives} passives · ${c.pct}%</em></span>
+        </button>`).join('')}
+      <p class="g-cap">Craft target</p>
+      <b class="g-target" data-craft-combo>Prism Weave + Snowstorm</b>
+      ${routesOf('g-routes')}
+    </aside>
+
+    <section class="g-table">
+      <div class="g-selected">
+        <div>
+          <p class="g-cap">Skill</p>
+          <h1 data-hero-name>${D.skill.name}</h1>
+          <span class="g-colpct">${D.skill.pop} of the ladder · ${D.skill.builds} builds</span>
+        </div>
+        <div class="g-selstats" data-stats>${stat('AVERAGE', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
+      </div>
+      <div class="g-cols">
+        <div class="g-col">
+          <p class="g-colcap">Option A · socketed now</p>
+          <h2>${CA.notables.join(' + ')}</h2>
+          <span class="g-colpct">${CA.pct}% of builds</span>
+        </div>
+        <div class="g-col g-colb">
+          <p class="g-colcap">Option B · the alternative</p>
+          <h2>${CB.notables.join(' + ')}</h2>
+          <span class="g-colpct">${CB.pct}% of builds</span>
+        </div>
       </div>
 
-      <div class="w-notables">
-        <p class="w-cap">Most used notables</p>
-        ${D.notables.slice(0, 4).map(([n, p]) => `<div class="w-notrow"><span>${n}</span><b>${p}%</b></div>`).join('')}
+      <div class="g-rows">
+        ${rows.map(([label, av, bv]) => `
+          <div class="g-row"><span class="g-label">${label}</span><span>${av}</span><span class="g-b">${bv}</span></div>`).join('')}
       </div>
 
-      <div class="w-uniques">
-        <p class="w-cap">Unique cluster jewels</p>
-        ${uniquesOf()}
+      <div class="g-pairs">
+        <div class="g-block"><p class="g-cap">Notables — A</p>${notablesOf(CA)}</div>
+        <div class="g-block"><p class="g-cap">Modifiers — A</p>${modsOf(CA)}</div>
+        <div class="g-block"><p class="g-cap">Socketing — A</p>${gearOf(CA)}<span class="g-barline">${bar(CA.pct)}</span></div>
       </div>
 
-      <div class="w-craft">
-        <p class="w-cap">Crafting — 3 routes</p>
-        <p class="w-target" data-craft-combo>Prism Weave + Snowstorm</p>
-        ${routesOf('w-routes')}
-        <button class="w-plan" data-press>Plan</button>
+      <div class="g-bottom">
+        <div class="g-uniques"><p class="g-cap">Unique cluster jewels</p>${uniquesOf()}</div>
+        <dl class="g-totals">
+          <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd>
+          <dt>Jewels</dt><dd>${D.totals.jewels}</dd><dt>Combinations</dt><dd>${D.totals.combos}</dd>
+        </dl>
       </div>
+    </section>
+  </div>
+
+  <footer class="g-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>A: ${CA.builds} builds · B: ${CB.builds} builds</span></footer>
+`;
+};
+
+/* ═══════════════════════════════════════════════════════════ 10 · VITRINE ══ */
+
+L.vitrine = () => `
+  <header class="z-bar">
+    <span class="z-mark"><img src="${A}/logo.png" alt="">VITRINE</span>
+    <nav class="z-tabs">${navLinks('')}</nav>
+    <span class="z-case">CASE 01 / 03 · LARGE</span>
+    <button class="z-sync" data-press>SYNC</button>
+  </header>
+
+  <div class="z-hall">
+    <aside class="z-tags">
+      <p class="z-cap">In this case</p>
+      ${D.combos.map((c) => `
+        <button class="z-tag" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}">
+          <img src="${art.cluster(c.art)}" alt="">
+          <span><b>${c.notables.join(' + ')}</b><em>${c.size} · ${c.pct}%</em></span>
+        </button>`).join('')}
+      <p class="z-cap">Ladder</p>
+      <div class="z-picks">${D.skills.map((s, i) => `<button class="z-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}</div>
+    </aside>
+
+    <section class="z-stage">
+      <div class="z-spot"></div>
+      <figure class="z-casebox">
+        <div class="z-glass">
+          <img class="z-jewel" src="${art.cluster('cluster_large')}" alt="">
+          <img class="z-gem" src="${art.gem(D.skill.gem)}" alt="">
+        </div>
+        <span class="z-plinth"></span>
+        <figcaption>
+          <p class="z-kicker" data-hero-name>${D.skill.name}</p>
+          <p class="z-line">${D.skill.damage} · ${D.skill.classes}</p>
+        </figcaption>
+      </figure>
+    </section>
+
+    <aside class="z-plaque">
+      <p class="z-cap">Plaque</p>
+      <h1>${D.combos[0].notables.join(' + ')}</h1>
+      <p class="z-socket">${gearOf(D.combos[0])}</p>
+      <div class="z-rows">
+        <p class="z-cap">Notables</p>
+        ${notablesOf(D.combos[0])}
+        <p class="z-cap">Modifiers</p>
+        ${modsOf(D.combos[0])}
+      </div>
+      <div class="z-scores" data-stats>${stat('AVERAGE', D.skill.avg)}${stat('PEAK', D.skill.peak)}</div>
+      <div class="z-craft">
+        <p class="z-cap">Crafting — 3 routes</p>
+        <b class="z-target" data-craft-combo>Prism Weave + Snowstorm</b>
+        ${routesOf('z-routes')}
+      </div>
+      <p class="z-cap">Unique cluster jewels</p>
+      ${uniquesOf()}
+      <dl class="z-totals">
+        <dt>Builds</dt><dd>${D.totals.builds}</dd><dt>Characters</dt><dd>${D.totals.chars}</dd><dt>Jewels</dt><dd>${D.totals.jewels}</dd>
+      </dl>
     </aside>
   </div>
 
-  <footer class="w-status" data-status><span>124,363 builds · 234 characters · 592 jewels · 34 combinations</span><span>poe.ninja</span></footer>`;
-
-/* ============================================================== the gallery */
+  <footer class="z-status" data-status><span>124,363 builds · 234 characters · 592 jewels</span><span>case 1 of 3 · snapshot demo-2026-11-07</span></footer>
+`;
 
 
 const VARIANTS = [
   {
-    id: 'waveform', name: 'Waveform', tag: 'Instrument bench',
-    intent: 'An oscilloscope bench: the skills are channels with their own LEDs, the combination markers sit on the trace itself, the selected one is measured out below as notables, modifiers and socketing, and the readout column carries the notables ranking, the uniques, the three routes and the totals.',
-    intent2: '',
-    keeps: 'Every number is a measurement taken off the trace, so the eye follows one line instead of ten panels.',
-    costs: 'The scope owns the screen; text is small outside the readouts.',
-    tags: ['scope', 'trace', 'instrument'],
-    sw: ['#04070c', '#0a1119', '#22d3ee', '#f08fae', '#7fb3f5'],
+    id: 'dossier', name: 'Dossier', tag: 'Item inspection',
+    intent: 'A game item screen: the jewel on a framed plate with its socketed gem, the stat block and the notables and modifiers read down the middle, and the three combinations plus the crafting routes and the uniques down the right.',
+    keeps: 'The closest to how an ARPG actually presents an item — you inspect one thing, everything about it is in view.',
+    costs: 'One combination at a time; the other two are only a line each.',
+    tags: ['inspection', 'item frame', 'three panes'],
+    sw: ['#0c0d11', '#15171d', '#ff3b3b', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'board', name: 'Board', tag: 'Kanban columns',
-    intent: 'A board with one column per cluster size: Large, Medium and Small, each holding the combination tickets that fit it, with the notables and modifiers printed on the ticket itself, an empty state where nothing was sampled, and a rail with the craft target, the ranking, the uniques and the routes.',
-    keeps: 'Size is the column, so the filter and the layout are the same gesture.',
-    costs: 'Only three tickets fit; a real board would need scrolling columns.',
-    tags: ['kanban', 'tickets', 'by size'],
-    sw: ['#0a0b12', '#141524', '#b18bff', '#f08fae', '#7fb3f5'],
+    id: 'sheet', name: 'Sheet', tag: 'Data grid',
+    intent: 'A spreadsheet: a toolbar with the filter and the size chips, five skill rows, then the three combinations as dense rows carrying their modifiers and socketing in the cell, with the craft target and the totals pinned underneath.',
+    keeps: 'The most information per pixel, and sorting and scanning are natural.',
+    costs: 'Text-forward; the art is limited to 20px thumbnails.',
+    tags: ['grid', 'rows', 'dense'],
+    sw: ['#0a0c10', '#12151b', '#38bdf8', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'chronicle', name: 'Chronicle', tag: 'Timeline',
-    intent: 'A chronicle of the ladder: a hero band with the build and its two numbers, a twelve-snapshot line with three flags marking when each combination entered the meta, the same three combinations written out underneath, and a band with the routes, the uniques, the ranking and the totals.',
-    keeps: 'Shows that the meta is a story with dates, not a static ranking.',
-    costs: 'The timeline needs width; the entries are the only dense part.',
-    tags: ['timeline', 'snapshots', 'flags'],
-    sw: ['#0b0a10', '#16141f', '#f43f5e', '#f08fae', '#7fb3f5'],
+    id: 'broadsheet', name: 'Broadsheet', tag: 'Editorial',
+    intent: 'A newspaper spread: serif masthead, a headline set large with a drop cap, the analysis written as prose with the notables and socketing as run-in notes, a pull quote carrying the two DPS numbers, three short entries, and a rail with the ladder, the routes and the uniques.',
+    keeps: 'Reads like a build guide, and the prose carries the relationships between the numbers.',
+    costs: 'Typographic; no interaction density.',
+    tags: ['editorial', 'serif', 'prose'],
+    sw: ['#0c0c0d', '#141416', '#a78bfa', '#f08fae', '#7fb3f5'],
   },
   {
     id: 'orbit', name: 'Orbit', tag: 'Radial graph',
-    intent: 'A radial graph: the skill sits at the core, concentric rings carry the share arcs, and each combination is a node on the orbit with its notables and its share; the panel beside it holds the selected node, the skill switcher, the ranking, the uniques and the routes.',
-    keeps: 'Relationships are spatial — you can see three combinations around one skill at once.',
+    intent: 'A radial graph: the skill sits at the core, concentric rings carry the share arcs, the tick band turns it into an instrument, and each combination is a node on the orbit; the panel beside it holds the selected node, the ranking, the uniques and the routes.',
+    keeps: 'Relationships are spatial — three combinations around one skill at once.',
     costs: 'Long notable names have to wrap inside a node.',
     tags: ['radial', 'nodes', 'spatial'],
-    sw: ['#07060f', '#151129', '#dd5ce0', '#f08fae', '#7fb3f5'],
+    sw: ['#07060f', '#100c1e', '#dd5ce0', '#f08fae', '#7fb3f5'],
   },
   {
     id: 'nocturne', name: 'Nocturne', tag: 'Cinematic hero',
-    intent: 'Full-bleed splash art, a 64px title over the grade, the notables under it, big numbers on hairlines, a glass card with the three routes, and three cards carrying each combination, its modifiers and its price.',
-    keeps: "The largest art of any direction here, and the palette is now cold rose on black.",
+    intent: 'Full-bleed splash art, a 64px title starting at the top edge, the notables under it, the numbers on the baseline above the strip, a glass card with the three routes, and three cards carrying each combination, its modifiers and its price.',
+    keeps: 'The largest art of any direction here.',
     costs: 'The least dense screen; deep links land on a picture.',
-    tags: ['full-bleed', 'glass', 'big type'],
+    tags: ['full-bleed', 'glass', 'poster'],
     sw: ['#0b0812', '#1d1630', '#ff6b9d', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'tiers', name: 'Tiers', tag: 'Comparison table',
-    intent: 'Three plans side by side, one per combination: price, share, iLvl floor, then a feature list of notables, modifiers and socketing, with the recommended plan lifted; underneath, the notables ranking, the three routes and the totals.',
+    id: 'tiers', name: 'Tiers', tag: 'Comparison plans',
+    intent: 'Three plans side by side, one per combination: price, share and the socketing line, then three feature rows — notables, modifiers, socketing — with the recommended plan lifted; underneath, the notables ranking, the routes and the totals.',
     keeps: 'The fastest way to answer "which jewel do I socket".',
-    costs: 'Reads as a pricing page — playful for a ladder tool, deliberate here.',
+    costs: 'Reads as a pricing page, which is deliberate here.',
     tags: ['plans', 'features', 'compare'],
     sw: ['#080b12', '#101828', '#58a6ff', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'deck', name: 'Deck', tag: 'Card stack',
-    intent: 'A deck of cards: the selected combination fills the top card with the art, the build, the two numbers, the notables, the modifiers and the socketing, two sheets behind it promise the rest, dots and arrows page through, and the queue lists the deck with its routes and totals.',
-    keeps: 'One combination at a time, at full size — the best home for the art.',
-    costs: 'Comparison costs a click; three cards is not a table.',
-    tags: ['cards', 'paging', 'one at a time'],
-    sw: ['#0a0a0c', '#17181d', '#dbe4f0', '#f08fae', '#7fb3f5'],
+    id: 'hud', name: 'HUD', tag: 'Heads-up display',
+    intent: 'A game HUD: corner clusters over a scanlined field — the skill and the ladder at top left, the numbers at top right, the jewel under brackets in the centre, the three combinations as a tab row under it, the notables bottom left and the routes and uniques bottom right.',
+    keeps: 'Everything anchored to an edge, the object in the middle — a cockpit, not a page.',
+    costs: 'Corner panels cap how much text each one can hold.',
+    tags: ['hud', 'corners', 'in-game'],
+    sw: ['#05070a', '#0b1016', '#22d3ee', '#f08fae', '#7fb3f5'],
   },
   {
     id: 'prism', name: 'Prism', tag: 'Command palette',
@@ -798,20 +791,20 @@ const VARIANTS = [
     sw: ['#060a16', '#121a2e', '#7c8bff', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'outline', name: 'Outline', tag: 'Tree browser',
-    intent: 'A file tree of the meta: skills open into their combinations, each combination into the notables it runs, with the unique jewels pinned at the foot; the detail pane prints the selected combination, its modifiers, its socketing and all three routes.',
-    keeps: 'Hierarchy is explicit — nothing is hidden behind a hover.',
-    costs: 'Only one branch is open at a time, so depth beats breadth.',
-    tags: ['tree', 'hierarchy', 'detail pane'],
-    sw: ['#0b0d10', '#151a21', '#8fb3d9', '#f08fae', '#7fb3f5'],
+    id: 'compare', name: 'Compare', tag: 'A / B diff',
+    intent: 'A two-way diff: pick a combination on the left, and its notables, modifiers, socketing, price, builds, share and average DPS line up against the alternative, row by row; the craft target, the uniques and the totals sit underneath.',
+    keeps: 'The decision is the point — two jewels, attribute by attribute.',
+    costs: 'Shows two combinations, so the third waits in the rail.',
+    tags: ['diff', 'a/b', 'decision'],
+    sw: ['#0a0b0e', '#131519', '#cfd8e6', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'trophy', name: 'Trophy', tag: 'Art wall',
-    intent: 'A gallery: the build hung as a framed plate with its notables set under the title, painted tiles for each combination with its socketing and its modifier, and a side column with the notables ranking, the uniques and the routes.',
-    keeps: 'You can recognise a build from across the room.',
-    costs: 'Needs art for everything, and it is the least dense of the ten.',
-    tags: ['gallery', 'framed plate', 'minimal text'],
-    sw: ['#0e0a10', '#1b1220', '#e9b8c4', '#f08fae', '#7fb3f5'],
+    id: 'vitrine', name: 'Vitrine', tag: 'Museum case',
+    intent: 'A museum hall: the jewel spotlit inside a glass case on a plinth, specimen tags for the other combinations on the left, and a plaque on the right engraved with the notables, the modifiers, the socketing, the two numbers, the routes and the uniques.',
+    keeps: 'The object is the hero, and the plaque does the reading.',
+    costs: 'Ceremonial; it will not scale past a handful of cases.',
+    tags: ['museum', 'spotlight', 'plaque'],
+    sw: ['#0d0b0e', '#171318', '#efe3ea', '#f08fae', '#7fb3f5'],
   },
 ];
 
