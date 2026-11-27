@@ -144,14 +144,14 @@ the whole frame and the subject is strong exactly where nothing is written.
 | 02 | The heroine | bleed | a Path of Exile 2 loading screen, cropped to a bust |
 | 03 | The logo | placed | the real wordmark, checkerboard keyed to alpha, 340 px, unfiltered |
 | 04 | Izaro | patch | the painted Emperor, vignetted to a portrait, pushed to full grey (the painting is green) |
-| 05 | The dark figure | patch | a near-black character plate, mirrored, lifted until she reads |
+| 05 | The grove | bleed | Oshabi and the Sacred Grove shrine, as supplied — barely trimmed, never recut |
 | 06 | The beast | bleed | key art around the horns, nearly monochrome, heaviest tint |
 | 07 | The quiet field | bleed | the cemetery at dusk, low brightness — the one to ship |
 | 08 | Portrait wash | — | the baseline that ships today |
 
-`assets/splash/` holds six files, 700 KB: four `bleed_*.jpg` at 1440 × 810 (16:9, subject parked at
-≈ 0.52 / 0.40), two `patch_*.jpg` at 720 × 790 (portrait, subject centred), and `logo_real.png` with
-real alpha. The wordmark's checkerboard background was keyed out with a border flood fill, then the
+`assets/splash/` holds six files, 700 KB: five `bleed_*.jpg` at 1440 × 810 (16:9, subject parked in
+the open band — the grove is the one that arrives already 16:9 and is only trimmed), one
+`patch_izaro.jpg` at 720 × 790 (portrait, subject centred), and `logo_real.png` with real alpha. The wordmark's checkerboard background was keyed out with a border flood fill, then the
 alpha edge eroded a pixel. The art is Grinding Gear Games' and the Izaro painting is fan work; it is
 here as a proposal, in the same spirit as the ascendancy portraits the gallery already ships, and
 none of it should ship without GGG's blessing.

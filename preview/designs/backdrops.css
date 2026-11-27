@@ -76,7 +76,7 @@
 .m-atrium .a-photo.is-quiet img { filter: grayscale(.88) contrast(1.02) brightness(.62) saturate(.8); }
 .m-atrium .a-photo.is-quiet i { opacity: .2; }
 
-/* 04 · 05 — portraits, vignetted so they have no edge to betray them */
+/* 04 — a portrait, vignetted so it has no edge to betray it */
 .m-atrium .a-photo.is-patch img {
   inset: 28px auto auto 458px; width: 440px; height: 428px;
   object-fit: cover; object-position: 50% 26%;
@@ -88,8 +88,8 @@
   -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 26%, rgba(0, 0, 0, .66) 58%, rgba(0, 0, 0, 0) 84%);
   mask-image: radial-gradient(circle at 50% 42%, #000 26%, rgba(0, 0, 0, .66) 58%, rgba(0, 0, 0, 0) 84%);
 }
-.m-atrium .a-photo.is-figure img { filter: grayscale(1) contrast(1.15) brightness(1.3) saturate(.85); }
-.m-atrium .a-photo.is-figure i { opacity: .26; }
+.m-atrium .a-photo.is-grove img { filter: grayscale(.86) saturate(.9) contrast(1.04) brightness(.95); }
+.m-atrium .a-photo.is-grove i { opacity: .26; }
 
 /* 03 — the wordmark, unfiltered, standing in the open band */
 .m-atrium .a-photo.is-logo img {

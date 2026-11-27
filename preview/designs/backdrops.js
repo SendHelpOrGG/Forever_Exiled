@@ -58,10 +58,10 @@
       tags: ['Izaro', 'vignette', 'grayscale'],
     },
     {
-      id: 'bg-art-figure', group: 'Actual art', name: 'The dark figure', tag: 'character plate', kind: 'photo',
-      cls: 'is-patch is-figure', file: 'patch_figure.jpg',
-      note: 'A near-black character plate, mirrored so the figure turns into the layout, lifted until she reads and then vignetted so the ground just falls away into the field. The quietest of the patches.',
-      tags: ['silhouette', 'lifted', 'vignette'],
+      id: 'bg-art-grove', group: 'Actual art', name: 'The grove', tag: 'Sacred Grove', kind: 'photo',
+      cls: 'is-bleed is-grove', file: 'bleed_grove.jpg',
+      note: 'Oshabi in the Sacred Grove at night: the shrine burning blue in its ring of roots, her eyes lit, spores drifting through the clearing. Used as it came — the scene is already 16:9, so it is the one picture here that has not been recut at all, only desaturated and tinted. The shrine and the figure both fall inside the open band, which is why the composition survives the UI.',
+      tags: ['Sacred Grove', 'uncropped', 'night'],
     },
     {
       id: 'bg-art-beast', group: 'Actual art', name: 'The beast', tag: 'key art', kind: 'photo',
