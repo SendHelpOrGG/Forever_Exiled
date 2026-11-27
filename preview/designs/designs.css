@@ -541,20 +541,25 @@ img { display: block; }
 /* the splash art is desaturated as well — otherwise the frame is not black and white */
 .m-atrium.t-noir .a-backdrop { filter: grayscale(1) contrast(1.1); }
 
-/* 06 · orchid — one hue only: every value, bar, notable and modifier is a tint of the same
-   magenta, so the screen is read by lightness rather than by colour. The art is pushed warmer
-   and glossier to match. */
-.m-atrium.t-orchid {
-  --accent: #ff4fd8; --accent-soft: #ff9ae6; --accent-hi: #ff74e0; --accent-lo: #c02a9e; --accent-ink: #16051a;
-  --bg: #120614; --panel: #1d0f22;
-  --glass: rgba(28, 14, 33, .72); --glass-hi: rgba(34, 17, 40, .55); --glass-on: rgba(56, 22, 62, .78); --glass-sel: rgba(52, 22, 58, .55);
-  --glow: rgba(255, 79, 216, .85); --halo: rgba(255, 79, 216, .18);
-  --v55: rgba(18, 6, 20, .55); --v70: rgba(18, 6, 20, .70); --v86: rgba(18, 6, 20, .86); --v95: rgba(18, 6, 20, .95);
-  --line: rgba(255, 170, 240, .14); --line2: rgba(255, 170, 240, .28);
-  --note: #ffb0ea; --mod: #c76dbf;
-  --text: #fbeefb; --muted: #c2a6c6; --faint: #92789a;
+/* 06 · neon — three hues, three jobs, on a neutral near-black field: magenta for chrome and
+   active fills, cyan for every value and every ranking bar, amber for the one action worth taking.
+   Nothing here is tinted; the accents are the only colour the screen has. */
+.m-atrium.t-neon {
+  --accent: #ff3ea5; --accent-soft: #ff9ecf; --accent-hi: #ff63b8; --accent-lo: #d81c85; --accent-ink: #0a0410;
+  --bg: #08060c; --panel: #12101c;
+  --glass: rgba(18, 15, 28, .74); --glass-hi: rgba(23, 19, 36, .6); --glass-on: rgba(42, 30, 62, .8); --glass-sel: rgba(38, 27, 56, .6);
+  --glow: rgba(255, 62, 165, .9); --halo: rgba(99, 230, 255, .16);
+  --v55: rgba(8, 6, 12, .55); --v70: rgba(8, 6, 12, .70); --v86: rgba(8, 6, 12, .86); --v95: rgba(8, 6, 12, .95);
+  --line: rgba(190, 180, 255, .14); --line2: rgba(190, 180, 255, .28);
+  --note: #63e6ff; --mod: #ffc861;
+  --gold: #ffd79a; --gold-soft: #ffeccb;
+  --text: #f6f2fb; --muted: #b3aec6; --faint: #8a86a0;
 }
-.m-atrium.t-orchid .a-backdrop { filter: saturate(1.18) contrast(1.03); }
+.m-atrium.t-neon .a-backdrop { filter: saturate(1.28) contrast(1.05); }
+.m-atrium.t-neon .a-kicker { color: var(--note); }
+.m-atrium.t-neon .a-target,
+.m-atrium.t-neon .fx-route.best b { color: var(--gold); }
+.m-atrium.t-neon .a-gem { border-color: rgba(99, 230, 255, .38); }
 
 /* 07 · ember — warm soot behind an orange chrome, with the cluster modifiers dropped into a
    cold ice blue so the two feature categories split by temperature, not just by hue. */
@@ -570,19 +575,20 @@ img { display: block; }
 }
 .m-atrium.t-ember .a-backdrop { filter: sepia(.26) saturate(1.35) hue-rotate(-12deg) contrast(1.04); }
 
-/* 08 · periwinkle — a pale blue-violet chrome on midnight, with the modifiers in a rose that
-   only appears on the cluster mods. The coolest of the ten. */
-.m-atrium.t-periwinkle {
-  --accent: #8f8dff; --accent-soft: #cfd2ff; --accent-hi: #a5a3ff; --accent-lo: #5a58d8; --accent-ink: #06050f;
-  --bg: #08060f; --panel: #14122e;
-  --glass: rgba(16, 13, 34, .72); --glass-hi: rgba(20, 17, 42, .55); --glass-on: rgba(34, 28, 68, .78); --glass-sel: rgba(32, 26, 62, .55);
-  --glow: rgba(143, 141, 255, .9); --halo: rgba(143, 141, 255, .2);
-  --v55: rgba(8, 6, 15, .55); --v70: rgba(8, 6, 15, .70); --v86: rgba(8, 6, 15, .86); --v95: rgba(8, 6, 15, .95);
-  --line: rgba(190, 190, 255, .14); --line2: rgba(190, 190, 255, .27);
-  --note: #cfd2ff; --mod: #ffb6cf;
-  --text: #f1f0ff; --muted: #b0aecb; --faint: #8583a6;
+/* 08 · rose gold — a rose chrome on plum-black, gold on the notables, periwinkle on the
+   modifiers: warm metal against a cold field, and no hue used twice. */
+.m-atrium.t-rose {
+  --accent: #f07d9f; --accent-soft: #ffb9cb; --accent-hi: #f796b1; --accent-lo: #c2536f; --accent-ink: #180610;
+  --bg: #0a0614; --panel: #171029;
+  --glass: rgba(24, 17, 40, .74); --glass-hi: rgba(29, 21, 48, .6); --glass-on: rgba(52, 36, 74, .8); --glass-sel: rgba(46, 32, 66, .6);
+  --glow: rgba(240, 125, 159, .85); --halo: rgba(255, 212, 121, .14);
+  --v55: rgba(10, 6, 20, .55); --v70: rgba(10, 6, 20, .70); --v86: rgba(10, 6, 20, .86); --v95: rgba(10, 6, 20, .95);
+  --line: rgba(255, 200, 220, .14); --line2: rgba(255, 200, 220, .27);
+  --note: #ffd479; --mod: #9dc4ff;
+  --text: #fbf0f4; --muted: #c4aeb8; --faint: #998494;
 }
-.m-atrium.t-periwinkle .a-backdrop { filter: saturate(.85) hue-rotate(10deg) brightness(.96); }
+.m-atrium.t-rose .a-backdrop { filter: saturate(1.12) hue-rotate(-8deg) brightness(1.02); }
+.m-atrium.t-rose .a-gem { border-color: rgba(255, 212, 121, .4); }
 
 /* 09 · honey — the gold becomes the chrome itself: chips, tabs, active fills and every value.
    Warm charcoal behind it, steel blue for the modifiers so the frame is not one warm blur. */

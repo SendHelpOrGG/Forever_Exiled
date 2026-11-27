@@ -49,7 +49,7 @@ const check = (label, ok, detail = '') =>
 
 const EXPECTED = [
   'Atrium · Crimson', 'Atrium · Violet', 'Atrium · Azure', 'Atrium · Cyan', 'Atrium · Noir',
-  'Atrium · Orchid', 'Atrium · Ember', 'Atrium · Periwinkle', 'Atrium · Honey', 'Atrium · Steel',
+  'Atrium · Neon', 'Atrium · Ember', 'Atrium · Rose Gold', 'Atrium · Honey', 'Atrium · Steel',
 ];
 
 /* one layout, ten palettes: the id is the theme, the class namespace is shared */
@@ -59,9 +59,9 @@ const THEMES = [
   { id: 'azure', prefix: 'a' },
   { id: 'cyan', prefix: 'a' },
   { id: 'noir', prefix: 'a' },
-  { id: 'orchid', prefix: 'a' },
+  { id: 'neon', prefix: 'a' },
   { id: 'ember', prefix: 'a' },
-  { id: 'periwinkle', prefix: 'a' },
+  { id: 'rose', prefix: 'a' },
   { id: 'honey', prefix: 'a' },
   { id: 'steel', prefix: 'a' },
 ];
@@ -96,8 +96,9 @@ check('every section has a numbered head and a one-word tag',
   sections.map((s) => text(s.querySelector('.v-tag'))).join(' · '));
 check('styling notes are written for every variant',
   sections.every((s) => s.querySelectorAll('.v-notes > div').length === 2));
-check('every variant has a palette',
-  sections.every((s) => s.querySelectorAll('.v-swatches i').length === 5));
+check('every variant has a palette of at least five swatches',
+  sections.every((s) => s.querySelectorAll('.v-swatches i').length >= 5),
+  sections.map((s) => s.querySelectorAll('.v-swatches i').length).join(' '));
 check('every frame can be zoomed to 1:1',
   sections.every((s) => s.querySelectorAll('.frame-zoom').length === 1));
 
@@ -689,9 +690,9 @@ check('the palettes that ask for a second accent declare it',
       return c.l > 0.6 && !brownOrGreen(c);
     };
     return warm('.m-atrium.t-violet', 'gold') && warm('.m-atrium.t-azure', 'warm')
-      && warm('.m-atrium.t-noir', 'gold');
+      && warm('.m-atrium.t-noir', 'gold') && warm('.m-atrium.t-neon', 'gold');
   })(),
-  `violet ${token('.m-atrium.t-violet', 'gold')} · azure ${token('.m-atrium.t-azure', 'warm')} · noir ${token('.m-atrium.t-noir', 'gold')}`);
+  `violet ${token('.m-atrium.t-violet', 'gold')} · azure ${token('.m-atrium.t-azure', 'warm')} · noir ${token('.m-atrium.t-noir', 'gold')} · neon ${token('.m-atrium.t-neon', 'gold')}`);
 
 /* ── report ─────────────────────────────────────────────────────────────── */
 

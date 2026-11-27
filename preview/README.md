@@ -50,7 +50,7 @@ earlier proposals that survived: **04**'s inspector panel and **05**'s cinematic
 splash art, the skill with its ascendancy icons and the character running it, the three numbers, and
 the combinations stacked top-down as full-width cards, with one glass panel on the right carrying the
 selected combination, the skill switcher, the notables ranking, the unique cluster jewels, the
-crafting routes and the totals. **All five palettes are dark, and none uses brown or green.**
+crafting routes and the totals. **All ten palettes are dark, and none uses brown or green.**
 
 | # | palette | accent | field |
 |---|---------|--------|-------|
@@ -59,9 +59,9 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 | 03 | Azure | `#4b8dff` + pale red `#f0b3b8` | `#070c18` |
 | 04 | Cyan | `#2ad4e6` | `#061318` |
 | 05 | Noir | `#f4f6f8` + gold `#d9b45c` | `#000000` — black and white, one gold |
-| 06 | Orchid | `#ff4fd8` + magenta `#c76dbf` | `#120614` — one hue, five lightness steps |
+| 06 | Neon | `#ff3ea5` + cyan `#63e6ff` + amber `#ffc861` | `#08060c` — three hues, three jobs |
 | 07 | Ember | `#ff7f38` + ice `#9fc6e8` | `#0c0604` — orange chrome, cold modifiers |
-| 08 | Periwinkle | `#8f8dff` + rose `#ffb6cf` | `#08060f` — pale blue-violet |
+| 08 | Rose Gold | `#f07d9f` + gold `#ffd479` + periwinkle `#9dc4ff` | `#0a0614` — warm metal on plum |
 | 09 | Honey | `#ffc04a` + steel `#8fb4e8` | `#0b0803` — the gold is the chrome |
 | 10 | Steel | `#a9c9df` + slate `#8fa3b9` | `#06090c` — matte, desaturated, greyscale art |
 
