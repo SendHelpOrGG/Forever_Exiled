@@ -11,22 +11,27 @@ rings) and 156-300 px (flasks, currency); the frame is 1280 x 720, so thrown up 
 which is exactly what the first version of these plates looked like. So each plate is built like a
 photograph of an object in a room:
 
-  1. The room is one of the existing paintings, blurred to a smear and pulled down to 20 % — it is
-     texture and depth, not a subject (nothing in it is legible at that blur). A pool of light, a
-     fine grain and a vignette are added at full resolution, so the field itself is sharp everywhere
-     the art is not.
+  1. The field is the gallery's own painting (`bleed_grove.jpg`'s companion `bleed_graveyard.jpg`),
+     blurred past legibility and graded to the measured darkness of the painting the frame already
+     uses: mean luminance ~34 against 30 for `bleed_grove.jpg`, ~51 in the middle band. It is the
+     same night, one room further in — not a lit room of its own. Nothing in it is legible: it is a
+     gradient with the painting's texture. A vignette closes the corners to near black.
   2. The artefact is upscaled in two steps (2x, sharpen, then the last resize) instead of one, which
      keeps painted edges from turning to mush; its alpha is thresholded first, because GGG's icons
      carry a near-invisible dark margin that reads as a box once the icon is brightened.
-  3. It gets a contact shadow, a soft light under it, a blurred halo of itself and a faint
-     reflection, so it sits in the room instead of floating in front of it.
+  3. It gets a contact shadow, a soft light under it and a blurred halo of itself, so it sits in
+     the field instead of floating in front of it.
   4. The artefact is centred on the point the frame's mask is centred on (52 % / 40 %), which is the
      open band — no card, no panel.
 
 Sizes are chosen per source: never more than about 3x the original, so nothing is soft.
 
+The field is checked against `bleed_grove.jpg` on every build: a plate whose mean luminance drifts
+away from the painting the gallery is built around is rejected before it is written, because that is
+what made the earlier plates look like grey haze.
+
 Sources are Grinding Gear Games' inventory art (item icons) and the Path of Exile wordmark;
-`bleed_graveyard.jpg` is the room. It is a local design proposal, the same standing as the
+`bleed_graveyard.jpg` is the field. It is a local design proposal, the same standing as the
 paintings in assets/splash.
 
     /path/to/python tools/make_tab_plates.py
@@ -34,10 +39,9 @@ paintings in assets/splash.
 Needs Pillow. Writes five 1440 x 810 JPEGs into preview/assets/splash/.
 """
 
-import random
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageStat
 
 ROOT = Path(__file__).resolve().parent.parent
 SPLASH = ROOT / 'preview' / 'assets' / 'splash'
@@ -50,10 +54,10 @@ CORNER = (4, 3, 6)
 
 PLATES = [
     # tab                         source                       height  contrast  brightness
-    ('tab_watchers_eye.jpg',      SRC / 'watchers_eye.png',      250,   1.22, 1.32),
-    ('tab_rare_items.jpg',        SRC / 'two_stone_ring.webp',  250,   1.06, 1.00),
-    ('tab_flasks.jpg',            SRC / 'divine_life_flask.webp', 300, 1.06, 1.02),
-    ('tab_economy.jpg',           SRC / 'exalted_orb.png',      300,   1.03, 1.00),
+    ('tab_watchers_eye.jpg',      SRC / 'watchers_eye.png',      250,   1.22, 1.44),
+    ('tab_rare_items.jpg',        SRC / 'two_stone_ring.webp',  250,   1.14, 1.20),
+    ('tab_flasks.jpg',            SRC / 'divine_life_flask.webp', 300, 1.10, 1.20),
+    ('tab_economy.jpg',           SRC / 'exalted_orb.png',      300,   1.06, 1.14),
     ('tab_settings.jpg',          SPLASH / 'logo_real.png',     360,   1.00, 0.92),
 ]
 
@@ -65,27 +69,29 @@ def clean(art, floor=14):
 
 
 def room():
-    """One of the paintings, blurred past legibility: texture and depth, no subject."""
+    """The gallery's night, one room further in — graded to bleed_grove.jpg's measured darkness.
+
+    The field was the thing that went wrong before: a bright blur over a mid grey pool lifted the
+    whole 1440 x 810 frame to a mean luminance of ~130, against ~30 for the painting the frame is
+    built around, so the plates read as grey haze instead of a dark stage. It is now graded by
+    measurement, not by eye: mean ~34, centre ~51 (bleed_grove.jpg: 30 / 52), no full-frame grain,
+    corners closed to near black.
+    """
     im = Image.open(SPLASH / 'bleed_graveyard.jpg').convert('RGB').resize((W, H), Image.LANCZOS)
     im = im.filter(ImageFilter.GaussianBlur(34))
-    im = ImageEnhance.Brightness(im).enhance(0.20)
+    im = ImageEnhance.Brightness(im).enhance(0.40)
     im = ImageEnhance.Color(im).enhance(0.5)
 
+    # a shallow pool of light where the artefact sits, so it is not floating on a flat wall
     pool = Image.new('L', (W, H), 0)
     ImageDraw.Draw(pool).ellipse([CX - 620, CY - 330, CX + 620, CY + 330], fill=255)
-    pool = pool.filter(ImageFilter.GaussianBlur(200)).point(lambda v: int(v * 0.45))
-    im = Image.composite(Image.new('RGB', (W, H), (46, 38, 52)), im, pool)
-
-    random.seed(9)
-    grain = Image.new('L', (W // 3, H // 3))
-    grain.putdata([random.randint(0, 255) for _ in range((W // 3) * (H // 3))])
-    grain = grain.resize((W, H), Image.BILINEAR).point(lambda v: 128 + int((v - 128) * 0.07))
-    im = Image.composite(Image.new('RGB', (W, H), (255, 255, 255)), im, grain)
+    pool = pool.filter(ImageFilter.GaussianBlur(200))
+    im = Image.composite(Image.new('RGB', (W, H), (62, 52, 72)), im, pool)
 
     vignette = Image.new('L', (W, H), 0)
     ImageDraw.Draw(vignette).ellipse([-W * .2, -H * .3, W * 1.2, H * 1.3], fill=255)
     vignette = vignette.filter(ImageFilter.GaussianBlur(140))
-    return Image.composite(im, Image.new('RGB', (W, H), CORNER), vignette)
+    return Image.composite(im, Image.new('RGB', (W, H), (9, 7, 12)), vignette)
 
 
 def upscale(art, height):
@@ -109,9 +115,9 @@ def build(out, src, height, contrast, brightness):
 
     light = Image.new('L', (W, H), 0)
     ImageDraw.Draw(light).ellipse(
-        [CX - height * 0.75, CY + height * 0.42, CX + height * 0.75, CY + height * 0.78], fill=110)
+        [CX - height * 0.75, CY + height * 0.42, CX + height * 0.75, CY + height * 0.78], fill=70)
     light = light.filter(ImageFilter.GaussianBlur(height * 0.18))
-    canvas = Image.composite(Image.new('RGB', (W, H), (60, 50, 64)), canvas, light)
+    canvas = Image.composite(Image.new('RGB', (W, H), (58, 48, 66)), canvas, light)
 
     shadow = hero.split()[3].point(lambda v: int(v * 0.55)).filter(ImageFilter.GaussianBlur(height * 0.05))
     canvas.paste(Image.new('RGB', hero.size, (0, 0, 0)),
@@ -119,25 +125,33 @@ def build(out, src, height, contrast, brightness):
 
     halo = art.resize((int(hero.width * 1.4), int(hero.height * 1.4)), Image.LANCZOS)
     halo = halo.filter(ImageFilter.GaussianBlur(height * 0.10))
-    halo.putalpha(halo.split()[3].point(lambda v: int(v * 0.85)))
+    halo.putalpha(halo.split()[3].point(lambda v: int(v * 0.70)))
     canvas.paste(halo, (CX - halo.width // 2, CY - halo.height // 2), halo)
-
-    reflection = hero.transpose(Image.FLIP_TOP_BOTTOM).filter(ImageFilter.GaussianBlur(8))
-    reflection.putalpha(reflection.split()[3].point(lambda v: int(v * 0.13)))
-    canvas.paste(reflection, (x, CY + hero.height // 2 + 6), reflection)
 
     canvas.paste(hero, (x, y), hero)
     canvas.save(out, quality=88, optimize=True)
     return out
 
 
+def luminance(path):
+    return ImageStat.Stat(Image.open(path).convert('L')).mean[0]
+
+
 def main():
+    reference = luminance(SPLASH / 'bleed_grove.jpg')
     for name, src, height, contrast, brightness in PLATES:
         if not Path(src).exists():
             raise SystemExit(f'missing source art: {src}')
         out = build(SPLASH / name, src, height, contrast, brightness)
+        mean = luminance(out)
+        if not 0.6 * reference <= mean <= 1.6 * reference:
+            out.unlink()
+            raise SystemExit(
+                f'{name}: mean luminance {mean:.0f} is not in the same night as bleed_grove.jpg '
+                f'({reference:.0f}); the field is too bright or too black (0.6x-1.6x allowed)')
         size = Image.open(out).size
-        print(f'{name}  {size[0]}x{size[1]}  {out.stat().st_size // 1024} KB')
+        print(f'{name}  {size[0]}x{size[1]}  mean {mean:.0f} (grove {reference:.0f})  '
+              f'{out.stat().st_size // 1024} KB')
 
 
 if __name__ == '__main__':

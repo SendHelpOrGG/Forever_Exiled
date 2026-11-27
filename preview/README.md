@@ -138,16 +138,20 @@ Flasks a flask, Economy currency and Rare Items a piece of gear. All six are 144
 
 The five item plates are **composed, not cropped** — GGG's inventory art tops out at 78 px for a
 jewel and 156–300 px for flasks and currency, so thrown up whole it is a blur, which is what the
-first version of these plates was. `tools/make_tab_plates.py` builds each one like a photograph of
-an object in a room: the room is the cemetery painting blurred past legibility and pulled to 20 %
-(texture and depth, no subject), with a pool of light, fine grain and a vignette all rendered at
-1440 × 810 so the field is sharp everywhere the icon is not; the artefact is upscaled in steps
+first version of these plates was. `tools/make_tab_plates.py` builds each one as an artefact on the
+gallery's own night: the field is the cemetery painting blurred past legibility and graded **by
+measurement** to the darkness the frame already lives in — mean luminance 34–39 against 30 for
+`bleed_grove.jpg`, ~51 in the middle band, corners closed to near black — with a shallow pool of
+light where the artefact stands and no full-frame grain; the artefact is upscaled in steps
 (2× → sharpen → 2× → the last resize) rather than one jump, its near-invisible dark margin is
-thresholded off first, and then it gets a contact shadow, a soft light under it, a blurred halo of
-itself and a faint reflection, so it sits *in* the room. It stands on the point the frame's mask is
-centred on (52 % / 40 %, the open band) and never grows past about 3× its source. The item icons and
-the wordmark are Grinding Gear Games' art, held in `assets/splash/src/` next to the plates so the
-build can be repeated: `/path/to/python tools/make_tab_plates.py`.
+thresholded off first, and then it gets a contact shadow, a soft light under it and a blurred halo
+of itself, so it sits *in* the field. It stands on the point the frame's mask is centred on
+(52 % / 40 %, the open band) and never grows past about 3× its source. The build refuses to write a
+plate whose mean luminance leaves 0.6–1.6× of `bleed_grove.jpg` — the earlier version let the field
+drift to 130, four times the painting's, and read as grey haze. The item icons and the wordmark are
+Grinding Gear Games' art, held in `assets/splash/src/` next to the plates so the build can be
+repeated: `/path/to/python tools/make_tab_plates.py`. `plates-review.png` is the six frames the
+build produces, composited through this frame's real layer chain (mask, grade, tint, scrim).
 
 One layer, three parts: the six `<img>`, an `<i>` that blends that palette's own `--accent` into
 whichever picture is lit with `mix-blend-mode: color`, and a `<b>` scrim. The chosen destination is
