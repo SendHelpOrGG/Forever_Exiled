@@ -2,18 +2,17 @@
 /**
  * Structural check for the design gallery (preview/designs/).
  *
- * It cannot judge whether a direction looks good — that is what the gallery is for — but it can
- * guarantee the things that are easy to break when ten layouts live in one page:
+ * There is now one layout — Atrium, the merged 04 + 05 direction — and five palettes of it. That
+ * makes the page much easier to get wrong in a different way, so the check guarantees:
  *
- *   1. ten directions, each with its own head, palette and notes;
- *   2. no two layouts are the same DOM — the whole point of the rewrite;
- *   3. every mock shows the same content (Winter Orb, average + peak, three combinations,
- *      a craft target, a 234-character status line), so the comparison is a fair one;
- *   4. every class a layout invents is actually styled, and every clickable thing has a hover,
- *      a press and a focus state;
- *   5. the mocks answer: clicking a skill rewrites the hero, clicking a combination rewrites the
- *      craft target, and the size chips filter the combination list;
- *   6. every image path resolves from preview/designs.
+ *   1. five variants, each with its own head and palette, all of them the same layout;
+ *   2. the palettes really differ: five distinct accents and five distinct fields;
+ *   3. every mock shows the whole cluster-jewel surface (notables, modifiers, socketing, uniques,
+ *      the ranking, three routes with tries and cost, all-builds totals) — no palette is allowed
+ *      to drop a feature;
+ *   4. every class the layout invents is styled, the hover language is preserved, and the click
+ *      contract still works in every copy;
+ *   5. every palette is dark, and none of them is brown or green.
  *
  *     NODE_PATH=/home/user/Forever_Exiled/node_modules node tools/designs_check.js
  */
@@ -49,22 +48,16 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Dossier', 'Sheet', 'Broadsheet', 'Orbit', 'Atrium',
-  'Tiers', 'HUD', 'Prism', 'Compare', 'Vitrine',
+  'Atrium · Rose', 'Atrium · Amethyst', 'Atrium · Cobalt', 'Atrium · Glacier', 'Atrium · Ash',
 ];
 
-/* every layout shares the same contract; only its class namespace differs */
-const LAYOUTS = [
-  { id: 'dossier', prefix: 'd' },
-  { id: 'sheet', prefix: 's' },
-  { id: 'broadsheet', prefix: 'b' },
-  { id: 'orbit', prefix: 'r' },
-  { id: 'atrium', prefix: 'a' },
-  { id: 'tiers', prefix: 't' },
-  { id: 'hud', prefix: 'u' },
-  { id: 'prism', prefix: 'p' },
-  { id: 'compare', prefix: 'g' },
-  { id: 'vitrine', prefix: 'z' },
+/* one layout, five palettes: the id is the theme, the class namespace is shared */
+const THEMES = [
+  { id: 'rose', prefix: 'a' },
+  { id: 'amethyst', prefix: 'a' },
+  { id: 'cobalt', prefix: 'a' },
+  { id: 'glacier', prefix: 'a' },
+  { id: 'ash', prefix: 'a' },
 ];
 
 const HERO = '[data-hero-name]';
@@ -82,11 +75,14 @@ const classesOf = (el) => [...el.querySelectorAll('[class]')].flatMap((n) => [..
 /* ── the gallery itself ─────────────────────────────────────────────────── */
 
 const sections = qa('.variant');
-check('ten directions rendered', sections.length === 10, sections.length + ' sections');
-check('they are the ten asked for',
-  sections.map((s) => text(s.querySelector('h2')).split(' ')[0]).join(' | ') === EXPECTED.join(' | '),
-  sections.map((s) => text(s.querySelector('h2'))).join(' · '));
-check('the index lists all ten', qa('.gal-index a').length === 10);
+check('five variants rendered', sections.length === 5, sections.length + ' sections');
+
+const names = sections.map((s) => {
+  const h = s.querySelector('h2');
+  return text(h).replace(text(h.querySelector('.v-tag')), '').trim();
+});
+check('they are the five palettes asked for', names.join(' | ') === EXPECTED.join(' | '), names.join(' · '));
+check('the index lists all five', qa('.gal-index a').length === 5);
 check('every index link points at a section',
   qa('.gal-index a').every((a) => document.getElementById(a.dataset.target) !== null));
 check('every section has a numbered head and a one-word tag',
@@ -99,58 +95,40 @@ check('every variant has a palette',
 check('every frame can be zoomed to 1:1',
   sections.every((s) => s.querySelectorAll('.frame-zoom').length === 1));
 
-/* ── ten mocks, ten distinct structures ─────────────────────────────────── */
+/* ── five mocks, one structure, five palettes ───────────────────────────── */
 
-check('ten mock sheets', qa('.mock').length === 10);
+check('five mock sheets', qa('.mock').length === 5, qa('.mock').length + ' mocks');
 
-/** class names a layout invents, stripped of its own prefix: "o-hero" → "hero" */
-const suffixes = (mock, prefix) =>
-  new Set(classesOf(mock).filter((c) => c.startsWith(prefix + '-')).map((c) => c.slice(prefix.length + 1)));
+check('every mock is the same layout', qa('.mock').every((m) => m.classList.contains('m-atrium')));
 
-const prints = LAYOUTS.map((l) => ({ id: l.id, set: suffixes(mockOf(l.id), l.prefix) }));
+check('every mock carries its own palette class',
+  THEMES.every((t) => mockOf(t.id).classList.contains('t-' + t.id)),
+  THEMES.map((t) => [...mockOf(t.id).classList].filter((c) => c.startsWith('t-')).join('')).join(' '));
 
-check('every mock carries its own class namespace',
-  LAYOUTS.every((l, i) => prints[i].set.size >= 8),
-  prints.map((p) => `${p.id}:${p.set.size}`).join(' '));
-
-const jaccard = (a, b) => {
-  const inter = [...a].filter((x) => b.has(x)).length;
-  return inter / (a.size + b.size - inter);
-};
-
-let worst = { pair: '', score: 0 };
-const identical = [];
-for (let i = 0; i < prints.length; i += 1) {
-  for (let j = i + 1; j < prints.length; j += 1) {
-    const score = jaccard(prints[i].set, prints[j].set);
-    if (score > worst.score) worst = { pair: `${prints[i].id}/${prints[j].id}`, score };
-    if (score === 1) identical.push(`${prints[i].id}/${prints[j].id}`);
-  }
-}
-check('no two layouts share the same structure', identical.length === 0, identical.join(', ') || 'all ten differ');
-check('and none is a re-skin of another', worst.score < 0.5,
-  `closest pair ${worst.pair} at ${(worst.score * 100).toFixed(0)}% shared structure`);
-
-/* the top-level shape must differ too: a poster, a table, a page, a palette … */
 const shape = (id) => [...mockOf(id).children]
-  .map((n) => n.tagName.toLowerCase() + (n.classList.length ? '.' + [...n.classList][0].replace(/^[a-z]-/, '') : ''))
+  .map((n) => n.tagName.toLowerCase() + (n.classList.length ? '.' + [...n.classList][0].replace(/^a-/, '') : ''))
   .join('>');
-const shapes = LAYOUTS.map((l) => shape(l.id));
-check('the top-level shapes are not interchangeable',
-  new Set(shapes).size === 10, new Set(shapes).size + ' unique of 10');
+const shapes = THEMES.map((t) => shape(t.id));
+check('the five are the same DOM, not five diverging layouts', new Set(shapes).size === 1, shapes[0]);
 
-/* ── the same content in all ten ────────────────────────────────────────── */
+check('no mock invents a second layout namespace',
+  qa('.mock [class]').every((n) => [...n.classList].every((c) =>
+    !/^[b-z]-/.test(c) || /^(t|m)-/.test(c) || ['fx-notables', 'fx-notable', 'fx-mods', 'fx-mod', 'fx-gear',
+      'fx-uniques', 'fx-un', 'fx-routes', 'fx-route', 'fx-tag', 'fx-craft', 'fx-notarow', 'bar', 'stat', 'num', 'val', 'sz'].includes(c))),
+  [...new Set(qa('.mock [class]').flatMap((n) => [...n.classList]).filter((c) => /^[b-z]-/.test(c) && !/^(t-|m-|fx-)/.test(c)))].slice(0, 6).join(', ') || 'none');
+
+/* ── the same content in all five ───────────────────────────────────────── */
 
 check('every mock names Winter Orb',
-  LAYOUTS.every((l) => text(section(l.id).querySelector(HERO)) === 'Winter Orb'),
-  LAYOUTS.map((l) => text(section(l.id).querySelector(HERO))).join(' · '));
+  THEMES.every((t) => text(section(t.id).querySelector(HERO)) === 'Winter Orb'),
+  THEMES.map((t) => text(section(t.id).querySelector(HERO))).join(' · '));
 
 check('every mock shows an average and a peak',
-  LAYOUTS.every((l) => {
-    const nums = [...section(l.id).querySelectorAll(STATS)].map(text);
+  THEMES.every((t) => {
+    const nums = [...section(t.id).querySelectorAll(STATS)].map(text);
     return nums.length === 2 && nums[0] === '34.5M' && nums[1] === '145M';
   }),
-  LAYOUTS.map((l) => [...section(l.id).querySelectorAll(STATS)].map(text).join('/')).join(' · '));
+  THEMES.map((t) => [...section(t.id).querySelectorAll(STATS)].map(text).join('/')).join(' · '));
 
 const CANON = [
   'Prism Weave + Snowstorm + Sadist',
@@ -158,71 +136,50 @@ const CANON = [
   'Eye to Eye + Repeater',
 ];
 check('every mock lists the three combinations from the same data',
-  LAYOUTS.every((l) => {
-    const labels = [...section(l.id).querySelectorAll(COMBOS)].map((c) => c.dataset.label);
+  THEMES.every((t) => {
+    const labels = [...section(t.id).querySelectorAll(COMBOS)].map((c) => c.dataset.label);
     return CANON.every((c) => labels.includes(c));
   }),
-  LAYOUTS.map((l) => section(l.id).querySelectorAll(COMBOS).length + ' rows').join(' '));
+  THEMES.map((t) => section(t.id).querySelectorAll(COMBOS).length + ' rows').join(' '));
 
 check('every mock has a craft target',
-  LAYOUTS.every((l) => {
-    const el = section(l.id).querySelector(CRAFT);
+  THEMES.every((t) => {
+    const el = section(t.id).querySelector(CRAFT);
     return el && text(el).length > 3;
   }));
 
 check('every mock has a status line that agrees on 234 characters',
-  LAYOUTS.every((l) => /234/.test(text(section(l.id).querySelector(STATUS)))),
-  LAYOUTS.map((l) => text(section(l.id).querySelector(STATUS)).slice(0, 26)).join(' · '));
+  THEMES.every((t) => /234/.test(text(section(t.id).querySelector(STATUS)))));
 
 check('every mock has the five-tab navigation',
-  LAYOUTS.every((l) => section(l.id).querySelectorAll(NAV).length >= 5),
-  LAYOUTS.map((l) => section(l.id).querySelectorAll(NAV).length).join(' '));
+  THEMES.every((t) => section(t.id).querySelectorAll(NAV).length >= 5),
+  THEMES.map((t) => section(t.id).querySelectorAll(NAV).length).join(' '));
 
 check('every mock can switch skill',
-  LAYOUTS.every((l) => section(l.id).querySelectorAll(PICKS).length >= 3),
-  LAYOUTS.map((l) => section(l.id).querySelectorAll(PICKS).length).join(' '));
+  THEMES.every((t) => section(t.id).querySelectorAll(PICKS).length >= 3),
+  THEMES.map((t) => section(t.id).querySelectorAll(PICKS).length).join(' '));
 
 /* ── it answers when you click ──────────────────────────────────────────── */
 
 const click = (el) => el.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 
-for (const l of LAYOUTS) {
-  const picks = [...section(l.id).querySelectorAll(PICKS)];
-  const combos = [...section(l.id).querySelectorAll(COMBOS)];
+for (const t of THEMES) {
+  const picks = [...section(t.id).querySelectorAll(PICKS)];
+  const combos = [...section(t.id).querySelectorAll(COMBOS)];
 
   const pick = picks[1] || picks[0];
   click(pick);
-  const heroAfter = text(section(l.id).querySelector(HERO));
+  const heroAfter = text(section(t.id).querySelector(HERO));
   const heroOk = heroAfter === pick.dataset.label && pick.classList.contains('on')
     && picks.filter((p) => p.classList.contains('on')).length === 1;
 
   click(combos[2]);
-  const craftAfter = text(section(l.id).querySelector(CRAFT));
+  const craftAfter = text(section(t.id).querySelector(CRAFT));
   const craftOk = craftAfter === combos[2].dataset.label
     && combos.filter((c) => c.classList.contains('on')).length === 1;
 
-  check(`${l.id}: picking a skill rewrites the hero`, heroOk, `${pick.dataset.label} → ${heroAfter}`);
-  check(`${l.id}: picking a combination rewrites the craft target`, craftOk, `${combos[2].dataset.label} → ${craftAfter}`);
-}
-
-/* the size chips are a real filter, not decoration */
-{
-  const rows = () => [...section('sheet').querySelectorAll('[data-combo][data-cluster-size]')];
-  const pills = [...section('sheet').querySelectorAll('[data-size]')];
-  const large = pills.find((p) => p.dataset.size === 'large');
-  click(large);
-  const onlyLarge = rows().filter((r) => !r.classList.contains('off')).map((r) => r.dataset.clusterSize);
-  const medium = pills.find((p) => p.dataset.size === 'medium');
-  click(medium);
-  const onlyMedium = rows().filter((r) => !r.classList.contains('off')).map((r) => r.dataset.clusterSize);
-  check('a size chip really filters the list',
-    onlyLarge.join() === 'Large' && onlyMedium.join() === 'Medium,Medium' && medium.classList.contains('on'),
-    `large → ${onlyLarge.join(', ') || 'none'} · medium → ${onlyMedium.join(', ')}`);
-
-  const withChips = LAYOUTS.filter((l) => section(l.id).querySelector('[data-size]'));
-  check('every layout that offers sizes can filter on them',
-    withChips.every((l) => section(l.id).querySelectorAll('[data-combo][data-cluster-size]').length >= 3),
-    withChips.map((l) => l.id).join(', ') || 'none');
+  check(`${t.id}: picking a skill rewrites the hero`, heroOk, `${pick.dataset.label} → ${heroAfter}`);
+  check(`${t.id}: picking a combination rewrites the craft target`, craftOk, `${combos[2].dataset.label} → ${craftAfter}`);
 }
 
 check('every clickable carries an explicit label',
@@ -231,40 +188,57 @@ check('every clickable carries an explicit label',
 
 check('nothing errors while being used', errors.length === 0, errors.join(' | ') || 'none');
 
-/* ── the CSS actually styles what the layouts invented ──────────────────── */
+/* ── the CSS actually styles what the layout invented ───────────────────── */
 
 const unstyled = [];
-for (const l of LAYOUTS) {
-  for (const cls of new Set(classesOf(mockOf(l.id)))) {
-    if (['on', 'off', 'bar', 'num', 'val', 'stat', 'sz'].includes(cls)) continue;
-    if (!css.includes('.' + cls)) unstyled.push(`${l.id}.${cls}`);
-  }
+for (const cls of new Set(classesOf(mockOf('rose')))) {
+  if (['on', 'off', 'bar', 'num', 'val', 'stat', 'sz', 'lit'].includes(cls)) continue;
+  if (!css.includes('.' + cls)) unstyled.push(cls);
 }
-check('every class used by a layout is styled', unstyled.length === 0,
+check('every class the layout uses is styled', unstyled.length === 0,
   unstyled.length ? unstyled.slice(0, 8).join(', ') : 'all styled');
 
 const hoverRules = css.match(/:hover/g) || [];
 const activeRules = css.match(/:active/g) || [];
-check('the interface reacts to the pointer', hoverRules.length >= 60, hoverRules.length + ':hover rules');
-check('pressing a control is acknowledged', activeRules.length >= 3, activeRules.length + ':active rules');
+check('the interface reacts to the pointer', hoverRules.length >= 20, hoverRules.length + ':hover rules');
+check('pressing a control is acknowledged', activeRules.length >= 1, activeRules.length + ':active rules');
 check('clickable things change more than colour',
   /:hover[^{]*\{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
 check('keyboard focus is visible', /:focus-visible\s*\{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
 check('bars animate when a mock comes into view',
   /\.mock\.lit \.bar i\s*\{\s*width:\s*var\(--pct\)/.test(css));
-check('each layout declares its own accent', LAYOUTS.every((l) => {
-  const block = css.split('.m-' + l.id)[1] || '';
-  return /--accent:\s*#[0-9a-f]{3,6}/i.test(block.slice(0, 700));
-}), LAYOUTS.map((l) => l.id).join(' '));
 
-/* every variant must react in its own idiom, so each block needs its own hover rules */
-const perLayoutHover = LAYOUTS.map((l) => {
-  const sel = new RegExp('\\.m-' + l.id + '[^{},]*:hover', 'g');
-  return [l.id, (css.match(sel) || []).length];
-});
-check('every direction has bespoke hover states',
-  perLayoutHover.every(([, n]) => n >= 4),
-  perLayoutHover.map(([id, n]) => `${id}:${n}`).join(' '));
+const blockOf = (sel) => {
+  const start = css.indexOf(sel + ' {');
+  return start === -1 ? '' : css.slice(start, css.indexOf('}', start));
+};
+const token = (sel, name) => {
+  const m = blockOf(sel).match(new RegExp('--' + name + ':\\s*([^;]+)', 'i'));
+  return m ? m[1].trim() : null;
+};
+
+check('the layout is written in palette tokens',
+  ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].every((n) => token('.m-atrium', n) !== null),
+  ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].filter((n) => !token('.m-atrium', n)).join(', ') || 'all present');
+
+const accents = THEMES.map((t) => [t.id, token(`.m-atrium.t-${t.id}`, 'accent')]);
+check('each palette declares its own accent',
+  accents.every(([, hex]) => hex !== null), accents.map(([id, hex]) => `${id}:${hex}`).join(' '));
+check('the five accents are five different colours',
+  new Set(accents.map(([, hex]) => hex)).size === 5, accents.map(([, hex]) => hex).join(' '));
+
+const fields = THEMES.map((t) => [t.id, token(`.m-atrium.t-${t.id}`, 'bg')]);
+check('the five fields are five different colours',
+  new Set(fields.map(([, hex]) => hex)).size === 5, fields.map(([id, hex]) => `${id}:${hex}`).join(' '));
+
+check('each palette keeps the notables / modifiers split',
+  THEMES.every((t) => token(`.m-atrium.t-${t.id}`, 'note') && token(`.m-atrium.t-${t.id}`, 'mod')
+    && token(`.m-atrium.t-${t.id}`, 'note') !== token(`.m-atrium.t-${t.id}`, 'mod')));
+
+/* ── one interaction language, kept ─────────────────────────────────────── */
+
+const hoverInLayout = (css.match(/\.m-atrium[^{},]*:hover/g) || []).length;
+check('the layout has bespoke hover states', hoverInLayout >= 6, hoverInLayout + ' states');
 
 /* the sheets are drawn at 1280×720 and scaled; nothing may claim to be bigger */
 check('the mock sheets are 1280×720',
@@ -278,12 +252,12 @@ check('mock art resolves from preview/designs', missingArt.length === 0,
   missingArt.length ? missingArt.join(', ') : `${sources.length} images, ${new Set(sources).size} unique`);
 
 check('every mock shows the app art, not just text',
-  LAYOUTS.every((l) => mockOf(l.id).querySelectorAll('img').length >= 3),
-  LAYOUTS.map((l) => `${l.id}:${mockOf(l.id).querySelectorAll('img').length}`).join(' '));
+  THEMES.every((t) => mockOf(t.id).querySelectorAll('img').length >= 3),
+  THEMES.map((t) => `${t.id}:${mockOf(t.id).querySelectorAll('img').length}`).join(' '));
 
 /* ── the cluster-jewel surface: nothing may be dropped for looks ─────────── */
 
-const perMock = (sel) => LAYOUTS.map((l) => [l.id, section(l.id).querySelectorAll(sel).length]);
+const perMock = (sel) => THEMES.map((t) => [t.id, section(t.id).querySelectorAll(sel).length]);
 
 const notables = perMock('.fx-notable');
 check('every mock names the notables of its combinations',
@@ -296,39 +270,41 @@ check('every mock names the cluster modifiers, not just the notables',
 const gear = perMock('.fx-gear');
 check('every mock states size, passives, iLvl floor and price',
   gear.every(([, n]) => n >= 1)
-  && LAYOUTS.every((l) => /12 passives/.test(text(section(l.id).querySelector('.fx-gear')))
-    && /iLvl \d+\+/.test(text(section(l.id).querySelector('.fx-gear')))
-    && /div/.test(text(section(l.id).querySelector('.fx-gear')))),
+  && THEMES.every((t) => /12 passives/.test(text(section(t.id).querySelector('.fx-gear')))
+    && /iLvl \d+\+/.test(text(section(t.id).querySelector('.fx-gear')))
+    && /div/.test(text(section(t.id).querySelector('.fx-gear')))),
   gear.map(([id, n]) => `${id}:${n}`).join(' '));
 
 const uniques = perMock('.fx-un');
 check('every mock counts the unique cluster jewels',
   uniques.every(([, n]) => n >= 2)
-  && LAYOUTS.every((l) => /Voices/.test(text(section(l.id))) && /Megalomaniac/.test(text(section(l.id)))
-    && /21/.test(text(section(l.id).querySelector('.fx-uniques'))) && /34/.test(text(section(l.id).querySelector('.fx-uniques')))),
+  && THEMES.every((t) => /Voices/.test(text(section(t.id))) && /Megalomaniac/.test(text(section(t.id)))
+    && /21/.test(text(section(t.id).querySelector('.fx-uniques'))) && /34/.test(text(section(t.id).querySelector('.fx-uniques')))),
   uniques.map(([id, n]) => `${id}:${n}`).join(' '));
 
 const routes = perMock('.fx-route');
 check('every mock lists all three crafting routes with tries and cost',
   routes.every(([, n]) => n === 3)
-  && LAYOUTS.every((l) => {
-    const r = section(l.id).querySelectorAll('.fx-route');
+  && THEMES.every((t) => {
+    const r = section(t.id).querySelectorAll('.fx-route');
     return [...r].every((row) => /in \d+/.test(text(row)) && /div/.test(text(row)));
   }),
   routes.map(([id, n]) => `${id}:${n}`).join(' '));
 
 check('the best route is marked in every mock',
-  LAYOUTS.every((l) => section(l.id).querySelectorAll('.fx-route.best').length === 1));
+  THEMES.every((t) => section(t.id).querySelectorAll('.fx-route.best').length === 1));
 
 check('every mock carries the all-builds totals',
-  LAYOUTS.every((l) => /124,363/.test(text(section(l.id)))
-    && /592/.test(text(section(l.id))) && /234/.test(text(section(l.id)))),
-  LAYOUTS.map((l) => (text(section(l.id)).match(/124,363/) ? 'ok' : 'missing')).join(' '));
+  THEMES.every((t) => /124,363/.test(text(section(t.id)))
+    && /592/.test(text(section(t.id))) && /234/.test(text(section(t.id)))));
 
 check('every mock ranks the most-used notables',
-  LAYOUTS.every((l) => /68%/.test(text(section(l.id))) || /68 %/.test(text(section(l.id)))));
+  THEMES.every((t) => /68%/.test(text(section(t.id)))));
 
-/* ── and none of the ten may be bright ──────────────────────────────────── */
+check('every mock keeps the share percentages',
+  THEMES.every((t) => ['68%', '44%', '31%'].every((p) => text(section(t.id)).includes(p))));
+
+/* ── and none of the five may be bright ─────────────────────────────────── */
 
 const luminance = (hex) => {
   const h = hex.replace('#', '');
@@ -338,16 +314,9 @@ const luminance = (hex) => {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
 
-const backgrounds = LAYOUTS.map((l) => {
-  const start = css.indexOf('.m-' + l.id + ' {');
-  const block = css.slice(start, css.indexOf('}', start));
-  const m = block.match(/--bg:\s*(#[0-9a-f]{3,6})/i) || block.match(/background:\s*(#[0-9a-f]{3,6})/i);
-  return [l.id, m ? m[1] : null];
-});
-
-check('every direction is dark — no light variant survives',
-  backgrounds.every(([, hex]) => hex && luminance(hex) < 0.2),
-  backgrounds.map(([id, hex]) => `${id}:${hex}${hex ? ' L=' + luminance(hex).toFixed(3) : ''}`).join(' '));
+check('every palette is dark — no light variant survives',
+  fields.every(([, hex]) => hex && luminance(hex) < 0.2),
+  fields.map(([id, hex]) => `${id}:${hex} L=${luminance(hex).toFixed(3)}`).join(' '));
 
 const bright = (css.match(/#(?:fff|ffffff|f8f8f8|fafafa|fbfbfb|fdf6e3|f6efe4)\b/gi) || []);
 check('the sheet paints no white or cream surface', bright.length === 0, bright.join(', ') || 'none');
@@ -391,14 +360,11 @@ check('no brown or green anywhere in the palettes', banned.length === 0,
     ? banned.slice(0, 8).map(([n, c]) => `${n} h${Math.round(c.h)}`).join(', ')
     : `${new Set(paletteColours.map(([n]) => n)).size} colours, all outside the brown and green bands`);
 
-/* and every direction's accent has to survive the same test on its own */
-const accentHues = LAYOUTS.map((l) => {
-  const start = css.indexOf('.m-' + l.id + ' {');
-  const block = css.slice(start, css.indexOf('}', start));
-  const m = block.match(/--accent:\s*(#[0-9a-f]{3,6})/i);
-  return [l.id, m ? hslOf(parseInt(m[1].slice(1, 3), 16), parseInt(m[1].slice(3, 5), 16), parseInt(m[1].slice(5, 7), 16)) : null];
-});
-check('no direction is accented in brown or green',
+/* and every palette's accent has to survive the same test on its own */
+const accentHues = accents.map(([id, hex]) => [id, hex
+  ? hslOf(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16))
+  : null]);
+check('no palette is accented in brown or green',
   accentHues.every(([, c]) => c && !brownOrGreen(c)),
   accentHues.map(([id, c]) => `${id}:h${c ? Math.round(c.h) : '?'}`).join(' '));
 
@@ -407,8 +373,8 @@ check('no direction is accented in brown or green',
 /* the bars light on the next animation frame, so the last checks wait for one */
 setTimeout(() => {
   check('every mock lit its bars on first paint',
-    LAYOUTS.every((l) => mockOf(l.id).classList.contains('lit')),
-    LAYOUTS.filter((l) => !mockOf(l.id).classList.contains('lit')).map((l) => l.id).join(', ') || 'all ten');
+    THEMES.every((t) => mockOf(t.id).classList.contains('lit')),
+    THEMES.filter((t) => !mockOf(t.id).classList.contains('lit')).map((t) => t.id).join(', ') || 'all five');
 
   check('nothing errors after a frame', errors.length === 0, errors.join(' | ') || 'none');
 

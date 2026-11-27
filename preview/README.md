@@ -45,24 +45,35 @@ above the combination list already covers it.
 
 ## Design gallery
 
-`/designs/` holds **ten directions for the interface**, built to be compared rather than used.
-They are ten different layouts, not ten colour schemes of one: an item inspection screen, a dense
-data grid, an editorial spread, a radial graph around the skill, a cinematic cover with the
-inspector panel from that radial direction, a three-plan comparison page, a game HUD with corner
-clusters, a command palette over blurred art, an A/B diff of two combinations, and a museum case
-with a plaque. **All ten are dark, and no palette
-uses brown or green.**
+`/designs/` holds the chosen direction, **Atrium**, in five palettes. It is the merge of the two
+earlier proposals that survived: **04**'s inspector panel and **05**'s cinematic cover. Full-bleed
+splash art, the skill and the three numbers at the top of the main column, the three combinations
+stacked top-down as full-width cards, and one glass panel on the right with the selected
+combination, the skill switcher, the notables ranking, the unique cluster jewels, the three
+crafting routes and the totals. **All five palettes are dark, and none uses brown or green.**
 
-Each shows the same screen, and the same *whole* cluster-jewel surface, so the comparison is fair:
-share, average and peak DPS, the three combinations with their notables (rose) and their cluster
-modifiers (azure), socketing (size · passives · iLvl floor · price), the unique cluster jewels
-(Voices 21, Megalomaniac 34), the most-used notables, the three crafting routes with tries and
-cost, and the all-builds totals (124,363 builds · 234 characters · 592 jewels).
+| # | palette | accent | field |
+|---|---------|--------|-------|
+| 01 | Rose | `#ff6b9d` | `#0b0812` — the original |
+| 02 | Amethyst | `#a78bfa` | `#0a0716` |
+| 03 | Cobalt | `#6d8cff` | `#080b18` |
+| 04 | Glacier | `#38bdf8` | `#06121a` |
+| 05 | Ash | `#c9d3e0` | `#0a0c11` |
 
-The frames are interactive, because a direction has to be judged by using it: every control lifts
-and glows on hover, presses under the cursor and takes focus; clicking a skill rewrites the build
-name; clicking a combination rewrites the crafting target; the size chips in the grid really narrow
-the list; bars grow to their share when a frame scrolls into view; `1:1` opens a frame at full size.
+The layout is written in palette tokens (`--accent`, `--bg`, `--glass`, `--line`, `--note`,
+`--mod`, …) and each palette only redefines those, so the five cannot drift apart. Notables always
+take one colour and cluster modifiers another, so the two feature categories stay readable in every
+palette.
+
+Every frame shows the whole cluster-jewel surface: share, average and peak DPS, the three
+combinations with their notables and modifiers, socketing (size · passives · iLvl floor · price),
+the unique cluster jewels (Voices 21, Megalomaniac 34), the most-used notables, the three crafting
+routes with tries and cost, and the all-builds totals (124,363 builds · 234 characters · 592
+jewels).
+
+The frames are interactive: every control lifts and glows on hover, presses under the cursor and
+takes focus; clicking a skill rewrites the build name; clicking a combination rewrites the crafting
+target; bars grow to their share when a frame scrolls into view; `1:1` opens a frame at full size.
 Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
