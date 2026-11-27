@@ -278,6 +278,7 @@ img { display: block; }
 .m-atrium .a-notrow b { text-align: right; color: var(--accent-soft); font-variant-numeric: tabular-nums; }
 .m-atrium .a-notrow:hover span { color: var(--text); }
 .m-atrium .a-notrow:hover b { color: var(--text); }
+.m-atrium .a-dotrule { height: 0; margin: 8px 0 7px; border-top: 1px dotted var(--faint); opacity: .7; }
 .m-atrium .a-selbar:hover .bar i { filter: saturate(160%) brightness(1.15); }
 .m-atrium .a-panel .fx-uniques:hover .fx-un { opacity: 1; }
 .m-atrium .a-panel .fx-uniques { margin-bottom: 2px; }

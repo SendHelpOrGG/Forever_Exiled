@@ -290,6 +290,23 @@ const token = (sel, name) => {
   return m ? m[1].trim() : null;
 };
 
+/* ── a dotted rule splits the ranking from the unique jewels ─────────────── */
+
+{
+  const mock = mockOf('crimson');
+  const rule = mock.querySelector('.a-dotrule');
+  const above = rule && rule.previousElementSibling;
+  const below = rule && rule.nextElementSibling;
+  const block = blockOf('.m-atrium .a-dotrule');
+  check('a dotted rule separates the ranking from the unique jewels',
+    Boolean(rule)
+    && Boolean(above) && above.classList.contains('a-notlist')
+    && Boolean(below) && below.classList.contains('a-caprow')
+    && /border-top:\s*1px\s+dotted\s+var\(--faint\)/.test(block)
+    && !/#[0-9a-f]{3,8}/i.test(block),
+    block.trim() || 'no rule');
+}
+
 /* ── settings is a page of its own, reached from the nav ─────────────────── */
 
 {
@@ -432,7 +449,9 @@ const rankH = 5 * cssNum('.m-atrium .a-notrow', 'font-size', 12) * 1.35
   + 4 * cssNum('.m-atrium .a-notlist', 'gap', 2);
 const routeH = 3 * (cssNum('.m-atrium .a-routes .fx-route', 'font-size', 11.5) * 1.35
   + 2 * boxNums('.m-atrium .a-routes .fx-route', 'padding', [2, 0])[0]);
-const panelH = panelPad * 2 + panelGap * 9 + selH
+const dotM = boxNums('.m-atrium .a-dotrule', 'margin', [8, 0, 7]);
+const dotH = dotM[0] + dotM[2] + 1;
+const panelH = panelPad * 2 + panelGap * 9 + selH + dotH
   + cssNum('.m-atrium .a-pick', 'width', 34) + 8
   + 3 * (capF * 1.2 + capM[0] + capM[2])
   + rankH + 24

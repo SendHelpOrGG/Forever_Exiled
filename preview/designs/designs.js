@@ -203,6 +203,8 @@ L.atrium = () => {
       <p class="a-cap">Most used notables</p>
       <div class="a-notlist">${D.notables.map(([n, pc]) => `<div class="a-notrow"><span>${n}</span><i style="--p:${pc}%"></i><b>${pc}%</b></div>`).join('')}</div>
 
+      <div class="a-dotrule" aria-hidden="true"></div>
+
       <div class="a-caprow">
         <p class="a-cap">Unique cluster jewels</p>
         <button class="a-switch on" data-toggle="uniques" aria-pressed="true" title="Show unique cluster jewels"><i></i></button>
