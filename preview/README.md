@@ -116,17 +116,32 @@ Nothing there is wired to the app, and the app does not link to it.
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
                                              #   /designs/backdrops.html is the background study
-NODE_PATH=… node tools/designs_check.js      # 118 checks: ten dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 124 checks: ten dark layouts, no brown or green, full feature surface, live controls, six plates per frame
 ```
 
-### The frame — the grove plate, in all ten palettes
+### The frame — six plates, one per destination
 
-Every mock in `/designs/` now hangs **Oshabi in the Sacred Grove** behind it
-(`assets/splash/bleed_grove.jpg`, 1440 × 810) at the **subtle** step of the study. One layer, three
-parts: the `<img>`, an `<i>` that blends that palette's own `--accent` into the picture with
-`mix-blend-mode: color`, and a `<b>` scrim. Because the tint reads the palette token, the ten frames
-re-colour the same file — crimson gives a plum night, noir a silver one, honey an amber one — and
-the markup is identical in all ten, so a palette still changes colour only.
+Every mock in `/designs/` hangs Path of Exile art behind it, and the destination you pick decides
+which picture is showing. All six are 1440 × 810 at the **subtle** step of the study, and each was
+recut so its subject already sits in the open band:
+
+| Destination | Plate | What it is |
+| --- | --- | --- |
+| Cluster Jewels | `bleed_grove.jpg` | Oshabi in the Sacred Grove, as supplied |
+| Watcher's Eyes | `bleed_colossus.jpg` | official key art, recut around the crossed head |
+| Rare Items | `bg_izaro_wide.jpg` | the painted Emperor, Izaro, cut to 16:9 |
+| Flasks | `bleed_heroine.jpg` | a Path of Exile 2 loading screen, cropped to a bust |
+| Economy | `bleed_beast.jpg` | key art around the horns, nearly monochrome |
+| Settings | `bleed_graveyard.jpg` | the cemetery at dusk, low brightness |
+
+One layer, three parts: the six `<img>`, an `<i>` that blends that palette's own `--accent` into
+whichever picture is lit with `mix-blend-mode: color`, and a `<b>` scrim. The chosen destination is
+written on the frame (`data-tab`, same node the layout class sits on), the six `[data-tab]` rules
+light one picture and leave the other five at zero, so a tab switch cross-fades the painting
+instead of reloading it — and **Cancel** or **Save** brings back the plate of the tab you came
+from, along with the bar highlight. Because the tint reads the palette token, the ten frames
+re-colour the same six files — crimson gives a plum night, noir a silver one, honey an amber one —
+and the markup is identical in all ten, so a palette still changes colour only.
 
 Layout constraints it obeys: the layer sits **above** `.a-shade` (underneath it a 1440 px painting
 survives at about 4 % and vanishes), and it is masked with a soft core over the one open band —

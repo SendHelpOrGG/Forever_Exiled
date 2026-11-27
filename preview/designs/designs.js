@@ -87,7 +87,20 @@ const D = {
 
 const bar = (pct) => `<span class="bar" style="--pct:${pct}%"><i></i></span>`;
 const stat = (label, value) => `<div class="stat"><em>${label}</em><b class="num">${value}</b></div>`;
-const navLinks = (cls) => D.nav.map((n, i) => `<a class="${cls}${i === 0 ? ' on' : ''}" data-nav data-view="main">${n}</a>`).join('');
+/* One plate per destination. All six are 16:9, so the frame never crops them; each was recut so its
+   subject already sits in the open band — beside the title, above the cards, left of the panel. */
+const PLATES = [
+  ['clusters', 'bleed_grove.jpg'],
+  ['watchers', 'bleed_colossus.jpg'],
+  ['rare', 'bg_izaro_wide.jpg'],
+  ['flasks', 'bleed_heroine.jpg'],
+  ['economy', 'bleed_beast.jpg'],
+  ['settings', 'bleed_graveyard.jpg'],
+];
+const plateArt = () => PLATES
+  .map(([tab, file]) => `<img data-plate="${tab}" src="${A}/splash/${file}" alt="">`).join('');
+/* the five main destinations are the first five plates, in the same order */
+const navLinks = (cls) => D.nav.map((n, i) => `<a class="${cls}${i === 0 ? ' on' : ''}" data-nav data-view="main" data-tab="${PLATES[i][0]}">${n}</a>`).join('');
 const sizeChips = () => ['LARGE 13', 'MEDIUM 5', 'SMALL 2']
   .map((l) => `<button class="sz" data-size="${l.split(' ')[0].toLowerCase()}">${l}</button>`).join('');
 
@@ -132,14 +145,14 @@ L.atrium = () => {
   return `
   <div class="a-shade"></div>
   <div class="a-photo" aria-hidden="true">
-    <img src="${A}/splash/bleed_grove.jpg" alt="">
+    ${plateArt()}
     <i></i>
     <b></b>
   </div>
 
   <header class="a-bar">
     <span class="a-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
-    <nav class="a-tabs">${navLinks('')}<span class="a-navsep"></span><a class="a-tab-set" data-nav data-view="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"></circle><circle cx="12" cy="12" r="7.6" stroke-dasharray="2.4 4.1"></circle><path d="M12 1.9v2.4M12 19.7v2.4M3.1 12h2.4M18.5 12h2.4"></path></svg><span>Settings</span></a></nav>
+    <nav class="a-tabs">${navLinks('')}<span class="a-navsep"></span><a class="a-tab-set" data-nav data-view="settings" data-tab="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"></circle><circle cx="12" cy="12" r="7.6" stroke-dasharray="2.4 4.1"></circle><path d="M12 1.9v2.4M12 19.7v2.4M3.1 12h2.4M18.5 12h2.4"></path></svg><span>Settings</span></a></nav>
     <div class="a-barright">
       <button class="a-sync" data-press>Sync ladder</button>
     </div>
@@ -391,7 +404,7 @@ function variantSection(v, index) {
         </div>
         <div class="v-swatches">${v.sw.map((c) => `<i style="background:${c}" title="${c}"></i>`).join('')}</div>
       </div>
-      <div class="v-frame"><div class="mock m-${v.layout || v.id} t-${v.theme || v.id}" data-layout="${v.id}">${L[v.layout || v.id]()}</div></div>
+      <div class="v-frame"><div class="mock m-${v.layout || v.id} t-${v.theme || v.id}" data-layout="${v.id}" data-tab="clusters">${L[v.layout || v.id]()}</div></div>
       <div class="v-notes">
         <div><b>Keeps</b><span>${v.keeps}</span></div>
         <div><b>Costs</b><span>${v.costs}</span></div>
@@ -420,6 +433,8 @@ function wireMock(mock) {
       if (at !== -1) mock.dataset.lastTab = String(at);
       pickAll('[data-nav]', nav);
       mock.classList.toggle('view-settings', nav.dataset.view === 'settings');
+      /* the plate follows the destination, exactly like the bar highlight does */
+      mock.dataset.tab = nav.dataset.tab || 'clusters';
       return;
     }
 
@@ -428,6 +443,7 @@ function wireMock(mock) {
       const main = [...mock.querySelectorAll('[data-nav][data-view="main"]')];
       const back = Math.min(Number(mock.dataset.lastTab || 0), main.length - 1);
       main.forEach((n, i) => n.classList.toggle('on', i === back));
+      if (main[back]) mock.dataset.tab = main[back].dataset.tab || 'clusters';
       const setTab = mock.querySelector('[data-nav][data-view="settings"]');
       if (setTab) setTab.classList.remove('on');
       return;

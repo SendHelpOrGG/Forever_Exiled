@@ -200,26 +200,39 @@ img { display: block; }
   background: var(--bg); color: var(--text); overflow: hidden; position: relative;
 }
 /* ── the background ────────────────────────────────────────────────────────────
-   The grove plate, at the subtle step of the study: one <img> carrying the art, an <i> that blends
-   the palette's own accent into it with mix-blend-mode: color, and a <b> scrim. It sits above the
-   gradient wash (below it the picture survives at about 4 % and disappears) and is masked with a
-   soft core over the open band — beside the title, above the cards, left of the panel — that never
-   falls below 30 %, so the art is present across the frame and strongest where no text is written.
-   The panel (z-index 1) and the layout (z-index 2) still paint over the top. */
+   Six plates, one per destination, at the subtle step of the study: six <img> carrying the art, an
+   <i> that blends the palette's own accent into whichever one is lit with mix-blend-mode: color,
+   and a <b> scrim. The layer sits above the gradient wash (below it a 1440 px painting survives at
+   about 4 % and disappears) and is masked with a soft core over the open band — beside the title,
+   above the cards, left of the panel — that never falls below 30 %, so the art is present across
+   the frame and strongest where no text is written. The panel (z-index 1) and the layout
+   (z-index 2) still paint over the top. */
 
-.m-atrium .a-photo { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; z-index: 0; opacity: .7; }
+.m-atrium .a-photo {
+  position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; z-index: 0; opacity: .7;
+  --plate-mask: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+}
 
 .m-atrium .a-photo img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%;
   filter: grayscale(.86) saturate(.9) contrast(1.04) brightness(.95);
-  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
-  mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+  -webkit-mask-image: var(--plate-mask); mask-image: var(--plate-mask);
 }
+
+/* One plate per destination: the tab you pick decides which picture is showing, so a switch is a
+   cross-fade between two paintings rather than the same picture under a new label. A layer with no
+   data-plate on its <img> — the background study builds those — keeps the plain, always-on picture. */
+.m-atrium .a-photo img[data-plate] { opacity: 0; transition: opacity .45s ease; }
+.m-atrium[data-tab="clusters"] .a-photo img[data-plate="clusters"],
+.m-atrium[data-tab="watchers"] .a-photo img[data-plate="watchers"],
+.m-atrium[data-tab="rare"] .a-photo img[data-plate="rare"],
+.m-atrium[data-tab="flasks"] .a-photo img[data-plate="flasks"],
+.m-atrium[data-tab="economy"] .a-photo img[data-plate="economy"],
+.m-atrium[data-tab="settings"] .a-photo img[data-plate="settings"] { opacity: 1; }
 
 .m-atrium .a-photo i {
   position: absolute; inset: 0; background: var(--accent); opacity: .26; mix-blend-mode: color;
-  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
-  mask-image: radial-gradient(ellipse 46% 50% at 52% 40%, #000 0%, #000 34%, rgba(0, 0, 0, .62) 70%, rgba(0, 0, 0, .3) 100%);
+  -webkit-mask-image: var(--plate-mask); mask-image: var(--plate-mask);
 }
 
 .m-atrium .a-photo b {

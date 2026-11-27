@@ -77,6 +77,8 @@ const PICKS = '[data-pick]';
 const section = (id) => document.getElementById(id);
 const mockOf = (id) => section(id).querySelector('.mock');
 const classesOf = (el) => [...el.querySelectorAll('[class]')].flatMap((n) => [...n.classList]);
+/* read before any test clicks a tab: the plate every frame opens on */
+const openingPlates = THEMES.map((t) => [t.id, mockOf(t.id).getAttribute('data-tab')]);
 
 /* ── the gallery itself ─────────────────────────────────────────────────── */
 
@@ -372,15 +374,83 @@ const token = (sel, name) => {
 check('the generic row rule excludes the background layers',
   /\.m-atrium > \*:not\(\.a-backdrop\):not\(\.a-shade\):not\(\.a-veil\)/.test(css));
 
-/* the chosen background: the grove plate, in every palette, above the wash, at the subtle step */
+/* ── the backgrounds: six plates, one per destination ───────────────────── */
+
+const PLATES = [
+  ['clusters', 'bleed_grove.jpg'],
+  ['watchers', 'bleed_colossus.jpg'],
+  ['rare', 'bg_izaro_wide.jpg'],
+  ['flasks', 'bleed_heroine.jpg'],
+  ['economy', 'bleed_beast.jpg'],
+  ['settings', 'bleed_graveyard.jpg'],
+];
+const flat = css.replace(/\n/g, ' ');
 const artOf = (id) => mockOf(id).querySelector('.a-photo');
-check('every palette hangs the same grove plate behind the frame',
+const platesOf = (id) => [...mockOf(id).querySelectorAll('.a-photo img[data-plate]')];
+const jpegSize = (file) => {
+  const buf = fs.readFileSync(file);
+  let i = 2;
+  while (i < buf.length - 9) {
+    if (buf[i] !== 0xFF) { i++; continue; }
+    const m = buf[i + 1];
+    if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) {
+      return [buf.readUInt16BE(i + 7), buf.readUInt16BE(i + 5)];
+    }
+    i += 2 + buf.readUInt16BE(i + 2);
+  }
+  return [0, 0];
+};
+
+check('every frame hangs six plates, one per destination',
   THEMES.every((t) => {
-    const photo = artOf(t.id);
-    const img = photo && photo.querySelector('img');
-    return !!img && /\/assets\/splash\/bleed_grove\.jpg$/.test(img.getAttribute('src') || '');
+    const imgs = platesOf(t.id);
+    return imgs.length === PLATES.length && PLATES.every(([tab, file]) => imgs.some((img) =>
+      img.getAttribute('data-plate') === tab &&
+      String(img.getAttribute('src')).endsWith('/assets/splash/' + file)));
   }),
-  THEMES.filter((t) => !/bleed_grove/.test((artOf(t.id) || { innerHTML: '' }).innerHTML.replace(/&quot;/g, ''))).map((t) => t.id).join(' ') || 'all ten');
+  THEMES.map((t) => platesOf(t.id).length).join(' ') + ' plates each');
+
+check('all six plates are real files at 16:9, so the frame never crops a subject',
+  PLATES.every(([, file]) => {
+    const [w, h] = jpegSize(path.join(root, 'assets', 'splash', file));
+    return w >= 1200 && Math.abs(w / h - 16 / 9) < 0.02;
+  }),
+  PLATES.map(([, file]) => {
+    const [w, h] = jpegSize(path.join(root, 'assets', 'splash', file));
+    return file.replace(/\.jpg$/, '') + ' ' + w + '×' + h;
+  }).join(' · '));
+
+check('the frame opens on the grove, like the bar does',
+  openingPlates.length === THEMES.length && openingPlates.every(([, tab]) => tab === 'clusters'),
+  openingPlates.map(([, tab]) => tab).join(' '));
+
+check('the bar names the five main plates and the gear names the sixth', (() => {
+  const tabs = [...mockOf('crimson').querySelectorAll('[data-nav]')].map((n) => n.getAttribute('data-tab'));
+  return JSON.stringify(tabs) === JSON.stringify(PLATES.map(([tab]) => tab));
+})(), [...mockOf('crimson').querySelectorAll('[data-nav]')].map((n) => n.getAttribute('data-tab')).join(' '));
+
+check('picking a destination lights its own plate', (() => {
+  const mock = mockOf('violet');
+  const links = [...mock.querySelectorAll('[data-nav]')];
+  const bad = [];
+  for (const [tab] of PLATES) {
+    const link = links.find((n) => n.getAttribute('data-tab') === tab);
+    if (!link) { bad.push(tab + '→missing'); continue; }
+    click(link);
+    if (mock.getAttribute('data-tab') !== tab) bad.push(tab + '→' + mock.getAttribute('data-tab'));
+  }
+  return bad.length === 0;
+})(), PLATES.length + ' destinations');
+
+check('cancel brings back the plate of the tab you came from', (() => {
+  const mock = mockOf('cyan');
+  const main = [...mock.querySelectorAll('[data-nav][data-view="main"]')];
+  click(main[2]);
+  click(mock.querySelector('[data-nav][data-view="settings"]'));
+  const opened = mock.getAttribute('data-tab') === 'settings';
+  click(mock.querySelector('[data-return]'));
+  return opened && mock.getAttribute('data-tab') === main[2].getAttribute('data-tab');
+})(), 'settings → cancel');
 check('the art sits above the wash and below the layout',
   THEMES.every((t) => {
     const photo = artOf(t.id);
@@ -396,7 +466,16 @@ check('the palette owns the colour and the grade is the subtle step',
   && /\.m-atrium \.a-photo i \{[^}]*background:\s*var\(--accent\)/.test(css.replace(/\n/g, ' '))
   && /\.m-atrium \.a-photo img \{[^}]*filter:\s*grayscale\(\.86\)/.test(css.replace(/\n/g, ' ')));
 check('the art layer is masked away from the type column',
-  /\.m-atrium \.a-photo img \{[^}]*mask-image:\s*radial-gradient/.test(css.replace(/\n/g, ' ')));
+  /\.m-atrium \.a-photo \{[^}]*--plate-mask:\s*radial-gradient/.test(flat)
+  && /\.m-atrium \.a-photo img \{[^}]*mask-image:\s*var\(--plate-mask\)/.test(flat)
+  && /\.m-atrium \.a-photo i \{[^}]*mask-image:\s*var\(--plate-mask\)/.test(flat),
+  'one mask, worn by the picture and the tint');
+
+check('only the plate of the current tab is lit',
+  /\.m-atrium \.a-photo img\[data-plate\] \{[^}]*opacity:\s*0/.test(flat)
+  && PLATES.every(([tab]) => new RegExp('\\.m-atrium\\[data-tab="' + tab + '"\\] \\.a-photo img\\[data-plate="' + tab + '"\\]').test(flat))
+  && /transition:\s*opacity\s+\.45s/.test(flat),
+  PLATES.length + ' fades, nothing else showing');
 
 check('the layout is written in palette tokens',
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].every((n) => token('.m-atrium', n) !== null),
