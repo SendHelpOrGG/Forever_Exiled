@@ -83,6 +83,10 @@ Four controls are real, not decoration:
   a real toggle, not a hover;
 - the top bar carries a **settings control** beside the Sync ladder button — a real button with
   `aria-label`, a rotating gear on hover, a pressed state and a focus ring;
+- pressing it opens a **settings sheet** over a blurred scrim: league and snapshot, auto-refresh
+  interval, four cluster-jewel switches (unique jewels, group by notable, item tooltip on hover,
+  include jewels under iLvl 68), density and number format. The switches and segments really change
+  state, and the sheet closes on the ×, Cancel, Save or the scrim;
 - hovering any combination flies out the **cluster jewel tooltip**: generated name, base type
   (`Large / Medium / Small Cluster Jewel`), item level, passive count, the jewel-socket line, the
   cluster modifiers, the notables and the jewel itself. It is anchored to the row (centre for the top
