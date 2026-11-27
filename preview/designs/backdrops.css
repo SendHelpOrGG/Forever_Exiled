@@ -21,9 +21,9 @@
 .bg-ctl-group button:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
 .bg-ctl-group button.on { color: #0b1018; background: #9db4ff; font-weight: 600; }
 
-body[data-strength="subtle"] .a-veil { opacity: .24; }
-body[data-strength="medium"] .a-veil { opacity: .4; }
-body[data-strength="strong"] .a-veil { opacity: .58; }
+body[data-strength="subtle"] .a-veil { opacity: .3; }
+body[data-strength="medium"] .a-veil { opacity: .46; }
+body[data-strength="strong"] .a-veil { opacity: .66; }
 
 /* group headings inside the study */
 .bg-group {

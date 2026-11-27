@@ -755,9 +755,13 @@ check('every palette declares a pale, legal action colour',
   check('the background study loads like a page, not like a snippet',
     study.sections.length === 9 && study.mocks === 9,
     study.sections.join(' ') || 'no sections rendered');
-  check('the study separates the game-accurate pass from the first one',
-    (study.groups || []).join(' |') === 'Closer to the game |Earlier attempt',
+  check('the study separates the game references from the earlier ones',
+    (study.groups || []).join(' |') === 'From the game |Earlier attempt',
     (study.groups || []).join(' · ') || 'no groups');
+  check('the game group is four references, not four textures',
+    ['bg-cartouche', 'bg-izaro', 'bg-grove', 'bg-bestiary']
+      .every((id) => (study.sections || []).includes(id)),
+    (study.sections || []).slice(0, 4).join(' '));
   check('one direction keeps the portrait and eight draw vectors',
     study.portraits === 1 && study.veils === 8,
     `${study.portraits} portrait · ${study.veils} vector`);

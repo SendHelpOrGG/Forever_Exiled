@@ -116,7 +116,7 @@ Nothing there is wired to the app, and the app does not link to it.
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
                                              #   /designs/backdrops.html is the background study
-NODE_PATH=… node tools/designs_check.js      # 112 checks: ten dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 113 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
 
 ### Background study — `/designs/backdrops.html`
@@ -126,27 +126,27 @@ scaled to 1280, held at half opacity under three gradient washes, and graded per
 (grayscale, sepia, desaturate, saturate). It is atmosphere, and it says *class*, not *Path of
 Exile*. `backdrops.html` puts nine directions on the same frame in two groups.
 
-**Closer to the game** — the second pass. The first one failed because it drew *geometry*: even
-rings, ticks, uniform dots, which reads as a HUD. PoE's language is different, and it is four
-things: clusters of small round nodes with bronze rims, links that bow instead of running straight,
-a vignetted near-black field with film grain over it, and window chrome with scrollwork corners.
+**From the game** — the current pass, and the third. The first failed because it drew *geometry*
+(even rings, ticks, uniform dots — a HUD); the second drew *texture* (clusters, bowed links, grain —
+game-adjacent, not the game). This one draws four things the game actually has, to their real parts:
 
 | # | direction | what it is |
 |---|-----------|------------|
-| 01 | Passive tree | notables with a minor cluster around each, chained through waypoint nodes; bowed links, dark cups with bronze rims and glyphs, vignette + grain |
-| 02 | Filigree frame | the game's window chrome: double bronze hairline, scrollwork bracket in each corner, crest, diamond studs, grain |
-| 03 | Jewel socket | a socket the size of the frame: bronze ring, four claw prongs, tick collar, the real cluster-jewel art in the cup |
-| 04 | Atlas | fifteen star groups joined by bowed links, a few bronze nodes, a nebula in the accent |
+| 01 | The logo | the title cartouche: domed shield plate with three bust medallions on the rim, five tapered feathers fanning off each side, the wordmark engraved in gold, an engraved rule and diamond, five pendants hanging beneath, the blood on the plate as accent droplets |
+| 02 | Izaro | the Labyrinth shield: oval crest with the winged emblem, its tail feathers, the crown threaded on the staff above and the gem boss below, brass scrollwork either side, a maze floor |
+| 03 | Sacred Grove | the ring and its radial paving, the heart tree in the clearing, a branch arch springing off the ring and landing on it again with five lanterns hung along it, and three seed beds in primal, vivid and wild — the accent, the notable and the modifier hues |
+| 04 | Einhar | the bestiary: three cages with scroll tops and a lantern burning inside one, a net thrown across the corner, paw prints crossing the floor, a skull and a bone, a capture tally |
 
-**Earlier attempt**, kept so the difference is visible: the portrait wash (what ships today), the
-even rings of nodes, the cluster wheel, the atlas wheel and the tree + socket fusion.
+**Earlier attempt**, kept so the difference is visible: the passive tree, the portrait wash (what
+ships today), the filigree frame, the atlas wheel and the jewel socket.
 
 All of it is inline SVG drawn from the palette tokens — the bronze is `var(--gold)` at low opacity,
 which keeps it gold rather than muddying into brown — so nothing upscales and every one of the ten
 palettes re-tints it. A fade mask dissolves the drawing over the card column, and a **subtle /
-medium / strong** control settles the veil against the text. Nothing is wired into the gallery yet:
-`L.atrium()` is shared through `window.FE`, the study swaps the portrait for a drawing and leaves
-`/designs/` untouched.
+medium / strong** control (0.30 / 0.46 / 0.66) settles the veil against the text. Every direction is
+also rendered headless at full size while it is drawn, because the frame edge cuts what it cuts.
+Nothing is wired into the gallery yet: `L.atrium()` is shared through `window.FE`, the study swaps
+the portrait for a drawing and leaves `/designs/` untouched.
 
 ## What is real and what is simulated
 
