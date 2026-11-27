@@ -50,25 +50,25 @@ const D = {
   ],
   combos: [
     {
-      art: 'cluster_large', size: 'Large', passives: 12, ilvl: 75, price: '4.2 div', pct: 68, builds: 15, avg: '41.2M', char: 'Hazblast',
+      art: 'cluster_large', size: 'Large', passives: 12, ilvl: 75, price: '4.2 div', pct: 68, builds: 15, avg: '41.2M', char: 'Hazblast', jewel: 'Dragon Wound',
       notables: ['Prism Weave', 'Snowstorm', 'Sadist'],
       mods: ['+35% increased Effect of Small Passives', '+12% increased Cold Damage'],
       tags: ['Cold', 'Damage'],
     },
     {
-      art: 'cluster_medium', size: 'Medium', passives: 8, ilvl: 68, price: '2.6 div', pct: 44, builds: 10, avg: '38.7M', char: 'Veyra',
+      art: 'cluster_medium', size: 'Medium', passives: 8, ilvl: 68, price: '2.6 div', pct: 44, builds: 10, avg: '38.7M', char: 'Veyra', jewel: 'Frozen Halo',
       notables: ['Blanketed Snow', 'Cold to the Core'],
       mods: ['+25% increased Effect of Small Passives', 'Adds 4 to 6 Cold Damage to Spells'],
       tags: ['Cold', 'Spell'],
     },
     {
-      art: 'cluster_medium', size: 'Medium', passives: 6, ilvl: 84, price: '6.8 div', pct: 31, builds: 7, avg: '44.1M', char: 'Korrinth',
+      art: 'cluster_medium', size: 'Medium', passives: 6, ilvl: 84, price: '6.8 div', pct: 31, builds: 7, avg: '44.1M', char: 'Korrinth', jewel: 'Sleeting Gaze',
       notables: ['Eye to Eye', 'Repeater'],
       mods: ['+20% increased Projectile Damage', '+15% increased Attack Speed'],
       tags: ['Projectile', 'Speed'],
     },
     {
-      art: 'cluster_small', size: 'Small', passives: 3, ilvl: 50, price: '1.4 div', pct: 12, builds: 3, avg: '29.4M', char: 'Ashvane',
+      art: 'cluster_small', size: 'Small', passives: 3, ilvl: 50, price: '1.4 div', pct: 12, builds: 3, avg: '29.4M', char: 'Ashvane', jewel: 'Rime Spark',
       notables: ['Snowstorm'],
       mods: ['12% increased Cold Damage', '+8% to Cold Resistance'],
       tags: ['Cold', 'Resist'],
@@ -115,6 +115,18 @@ L.atrium = () => {
     n: D.combos.filter((c) => c.size === sz).length,
   }));
   const cls = (c) => `<span class="a-cls" title="${c.name}"><img src="${art.ascIcon(c.icon)}" alt="${c.name}">${c.name}</span>`;
+  const tip = (c) => `
+    <span class="a-tip" role="tooltip">
+      <span class="a-tiphead"><b>${c.jewel}</b><em>${c.size} Cluster Jewel</em></span>
+      <span class="a-tipbody">
+        <span class="a-tipline">Item Level: ${c.ilvl}</span>
+        <span class="a-tipline">Adds ${c.passives} Passive Skills</span>
+        <span class="a-tipline">1 Added Passive Skill is a Jewel Socket</span>
+        <span class="a-tipmods">${c.mods.map((m) => `<i>${m}</i>`).join('')}</span>
+        <span class="a-tipnotes">${c.notables.map((n) => `<i>${n}</i>`).join('')}</span>
+        <img class="a-tipjewel" src="${art.cluster(c.art)}" alt="">
+      </span>
+    </span>`;
   const top = D.combos[0];
 
   return `
@@ -168,6 +180,7 @@ L.atrium = () => {
               <b class="a-cardpct">${c.pct}%</b>
               <em class="a-cardchar" title="character">${c.char}</em>
             </span>
+            ${tip(c)}
           </button>`).join('')}
       </div>
     </section>

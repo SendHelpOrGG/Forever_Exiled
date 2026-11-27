@@ -219,7 +219,7 @@ img { display: block; }
 .m-atrium .a-sync:active { transform: translateY(1px); }
 
 .m-atrium .a-body { display: grid; grid-template-columns: minmax(0, 1fr) 344px; gap: 32px; padding: 24px 34px 20px; min-height: 0; overflow: hidden; }
-.m-atrium .a-main { display: grid; grid-template-rows: auto auto auto minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; }
+.m-atrium .a-main { position: relative; z-index: 2; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr); min-width: 0; min-height: 0; overflow: visible; }
 .m-atrium .a-kicker { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--accent-soft); }
 .m-atrium .a-kicker::before { content: ""; width: 26px; height: 1px; background: currentColor; }
 .m-atrium .a-titlerow { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
@@ -235,7 +235,7 @@ img { display: block; }
 .m-atrium .a-stats .stat:first-child .num { color: var(--accent-soft); }
 
 .m-atrium .a-list { display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; min-height: 0; }
-.m-atrium .a-card { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass-hi); backdrop-filter: blur(10px); text-align: left; }
+.m-atrium .a-card { position: relative; overflow: visible; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass-hi); backdrop-filter: blur(10px); text-align: left; }
 .m-atrium .a-cardart { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .1); }
 .m-atrium .a-cardbody { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .m-atrium .a-cardbody b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -251,7 +251,7 @@ img { display: block; }
 .m-atrium .a-card:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); }
 .m-atrium .a-card.off { opacity: .25; }
 
-.m-atrium .a-panel { display: flex; flex-direction: column; gap: 2px; padding: 16px;  border-radius: 14px; border: 1px solid var(--line2); background: var(--glass); backdrop-filter: blur(18px) saturate(120%); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .9); min-height: 0; overflow: hidden; }
+.m-atrium .a-panel { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 2px; padding: 16px;  border-radius: 14px; border: 1px solid var(--line2); background: var(--glass); backdrop-filter: blur(18px) saturate(120%); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .9); min-height: 0; overflow: hidden; }
 .m-atrium .a-cap { margin: 12px 0 6px; font-size: 8.5px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
 .m-atrium .a-cap:first-child { margin-top: 0; }
 .m-atrium .a-selected { padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line2); background: var(--glass-sel); display: flex; flex-direction: column; gap: 3px; }
@@ -342,6 +342,59 @@ img { display: block; }
 .m-atrium .a-panel > * { flex: 0 0 auto; }
 .m-atrium .a-panel > .a-totals { flex: 0 0 auto; }
 
+/* the cluster jewel tooltip — the surface a player actually reads before socketing */
+.m-atrium .a-tip {
+  position: absolute; left: calc(100% + 14px); width: 316px; z-index: 30;
+  display: flex; flex-direction: column; padding: 0 0 10px;
+  background: rgba(8, 7, 12, .98); border: 1px solid var(--accent); border-radius: 10px;
+  box-shadow: 0 44px 90px -34px rgba(0, 0, 0, .95), 0 0 0 1px rgba(0, 0, 0, .55);
+  text-align: center; opacity: 0; visibility: hidden;
+  transition: opacity .12s ease, visibility .12s ease;
+  pointer-events: none;
+}
+.m-atrium .a-card:hover .a-tip, .m-atrium .a-card:focus-visible .a-tip { opacity: 1; visibility: visible; }
+.m-atrium .a-card:nth-child(1) .a-tip,
+.m-atrium .a-card:nth-child(2) .a-tip { top: 50%; transform: translateY(-50%); }
+.m-atrium .a-card:nth-child(3) .a-tip,
+.m-atrium .a-card:nth-child(4) .a-tip { bottom: 0; }
+.m-atrium .a-tiphead { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px 8px; border-bottom: 1px solid var(--line2); background: linear-gradient(180deg, var(--glass-sel), transparent); }
+.m-atrium .a-tiphead b { font-size: 15px; font-weight: 700; letter-spacing: .01em; color: var(--accent-soft); }
+.m-atrium .a-tiphead em { font-style: normal; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.m-atrium .a-tipbody { display: flex; flex-direction: column; gap: 3px; padding: 9px 14px 0; }
+.m-atrium .a-tipline { font-size: 10.5px; color: var(--muted); }
+.m-atrium .a-tipmods, .m-atrium .a-tipnotes { display: flex; flex-direction: column; gap: 3px; padding-top: 7px; margin-top: 4px; border-top: 1px solid var(--line); }
+.m-atrium .a-tipmods i { font-style: normal; font-size: 10.5px; color: var(--mod); }
+.m-atrium .a-tipnotes i { font-style: normal; font-size: 10.5px; color: var(--note); }
+.m-atrium .a-tipjewel { display: block; width: 40px; height: 40px; object-fit: contain; margin: 10px auto 0; }
+
+/* 02 · the pale yellow lands on values, never on a surface */
+.m-atrium.t-violet .a-kicker,
+.m-atrium.t-violet .a-stats .stat:first-child .num,
+.m-atrium.t-violet .a-stats .val,
+.m-atrium.t-violet .a-cardpct,
+.m-atrium.t-violet .a-notrow b,
+.m-atrium.t-violet .a-target,
+.m-atrium.t-violet .fx-route.best b { color: var(--gold); }
+.m-atrium.t-violet .a-notrow i { background: linear-gradient(90deg, var(--gold), var(--gold-soft)); }
+.m-atrium.t-violet .a-cardbody .bar i,
+.m-atrium.t-violet .a-selected .bar i { background: linear-gradient(90deg, rgba(239, 228, 176, .75), var(--gold-soft)); }
+.m-atrium.t-violet .a-gem { border-color: rgba(239, 228, 176, .42); }
+.m-atrium.t-violet .a-tabs a.on { border-color: rgba(239, 228, 176, .45); }
+
+/* 03 · the pale red does the same job */
+.m-atrium.t-azure .a-kicker,
+.m-atrium.t-azure .a-stats .stat:first-child .num,
+.m-atrium.t-azure .a-stats .val,
+.m-atrium.t-azure .a-cardpct,
+.m-atrium.t-azure .a-notrow b,
+.m-atrium.t-azure .a-target,
+.m-atrium.t-azure .fx-route.best b { color: var(--warm); }
+.m-atrium.t-azure .a-notrow i { background: linear-gradient(90deg, var(--warm), var(--warm-soft)); }
+.m-atrium.t-azure .a-cardbody .bar i,
+.m-atrium.t-azure .a-selected .bar i { background: linear-gradient(90deg, rgba(240, 179, 184, .75), var(--warm-soft)); }
+.m-atrium.t-azure .a-gem { border-color: rgba(240, 179, 184, .42); }
+.m-atrium.t-azure .a-tabs a.on { border-color: rgba(240, 179, 184, .45); }
+
 /* ── the five palettes ──────────────────────────────────────────────────── */
 
 /* 01 · crimson + gold — red chrome, yellow for every value the eye should land on */
@@ -382,6 +435,7 @@ img { display: block; }
   --v55: rgba(10, 8, 23, .55); --v70: rgba(10, 8, 23, .70); --v86: rgba(10, 8, 23, .86); --v95: rgba(10, 8, 23, .95);
   --line: rgba(205, 186, 255, .14); --line2: rgba(205, 186, 255, .26);
   --note: #c9a9ff; --mod: #6fd6ff;
+  --gold: #efe4b0; --gold-soft: #f8f2d2;
   --text: #f2efff; --muted: #b0a8c8; --faint: #8880a4;
 }
 
@@ -394,6 +448,7 @@ img { display: block; }
   --v55: rgba(7, 12, 24, .55); --v70: rgba(7, 12, 24, .70); --v86: rgba(7, 12, 24, .86); --v95: rgba(7, 12, 24, .95);
   --line: rgba(180, 205, 255, .14); --line2: rgba(180, 205, 255, .26);
   --note: #9dc0ff; --mod: #c8a6ff;
+  --warm: #f0b3b8; --warm-soft: #f9d8db;
   --text: #eef3ff; --muted: #a2aecb; --faint: #7c88a6;
 }
 

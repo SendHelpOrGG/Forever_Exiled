@@ -55,8 +55,8 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 | # | palette | accent | field |
 |---|---------|--------|-------|
 | 01 | Crimson | `#ff4d5e` + gold `#f2c94c` | `#0b080d` — the original, de-pinked |
-| 02 | Violet | `#a06bff` | `#0a0817` |
-| 03 | Azure | `#4b8dff` | `#070c18` |
+| 02 | Violet | `#a06bff` + pale yellow `#efe4b0` | `#0a0817` |
+| 03 | Azure | `#4b8dff` + pale red `#f0b3b8` | `#070c18` |
 | 04 | Cyan | `#2ad4e6` | `#061318` |
 | 05 | Noir | `#f4f6f8` | `#000000` — black and white, colour only |
 
@@ -80,7 +80,11 @@ Four controls are real, not decoration:
 - the **class icons** (Occultist, Elementalist, Assassin) come from the app's own ascendancy art in
   `preview/assets/asc_icons/`;
 - the **unique cluster jewels** can be switched off and back on from the panel header — the switch is
-  a real toggle, not a hover.
+  a real toggle, not a hover;
+- hovering any combination flies out the **cluster jewel tooltip**: generated name, base type
+  (`Large / Medium / Small Cluster Jewel`), item level, passive count, the jewel-socket line, the
+  cluster modifiers, the notables and the jewel itself. It is anchored to the row (centre for the top
+  two rows, bottom-aligned for the lower two), never takes the pointer, and paints above the panel.
 
 Every control lifts and glows on hover, presses under the cursor and takes focus; clicking a skill
 rewrites the build name; clicking a combination rewrites the crafting target; bars grow to their share

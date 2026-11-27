@@ -374,8 +374,47 @@ check('the mock footer clears the gallery zoom button',
   /\.m-atrium \.a-status \{[^}]*padding:\s*0 96px 0 34px/.test(css.replace(/\n/g, ' ')));
 
 check('no region can spill into its neighbour',
-  ['.m-atrium .a-body', '.m-atrium .a-main', '.m-atrium .a-panel']
-    .every((sel) => /overflow:\s*hidden/.test(blockOf(sel)) && /min-height:\s*0/.test(blockOf(sel))));
+  ['.m-atrium .a-body', '.m-atrium .a-panel']
+    .every((sel) => /overflow:\s*hidden/.test(blockOf(sel)) && /min-height:\s*0/.test(blockOf(sel)))
+  && /min-height:\s*0/.test(blockOf('.m-atrium .a-main')));
+
+/* ── the hover tooltip: the item card a player reads before socketing ────── */
+
+check('every combination carries an item tooltip',
+  THEMES.every((t) => section(t.id).querySelectorAll('.a-card .a-tip').length === 4),
+  THEMES.map((t) => section(t.id).querySelectorAll('.a-tip').length).join(' '));
+
+check('the tooltip states name, base type, item level, mods and notables',
+  THEMES.every((t) => {
+    const tips = [...section(t.id).querySelectorAll('.a-tip')];
+    return tips.every((tip) => text(tip.querySelector('.a-tiphead b')).length > 3
+      && /Cluster Jewel$/.test(text(tip.querySelector('.a-tiphead em')))
+      && /Item Level: \d+/.test(text(tip))
+      && /Passive Skills/.test(text(tip))
+      && tip.querySelectorAll('.a-tipmods i').length >= 2
+      && tip.querySelectorAll('.a-tipnotes i').length >= 1
+      && tip.querySelector('.a-tipjewel'));
+  }),
+  text(section('crimson').querySelector('.a-tiphead')));
+
+check('the tooltip is hidden until the card is hovered',
+  /\.m-atrium \.a-tip \{[^}]*opacity:\s*0[^}]*visibility:\s*hidden/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-card:hover \.a-tip[^{]*\{[^}]*opacity:\s*1[^}]*visibility:\s*visible/.test(css.replace(/\n/g, ' ')));
+
+check('the tooltip floats above the sheet and cannot block the pointer',
+  /z-index:\s*\d+/.test(blockOf('.m-atrium .a-tip'))
+  && /pointer-events:\s*none/.test(blockOf('.m-atrium .a-tip')));
+
+check('the tooltip paints above the panel it flies over',
+  /z-index:\s*2/.test(blockOf('.m-atrium .a-main')) && /z-index:\s*1/.test(blockOf('.m-atrium .a-panel'))
+  && /z-index:\s*30/.test(blockOf('.m-atrium .a-tip')));
+
+check('the tooltip is out of flow, so it can never push the layout',
+  /position:\s*absolute/.test(blockOf('.m-atrium .a-tip'))
+  && /overflow:\s*visible/.test(blockOf('.m-atrium .a-card')));
+
+check('the tooltip is anchored to its card on both sides of the list',
+  /\.a-card:nth-child\(1\) \.a-tip/.test(css) && /\.a-card:nth-child\(3\) \.a-tip/.test(css));
 
 const spaced = [
   '.m-atrium .a-headline', '.m-atrium .a-meta', '.m-atrium .a-stats', '.m-atrium .a-list',
@@ -522,6 +561,20 @@ check('the first palette carries a second, warm accent',
 check('no palette is accented in brown or green',
   accentHues.every(([, c]) => c && !brownOrGreen(c)),
   accentHues.map(([id, c]) => `${id}:h${c ? Math.round(c.h) : '?'}`).join(' '));
+
+
+
+check('the two new palettes carry their second accent',
+  (() => {
+    const warm = (sel, name) => {
+      const hex = token(sel, name);
+      if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return false;
+      const c = hslOf(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16));
+      return c.l > 0.6 && !brownOrGreen(c);
+    };
+    return warm('.m-atrium.t-violet', 'gold') && warm('.m-atrium.t-azure', 'warm');
+  })(),
+  `violet ${token('.m-atrium.t-violet', 'gold')} · azure ${token('.m-atrium.t-azure', 'warm')}`);
 
 /* ── report ─────────────────────────────────────────────────────────────── */
 
