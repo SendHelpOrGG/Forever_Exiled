@@ -365,7 +365,13 @@ label.field { cursor: text; }
 .lab > * { min-width: 0; }
 .lab > .page-head { grid-column: 1 / -1; }
 
-.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; row-gap: 8px; }
+.page-head > div { min-width: 0; }
+/* the same rule for the other two panes: a head row that cannot fit wraps instead of colliding */
+.meta-head, .ladder-head { flex-wrap: wrap; row-gap: 8px; }
+.meta-head > div, .ladder-head > div { min-width: 0; }
+.ladder-head .field.search.wide { flex: 1 1 240px; min-width: 0; }
+.btn-row { flex-wrap: wrap; row-gap: 6px; }
 .page-head .sub { margin-top: 3px; font-size: 15.5px; color: var(--text-3); }
 .page-head .sub b { color: var(--text-2); font-weight: 600; }
 
