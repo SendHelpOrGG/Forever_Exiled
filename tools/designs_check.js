@@ -182,6 +182,68 @@ for (const t of THEMES) {
   check(`${t.id}: picking a combination rewrites the craft target`, craftOk, `${combos[2].dataset.label} → ${craftAfter}`);
 }
 
+/* ── the four controls the app needs: size, character, classes, uniques ──── */
+
+check('every mock offers a cluster-size switch',
+  THEMES.every((t) => section(t.id).querySelectorAll('[data-size]').length === 4),
+  THEMES.map((t) => section(t.id).querySelectorAll('[data-size]').length).join(' '));
+
+{
+  const mock = mockOf('crimson');
+  const chips = [...mock.querySelectorAll('[data-size]')];
+  const shown = () => [...mock.querySelectorAll('[data-combo]')].filter((r) => !r.classList.contains('off'));
+
+  click(chips.find((c) => c.dataset.size === 'small'));
+  const small = shown().map((r) => r.dataset.clusterSize);
+  const smallOn = chips.find((c) => c.dataset.size === 'small').classList.contains('on');
+
+  click(chips.find((c) => c.dataset.size === 'medium'));
+  const medium = shown().map((r) => r.dataset.clusterSize);
+
+  click(chips[0]);
+  const all = shown().length;
+
+  check('the size switch really filters the combinations',
+    small.join() === 'Small' && smallOn && medium.join() === 'Medium,Medium' && all === 4,
+    `small → ${small.join(', ') || 'none'} · medium → ${medium.join(', ') || 'none'} · all → ${all}`);
+}
+
+check('every mock shows the class icons, not just the names',
+  THEMES.every((t) => {
+    const icons = [...section(t.id).querySelectorAll('.a-cls img')];
+    return icons.length === 3 && icons.every((i) => fs.existsSync(path.join(dir, i.getAttribute('src'))));
+  }),
+  THEMES.map((t) => section(t.id).querySelectorAll('.a-cls img').length).join(' '));
+
+check('every mock names the character running the combination',
+  THEMES.every((t) => {
+    const hero = text(section(t.id).querySelector('.a-char'));
+    const line = text(section(t.id).querySelector('.a-charln'));
+    const cards = [...section(t.id).querySelectorAll('.a-cardchar')].map(text);
+    return /Hazblast/.test(hero) && /Hazblast/.test(line)
+      && cards.length === 4 && cards.every((c) => c.length > 2) && cards[0] === 'Hazblast';
+  }),
+  text(section('crimson').querySelector('.a-char')) + ' · ' + text(section('crimson').querySelector('.a-charln')));
+
+check('the uniques can be switched off and back on',
+  (() => {
+    const mock = mockOf('crimson');
+    const sw = mock.querySelector('[data-toggle="uniques"]');
+    const box = mock.querySelector('[data-uniques]');
+    if (!sw || !box) return false;
+    click(sw);
+    const off = box.classList.contains('hidden') && !sw.classList.contains('on')
+      && sw.getAttribute('aria-pressed') === 'false';
+    click(sw);
+    const on = !box.classList.contains('hidden') && sw.classList.contains('on')
+      && sw.getAttribute('aria-pressed') === 'true';
+    return off && on;
+  })(),
+  'hides and restores the two unique chips');
+
+check('a hidden block is really hidden',
+  /\.a-uniques\.hidden\s*\{[^}]*display:\s*none/.test(css.replace(/\n/g, ' ')));
+
 check('every clickable carries an explicit label',
   qa('.mock [data-pick], .mock [data-combo]').every((el) => (el.dataset.label || '').trim().length > 2),
   qa('.mock [data-pick], .mock [data-combo]').length + ' targets');

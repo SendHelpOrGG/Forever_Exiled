@@ -26,13 +26,19 @@ const A = '../assets';
 const art = {
   gem: (n) => `${A}/gems/${n}.png`,
   asc: (n) => `${A}/asc/${n}.jpg`,
+  ascIcon: (n) => `${A}/asc_icons/asc_${n}.png`,
   cluster: (n) => `${A}/${n}.png`,
 };
 
 const D = {
   skill: {
     name: 'Winter Orb', gem: 'winter_orb', asc: 'occultist', damage: 'Cold',
-    classes: 'Occultist, Elementalist, Assassin', tags: ['Cold', 'Spell', 'Duration'],
+    classes: [
+      { name: 'Occultist', icon: 'occultist' },
+      { name: 'Elementalist', icon: 'elementalist' },
+      { name: 'Assassin', icon: 'assassin' },
+    ],
+    character: 'Hazblast', level: 97, tags: ['Cold', 'Spell', 'Duration'],
     builds: '1,910', pop: '20.5%', avg: '34.5M', peak: '145M', sampled: '21 of 24',
   },
   skills: [
@@ -44,22 +50,28 @@ const D = {
   ],
   combos: [
     {
-      art: 'cluster_large', size: 'Large', passives: 12, ilvl: 75, price: '4.2 div', pct: 68, builds: 15, avg: '41.2M',
+      art: 'cluster_large', size: 'Large', passives: 12, ilvl: 75, price: '4.2 div', pct: 68, builds: 15, avg: '41.2M', char: 'Hazblast',
       notables: ['Prism Weave', 'Snowstorm', 'Sadist'],
       mods: ['+35% increased Effect of Small Passives', '+12% increased Cold Damage'],
       tags: ['Cold', 'Damage'],
     },
     {
-      art: 'cluster_medium', size: 'Medium', passives: 8, ilvl: 68, price: '2.6 div', pct: 44, builds: 10, avg: '38.7M',
+      art: 'cluster_medium', size: 'Medium', passives: 8, ilvl: 68, price: '2.6 div', pct: 44, builds: 10, avg: '38.7M', char: 'Veyra',
       notables: ['Blanketed Snow', 'Cold to the Core'],
       mods: ['+25% increased Effect of Small Passives', 'Adds 4 to 6 Cold Damage to Spells'],
       tags: ['Cold', 'Spell'],
     },
     {
-      art: 'cluster_medium', size: 'Medium', passives: 6, ilvl: 84, price: '6.8 div', pct: 31, builds: 7, avg: '44.1M',
+      art: 'cluster_medium', size: 'Medium', passives: 6, ilvl: 84, price: '6.8 div', pct: 31, builds: 7, avg: '44.1M', char: 'Korrinth',
       notables: ['Eye to Eye', 'Repeater'],
       mods: ['+20% increased Projectile Damage', '+15% increased Attack Speed'],
       tags: ['Projectile', 'Speed'],
+    },
+    {
+      art: 'cluster_small', size: 'Small', passives: 3, ilvl: 50, price: '1.4 div', pct: 12, builds: 3, avg: '29.4M', char: 'Ashvane',
+      notables: ['Snowstorm'],
+      mods: ['12% increased Cold Damage', '+8% to Cold Resistance'],
+      tags: ['Cold', 'Resist'],
     },
   ],
   uniques: [{ name: 'Voices', count: 21 }, { name: 'Megalomaniac', count: 34 }],
@@ -97,7 +109,15 @@ const L = {};
    The merged 04 + 05 direction: cinematic cover, inspector panel, combinations
    stacked top-down. The five gallery entries below are palettes of this DOM.  */
 
-L.atrium = () => `
+L.atrium = () => {
+  const sizes = ['Large', 'Medium', 'Small'].map((sz) => ({
+    sz,
+    n: D.combos.filter((c) => c.size === sz).length,
+  }));
+  const cls = (c) => `<span class="a-cls" title="${c.name}"><img src="${art.ascIcon(c.icon)}" alt="${c.name}">${c.name}</span>`;
+  const top = D.combos[0];
+
+  return `
   <img class="a-backdrop" src="${art.asc(D.skill.asc)}" alt="">
   <div class="a-shade"></div>
 
@@ -109,15 +129,26 @@ L.atrium = () => `
 
   <div class="a-body">
     <section class="a-main">
-      <p class="a-kicker">Cluster Jewels · ${D.combos[0].size} · iLvl ${D.combos[0].ilvl}+</p>
-      <div class="a-titlerow">
-        <img class="a-gem" src="${art.gem(D.skill.gem)}" alt="">
-        <div>
-          <h1 data-hero-name>${D.skill.name}</h1>
-          <p class="a-sub">${D.skill.damage} damage · ${D.skill.classes}</p>
+      <div class="a-headline">
+        <p class="a-kicker">Cluster Jewels · iLvl 75+</p>
+        <div class="a-sizes" role="group" aria-label="Cluster size">
+          <button class="a-size on" data-size="" title="Every size"><span>All</span><b>${D.combos.length}</b></button>
+          ${sizes.map((s) => `<button class="a-size${s.n ? '' : ' dim'}" data-size="${s.sz.toLowerCase()}" title="${s.sz} clusters"><span>${s.sz}</span><b>${s.n}</b></button>`).join('')}
         </div>
       </div>
-      <p class="a-notarow">${notablesOf(D.combos[0])}</p>
+
+      <div class="a-titlerow">
+        <img class="a-gem" src="${art.gem(D.skill.gem)}" alt="">
+        <div class="a-titlebody">
+          <h1 data-hero-name>${D.skill.name}</h1>
+          <p class="a-sub">${D.skill.damage} damage · ${D.skill.tags.join(' · ')}</p>
+          <div class="a-meta">
+            <span class="a-char" title="character running this combination"><b>${D.skill.character}</b><em>lvl ${D.skill.level}</em></span>
+            <span class="a-classrow">${D.skill.classes.map(cls).join('')}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="a-stats" data-stats>
         ${stat('AVERAGE DPS', D.skill.avg)}${stat('PEAK DPS', D.skill.peak)}
         <div class="stat"><em>BUILDS</em><b class="val">${D.skill.builds}</b></div>
@@ -134,7 +165,10 @@ L.atrium = () => `
               ${gearOf(c)}
               ${bar(c.pct)}
             </span>
-            <span class="a-cardpct">${c.pct}%</span>
+            <span class="a-cardright">
+              <b class="a-cardpct">${c.pct}%</b>
+              <em class="a-cardchar" title="character">${c.char}</em>
+            </span>
           </button>`).join('')}
       </div>
     </section>
@@ -142,20 +176,24 @@ L.atrium = () => `
     <aside class="a-panel">
       <div class="a-selected">
         <p class="a-cap">Selected combination</p>
-        <h2>${D.combos[0].notables.join(' + ')}</h2>
-        ${notablesOf(D.combos[0])}
-        ${modsOf(D.combos[0])}
-        <span class="a-selgear">${gearOf(D.combos[0])}</span>
-        <span class="a-selbar">${bar(D.combos[0].pct)}</span>
+        <h2>${top.notables.join(' + ')}</h2>
+        <p class="a-charln">top build · <b>${top.char}</b> · ${D.skill.classes[0].name} · ${top.builds} builds</p>
+        ${notablesOf(top)}
+        ${modsOf(top)}
+        <span class="a-selgear">${gearOf(top)}</span>
+        <span class="a-selbar">${bar(top.pct)}</span>
       </div>
 
-      <div class="a-picks">${D.skills.map((s, i) => `<button class="a-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}</div>
+      <div class="a-picks">${D.skills.map((sk, i) => `<button class="a-pick${i === 0 ? ' on' : ''}" data-pick data-label="${sk.name}" title="${sk.name}"><img src="${art.gem(sk.gem)}" alt=""></button>`).join('')}</div>
 
       <p class="a-cap">Most used notables</p>
-      <div class="a-notlist">${D.notables.map(([n, p]) => `<div class="a-notrow"><span>${n}</span><i style="--p:${p}%"></i><b>${p}%</b></div>`).join('')}</div>
+      <div class="a-notlist">${D.notables.map(([n, pc]) => `<div class="a-notrow"><span>${n}</span><i style="--p:${pc}%"></i><b>${pc}%</b></div>`).join('')}</div>
 
-      <p class="a-cap">Unique cluster jewels</p>
-      ${uniquesOf()}
+      <div class="a-caprow">
+        <p class="a-cap">Unique cluster jewels</p>
+        <button class="a-switch on" data-toggle="uniques" aria-pressed="true" title="Show unique cluster jewels"><i></i></button>
+      </div>
+      <span class="a-uniques" data-uniques>${uniquesOf()}</span>
 
       <p class="a-cap">Crafting — 3 routes</p>
       <b class="a-target" data-craft-combo>Prism Weave + Snowstorm</b>
@@ -171,7 +209,7 @@ L.atrium = () => `
 
   <footer class="a-status" data-status><span>124,363 builds · 234 characters · 592 jewels · 34 combinations</span><span>snapshot demo-2026-11-07</span></footer>
 `;
-
+};
 
 const VARIANTS = [
   {
@@ -252,6 +290,15 @@ function wireMock(mock) {
 
     const nav = target.closest('[data-nav]');
     if (nav) { pickAll('[data-nav]', nav); return; }
+
+    const toggle = target.closest('[data-toggle]');
+    if (toggle) {
+      const on = !toggle.classList.contains('on');
+      toggle.classList.toggle('on', on);
+      toggle.setAttribute('aria-pressed', String(on));
+      mock.querySelectorAll('[data-' + toggle.dataset.toggle + ']').forEach((el) => el.classList.toggle('hidden', !on));
+      return;
+    }
 
     const size = target.closest('[data-size]');
     if (size) {

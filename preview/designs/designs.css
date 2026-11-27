@@ -231,8 +231,8 @@ img { display: block; }
 .m-atrium .a-kicker::before { content: ""; width: 26px; height: 1px; background: currentColor; }
 .m-atrium .a-titlerow { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
 .m-atrium .a-gem { width: 56px; height: 56px; object-fit: contain; border-radius: 12px; background: rgba(0, 0, 0, .4); border: 1px solid var(--line2); padding: 5px; }
-.m-atrium .a-titlerow h1 { margin: 0; font-size: 56px; line-height: .95; letter-spacing: -.04em; font-weight: 600; text-shadow: 0 20px 50px rgba(0, 0, 0, .6); }
-.m-atrium .a-sub { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.m-atrium .a-titlerow h1 { margin: 0; font-size: 50px; line-height: .95; letter-spacing: -.04em; font-weight: 600; text-shadow: 0 20px 50px rgba(0, 0, 0, .6); }
+.m-atrium .a-sub { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
 .m-atrium .a-notarow { margin: 10px 0 0; }
 .m-atrium .a-notarow .fx-notable { font-size: 12px; }
 .m-atrium .a-stats { display: flex; gap: 38px; margin-top: 18px; }
@@ -241,16 +241,16 @@ img { display: block; }
 .m-atrium .a-stats .num, .m-atrium .a-stats .val { font-size: 32px; }
 .m-atrium .a-stats .stat:first-child .num { color: var(--accent-soft); }
 
-.m-atrium .a-list { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
-.m-atrium .a-card { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass-hi); backdrop-filter: blur(10px); text-align: left; }
-.m-atrium .a-cardart { width: 56px; height: 56px; object-fit: contain; border-radius: 8px; background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .1); }
+.m-atrium .a-list { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.m-atrium .a-card { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass-hi); backdrop-filter: blur(10px); text-align: left; }
+.m-atrium .a-cardart { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .1); }
 .m-atrium .a-cardbody { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.m-atrium .a-cardbody b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-atrium .a-cardbody b { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .m-atrium .a-cardbody .fx-notables { gap: 2px 12px; }
 .m-atrium .a-cardbody .fx-notable { font-size: 10px; opacity: .9; }
-.m-atrium .a-cardbody .fx-mod { font-size: 10px; }
-.m-atrium .a-cardbody .fx-gear { display: block; font-size: 9.5px; }
-.m-atrium .a-cardbody .bar { height: 3px; background: rgba(255, 255, 255, .1); margin-top: 5px; }
+.m-atrium .a-cardbody .fx-mod { font-size: 9.5px; }
+.m-atrium .a-cardbody .fx-gear { display: block; font-size: 9px; }
+.m-atrium .a-cardbody .bar { height: 3px; background: rgba(255, 255, 255, .1); margin-top: 4px; }
 .m-atrium .a-cardpct { font-size: 22px; font-weight: 700; color: var(--accent-soft); font-variant-numeric: tabular-nums; }
 .m-atrium .a-card:hover { border-color: var(--accent); background: var(--glass-on); box-shadow: 0 22px 44px -26px var(--glow); transform: translateX(2px); }
 .m-atrium .a-card.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 22px 44px -26px var(--glow); }
@@ -298,6 +298,40 @@ img { display: block; }
 .m-atrium .a-target:hover { color: var(--text); }
 .m-atrium .a-status span:hover { color: var(--text); }
 .m-atrium .a-status { display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-top: 1px solid var(--line); font-size: 9.5px; color: var(--faint); }
+
+/* size switcher, character nickname, class icons, uniques switch */
+.m-atrium .a-headline { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.m-atrium .a-sizes { display: flex; gap: 4px; }
+.m-atrium .a-size { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); }
+.m-atrium .a-size b { font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums; }
+.m-atrium .a-size:hover { border-color: var(--accent); color: var(--text); }
+.m-atrium .a-size.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.m-atrium .a-size.on b { color: var(--accent-ink); opacity: .7; }
+.m-atrium .a-size.dim { opacity: .45; }
+.m-atrium .a-titlebody { min-width: 0; }
+.m-atrium .a-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.m-atrium .a-char { display: inline-flex; align-items: baseline; gap: 7px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line2); background: rgba(255, 255, 255, .04); }
+.m-atrium .a-char b { font-size: 11.5px; }
+.m-atrium .a-char em { font-style: normal; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.m-atrium .a-classrow { display: flex; align-items: center; gap: 6px; }
+.m-atrium .a-cls { display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; color: var(--muted); padding: 2px 8px 2px 2px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); }
+.m-atrium .a-cls img { width: 17px; height: 17px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, .18); }
+.m-atrium .a-cls:hover { border-color: var(--accent); color: var(--text); }
+.m-atrium .a-cardright { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.m-atrium .a-cardchar { font-style: normal; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.m-atrium .a-card:hover .a-cardchar { color: var(--accent-soft); }
+.m-atrium .a-charln { margin: 1px 0 2px; font-size: 9.5px; color: var(--faint); }
+.m-atrium .a-charln b { color: var(--accent-soft); font-weight: 600; }
+.m-atrium .a-caprow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.m-atrium .a-caprow .a-cap { margin-bottom: 5px; }
+.m-atrium .a-switch { position: relative; width: 26px; height: 15px; margin-bottom: 4px; border-radius: 999px; border: 1px solid var(--line2); background: rgba(0, 0, 0, .55); }
+.m-atrium .a-switch i { position: absolute; top: 2px; left: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--faint); transition: transform .16s ease, background .16s ease; }
+.m-atrium .a-switch.on { border-color: var(--accent); }
+.m-atrium .a-switch.on i { transform: translateX(11px); background: var(--accent); }
+.m-atrium .a-switch:hover { border-color: var(--accent); }
+.m-atrium .a-switch:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.m-atrium .a-uniques { display: block; }
+.m-atrium .a-uniques.hidden { display: none; }
 
 /* ── the five palettes ──────────────────────────────────────────────────── */
 

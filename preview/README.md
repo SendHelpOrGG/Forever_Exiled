@@ -47,9 +47,9 @@ above the combination list already covers it.
 
 `/designs/` holds the chosen direction, **Atrium**, in five palettes. It is the merge of the two
 earlier proposals that survived: **04**'s inspector panel and **05**'s cinematic cover. Full-bleed
-splash art, the skill and the three numbers at the top of the main column, the three combinations
-stacked top-down as full-width cards, and one glass panel on the right with the selected
-combination, the skill switcher, the notables ranking, the unique cluster jewels, the three
+splash art, the skill with its ascendancy icons and the character running it, the three numbers, and
+the combinations stacked top-down as full-width cards, with one glass panel on the right carrying the
+selected combination, the skill switcher, the notables ranking, the unique cluster jewels, the
 crafting routes and the totals. **All five palettes are dark, and none uses brown or green.**
 
 | # | palette | accent | field |
@@ -71,9 +71,20 @@ the unique cluster jewels (Voices 21, Megalomaniac 34), the most-used notables, 
 routes with tries and cost, and the all-builds totals (124,363 builds · 234 characters · 592
 jewels).
 
-The frames are interactive: every control lifts and glows on hover, presses under the cursor and
-takes focus; clicking a skill rewrites the build name; clicking a combination rewrites the crafting
-target; bars grow to their share when a frame scrolls into view; `1:1` opens a frame at full size.
+Four controls are real, not decoration:
+
+- the **size switch** (`All · Large · Medium · Small`, with counts) filters the combination list, and
+  each row carries its own size so the filter can be checked;
+- the **character nickname** — `Hazblast`, lvl 97 — sits in the hero and on every combination card,
+  with the top build named in the panel;
+- the **class icons** (Occultist, Elementalist, Assassin) come from the app's own ascendancy art in
+  `preview/assets/asc_icons/`;
+- the **unique cluster jewels** can be switched off and back on from the panel header — the switch is
+  a real toggle, not a hover.
+
+Every control lifts and glows on hover, presses under the cursor and takes focus; clicking a skill
+rewrites the build name; clicking a combination rewrites the crafting target; bars grow to their share
+when a frame scrolls into view; `1:1` opens a frame at full size.
 Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
