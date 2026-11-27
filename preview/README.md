@@ -46,11 +46,17 @@ above the combination list already covers it.
 ## Design gallery
 
 `/designs/` holds **ten directions for the interface**, built to be compared rather than used.
-They are ten different layouts, not ten colour schemes of one: a bento cockpit, an editorial spread
-on paper, a market terminal with a tape, a light product UI, a cinematic full-bleed hero, a treemap of
-the meta, a Swiss poster, a command palette over blurred art, a dense master/detail ledger and an art
-wall. Each shows the same screen — Winter Orb, its three combinations, the crafting card, the same
-234 sampled characters — so the comparison is fair.
+They are ten different layouts, not ten colour schemes of one: a bento cockpit, a technical
+schematic on dark drafting paper, a market terminal with a tape, a creative editor with a canvas
+and an inspector, a cinematic full-bleed hero, a treemap of the meta, a control-room console with
+faders and meters, a command palette over blurred art, a dense master/detail ledger and an art
+wall. **All ten are dark** — no light or cream variant survives.
+
+Each shows the same screen, and the same *whole* cluster-jewel surface, so the comparison is fair:
+share, average and peak DPS, the three combinations with their notables (gold) and their cluster
+modifiers (blue), socketing (size · passives · iLvl floor · price), the unique cluster jewels
+(Voices 21, Megalomaniac 34), the most-used notables, the three crafting routes with tries and
+cost, and the all-builds totals (124,363 builds · 234 characters · 592 jewels).
 
 The frames are interactive, because a direction has to be judged by using it: every control lifts
 and glows on hover, presses under the cursor and takes focus; clicking a skill rewrites the build
@@ -60,7 +66,7 @@ full size. Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
-NODE_PATH=… node tools/designs_check.js      # 55 checks: ten layouts, same content, live controls
+NODE_PATH=… node tools/designs_check.js      # 67 checks: ten dark layouts, full feature surface, live controls
 ```
 
 ## What is real and what is simulated

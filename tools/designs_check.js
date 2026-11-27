@@ -49,19 +49,19 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Obsidian', 'Codex', 'Terminal', 'Sanctum', 'Ember',
-  'Atlas', 'Brutalist', 'Prism', 'Ledger', 'Trophy',
+  'Obsidian', 'Blueprint', 'Terminal', 'Studio', 'Ember',
+  'Atlas', 'Switchboard', 'Prism', 'Ledger', 'Trophy',
 ];
 
 /* every layout shares the same contract; only its class namespace differs */
 const LAYOUTS = [
   { id: 'obsidian', prefix: 'o' },
-  { id: 'codex', prefix: 'c' },
+  { id: 'blueprint', prefix: 'g' },
   { id: 'terminal', prefix: 't' },
-  { id: 'sanctum', prefix: 's' },
+  { id: 'studio', prefix: 'u' },
   { id: 'ember', prefix: 'e' },
   { id: 'atlas', prefix: 'a' },
-  { id: 'brutalist', prefix: 'b' },
+  { id: 'switchboard', prefix: 'h' },
   { id: 'prism', prefix: 'p' },
   { id: 'ledger', prefix: 'l' },
   { id: 'trophy', prefix: 'w' },
@@ -152,7 +152,11 @@ check('every mock shows an average and a peak',
   }),
   LAYOUTS.map((l) => [...section(l.id).querySelectorAll(STATS)].map(text).join('/')).join(' · '));
 
-const CANON = ['Prism Weave + Snowstorm', 'Blanketed Snow + Cold to the Core', 'Eye to Eye + Repeater'];
+const CANON = [
+  'Prism Weave + Snowstorm + Sadist',
+  'Blanketed Snow + Cold to the Core',
+  'Eye to Eye + Repeater',
+];
 check('every mock lists the three combinations from the same data',
   LAYOUTS.every((l) => {
     const labels = [...section(l.id).querySelectorAll(COMBOS)].map((c) => c.dataset.label);
@@ -277,6 +281,77 @@ check('mock art resolves from preview/designs', missingArt.length === 0,
 check('every mock shows the app art, not just text',
   LAYOUTS.every((l) => mockOf(l.id).querySelectorAll('img').length >= 3),
   LAYOUTS.map((l) => `${l.id}:${mockOf(l.id).querySelectorAll('img').length}`).join(' '));
+
+/* ── the cluster-jewel surface: nothing may be dropped for looks ─────────── */
+
+const perMock = (sel) => LAYOUTS.map((l) => [l.id, section(l.id).querySelectorAll(sel).length]);
+
+const notables = perMock('.fx-notable');
+check('every mock names the notables of its combinations',
+  notables.every(([, n]) => n >= 3), notables.map(([id, n]) => `${id}:${n}`).join(' '));
+
+const mods = perMock('.fx-mod');
+check('every mock names the cluster modifiers, not just the notables',
+  mods.every(([, n]) => n >= 2), mods.map(([id, n]) => `${id}:${n}`).join(' '));
+
+const gear = perMock('.fx-gear');
+check('every mock states size, passives, iLvl floor and price',
+  gear.every(([, n]) => n >= 1)
+  && LAYOUTS.every((l) => /12 passives/.test(text(section(l.id).querySelector('.fx-gear')))
+    && /iLvl \d+\+/.test(text(section(l.id).querySelector('.fx-gear')))
+    && /div/.test(text(section(l.id).querySelector('.fx-gear')))),
+  gear.map(([id, n]) => `${id}:${n}`).join(' '));
+
+const uniques = perMock('.fx-un');
+check('every mock counts the unique cluster jewels',
+  uniques.every(([, n]) => n >= 2)
+  && LAYOUTS.every((l) => /Voices/.test(text(section(l.id))) && /Megalomaniac/.test(text(section(l.id)))
+    && /21/.test(text(section(l.id).querySelector('.fx-uniques'))) && /34/.test(text(section(l.id).querySelector('.fx-uniques')))),
+  uniques.map(([id, n]) => `${id}:${n}`).join(' '));
+
+const routes = perMock('.fx-route');
+check('every mock lists all three crafting routes with tries and cost',
+  routes.every(([, n]) => n === 3)
+  && LAYOUTS.every((l) => {
+    const r = section(l.id).querySelectorAll('.fx-route');
+    return [...r].every((row) => /in \d+/.test(text(row)) && /div/.test(text(row)));
+  }),
+  routes.map(([id, n]) => `${id}:${n}`).join(' '));
+
+check('the best route is marked in every mock',
+  LAYOUTS.every((l) => section(l.id).querySelectorAll('.fx-route.best').length === 1));
+
+check('every mock carries the all-builds totals',
+  LAYOUTS.every((l) => /124,363/.test(text(section(l.id)))
+    && /592/.test(text(section(l.id))) && /234/.test(text(section(l.id)))),
+  LAYOUTS.map((l) => (text(section(l.id)).match(/124,363/) ? 'ok' : 'missing')).join(' '));
+
+check('every mock ranks the most-used notables',
+  LAYOUTS.every((l) => /68%/.test(text(section(l.id))) || /68 %/.test(text(section(l.id)))));
+
+/* ── and none of the ten may be bright ──────────────────────────────────── */
+
+const luminance = (hex) => {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+const backgrounds = LAYOUTS.map((l) => {
+  const start = css.indexOf('.m-' + l.id + ' {');
+  const block = css.slice(start, css.indexOf('}', start));
+  const m = block.match(/--bg:\s*(#[0-9a-f]{3,6})/i) || block.match(/background:\s*(#[0-9a-f]{3,6})/i);
+  return [l.id, m ? m[1] : null];
+});
+
+check('every direction is dark — no light variant survives',
+  backgrounds.every(([, hex]) => hex && luminance(hex) < 0.2),
+  backgrounds.map(([id, hex]) => `${id}:${hex}${hex ? ' L=' + luminance(hex).toFixed(3) : ''}`).join(' '));
+
+const bright = (css.match(/#(?:fff|ffffff|f8f8f8|fafafa|fbfbfb|fdf6e3|f6efe4)\b/gi) || []);
+check('the sheet paints no white or cream surface', bright.length === 0, bright.join(', ') || 'none');
 
 /* ── report ─────────────────────────────────────────────────────────────── */
 
