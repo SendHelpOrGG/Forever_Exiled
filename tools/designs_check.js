@@ -291,6 +291,54 @@ const token = (sel, name) => {
   return m ? m[1].trim() : null;
 };
 
+/* ── the settings sheet behind the gear ─────────────────────────────────── */
+
+{
+  const mock = mockOf('crimson');
+  const gear = mock.querySelector('.a-gear');
+  const sheet = mock.querySelector('.a-sheet');
+  check('the gear opens a settings sheet',
+    Boolean(gear && sheet) && gear.dataset.panel === 'settings'
+    && gear.getAttribute('aria-haspopup') === 'dialog',
+    gear ? gear.dataset.panel : 'no gear');
+
+  check('the settings sheet has sections and real controls',
+    Boolean(sheet)
+    && sheet.querySelectorAll('.a-sec').length >= 3
+    && sheet.querySelectorAll('[data-switch]').length >= 3
+    && sheet.querySelectorAll('[data-seggroup]').length >= 3,
+    sheet ? `${sheet.querySelectorAll('.a-sec').length} sections, ${sheet.querySelectorAll('[data-switch]').length} switches, ${sheet.querySelectorAll('[data-seg]').length} segments` : 'none');
+
+  click(gear);
+  const opened = mock.classList.contains('panel-open') && gear.getAttribute('aria-expanded') === 'true';
+
+  const sw = sheet.querySelector('[data-switch]');
+  const before = sw.classList.contains('on');
+  click(sw);
+  const toggled = sw.classList.contains('on') !== before
+    && sw.getAttribute('aria-pressed') === String(!before);
+
+  const group = sheet.querySelector('[data-seggroup]');
+  const segs = [...group.querySelectorAll('[data-seg]')];
+  click(segs[segs.length - 1]);
+  const segOk = segs[segs.length - 1].classList.contains('on')
+    && segs.filter((n) => n.classList.contains('on')).length === 1;
+
+  check('the settings sheet opens from the gear', opened);
+  check('the settings switches and segments really change', toggled && segOk,
+    `switch ${before ? 'on' : 'off'} → ${!before ? 'on' : 'off'}, segment ${segs.length} kept one selected`);
+
+  click(sheet.querySelector('.a-x'));
+  const closed = !mock.classList.contains('panel-open') && gear.getAttribute('aria-expanded') === 'false';
+  check('the settings sheet closes again', closed);
+
+  check('the sheet is a centred overlay, not another column',
+    /\.m-atrium \.a-panelwrap \{[^}]*position:\s*absolute[^}]*inset:\s*0/.test(css.replace(/\n/g, ' '))
+    && /\.m-atrium\.panel-open \.a-panelwrap \{[^}]*display:\s*flex/.test(css.replace(/\n/g, ' '))
+    && Number((blockOf('.m-atrium .a-sheet').match(/width:\s*(\d+)px/) || [0, 0])[1]) <= 560
+    && Number((blockOf('.m-atrium .a-sheet').match(/max-height:\s*(\d+)px/) || [0, 0])[1]) <= 560);
+}
+
 check('the layout is written in palette tokens',
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].every((n) => token('.m-atrium', n) !== null),
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].filter((n) => !token('.m-atrium', n)).join(', ') || 'all present');

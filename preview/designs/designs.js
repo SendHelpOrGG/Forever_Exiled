@@ -137,7 +137,7 @@ L.atrium = () => {
     <span class="a-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
     <nav class="a-tabs">${navLinks('')}</nav>
     <div class="a-barright">
-      <button class="a-gear" data-press title="Settings" aria-label="Settings">
+      <button class="a-gear" data-panel="settings" aria-haspopup="dialog" aria-expanded="false" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3.1"></circle>
           <circle cx="12" cy="12" r="7.6" stroke-dasharray="2.4 4.1"></circle>
@@ -228,6 +228,62 @@ L.atrium = () => {
     </aside>
   </div>
 
+  <div class="a-panelwrap">
+    <span class="a-scrim" data-close></span>
+    <div class="a-sheet" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="a-sheethead">
+        <h2>Settings</h2>
+        <button class="a-x" data-close title="Close" aria-label="Close settings">&#10005;</button>
+      </div>
+
+      <p class="a-sec">Ladder</p>
+      <div class="a-row"><span>League</span>
+        <div class="a-seggroup" data-seggroup>
+          <button class="a-seg on" data-seg>Standard</button>
+          <button class="a-seg" data-seg>Hardcore</button>
+          <button class="a-seg" data-seg>Ruthless</button>
+        </div>
+      </div>
+      <div class="a-row"><span>Snapshot</span><b class="a-val">demo-2026-11-07</b></div>
+      <div class="a-row"><span>Auto-refresh</span>
+        <div class="a-seggroup" data-seggroup>
+          <button class="a-seg" data-seg>Off</button>
+          <button class="a-seg" data-seg>5 min</button>
+          <button class="a-seg on" data-seg>15 min</button>
+          <button class="a-seg" data-seg>1 h</button>
+        </div>
+      </div>
+
+      <p class="a-sec">Cluster jewels</p>
+      <div class="a-row"><span>Show unique cluster jewels</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Show unique cluster jewels"><i></i></button></div>
+      <div class="a-row"><span>Group combinations by notable</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Group combinations by notable"><i></i></button></div>
+      <div class="a-row"><span>Show item tooltip on hover</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Show item tooltip on hover"><i></i></button></div>
+      <div class="a-row"><span>Include jewels under iLvl 68</span><button class="a-switch" data-switch aria-pressed="false" aria-label="Include jewels under iLvl 68"><i></i></button></div>
+
+      <p class="a-sec">Display</p>
+      <div class="a-row"><span>Density</span>
+        <div class="a-seggroup" data-seggroup>
+          <button class="a-seg on" data-seg>Comfortable</button>
+          <button class="a-seg" data-seg>Compact</button>
+        </div>
+      </div>
+      <div class="a-row"><span>Numbers</span>
+        <div class="a-seggroup" data-seggroup>
+          <button class="a-seg on" data-seg>34.5M</button>
+          <button class="a-seg" data-seg>34,532,119</button>
+        </div>
+      </div>
+
+      <div class="a-sheetfoot">
+        <span class="a-note">Saved to this device</span>
+        <div class="a-sheetbtns">
+          <button class="a-btn" data-close>Cancel</button>
+          <button class="a-btn primary" data-close>Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="a-status" data-status><span>124,363 builds · 234 characters · 592 jewels · 34 combinations</span><span>snapshot demo-2026-11-07</span></footer>
 `;
 };
@@ -311,6 +367,36 @@ function wireMock(mock) {
 
     const nav = target.closest('[data-nav]');
     if (nav) { pickAll('[data-nav]', nav); return; }
+
+    const panel = target.closest('[data-panel]');
+    if (panel) {
+      const open = !mock.classList.contains('panel-open');
+      mock.classList.toggle('panel-open', open);
+      panel.setAttribute('aria-expanded', String(open));
+      return;
+    }
+
+    if (target.closest('[data-close]')) {
+      mock.classList.remove('panel-open');
+      const gearBtn = mock.querySelector('[data-panel="settings"]');
+      if (gearBtn) gearBtn.setAttribute('aria-expanded', 'false');
+      return;
+    }
+
+    const sw = target.closest('[data-switch]');
+    if (sw) {
+      const on = !sw.classList.contains('on');
+      sw.classList.toggle('on', on);
+      sw.setAttribute('aria-pressed', String(on));
+      return;
+    }
+
+    const seg = target.closest('[data-seg]');
+    if (seg) {
+      const group = seg.closest('[data-seggroup]');
+      if (group) [...group.querySelectorAll('[data-seg]')].forEach((n) => n.classList.toggle('on', n === seg));
+      return;
+    }
 
     const toggle = target.closest('[data-toggle]');
     if (toggle) {
