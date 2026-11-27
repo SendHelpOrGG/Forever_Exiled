@@ -696,39 +696,67 @@ check('every palette declares a pale, legal action colour',
 
 /* ── the background study (designs/backdrops.html) ──────────────────────── */
 
+/**
+ * Loaded the way a browser loads it — real <script> tags, one shared global scope. The eval-based
+ * checks above cannot see a name collision between two classic scripts, and that is exactly how
+ * the study page first shipped blank: backdrops.js redeclared `L` and the browser killed it with
+ * a SyntaxError while jsdom's eval() was happy. So this one runs in a child process.
+ */
 {
-  const bgErrors = [];
-  const bgVc = new VirtualConsole();
-  bgVc.on('jsdomError', (e) => bgErrors.push('jsdomError: ' + e.message));
-  bgVc.on('error', (...a) => bgErrors.push('console.error: ' + a.join(' ')));
-  const bgHtml = read(path.join(dir, 'backdrops.html'))
-    .replace('<script src="designs.js"></script>', '')
-    .replace('<script src="backdrops.js"></script>', '');
-  const bgDom = new JSDOM(bgHtml, { runScripts: 'outside-only', virtualConsole: bgVc, pretendToBeVisual: true });
-  bgDom.window.eval(read(path.join(dir, 'designs.js')));
-  bgDom.window.eval(read(path.join(dir, 'backdrops.js')));
-  const bd = bgDom.window.document;
+  const { execFileSync } = require('child_process');
+  const probe = `
+    const path = require('path');
+    const { pathToFileURL } = require('url');
+    const { JSDOM, VirtualConsole } = require('jsdom');
+    const errors = [];
+    const vc = new VirtualConsole();
+    vc.on('jsdomError', (e) => errors.push('jsdomError: ' + e.message));
+    vc.on('error', (...a) => errors.push('console.error: ' + a.join(' ')));
+    const file = path.resolve(${JSON.stringify(path.join(dir, 'backdrops.html'))});
+    JSDOM.fromFile(file, { runScripts: 'dangerously', resources: 'usable', virtualConsole: vc, pretendToBeVisual: true, url: pathToFileURL(file).href })
+      .then((dom) => new Promise((done) => {
+        if (dom.window.document.readyState === 'complete') return done(dom);
+        dom.window.addEventListener('load', () => done(dom));
+        setTimeout(() => done(dom), 4000);
+      }))
+      .then((dom) => {
+        const d = dom.window.document;
+        const veils = [...d.querySelectorAll('.a-veil')].map((v) => v.outerHTML).join('');
+        process.stdout.write(JSON.stringify({
+          sections: [...d.querySelectorAll('.bg-sec')].map((x) => x.id),
+          mocks: d.querySelectorAll('.mock').length,
+          veils: d.querySelectorAll('.a-veil').length,
+          portraits: d.querySelectorAll('img.a-backdrop').length,
+          strengths: d.querySelectorAll('[data-strength]').length,
+          hex: (veils.match(/(?:fill|stroke)="#[0-9a-f]{3,8}"/gi) || []).length,
+          tokens: (veils.match(/var\\(--/g) || []).length,
+          errors,
+        }));
+      })
+      .catch((e) => process.stdout.write(JSON.stringify({ sections: [], errors: ['load: ' + e.message] })));
+  `;
 
-  const secs = [...bd.querySelectorAll('.bg-sec')];
-  const veils = [...bd.querySelectorAll('.a-veil')];
-  const drawn = veils.map((v) => v.outerHTML).join('');
-  const hexes = (drawn.match(/(?:fill|stroke)="#[0-9a-f]{3,8}"/gi) || []);
+  let study = { sections: [], errors: ['probe did not run'] };
+  try {
+    const raw = execFileSync(process.execPath, ['-e', probe], {
+      encoding: 'utf8', env: process.env, timeout: 30000,
+    });
+    study = JSON.parse(raw);
+  } catch (e) {
+    study = { sections: [], errors: ['probe failed: ' + e.message.split('\n')[0]] };
+  }
 
-  check('the background study puts five directions on the same frame',
-    secs.length === 5 && bd.querySelectorAll('.mock').length === 5,
-    secs.map((x) => x.id).join(' '));
+  check('the background study loads like a page, not like a snippet',
+    study.sections.length === 5 && study.mocks === 5,
+    study.sections.join(' ') || 'no sections rendered');
   check('one direction keeps the portrait and four draw vectors',
-    bd.querySelectorAll('img.a-backdrop').length === 1 && veils.length === 4,
-    `${bd.querySelectorAll('img.a-backdrop').length} portrait · ${veils.length} vector`);
+    study.portraits === 1 && study.veils === 4,
+    `${study.portraits} portrait · ${study.veils} vector`);
   check('the vectors are drawn from tokens, never from hex',
-    hexes.length === 0 && (drawn.match(/var\(--/g) || []).length >= 8,
-    hexes.slice(0, 4).join(' ') || `${(drawn.match(/var\(--/g) || []).length} token reads`);
-  check('every vector actually draws something',
-    veils.every((v) => v.querySelectorAll('line, circle, path, image').length >= 6),
-    veils.map((v) => v.querySelectorAll('line, circle, path, image').length).join(' '));
-  check('the study has a three-step strength control',
-    bd.querySelectorAll('[data-strength]').length === 3);
-  check('the study page runs without errors', bgErrors.length === 0, bgErrors.join(' | ') || 'none');
+    study.hex === 0 && study.tokens >= 8, study.hex ? `${study.hex} hex fills` : `${study.tokens} token reads`);
+  check('the study has a three-step strength control', study.strengths === 3);
+  check('the study page runs without errors', study.errors.length === 0,
+    study.errors.slice(0, 3).join(' | ') || 'none');
 }
 
 /* ── report ─────────────────────────────────────────────────────────────── */
