@@ -53,3 +53,6 @@ forever-exiled-clusters-*.csv
 
 ## Local reference screenshots (not distributed)
 image-search/
+
+## Node tooling (tools/preview_smoke_test.js needs jsdom)
+node_modules/
