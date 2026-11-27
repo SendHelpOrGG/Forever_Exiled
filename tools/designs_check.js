@@ -321,42 +321,61 @@ const boxNums = (sel, prop, fallback) => {
 const SHEET_H = 720;
 const BAR_H = 64;
 const STATUS_H = 30;
-const bodyPad = boxNums('.m-atrium .a-body', 'padding', [24, 34, 20]);
+const bodyPad = boxNums('.m-atrium .a-body', 'padding', [18, 32, 16]);
 const padY = bodyPad[0] + (bodyPad[2] !== undefined ? bodyPad[2] : bodyPad[0]);
 const padX = bodyPad[1] !== undefined ? bodyPad[1] : bodyPad[0];
-const gapBody = cssNum('.m-atrium .a-body', 'gap', 32);
+const gapBody = cssNum('.m-atrium .a-body', 'gap', 30);
 const panelW = (cssVal('.m-atrium .a-body', 'grid-template-columns').match(/(\d+)px/) || [0, 344])[1] * 1;
 const available = SHEET_H - BAR_H - STATUS_H - padY;
 
-/* the main column: head row, hero block, then three-to-four cards */
-const cardPad = boxNums('.m-atrium .a-card', 'padding', [10, 14])[0];
-/* the card's modifiers sit on one line; the name, the mods, the socketing and the bar stack */
+/* the main column: head row, hero block, then the cards */
+const cardPad = boxNums('.m-atrium .a-card', 'padding', [9, 15])[0];
 const modsPerRow = /\.a-cardbody \.fx-mods \{[^}]*flex-direction:\s*row/.test(css.replace(/\n/g, ' ')) ? 1 : 2;
 const cardH = cardPad * 2 + 2
-  + cssNum('.m-atrium .a-cardbody b', 'font-size', 12) * 1.35
-  + modsPerRow * (cssNum('.m-atrium .a-cardbody .fx-mod', 'font-size', 9.5) * 1.35 + 1)
-  + cssNum('.m-atrium .a-cardbody .fx-gear', 'font-size', 9) * 1.35
+  + cssNum('.m-atrium .a-cardbody b', 'font-size', 14) * 1.35
+  + modsPerRow * (cssNum('.m-atrium .a-cardbody .fx-mod', 'font-size', 11) * 1.35 + 1)
+  + cssNum('.m-atrium .a-cardbody .fx-gear', 'font-size', 10.5) * 1.35
   + 7 + 6;
 const rows = section('crimson').querySelectorAll('[data-combo]').length;
-const listH = rows * cardH + (rows - 1) * cssNum('.m-atrium .a-list', 'gap', 8);
+const listH = rows * cardH + (rows - 1) * cssNum('.m-atrium .a-list', 'gap', 6);
 const heroH = 24
-  + cssNum('.m-atrium .a-titlerow h1', 'font-size', 50) * 0.95
-  + cssNum('.m-atrium .a-sub', 'font-size', 12) * 1.5 + 4
-  + cssNum('.m-atrium .a-meta', 'margin-top', 10) + 28
-  + cssNum('.m-atrium .a-stats', 'margin-top', 20) + 11 + cssNum('.m-atrium .a-stats .num', 'font-size', 32) * 1.25;
+  + cssNum('.m-atrium .a-titlerow h1', 'font-size', 46) * 0.95
+  + cssNum('.m-atrium .a-sub', 'font-size', 12.5) * 1.5 + 4
+  + cssNum('.m-atrium .a-meta', 'margin-top', 8) + 34
+  + cssNum('.m-atrium .a-stats', 'margin-top', 12)
+  + cssNum('.m-atrium .a-stats .stat em', 'font-size', 11) * 1.35
+  + cssNum('.m-atrium .a-stats .num', 'font-size', 40) * 1.25;
 const mainSlack = available - (heroH + listH);
 check('the main column fits above the status bar, with room to spare',
   mainSlack >= 12, `${(heroH + listH).toFixed(0)} of ${available}px used, ${mainSlack.toFixed(0)}px spare`);
 
 /* the panel: selected block, gem picker, ranking, uniques, routes, totals */
-const panelPad = boxNums('.m-atrium .a-panel', 'padding', [16])[0];
-const notRow = cssNum('.m-atrium .a-notrow', 'font-size', 10.5) * 1.35;
-const panelH = panelPad * 2
-  + 157 + 42 + 3 * 20
-  + (5 * notRow + 12) + 24 + 15 + 3 * 20 + (8 + 3 * 15) + 20;
+const panelPad = boxNums('.m-atrium .a-panel', 'padding', [12])[0];
+const panelGap = cssNum('.m-atrium .a-panel', 'gap', 1);
+const capF = cssNum('.m-atrium .a-cap', 'font-size', 9.5);
+const capM = boxNums('.m-atrium .a-cap', 'margin', [5, 0, 2]);
+const selPad = boxNums('.m-atrium .a-selected', 'padding', [8, 10])[0];
+const selH = selPad * 2 + capF * 1.2 + 2
+  + 2 * cssNum('.m-atrium .a-selected h2', 'font-size', 16) * 1.3
+  + cssNum('.m-atrium .a-charln', 'font-size', 11) * 1.4
+  + cssNum('.m-atrium .a-selected .fx-notable', 'font-size', 12) * 1.35
+  + 2 * cssNum('.m-atrium .a-selected .fx-mod', 'font-size', 12) * 1.35 + 2
+  + cssNum('.m-atrium .a-selected .fx-gear', 'font-size', 11) * 1.35
+  + 7 + 12;
+const rankH = 5 * cssNum('.m-atrium .a-notrow', 'font-size', 12) * 1.35
+  + 4 * cssNum('.m-atrium .a-notlist', 'gap', 2);
+const routeH = 3 * (cssNum('.m-atrium .a-routes .fx-route', 'font-size', 11.5) * 1.35
+  + 2 * boxNums('.m-atrium .a-routes .fx-route', 'padding', [2, 0])[0]);
+const panelH = panelPad * 2 + panelGap * 9 + selH
+  + cssNum('.m-atrium .a-pick', 'width', 34) + 8
+  + 3 * (capF * 1.2 + capM[0] + capM[2])
+  + rankH + 24
+  + cssNum('.m-atrium .a-target', 'font-size', 13) * 1.4
+  + routeH
+  + (cssNum('.m-atrium .a-totals', 'padding-top', 8) + 3 * cssNum('.m-atrium .a-totals', 'font-size', 12) * 1.4);
 const panelSlack = available - panelH;
 check('the panel fits inside its own box',
-  panelSlack >= 8, `${panelH.toFixed(0)} of ${available}px used, ${panelSlack.toFixed(0)}px spare`);
+  panelSlack >= 12, `${panelH.toFixed(0)} of ${available}px used, ${panelSlack.toFixed(0)}px spare`);
 
 const mainW = 1280 - padX * 2 - panelW - gapBody;
 check('the two columns share the sheet without touching',
