@@ -42,6 +42,17 @@ skill rail on the lab screen, and the crafting card is the more useful occupant.
 not repeat the cluster-size breakdown as a card either — the Large / Medium / Small switch
 above the combination list already covers it.
 
+## Design gallery
+
+`/designs/` holds **ten directions for the interface**, built to be compared rather than used:
+one mock screen, ten skins, the same content in each. Nothing there is wired to the app, and the
+app does not link to it — it exists to be argued about. Each direction carries what it keeps, what
+it costs, and its palette; every frame can be switched to 1:1 to read the type at full size.
+
+```bash
+NODE_PATH=… node tools/designs_check.js      # ten mocks, same content, art resolved
+```
+
 ## What is real and what is simulated
 
 | Real | Simulated |
