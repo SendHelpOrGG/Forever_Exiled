@@ -107,54 +107,6 @@ input, select { font-family: inherit; color: inherit; }
 .sidebar { grid-column: 1; grid-row: 1 / -1; }
 .topnav { grid-column: 2; grid-row: 1; }
 
-/* ─────────────────────── background art ───────────────────────
-   The stage is the only transparent region of the shell — the sidebar, the top bar and the status bar
-   all paint their own — so one layer behind everything shows exactly where a layout leaves room: the
-   gaps between panels, and the whole stage on the five spare tabs. Each tab brings its own plate and
-   they cross-fade on data-tab. Nothing here is a control: the layer never takes the pointer. */
-.app { position: relative; }
-.app-art {
-  position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; z-index: 0;
-  /* the soft core sits over the middle of the stage: clear of the 214px sidebar, the 50px bar, the 26px status bar */
-  --art-mask: radial-gradient(ellipse 56% 60% at 58% 44%, #000 0%, #000 32%, rgba(0, 0, 0, .55) 70%, rgba(0, 0, 0, .2) 100%);
-}
-.app > .sidebar, .app > .topnav, .app > .stage, .app > .statusbar, .app > .notice { position: relative; }
-
-.app-art img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: 56% 44%;
-  filter: grayscale(.86) saturate(.9) contrast(1.04) brightness(.95);
-  opacity: 0; transition: opacity .45s ease;
-  -webkit-mask-image: var(--art-mask); mask-image: var(--art-mask);
-}
-.app-art i {
-  position: absolute; inset: 0; background: var(--green); opacity: calc(var(--art-o, .5) * .42); mix-blend-mode: color;
-  -webkit-mask-image: var(--art-mask); mask-image: var(--art-mask);
-}
-.app-art b {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, .06) 0%, rgba(0, 0, 0, .12) 55%, var(--bg) 98%);
-}
-
-/* how loud the plate is per tab — the dense one steps back, the empty ones carry the room */
-body[data-tab="clusters"] { --art-o: .36; }
-body[data-tab="watchers"] { --art-o: .62; }
-body[data-tab="rare"] { --art-o: .58; }
-body[data-tab="flasks"] { --art-o: .6; }
-body[data-tab="economy"] { --art-o: .66; }
-body[data-tab="settings"] { --art-o: .4; }
-
-body[data-tab="clusters"] .app-art .art-clusters,
-body[data-tab="watchers"] .app-art .art-watchers,
-body[data-tab="rare"] .app-art .art-rare,
-body[data-tab="flasks"] .app-art .art-flasks,
-body[data-tab="economy"] .app-art .art-economy,
-body[data-tab="settings"] .app-art .art-settings { opacity: var(--art-o, .5); }
-
-@media (prefers-reduced-motion: reduce) {
-  .app-art img { transition: none; }
-}
-
 .stage { min-height: 0; container-type: inline-size; container-name: stage; }
 .view { min-height: 0; }
 .view[hidden] { display: none !important; }
@@ -1019,14 +971,8 @@ input[type="range"]::-moz-range-thumb {
 .pane[hidden] { display: none !important; }
 
 /* ─────────────────── planned tabs: empty, and say so ─────────────────── */
-.empty-view { position: relative; display: grid; place-items: center; height: 100%; padding: 24px; }
+.empty-view { display: grid; place-items: center; height: 100%; padding: 24px; }
 .empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 400px; }
-/* the copy sits straight on the plate, so it gets a soft pocket rather than a card */
-.empty-view::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse 37% 46% at 50% 50%, rgba(13, 19, 25, .64) 0%, rgba(13, 19, 25, .42) 55%, rgba(13, 19, 25, 0) 100%);
-}
-.empty-state { position: relative; }
 .empty-art {
   width: 62px; height: 62px; display: grid; place-items: center;
   border-radius: 10px; color: var(--text-3);

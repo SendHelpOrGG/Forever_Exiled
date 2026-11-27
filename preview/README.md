@@ -25,35 +25,6 @@ sidebar, away from the features. The four remaining destinations (Watcher's Eyes
 Flasks, Economy) are marked **SOON** and open onto an empty state that says in one line what will
 live there — a row that does nothing when clicked reads as a bug.
 
-### One plate per tab
-
-The shell paints one background layer behind everything — `.app-art`, the first child of `.app`,
-`aria-hidden`, `pointer-events: none`. It holds six plates, one per destination, and `setTab()`
-writes the tab on `<body>`, so the winner fades up over 0.45 s while the other five go to zero.
-Nothing in the layer is a control, and the chrome (sidebar, top bar, notice, stage, status bar)
-paints over it, so the art only shows where a screen actually leaves room.
-
-| Tab | Plate | What it is |
-| --- | --- | --- |
-| Cluster Jewels | `bleed_grove.jpg` | Oshabi in the Sacred Grove, as supplied |
-| Watcher's Eyes | `bleed_colossus.jpg` | official key art recut around the crossed head |
-| Rare Items | `bg_izaro_wide.jpg` | the painted Emperor, Izaro, cut to 16:9 |
-| Flasks | `bleed_heroine.jpg` | a Path of Exile 2 loading screen, cropped to a bust |
-| Economy | `bleed_beast.jpg` | key art around the horns, nearly monochrome |
-| Settings | `bleed_graveyard.jpg` | the cemetery at dusk, low brightness |
-
-It is the study's frame at the study's recipe: greyscale 86 %, `contrast(1.04)`, a radial mask with
-its core parked at 58 % / 44 % — the middle of the stage, clear of the 214 px sidebar, the 50 px
-bar and the 26 px status bar — an `<i>` that blends `--green` into the picture with
-`mix-blend-mode: color`, and a `<b>` scrim that takes the bottom edge back to `--bg`. Each tab
-carries its own `--art-o`: 0.36 under the dense Cluster Jewels screen, 0.58–0.66 under the five
-spare ones, 0.4 under Settings. The tint reads the same number, so a step-back plate gets a
-step-back cast instead of a flat wash.
-
-The five spare tabs write their copy straight onto the plate, so the copy gets a soft pocket rather
-than a card (`.empty-view::before`, a radial falloff of `--bg`): the picture stays visible around
-it, the text stays legible on it, and the frame never turns into a card.
-
 ## What each screen shows
 
 | Screen | Cards |
@@ -243,12 +214,12 @@ dotnet run --project tools/ForeverExiled.Capture -- --preview
 ## Smoke test
 
 `tools/preview_smoke_test.js` loads this page in jsdom and drives every screen —
-skill selection, size switch, search, the six tabs, their plates, ladder filter/sort, the popularity
+skill selection, size switch, search, the four tabs, ladder filter/sort, the popularity
 floor and the busy overlay — then asserts that each one rendered real numbers:
 
 ```bash
 npm install jsdom                    # anywhere on NODE_PATH
-node tools/preview_smoke_test.js     # 121/121 checks passed
+node tools/preview_smoke_test.js     # 28/28 checks passed
 ```
 
 ## Files
@@ -278,7 +249,6 @@ This folder is a design aid, not part of the shipped application and not referen
 | `assets/gems/` | 507 skill gem icons (78px) plus `index.json`, so a skill row can show its real gem art and fall back cleanly when a gem has none. Art from PoE-Gems / Grinding Gear Games. |
 | `assets/cluster_{large,medium,small}.png` | Real in-game cluster jewel icons (transparent), so pills and combo cards match the item art. Art from ExileCraft / Grinding Gear Games. |
 | `assets/asc/<class>.jpg` | Ascendancy and base-class portraits, shown next to every class name. Art from Path of Building / Grinding Gear Games. |
-| `assets/splash/*.jpg` | Six background plates at 1440 x 810, one per tab, all from Path of Exile key art and loading screens (see the design gallery notes for provenance). |
 
 Regenerate the gem index and the app's copies with `python3 tools/sync_gem_art.py`.
 ## Hover cards
