@@ -378,17 +378,18 @@ check('the generic row rule excludes the background layers',
 
 const PLATES = [
   ['clusters', 'bleed_grove.jpg'],
-  ['watchers', 'bleed_colossus.jpg'],
-  ['rare', 'bg_izaro_wide.jpg'],
-  ['flasks', 'bleed_heroine.jpg'],
-  ['economy', 'bleed_beast.jpg'],
-  ['settings', 'bleed_graveyard.jpg'],
+  ['watchers', 'tab_watchers_eye.jpg'],
+  ['rare', 'tab_rare_items.jpg'],
+  ['flasks', 'tab_flasks.jpg'],
+  ['economy', 'tab_economy.jpg'],
+  ['settings', 'tab_settings.jpg'],
 ];
 const flat = css.replace(/\n/g, ' ');
 const artOf = (id) => mockOf(id).querySelector('.a-photo');
 const platesOf = (id) => [...mockOf(id).querySelectorAll('.a-photo img[data-plate]')];
 const jpegSize = (file) => {
-  const buf = fs.readFileSync(file);
+  let buf;
+  try { buf = fs.readFileSync(file); } catch (e) { return [0, 0]; }
   let i = 2;
   while (i < buf.length - 9) {
     if (buf[i] !== 0xFF) { i++; continue; }
@@ -419,6 +420,10 @@ check('all six plates are real files at 16:9, so the frame never crops a subject
     const [w, h] = jpegSize(path.join(root, 'assets', 'splash', file));
     return file.replace(/\.jpg$/, '') + ' ' + w + '×' + h;
   }).join(' · '));
+
+check('no two destinations share a plate',
+  new Set(PLATES.map(([, file]) => file)).size === PLATES.length,
+  PLATES.length + ' distinct files');
 
 check('the frame opens on the grove, like the bar does',
   openingPlates.length === THEMES.length && openingPlates.every(([, tab]) => tab === 'clusters'),

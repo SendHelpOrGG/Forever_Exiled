@@ -87,15 +87,20 @@ const D = {
 
 const bar = (pct) => `<span class="bar" style="--pct:${pct}%"><i></i></span>`;
 const stat = (label, value) => `<div class="stat"><em>${label}</em><b class="num">${value}</b></div>`;
-/* One plate per destination. All six are 16:9, so the frame never crops them; each was recut so its
-   subject already sits in the open band — beside the title, above the cards, left of the panel. */
+/* One plate per destination, and the picture answers to the tab's name. Four of these destinations
+   are an item, so their plate is that item: Watcher's Eyes is a unique jewel in Path of Exile, so it
+   is the jewel itself, not a painting of a monster. Settings has no artefact of its own, so it takes
+   the game's wordmark — the one panel that is about the app rather than about a feature.
+   All six are 16:9 and 1440 x 810, so the frame never crops them; the five composed plates are built
+   by tools/make_tab_plates.py with the artefact on the mask's centre (52 % / 40 %), the grove is the
+   painting the frame shipped with. */
 const PLATES = [
   ['clusters', 'bleed_grove.jpg'],
-  ['watchers', 'bleed_colossus.jpg'],
-  ['rare', 'bg_izaro_wide.jpg'],
-  ['flasks', 'bleed_heroine.jpg'],
-  ['economy', 'bleed_beast.jpg'],
-  ['settings', 'bleed_graveyard.jpg'],
+  ['watchers', 'tab_watchers_eye.jpg'],
+  ['rare', 'tab_rare_items.jpg'],
+  ['flasks', 'tab_flasks.jpg'],
+  ['economy', 'tab_economy.jpg'],
+  ['settings', 'tab_settings.jpg'],
 ];
 const plateArt = () => PLATES
   .map(([tab, file]) => `<img data-plate="${tab}" src="${A}/splash/${file}" alt="">`).join('');

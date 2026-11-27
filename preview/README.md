@@ -122,17 +122,26 @@ NODE_PATH=… node tools/designs_check.js      # 124 checks: ten dark layouts, n
 ### The frame — six plates, one per destination
 
 Every mock in `/designs/` hangs Path of Exile art behind it, and the destination you pick decides
-which picture is showing. All six are 1440 × 810 at the **subtle** step of the study, and each was
-recut so its subject already sits in the open band:
+which picture is showing. **The picture has to answer to the tab's name.** Watcher's Eyes is a unique
+jewel in the game, so its plate is that jewel — not a painting of a monster; the same rule gives
+Flasks a flask, Economy currency and Rare Items a piece of gear. All six are 1440 × 810 at the
+**subtle** step of the study:
 
 | Destination | Plate | What it is |
 | --- | --- | --- |
-| Cluster Jewels | `bleed_grove.jpg` | Oshabi in the Sacred Grove, as supplied |
-| Watcher's Eyes | `bleed_colossus.jpg` | official key art, recut around the crossed head |
-| Rare Items | `bg_izaro_wide.jpg` | the painted Emperor, Izaro, cut to 16:9 |
-| Flasks | `bleed_heroine.jpg` | a Path of Exile 2 loading screen, cropped to a bust |
-| Economy | `bleed_beast.jpg` | key art around the horns, nearly monochrome |
-| Settings | `bleed_graveyard.jpg` | the cemetery at dusk, low brightness |
+| Cluster Jewels | `bleed_grove.jpg` | Oshabi in the Sacred Grove, as supplied — the frame's painting |
+| Watcher's Eyes | `tab_watchers_eye.jpg` | the **Watcher's Eye** jewel, the item the tab is named after |
+| Rare Items | `tab_rare_items.jpg` | a **Two-Stone Ring** — the rare slot, as an object |
+| Flasks | `tab_flasks.jpg` | a **Divine Life Flask** |
+| Economy | `tab_economy.jpg` | an **Exalted Orb** |
+| Settings | `tab_settings.jpg` | the **path of exile** wordmark — the one tab about the app, not a feature |
+
+The five item plates are composed, not cropped: the inventory art is small, so
+`tools/make_tab_plates.py` upscales it with an unsharp pass, stands it on the point the frame's mask
+is centred on (52 % / 40 %, the open band), puts a blurred oversized copy of the same art behind it
+at a third of the alpha, gives it a wide glow and vignettes the corners back to the field. The item
+icons and the wordmark are Grinding Gear Games' art, held in `assets/splash/src/` next to the
+plates so the build can be repeated.
 
 One layer, three parts: the six `<img>`, an `<i>` that blends that palette's own `--accent` into
 whichever picture is lit with `mix-blend-mode: color`, and a `<b>` scrim. The chosen destination is
@@ -177,12 +186,14 @@ the whole frame and the subject is strong exactly where nothing is written.
 | 07 | The quiet field | bleed | the cemetery at dusk, low brightness — the one to ship |
 | 08 | Portrait wash | — | the baseline that ships today |
 
-`assets/splash/` holds six files, 700 KB: five `bleed_*.jpg` at 1440 × 810 (16:9, subject parked in
-the open band — the grove is the one that arrives already 16:9 and is only trimmed), one
-`patch_izaro.jpg` at 720 × 790 (portrait, subject centred), and `logo_real.png` with real alpha. The wordmark's checkerboard background was keyed out with a border flood fill, then the
-alpha edge eroded a pixel. The art is Grinding Gear Games' and the Izaro painting is fan work; it is
-here as a proposal, in the same spirit as the ascendancy portraits the gallery already ships, and
-none of it should ship without GGG's blessing.
+`assets/splash/` holds the five paintings, 700 KB: five `bleed_*.jpg` at 1440 × 810 (16:9, subject
+parked in the open band — the grove is the one that arrives already 16:9 and is only trimmed), one
+`patch_izaro.jpg` at 720 × 790 (portrait, subject centred), and `logo_real.png` with real alpha. The
+wordmark's checkerboard background was keyed out with a border flood fill, then the alpha edge eroded
+a pixel. Beside them sit the five composed `tab_*.jpg` plates the gallery hangs per destination (see
+“The frame” above) and, in `src/`, the inventory icons they are built from. The art is Grinding Gear
+Games' and the Izaro painting is fan work; it is here as a proposal, in the same spirit as the
+ascendancy portraits the gallery already ships, and none of it should ship without GGG's blessing.
 
 Every direction is one `.a-photo` layer — `<img>`, an `<i>` that blends `--accent` in with
 `mix-blend-mode: color`, and a `<b>` scrim. The layer sits **above** `.a-shade` (underneath it a
