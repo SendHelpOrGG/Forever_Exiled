@@ -126,34 +126,41 @@ jpeg, scaled to 1280, held at half opacity under three gradient washes, and grad
 is atmosphere, and it says *class*, not *Path of Exile*. `backdrops.html` puts eight directions on
 the same frame: seven built on **real Path of Exile art**, and the portrait kept as the baseline.
 
-Three earlier passes drew their way to it — geometry first, then game-adjacent texture, then the
-game's own heraldry, part by part. All three were rejected for the same reason, and it is the right
-one: a hand-drawn copy of a painted asset is a copy. So this pass stops drawing.
+Three earlier passes drew their way to it — geometry, then game-adjacent texture, then the game's
+own heraldry part by part. All three were rejected, and rightly: a hand-drawn copy of a painted
+asset is a copy. This pass uses the art.
 
-| # | direction | what it is |
-|---|-----------|------------|
-| 01 | Key art, full bleed | official key art, cover-cropped, desaturated, tinted to the accent, bottom third scrimmed back to the field |
-| 02 | The splash | a Path of Exile 2 loading screen held to the right 56 %, feathered where it meets the type column |
-| 03 | The logo | the real wordmark, background keyed to alpha, 540 px, in the corner, unfiltered |
-| 04 | Izaro | the Emperor, cropped to the shoulder and pushed to full grey (the painting is green) |
-| 05 | The dark figure | a near-black character plate, mirrored, brightness lifted until the silhouette reads |
-| 06 | The plate | key art clipped into a rectangle with a 1 px gold rule and an inset shadow |
-| 07 | The quiet field | an environment plate at low brightness — the safest of the seven to ship |
-| 08 | Portrait wash | the baseline that ships today |
+**Where the art is allowed to be.** Atrium's UI covers almost the whole 1280 × 720 frame. The bar is
+64 px, the body runs `1fr 344px` with a 30 px gutter and 32 px padding, so the main column ends at
+x 874 and the glass panel takes x 904–1248 for the full height; the card stack fills everything
+below y 368. The one genuinely open band is **x 470–900, y 64–368** — beside the title, above the
+cards, left of the panel. Every asset is recut so its subject lands in that band, and the art layer
+is masked with a soft core over it that never drops below 30 %, so the painting is present across
+the whole frame and the subject is strong exactly where nothing is written.
 
-The originals live in **`assets/splash/`**: 1600 px JPEGs and one keyed PNG, ~1.1 MB in total.
-They are Grinding Gear Games' art, pulled from the open web for a proposal in the same spirit as the
-ascendancy portraits the gallery already ships; the Izaro painting is fan work (torvald2016). None
-of it is wired into `/designs/`, and none of it should ship without GGG's blessing. The wordmark's
-checkerboard background was keyed out with a border flood fill, which is why its alpha edges were
-then eroded by a pixel.
+| # | direction | slot | what it is |
+|---|-----------|------|------------|
+| 01 | The colossus | bleed | official key art recut to 16:9 around the crossed head |
+| 02 | The heroine | bleed | a Path of Exile 2 loading screen, cropped to a bust |
+| 03 | The logo | placed | the real wordmark, checkerboard keyed to alpha, 340 px, unfiltered |
+| 04 | Izaro | patch | the painted Emperor, vignetted to a portrait, pushed to full grey (the painting is green) |
+| 05 | The dark figure | patch | a near-black character plate, mirrored, lifted until she reads |
+| 06 | The beast | bleed | key art around the horns, nearly monochrome, heaviest tint |
+| 07 | The quiet field | bleed | the cemetery at dusk, low brightness — the one to ship |
+| 08 | Portrait wash | — | the baseline that ships today |
+
+`assets/splash/` holds six files, 700 KB: four `bleed_*.jpg` at 1440 × 810 (16:9, subject parked at
+≈ 0.52 / 0.40), two `patch_*.jpg` at 720 × 790 (portrait, subject centred), and `logo_real.png` with
+real alpha. The wordmark's checkerboard background was keyed out with a border flood fill, then the
+alpha edge eroded a pixel. The art is Grinding Gear Games' and the Izaro painting is fan work; it is
+here as a proposal, in the same spirit as the ascendancy portraits the gallery already ships, and
+none of it should ship without GGG's blessing.
 
 Every direction is one `.a-photo` layer — `<img>`, an `<i>` that blends `--accent` in with
-`mix-blend-mode: color`, and a `<b>` scrim — so the only differences are crop, mask and framing.
-Two things matter about where it sits: it goes **above** `.a-shade` (underneath it a 1600 px
-painting survives at about 4 % and the study looks empty), and it carries its own left-edge mask so
-it never reaches the card column. The panel (`z-index: 1`) and the layout (`z-index: 2`) still paint
-over the top of it. A **subtle / medium / strong** control sets the layer opacity at 0.66 / 0.86 / 1.
+`mix-blend-mode: color`, and a `<b>` scrim. The layer sits **above** `.a-shade` (underneath it a
+1440 px painting survives at about 4 % and the study looks empty); the panel (`z-index: 1`) and the
+layout (`z-index: 2`) still paint over the top. A **subtle / medium / strong** control sets layer
+opacity at 0.70 / 0.90 / 1.
 
 ## What is real and what is simulated
 

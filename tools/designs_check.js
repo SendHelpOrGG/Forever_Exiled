@@ -778,7 +778,7 @@ check('every palette declares a pale, legal action colour',
         while (i < buf.length - 9) {
           if (buf[i] !== 0xFF) { i++; continue; }
           const m = buf[i + 1];
-          if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return buf.readUInt16BE(i + 7) >= 1100;
+          if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return buf.readUInt16BE(i + 7) >= 700;
           i += 2 + buf.readUInt16BE(i + 2);
         }
         return false;
