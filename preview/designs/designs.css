@@ -206,6 +206,17 @@ img { display: block; }
   linear-gradient(180deg, var(--v70), var(--v95) 88%); }
 .m-atrium > *:not(.a-backdrop):not(.a-shade) { position: relative; }
 
+/* a vector background sits above the gradient wash but below everything the layout paints, so it
+   can be as crisp as it likes without ever dimming a number */
+.m-atrium .a-veil { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .4; pointer-events: none; }
+.m-atrium .a-veil line,
+.m-atrium .a-veil circle { vector-effect: non-scaling-stroke; }
+.m-atrium .a-veil .spin { animation: veil-spin 72s linear infinite; }
+@keyframes veil-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .m-atrium .a-veil .spin { animation: none; }
+}
+
 .m-atrium .a-bar { display: flex; align-items: center; gap: 26px; padding: 0 34px; border-bottom: 1px solid var(--line); }
 .m-atrium .a-brand { display: flex; align-items: center; gap: 9px; font-size: 11.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .m-atrium .a-brand img { width: 22px; height: 22px; }

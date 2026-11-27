@@ -115,8 +115,30 @@ Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
-NODE_PATH=… node tools/designs_check.js      # 104 checks: ten dark layouts, no brown or green, full feature surface, live controls
+                                             #   /designs/backdrops.html is the background study
+NODE_PATH=… node tools/designs_check.js      # 110 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
+
+### Background study — `/designs/backdrops.html`
+
+The frame behind each mock is the ascendancy portrait (`assets/asc/<class>.jpg`): 152 px of jpeg,
+scaled to 1280, held at half opacity under three gradient washes, and graded per palette
+(grayscale, sepia, desaturate, saturate). It is atmosphere, and it says *class*, not *Path of
+Exile*. `backdrops.html` puts five alternatives on the same frame so one can be chosen:
+
+| # | direction | what it is |
+|---|-----------|------------|
+| 01 | Portrait wash | what ships today — the jpeg, as the baseline |
+| 02 | Passive tree | five rings of nodes and every link, one allocated path lit in `--accent` |
+| 03 | Cluster wheel | the jewel radius as a dashed ring, its sockets and notables, the real jewel art at the centre |
+| 04 | Atlas wheel | concentric rings, 120 ticks and three runes, the outer ring turning once in 72 s |
+| 05 | Tree + socket | the tree with a cluster jewel socket at its heart — the recommended one |
+
+02–05 are inline SVG drawn from the palette tokens (`var(--accent)`, `var(--line2)`, the field),
+so they add no files, never upscale, and re-tint themselves in all ten palettes. The page carries a
+**subtle / medium / strong** control for the veil so it can be judged against the text it sits
+behind. Nothing is wired into the gallery yet: `L.atrium()` is shared through `window.FE`, the study
+swaps the portrait for a drawing and leaves `/designs/` untouched.
 
 ## What is real and what is simulated
 

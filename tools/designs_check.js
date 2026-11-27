@@ -694,6 +694,43 @@ const golds = THEMES.map((t) => {
 check('every palette declares a pale, legal action colour',
   golds.every(([, , ok]) => ok), golds.map(([id, hex]) => `${id}:${hex}`).join(' '));
 
+/* ── the background study (designs/backdrops.html) ──────────────────────── */
+
+{
+  const bgErrors = [];
+  const bgVc = new VirtualConsole();
+  bgVc.on('jsdomError', (e) => bgErrors.push('jsdomError: ' + e.message));
+  bgVc.on('error', (...a) => bgErrors.push('console.error: ' + a.join(' ')));
+  const bgHtml = read(path.join(dir, 'backdrops.html'))
+    .replace('<script src="designs.js"></script>', '')
+    .replace('<script src="backdrops.js"></script>', '');
+  const bgDom = new JSDOM(bgHtml, { runScripts: 'outside-only', virtualConsole: bgVc, pretendToBeVisual: true });
+  bgDom.window.eval(read(path.join(dir, 'designs.js')));
+  bgDom.window.eval(read(path.join(dir, 'backdrops.js')));
+  const bd = bgDom.window.document;
+
+  const secs = [...bd.querySelectorAll('.bg-sec')];
+  const veils = [...bd.querySelectorAll('.a-veil')];
+  const drawn = veils.map((v) => v.outerHTML).join('');
+  const hexes = (drawn.match(/(?:fill|stroke)="#[0-9a-f]{3,8}"/gi) || []);
+
+  check('the background study puts five directions on the same frame',
+    secs.length === 5 && bd.querySelectorAll('.mock').length === 5,
+    secs.map((x) => x.id).join(' '));
+  check('one direction keeps the portrait and four draw vectors',
+    bd.querySelectorAll('img.a-backdrop').length === 1 && veils.length === 4,
+    `${bd.querySelectorAll('img.a-backdrop').length} portrait · ${veils.length} vector`);
+  check('the vectors are drawn from tokens, never from hex',
+    hexes.length === 0 && (drawn.match(/var\(--/g) || []).length >= 8,
+    hexes.slice(0, 4).join(' ') || `${(drawn.match(/var\(--/g) || []).length} token reads`);
+  check('every vector actually draws something',
+    veils.every((v) => v.querySelectorAll('line, circle, path, image').length >= 6),
+    veils.map((v) => v.querySelectorAll('line, circle, path, image').length).join(' '));
+  check('the study has a three-step strength control',
+    bd.querySelectorAll('[data-strength]').length === 3);
+  check('the study page runs without errors', bgErrors.length === 0, bgErrors.join(' | ') || 'none');
+}
+
 /* ── report ─────────────────────────────────────────────────────────────── */
 
 /* the bars light on the next animation frame, so the last checks wait for one */

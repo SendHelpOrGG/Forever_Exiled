@@ -554,4 +554,9 @@ function observeSections() {
   sections.forEach((s) => io.observe(s));
 }
 
-build();
+/* the background study (backdrops.html) reuses the mock template and the wiring, so both are
+   published; scripts see each other's top-level consts in a browser, but not through eval */
+window.FE = { L, D, art, wireMock, fitFrames };
+
+/* the gallery is the only page that owns these containers */
+if (document.getElementById('galList')) build();

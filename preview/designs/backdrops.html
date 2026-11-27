@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forever Exiled — background directions</title>
+<link rel="stylesheet" href="designs.css">
+<link rel="stylesheet" href="backdrops.css">
+</head>
+<body>
+
+<header class="gal-top">
+  <div class="gal-word">forever<span> </span>exiled</div>
+  <h1>Background directions</h1>
+  <p class="gal-sub">
+    The gallery fills the frame with the ascendancy portrait — a 152 px icon blown up to 1280 px,
+    held at half opacity under three gradient washes. It is soft, and it says “class”, not
+    “Path of Exile”. These are five ways to put something more of the game behind Atrium.
+  </p>
+  <p class="gal-sub">
+    Everything but <b>01</b> is inline SVG drawn from the palette tokens — <b>no new files, no
+    upscaling, sharp at any size</b>, and it re-tints itself in all ten palettes because it only
+    reads <b>var(--accent)</b>, <b>var(--line2)</b> and the field. Nothing here is wired into the
+    gallery yet: pick one and it goes into all ten frames.
+  </p>
+</header>
+
+<div class="gal-top bg-controls">
+  <p class="bg-ctl-label">Veil strength</p>
+  <div class="bg-ctl-group">
+    <button data-strength="subtle">Subtle</button>
+    <button data-strength="medium" class="on">Medium</button>
+    <button data-strength="strong">Strong</button>
+  </div>
+</div>
+
+<main class="bg-list" id="bgList"></main>
+
+<script src="designs.js"></script>
+<script src="backdrops.js"></script>
+</body>
+</html>
