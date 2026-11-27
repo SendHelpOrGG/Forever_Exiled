@@ -392,59 +392,81 @@ L.tiers = () => {
 
 /* ═════════════════════════════════════════════════════════════ 07 · DECK ═══ */
 
-L.nocturne = () => `
-  <img class="e-backdrop" src="${art.asc(D.skill.asc)}" alt="">
-  <div class="e-shade"></div>
+L.atrium = () => `
+  <img class="a-backdrop" src="${art.asc(D.skill.asc)}" alt="">
+  <div class="a-shade"></div>
 
-  <header class="e-nav">
-    <span class="e-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
-    <nav>${navLinks('')}</nav>
-    <button class="e-sync" data-press>Sync ladder</button>
+  <header class="a-bar">
+    <span class="a-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
+    <nav class="a-tabs">${navLinks('')}</nav>
+    <button class="a-sync" data-press>Sync ladder</button>
   </header>
 
-  <section class="e-hero">
-    <div class="e-copy">
-      <p class="e-kicker"><span></span>Cluster Jewels · Large · iLvl 75+</p>
-      <div class="e-titlerow">
-        <img class="e-gem" src="${art.gem(D.skill.gem)}" alt="">
-        <h1 data-hero-name>${D.skill.name}</h1>
+  <div class="a-body">
+    <section class="a-main">
+      <p class="a-kicker">Cluster Jewels · ${D.combos[0].size} · iLvl ${D.combos[0].ilvl}+</p>
+      <div class="a-titlerow">
+        <img class="a-gem" src="${art.gem(D.skill.gem)}" alt="">
+        <div>
+          <h1 data-hero-name>${D.skill.name}</h1>
+          <p class="a-sub">${D.skill.damage} damage · ${D.skill.classes}</p>
+        </div>
       </div>
-      <p class="e-sub">${D.skill.damage} damage · ${D.skill.classes}</p>
-      <p class="e-notarow">${notablesOf(D.combos[0])}</p>
-      <div class="e-stats" data-stats>
-        ${stat('Average DPS', D.skill.avg)}${stat('Peak DPS', D.skill.peak)}
-        <div class="stat"><em>Builds</em><b class="val">${D.skill.builds}</b></div>
+      <p class="a-notarow">${notablesOf(D.combos[0])}</p>
+      <div class="a-stats" data-stats>
+        ${stat('AVERAGE DPS', D.skill.avg)}${stat('PEAK DPS', D.skill.peak)}
+        <div class="stat"><em>BUILDS</em><b class="val">${D.skill.builds}</b></div>
       </div>
-    </div>
-    <aside class="e-craft">
-      <p class="e-craftcap">Crafting routes — 3 tried</p>
-      <p class="e-target" data-craft-combo>Prism Weave + Snowstorm</p>
-      ${routesOf('e-routes')}
-      <div class="e-uniquefoot">${uniquesOf()}</div>
-      <button class="e-plan" data-press>Plan it</button>
+
+      <div class="a-list">
+        ${D.combos.map((c) => `
+          <button class="a-card" data-combo data-label="${c.notables.join(' + ')}" data-cluster-size="${c.size}">
+            <img class="a-cardart" src="${art.cluster(c.art)}" alt="">
+            <span class="a-cardbody">
+              <b>${c.notables.join(' + ')}</b>
+              ${notablesOf(c)}
+              ${modsOf(c)}
+              ${gearOf(c)}
+              ${bar(c.pct)}
+            </span>
+            <span class="a-cardpct">${c.pct}%</span>
+          </button>`).join('')}
+      </div>
+    </section>
+
+    <aside class="a-panel">
+      <div class="a-selected">
+        <p class="a-cap">Selected combination</p>
+        <h2>${D.combos[0].notables.join(' + ')}</h2>
+        ${notablesOf(D.combos[0])}
+        ${modsOf(D.combos[0])}
+        <span class="a-selgear">${gearOf(D.combos[0])}</span>
+        <span class="a-selbar">${bar(D.combos[0].pct)}</span>
+      </div>
+
+      <div class="a-picks">${D.skills.map((s, i) => `<button class="a-pick${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}</div>
+
+      <p class="a-cap">Most used notables</p>
+      <div class="a-notlist">${D.notables.map(([n, p]) => `<div class="a-notrow"><span>${n}</span><i style="--p:${p}%"></i><b>${p}%</b></div>`).join('')}</div>
+
+      <p class="a-cap">Unique cluster jewels</p>
+      ${uniquesOf()}
+
+      <p class="a-cap">Crafting — 3 routes</p>
+      <b class="a-target" data-craft-combo>Prism Weave + Snowstorm</b>
+      ${routesOf('a-routes')}
+
+      <dl class="a-totals">
+        <dt>Builds</dt><dd>${D.totals.builds}</dd>
+        <dt>Characters</dt><dd>${D.totals.chars}</dd>
+        <dt>Jewels</dt><dd>${D.totals.jewels}</dd>
+      </dl>
     </aside>
-  </section>
+  </div>
 
-  <section class="e-strip">
-    ${D.combos.map((c) => `
-      <button class="e-card" data-combo data-label="${c.notables.join(' + ')}">
-        <img src="${art.cluster(c.art)}" alt="">
-        <span class="e-cardbody">
-          <b>${c.notables.join(' + ')}</b>
-          ${modsOf(c)}
-          <em>${gearOf(c)}</em>
-          ${bar(c.pct)}
-        </span>
-        <span class="e-cardpct">${c.pct}%</span>
-      </button>`).join('')}
-    <div class="e-switcher">
-      ${D.skills.slice(0, 4).map((s, i) => `<button class="e-pill${i === 0 ? ' on' : ''}" data-pick data-label="${s.name}" title="${s.name}"><img src="${art.gem(s.gem)}" alt=""></button>`).join('')}
-    </div>
-  </section>
+  <footer class="a-status" data-status><span>124,363 builds · 234 characters · 592 jewels · 34 combinations</span><span>snapshot demo-2026-11-07</span></footer>
+`;
 
-  <footer class="e-status" data-status><span>124,363 builds · 234 characters · 592 jewels · 34 combinations</span><span>snapshot demo-2026-11-07</span></footer>`;
-
-/* ── 06 · ATLAS — treemap of the meta ─────────────────────────────────────── */
 
 L.prism = () => `
   <div class="p-backdrop">
@@ -759,12 +781,12 @@ const VARIANTS = [
     sw: ['#07060f', '#100c1e', '#dd5ce0', '#f08fae', '#7fb3f5'],
   },
   {
-    id: 'nocturne', name: 'Nocturne', tag: 'Cinematic hero',
-    intent: 'Full-bleed splash art, a 64px title starting at the top edge, the notables under it, the numbers on the baseline above the strip, a glass card with the three routes, and three cards carrying each combination, its modifiers and its price.',
-    keeps: 'The largest art of any direction here.',
-    costs: 'The least dense screen; deep links land on a picture.',
-    tags: ['full-bleed', 'glass', 'poster'],
-    sw: ['#0b0812', '#1d1630', '#ff6b9d', '#f08fae', '#7fb3f5'],
+    id: 'atrium', name: 'Atrium', tag: 'Cinematic cover + inspector',
+    intent: 'A cinematic cover with the inspector from the radial direction: full-bleed splash art behind the title and the three numbers, the three combinations stacked as full-width cards down the main column, and one glass panel on the right carrying the selected combination, the skill switcher, the notables ranking, the uniques, the three routes and the totals.',
+    keeps: 'The atmosphere of a hero with the density of a side panel — the art stays, the information does not hide.',
+    costs: 'Two columns only; the cards carry the comparison, so the panel has to stay narrow.',
+    tags: ['cinematic', 'inspector', 'stacked cards'],
+    sw: ['#0b0812', '#1a1329', '#ff6b9d', '#f08fae', '#7fb3f5'],
   },
   {
     id: 'tiers', name: 'Tiers', tag: 'Comparison plans',

@@ -49,7 +49,7 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Dossier', 'Sheet', 'Broadsheet', 'Orbit', 'Nocturne',
+  'Dossier', 'Sheet', 'Broadsheet', 'Orbit', 'Atrium',
   'Tiers', 'HUD', 'Prism', 'Compare', 'Vitrine',
 ];
 
@@ -59,7 +59,7 @@ const LAYOUTS = [
   { id: 'sheet', prefix: 's' },
   { id: 'broadsheet', prefix: 'b' },
   { id: 'orbit', prefix: 'r' },
-  { id: 'nocturne', prefix: 'e' },
+  { id: 'atrium', prefix: 'a' },
   { id: 'tiers', prefix: 't' },
   { id: 'hud', prefix: 'u' },
   { id: 'prism', prefix: 'p' },

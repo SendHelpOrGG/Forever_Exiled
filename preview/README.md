@@ -47,9 +47,10 @@ above the combination list already covers it.
 
 `/designs/` holds **ten directions for the interface**, built to be compared rather than used.
 They are ten different layouts, not ten colour schemes of one: an item inspection screen, a dense
-data grid, an editorial spread, a radial graph around the skill, a cinematic full-bleed hero, a
-three-plan comparison page, a game HUD with corner clusters, a command palette over blurred art, an
-A/B diff of two combinations, and a museum case with a plaque. **All ten are dark, and no palette
+data grid, an editorial spread, a radial graph around the skill, a cinematic cover with the
+inspector panel from that radial direction, a three-plan comparison page, a game HUD with corner
+clusters, a command palette over blurred art, an A/B diff of two combinations, and a museum case
+with a plaque. **All ten are dark, and no palette
 uses brown or green.**
 
 Each shows the same screen, and the same *whole* cluster-jewel surface, so the comparison is fair:
