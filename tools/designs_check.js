@@ -330,20 +330,23 @@ const available = SHEET_H - BAR_H - STATUS_H - padY;
 
 /* the main column: head row, hero block, then three-to-four cards */
 const cardPad = boxNums('.m-atrium .a-card', 'padding', [10, 14])[0];
-const cardH = cardPad * 2
-  + cssNum('.m-atrium .a-cardbody b', 'font-size', 12) * 1.2
-  + 2 * (cssNum('.m-atrium .a-cardbody .fx-mod', 'font-size', 9.5) * 1.35 + 1)
-  + cssNum('.m-atrium .a-cardbody .fx-gear', 'font-size', 9) * 1.2
+/* the card's modifiers sit on one line; the name, the mods, the socketing and the bar stack */
+const modsPerRow = /\.a-cardbody \.fx-mods \{[^}]*flex-direction:\s*row/.test(css.replace(/\n/g, ' ')) ? 1 : 2;
+const cardH = cardPad * 2 + 2
+  + cssNum('.m-atrium .a-cardbody b', 'font-size', 12) * 1.35
+  + modsPerRow * (cssNum('.m-atrium .a-cardbody .fx-mod', 'font-size', 9.5) * 1.35 + 1)
+  + cssNum('.m-atrium .a-cardbody .fx-gear', 'font-size', 9) * 1.35
   + 7 + 6;
 const rows = section('crimson').querySelectorAll('[data-combo]').length;
 const listH = rows * cardH + (rows - 1) * cssNum('.m-atrium .a-list', 'gap', 8);
-const heroH = 22
+const heroH = 24
   + cssNum('.m-atrium .a-titlerow h1', 'font-size', 50) * 0.95
-  + cssNum('.m-atrium .a-sub', 'font-size', 12) * 1.35 + 4 + 29
-  + cssNum('.m-atrium .a-stats', 'margin-top', 20) + 11 + cssNum('.m-atrium .a-stats .num', 'font-size', 32) * 1.05;
+  + cssNum('.m-atrium .a-sub', 'font-size', 12) * 1.5 + 4
+  + cssNum('.m-atrium .a-meta', 'margin-top', 10) + 28
+  + cssNum('.m-atrium .a-stats', 'margin-top', 20) + 11 + cssNum('.m-atrium .a-stats .num', 'font-size', 32) * 1.25;
 const mainSlack = available - (heroH + listH);
 check('the main column fits above the status bar, with room to spare',
-  mainSlack >= 8, `${(heroH + listH).toFixed(0)} of ${available}px used, ${mainSlack.toFixed(0)}px spare`);
+  mainSlack >= 12, `${(heroH + listH).toFixed(0)} of ${available}px used, ${mainSlack.toFixed(0)}px spare`);
 
 /* the panel: selected block, gem picker, ranking, uniques, routes, totals */
 const panelPad = boxNums('.m-atrium .a-panel', 'padding', [16])[0];
@@ -359,6 +362,16 @@ const mainW = 1280 - padX * 2 - panelW - gapBody;
 check('the two columns share the sheet without touching',
   mainW >= 700 && panelW >= 320 && gapBody >= 24,
   `main ${mainW}px · gap ${gapBody}px · panel ${panelW}px`);
+
+check('the hero and the list cannot overlap by construction',
+  /\.m-atrium \.a-main \{[^}]*display:\s*grid[^}]*grid-template-rows:\s*auto auto auto minmax\(0, 1fr\)/.test(css.replace(/\n/g, ' ')));
+
+check('the cards keep their height instead of being squeezed',
+  /\.m-atrium \.a-list \{[^}]*justify-content:\s*flex-end/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-panel > \* \{[^}]*flex:\s*0 0 auto/.test(css.replace(/\n/g, ' ')));
+
+check('the mock footer clears the gallery zoom button',
+  /\.m-atrium \.a-status \{[^}]*padding:\s*0 96px 0 34px/.test(css.replace(/\n/g, ' ')));
 
 check('no region can spill into its neighbour',
   ['.m-atrium .a-body', '.m-atrium .a-main', '.m-atrium .a-panel']
