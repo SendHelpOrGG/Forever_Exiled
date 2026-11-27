@@ -9,10 +9,10 @@
  *   2. no two layouts are the same DOM — the whole point of the rewrite;
  *   3. every mock shows the same content (Winter Orb, average + peak, three combinations,
  *      a craft target, a 234-character status line), so the comparison is a fair one;
- *   4. every class a layout invents is actually styled, and every clickable thing has hover,
- *      press and focus feedback;
+ *   4. every class a layout invents is actually styled, and every clickable thing has a hover,
+ *      a press and a focus state;
  *   5. the mocks answer: clicking a skill rewrites the hero, clicking a combination rewrites the
- *      craft target, and the size pills in the first direction filter the list;
+ *      craft target, and the size chips filter the combination list;
  *   6. every image path resolves from preview/designs.
  *
  *     NODE_PATH=/home/user/Forever_Exiled/node_modules node tools/designs_check.js
@@ -49,24 +49,34 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Obsidian Glass', 'Codex', 'Terminal', 'Sanctum', 'Ember',
+  'Obsidian', 'Codex', 'Terminal', 'Sanctum', 'Ember',
   'Atlas', 'Brutalist', 'Prism', 'Ledger', 'Trophy',
 ];
 
-/* one descriptor per direction: prefix = the class namespace its own markup uses */
+/* every layout shares the same contract; only its class namespace differs */
 const LAYOUTS = [
-  { id: 'obsidian', prefix: 'o', hero: '[data-hero-name]', stats: '.o-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.o-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'codex', prefix: 'c', hero: '[data-hero-name]', stats: '.c-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.c-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'terminal', prefix: 't', hero: '[data-hero-name]', stats: '.t-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.t-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'sanctum', prefix: 's', hero: '[data-hero-name]', stats: '.s-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.s-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'ember', prefix: 'e', hero: '[data-hero-name]', stats: '.e-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.e-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'atlas', prefix: 'a', hero: '[data-hero-name]', stats: '.a-herostats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.a-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'brutalist', prefix: 'b', hero: '[data-hero-name]', stats: '.b-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.b-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'prism', prefix: 'p', hero: '[data-hero-name]', stats: '.p-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.p-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'ledger', prefix: 'l', hero: '[data-hero-name]', stats: '.l-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.l-status', nav: '[data-nav]', picks: '[data-pick]' },
-  { id: 'trophy', prefix: 'w', hero: '[data-hero-name]', stats: '.w-stats .num', combos: '[data-combo]', craft: '[data-craft-combo]', status: '.w-status', nav: '[data-nav]', picks: '[data-pick]' },
+  { id: 'obsidian', prefix: 'o' },
+  { id: 'codex', prefix: 'c' },
+  { id: 'terminal', prefix: 't' },
+  { id: 'sanctum', prefix: 's' },
+  { id: 'ember', prefix: 'e' },
+  { id: 'atlas', prefix: 'a' },
+  { id: 'brutalist', prefix: 'b' },
+  { id: 'prism', prefix: 'p' },
+  { id: 'ledger', prefix: 'l' },
+  { id: 'trophy', prefix: 'w' },
 ];
 
+const HERO = '[data-hero-name]';
+const STATS = '[data-stats] .num';
+const COMBOS = '[data-combo]';
+const CRAFT = '[data-craft-combo]';
+const STATUS = '[data-status]';
+const NAV = '[data-nav]';
+const PICKS = '[data-pick]';
+
+const section = (id) => document.getElementById(id);
+const mockOf = (id) => section(id).querySelector('.mock');
 const classesOf = (el) => [...el.querySelectorAll('[class]')].flatMap((n) => [...n.classList]);
 
 /* ── the gallery itself ─────────────────────────────────────────────────── */
@@ -74,14 +84,14 @@ const classesOf = (el) => [...el.querySelectorAll('[class]')].flatMap((n) => [..
 const sections = qa('.variant');
 check('ten directions rendered', sections.length === 10, sections.length + ' sections');
 check('they are the ten asked for',
-  sections.map((s) => text(s.querySelector('h2'))).join(' | ') === EXPECTED.join(' | '),
+  sections.map((s) => text(s.querySelector('h2')).split(' ')[0]).join(' | ') === EXPECTED.join(' | '),
   sections.map((s) => text(s.querySelector('h2'))).join(' · '));
 check('the index lists all ten', qa('.gal-index a').length === 10);
 check('every index link points at a section',
   qa('.gal-index a').every((a) => document.getElementById(a.dataset.target) !== null));
-check('every section has a numbered head',
-  sections.every((s) => /^\d\d$/.test(text(s.querySelector('.v-num')))),
-  sections.map((s) => text(s.querySelector('.v-num'))).join(' '));
+check('every section has a numbered head and a one-word tag',
+  sections.every((s) => /^\d\d$/.test(text(s.querySelector('.v-num'))) && s.querySelector('.v-tag')),
+  sections.map((s) => text(s.querySelector('.v-tag'))).join(' · '));
 check('styling notes are written for every variant',
   sections.every((s) => s.querySelectorAll('.v-notes > div').length === 2));
 check('every variant has a palette',
@@ -91,17 +101,13 @@ check('every frame can be zoomed to 1:1',
 
 /* ── ten mocks, ten distinct structures ─────────────────────────────────── */
 
-const mocks = qa('.mock');
-check('ten mock sheets', mocks.length === 10);
+check('ten mock sheets', qa('.mock').length === 10);
 
 /** class names a layout invents, stripped of its own prefix: "o-hero" → "hero" */
 const suffixes = (mock, prefix) =>
   new Set(classesOf(mock).filter((c) => c.startsWith(prefix + '-')).map((c) => c.slice(prefix.length + 1)));
 
-const prints = LAYOUTS.map((l) => ({
-  id: l.id,
-  set: suffixes(document.getElementById(l.id).querySelector('.mock'), l.prefix),
-}));
+const prints = LAYOUTS.map((l) => ({ id: l.id, set: suffixes(mockOf(l.id), l.prefix) }));
 
 check('every mock carries its own class namespace',
   LAYOUTS.every((l, i) => prints[i].set.size >= 8),
@@ -126,71 +132,68 @@ check('and none is a re-skin of another', worst.score < 0.5,
   `closest pair ${worst.pair} at ${(worst.score * 100).toFixed(0)}% shared structure`);
 
 /* the top-level shape must differ too: a poster, a table, a page, a palette … */
-const shape = (l) => {
-  const mock = document.getElementById(l.id).querySelector('.mock');
-  return [...mock.children]
-    .map((n) => n.tagName.toLowerCase() + (n.classList.length ? '.' + [...n.classList][0].replace(/^[a-z]-/, '') : ''))
-    .join('>');
-};
-const shapes = LAYOUTS.map(shape);
+const shape = (id) => [...mockOf(id).children]
+  .map((n) => n.tagName.toLowerCase() + (n.classList.length ? '.' + [...n.classList][0].replace(/^[a-z]-/, '') : ''))
+  .join('>');
+const shapes = LAYOUTS.map((l) => shape(l.id));
 check('the top-level shapes are not interchangeable',
   new Set(shapes).size === 10, new Set(shapes).size + ' unique of 10');
 
 /* ── the same content in all ten ────────────────────────────────────────── */
 
 check('every mock names Winter Orb',
-  LAYOUTS.every((l) => text(document.getElementById(l.id).querySelector(l.hero)) === 'Winter Orb'),
-  LAYOUTS.map((l) => text(document.getElementById(l.id).querySelector(l.hero))).join(' · '));
+  LAYOUTS.every((l) => text(section(l.id).querySelector(HERO)) === 'Winter Orb'),
+  LAYOUTS.map((l) => text(section(l.id).querySelector(HERO))).join(' · '));
 
 check('every mock shows an average and a peak',
   LAYOUTS.every((l) => {
-    const nums = [...document.getElementById(l.id).querySelectorAll(l.stats)].map(text);
+    const nums = [...section(l.id).querySelectorAll(STATS)].map(text);
     return nums.length === 2 && nums[0] === '34.5M' && nums[1] === '145M';
   }),
-  LAYOUTS.map((l) => [...document.getElementById(l.id).querySelectorAll(l.stats)].map(text).join('/')).join(' · '));
+  LAYOUTS.map((l) => [...section(l.id).querySelectorAll(STATS)].map(text).join('/')).join(' · '));
 
 const CANON = ['Prism Weave + Snowstorm', 'Blanketed Snow + Cold to the Core', 'Eye to Eye + Repeater'];
 check('every mock lists the three combinations from the same data',
   LAYOUTS.every((l) => {
-    const labels = [...document.getElementById(l.id).querySelectorAll(l.combos)].map((c) => c.dataset.label);
+    const labels = [...section(l.id).querySelectorAll(COMBOS)].map((c) => c.dataset.label);
     return CANON.every((c) => labels.includes(c));
   }),
-  LAYOUTS.map((l) => document.getElementById(l.id).querySelectorAll(l.combos).length + ' rows').join(' '));
+  LAYOUTS.map((l) => section(l.id).querySelectorAll(COMBOS).length + ' rows').join(' '));
 
 check('every mock has a craft target',
   LAYOUTS.every((l) => {
-    const el = document.getElementById(l.id).querySelector(l.craft);
+    const el = section(l.id).querySelector(CRAFT);
     return el && text(el).length > 3;
   }));
 
 check('every mock has a status line that agrees on 234 characters',
-  LAYOUTS.every((l) => /234/.test(text(document.getElementById(l.id).querySelector(l.status)))),
-  LAYOUTS.map((l) => text(document.getElementById(l.id).querySelector(l.status)).slice(0, 24)).join(' · '));
+  LAYOUTS.every((l) => /234/.test(text(section(l.id).querySelector(STATUS)))),
+  LAYOUTS.map((l) => text(section(l.id).querySelector(STATUS)).slice(0, 26)).join(' · '));
 
 check('every mock has the five-tab navigation',
-  LAYOUTS.every((l) => document.getElementById(l.id).querySelectorAll(l.nav).length >= 5));
+  LAYOUTS.every((l) => section(l.id).querySelectorAll(NAV).length >= 5),
+  LAYOUTS.map((l) => section(l.id).querySelectorAll(NAV).length).join(' '));
 
 check('every mock can switch skill',
-  LAYOUTS.every((l) => document.getElementById(l.id).querySelectorAll(l.picks).length >= 3),
-  LAYOUTS.map((l) => document.getElementById(l.id).querySelectorAll(l.picks).length).join(' '));
+  LAYOUTS.every((l) => section(l.id).querySelectorAll(PICKS).length >= 3),
+  LAYOUTS.map((l) => section(l.id).querySelectorAll(PICKS).length).join(' '));
 
 /* ── it answers when you click ──────────────────────────────────────────── */
 
 const click = (el) => el.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 
 for (const l of LAYOUTS) {
-  const section = document.getElementById(l.id);
-  const picks = [...section.querySelectorAll(l.picks)];
-  const combos = [...section.querySelectorAll(l.combos)];
+  const picks = [...section(l.id).querySelectorAll(PICKS)];
+  const combos = [...section(l.id).querySelectorAll(COMBOS)];
 
   const pick = picks[1] || picks[0];
   click(pick);
-  const heroAfter = text(section.querySelector(l.hero));
+  const heroAfter = text(section(l.id).querySelector(HERO));
   const heroOk = heroAfter === pick.dataset.label && pick.classList.contains('on')
     && picks.filter((p) => p.classList.contains('on')).length === 1;
 
   click(combos[2]);
-  const craftAfter = text(section.querySelector(l.craft));
+  const craftAfter = text(section(l.id).querySelector(CRAFT));
   const craftOk = craftAfter === combos[2].dataset.label
     && combos.filter((c) => c.classList.contains('on')).length === 1;
 
@@ -198,20 +201,24 @@ for (const l of LAYOUTS) {
   check(`${l.id}: picking a combination rewrites the craft target`, craftOk, `${combos[2].dataset.label} → ${craftAfter}`);
 }
 
-/* the size pills are a real filter, not decoration */
+/* the size chips are a real filter, not decoration */
 {
-  const section = document.getElementById('obsidian');
-  const pills = [...section.querySelectorAll('[data-size]')];
-  const rows = () => [...section.querySelectorAll('[data-combo][data-cluster-size]')];
+  const rows = () => [...section('obsidian').querySelectorAll('[data-combo][data-cluster-size]')];
+  const pills = [...section('obsidian').querySelectorAll('[data-size]')];
   const large = pills.find((p) => p.dataset.size === 'large');
   click(large);
   const onlyLarge = rows().filter((r) => !r.classList.contains('off')).map((r) => r.dataset.clusterSize);
   const medium = pills.find((p) => p.dataset.size === 'medium');
   click(medium);
   const onlyMedium = rows().filter((r) => !r.classList.contains('off')).map((r) => r.dataset.clusterSize);
-  check('a size pill really filters the list',
+  check('a size chip really filters the list',
     onlyLarge.join() === 'Large' && onlyMedium.join() === 'Medium,Medium' && medium.classList.contains('on'),
     `large → ${onlyLarge.join(', ') || 'none'} · medium → ${onlyMedium.join(', ')}`);
+
+  const withChips = LAYOUTS.filter((l) => section(l.id).querySelector('[data-size]'));
+  check('every layout that offers sizes can filter on them',
+    withChips.every((l) => section(l.id).querySelectorAll('[data-combo][data-cluster-size]').length >= 3),
+    withChips.map((l) => l.id).join(', ') || 'none');
 }
 
 check('every clickable carries an explicit label',
@@ -224,9 +231,8 @@ check('nothing errors while being used', errors.length === 0, errors.join(' | ')
 
 const unstyled = [];
 for (const l of LAYOUTS) {
-  const used = new Set(classesOf(document.getElementById(l.id).querySelector('.mock')));
-  for (const cls of used) {
-    if (cls === 'on' || cls === 'bar' || cls === 'gem' || cls === 'asc' || cls === 'num') continue;
+  for (const cls of new Set(classesOf(mockOf(l.id)))) {
+    if (['on', 'off', 'bar', 'num', 'val', 'stat', 'sz'].includes(cls)) continue;
     if (!css.includes('.' + cls)) unstyled.push(`${l.id}.${cls}`);
   }
 }
@@ -235,9 +241,9 @@ check('every class used by a layout is styled', unstyled.length === 0,
 
 const hoverRules = css.match(/:hover/g) || [];
 const activeRules = css.match(/:active/g) || [];
-check('the interface reacts to the pointer', hoverRules.length >= 50, hoverRules.length + ':hover rules');
+check('the interface reacts to the pointer', hoverRules.length >= 60, hoverRules.length + ':hover rules');
 check('pressing a control is acknowledged', activeRules.length >= 3, activeRules.length + ':active rules');
-check('clickable things glow, not just change colour',
+check('clickable things change more than colour',
   /:hover[^{]*\{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
 check('keyboard focus is visible', /:focus-visible\s*\{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
 check('bars animate when a mock comes into view',
@@ -254,7 +260,7 @@ const perLayoutHover = LAYOUTS.map((l) => {
   return [l.id, (css.slice(start, end).match(/:hover/g) || []).length];
 });
 check('every direction has bespoke hover states',
-  perLayoutHover.every(([, n]) => n >= 2),
+  perLayoutHover.every(([, n]) => n >= 4),
   perLayoutHover.map(([id, n]) => `${id}:${n}`).join(' '));
 
 /* the sheets are drawn at 1280×720 and scaled; nothing may claim to be bigger */
@@ -268,14 +274,17 @@ const missingArt = [...new Set(sources)].filter((src) => !fs.existsSync(path.joi
 check('mock art resolves from preview/designs', missingArt.length === 0,
   missingArt.length ? missingArt.join(', ') : `${sources.length} images, ${new Set(sources).size} unique`);
 
+check('every mock shows the app art, not just text',
+  LAYOUTS.every((l) => mockOf(l.id).querySelectorAll('img').length >= 3),
+  LAYOUTS.map((l) => `${l.id}:${mockOf(l.id).querySelectorAll('img').length}`).join(' '));
+
 /* ── report ─────────────────────────────────────────────────────────────── */
 
 /* the bars light on the next animation frame, so the last checks wait for one */
 setTimeout(() => {
   check('every mock lit its bars on first paint',
-    LAYOUTS.every((l) => document.getElementById(l.id).querySelector('.mock').classList.contains('lit')),
-    LAYOUTS.filter((l) => !document.getElementById(l.id).querySelector('.mock').classList.contains('lit'))
-      .map((l) => l.id).join(', ') || 'all ten');
+    LAYOUTS.every((l) => mockOf(l.id).classList.contains('lit')),
+    LAYOUTS.filter((l) => !mockOf(l.id).classList.contains('lit')).map((l) => l.id).join(', ') || 'all ten');
 
   check('nothing errors after a frame', errors.length === 0, errors.join(' | ') || 'none');
 

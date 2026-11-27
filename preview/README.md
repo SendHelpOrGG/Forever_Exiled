@@ -46,9 +46,9 @@ above the combination list already covers it.
 ## Design gallery
 
 `/designs/` holds **ten directions for the interface**, built to be compared rather than used.
-They are ten different layouts, not ten colour schemes of one: a sidebar shell, a printed page with
-a contents column, a monospace table with an inspector, a light magazine, a cinematic banner, a KPI
-dashboard, a brutalist poster, a command palette over blurred art, a master/detail ledger and an art
+They are ten different layouts, not ten colour schemes of one: a bento cockpit, an editorial spread
+on paper, a market terminal with a tape, a light product UI, a cinematic full-bleed hero, a treemap of
+the meta, a Swiss poster, a command palette over blurred art, a dense master/detail ledger and an art
 wall. Each shows the same screen — Winter Orb, its three combinations, the crafting card, the same
 234 sampled characters — so the comparison is fair.
 
