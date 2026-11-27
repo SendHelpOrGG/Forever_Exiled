@@ -15,28 +15,27 @@
   <p class="gal-sub">
     The gallery fills the frame with the ascendancy portrait — a 152 px icon blown up to 1280 px,
     held at half opacity under three gradient washes. It is soft, and it says “class”, not
-    “Path of Exile”. These are four references from the game, and the five earlier attempts kept
-    underneath them for comparison.
+    “Path of Exile”. Six of these seven put real Path of Exile art behind Atrium instead.
   </p>
   <p class="gal-sub">
-    <b>From the game</b> is the third pass, and this one starts from four specific things rather
-    than from a mood: the <b>title cartouche</b> with its bust medallions, feather wings and hanging
-    pendants; <b>Izaro’s shield</b> as it hangs in the Lord’s Labyrinth; the <b>Sacred Grove</b>,
-    with the heart tree in its clearing, the lantern branch and the three seed colours the Harvest
-    league is built on; and <b>Einhar’s</b> bestiary — cages, a lantern inside one, a net across the
-    corner, paw prints and a capture tally. Each is drawn to its parts, not to the impression of
-    them, and each is checked at full size so nothing is cut by the frame.
+    <b>Actual art</b> is the fourth pass and the first one that does not draw anything. The originals
+    live in <b>preview/assets/splash/</b>: the official key art at 1600 px, the Labyrinth painting, the
+    near-black character plate, and the wordmark PNG with its background keyed out to real alpha.
+    Each direction is the same DOM — one layer holding an <b>&lt;img&gt;</b> and a palette tint —
+    and the only things that change are the crop, the mask and whether the art is clipped into a
+    frame. The tint is <b>mix-blend-mode: color</b> over desaturated art, so the picture wears the
+    palette instead of fighting it.
   </p>
   <p class="gal-sub">
-    All of it is inline SVG reading the palette tokens — the metal is <b>var(--gold)</b> at low
-    opacity, so it stays gold rather than muddying into brown, and the grove’s three beds are the
-    accent, the notable and the modifier hues, which is why they re-tint in all ten palettes.
-    Nothing is wired into the gallery yet: pick one and it goes into all ten frames.
+    The art is Grinding Gear Games’ and is here as a proposal only: it is pulled from the open web,
+    in the same spirit as the ascendancy portraits the gallery already ships, and none of this is
+    wired into <b>/designs/</b>. A fade mask keeps every crop off the card column, and the art layer
+    sits under the mock’s own gradient wash, so the layout still owns its numbers.
   </p>
 </header>
 
 <div class="gal-top bg-controls">
-  <p class="bg-ctl-label">Veil strength</p>
+  <p class="bg-ctl-label">Art strength</p>
   <div class="bg-ctl-group">
     <button data-strength="subtle">Subtle</button>
     <button data-strength="medium" class="on">Medium</button>

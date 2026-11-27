@@ -724,18 +724,25 @@ check('every palette declares a pale, legal action colour',
       }))
       .then((dom) => {
         const d = dom.window.document;
-        const veils = [...d.querySelectorAll('.a-veil')].map((v) => v.outerHTML).join('');
+        const photos = [...d.querySelectorAll('.a-photo')];
         process.stdout.write(JSON.stringify({
           sections: [...d.querySelectorAll('.bg-sec')].map((x) => x.id),
           groups: [...d.querySelectorAll('.bg-group')].map((g) => g.textContent.trim()),
           mocks: d.querySelectorAll('.mock').length,
-          veils: d.querySelectorAll('.a-veil').length,
+          photos: photos.length,
           portraits: d.querySelectorAll('img.a-backdrop').length,
           strengths: d.querySelectorAll('[data-strength]').length,
-          hex: (veils.match(/(?:fill|stroke)="#[0-9a-f]{3,8}"/gi) || []).length,
-          veilPosition: [...d.querySelectorAll('.a-veil')].map((v) => dom.window.getComputedStyle(v).position),
-          gold: veils.split('var(--gold)').length - 1,
-          tokens: veils.split('var(--').length - 1,
+          srcs: photos.map((p) => p.querySelector('img').getAttribute('src')),
+          photoPosition: photos.map((p) => dom.window.getComputedStyle(p).position),
+          masked: photos.filter((p) => {
+            const cs = dom.window.getComputedStyle(p.querySelector('img'));
+            return /gradient/.test(cs.maskImage || cs.webkitMaskImage || '');
+          }).length,
+          scrim: photos.filter((p) => p.querySelector('b')).length,
+          tinted: photos.filter((p) => {
+            const i = p.querySelector('i');
+            return i && dom.window.getComputedStyle(i).mixBlendMode === 'color';
+          }).length,
           errors,
         }));
       })
@@ -753,24 +760,37 @@ check('every palette declares a pale, legal action colour',
   }
 
   check('the background study loads like a page, not like a snippet',
-    study.sections.length === 9 && study.mocks === 9,
+    study.sections.length === 8 && study.mocks === 8,
     study.sections.join(' ') || 'no sections rendered');
-  check('the study separates the game references from the earlier ones',
-    (study.groups || []).join(' |') === 'From the game |Earlier attempt',
+  check('the study separates the real art from the baseline',
+    (study.groups || []).join(' |') === 'Actual art |Baseline',
     (study.groups || []).join(' · ') || 'no groups');
-  check('the game group is four references, not four textures',
-    ['bg-cartouche', 'bg-izaro', 'bg-grove', 'bg-bestiary']
-      .every((id) => (study.sections || []).includes(id)),
-    (study.sections || []).slice(0, 4).join(' '));
-  check('one direction keeps the portrait and eight draw vectors',
-    study.portraits === 1 && study.veils === 8,
-    `${study.portraits} portrait · ${study.veils} vector`);
-  check('the vectors are drawn from tokens, never from hex',
-    study.hex === 0 && study.tokens >= 60 && study.gold >= 8,
-    study.hex ? `${study.hex} hex fills` : `${study.tokens} token reads, ${study.gold} of them gold`);
-  check('the vector backgrounds stay out of the mock grid',
-    (study.veilPosition || []).length === 8 && study.veilPosition.every((p) => p === 'absolute'),
-    (study.veilPosition || []).join(' ') || 'no veils measured');
+  check('seven directions use real art and one keeps the portrait',
+    study.photos === 7 && study.portraits === 1,
+    `${study.photos} art layers · ${study.portraits} portrait`);
+  check('every art layer loads a file that exists, at real resolution',
+    (study.srcs || []).length === 7 && (study.srcs || []).every((src) => {
+      const file = path.resolve(dir, src);
+      try {
+        const buf = fs.readFileSync(file);
+        if (buf.slice(1, 4).toString() === 'PNG') return buf.readUInt32BE(16) >= 600;
+        let i = 2;
+        while (i < buf.length - 9) {
+          if (buf[i] !== 0xFF) { i++; continue; }
+          const m = buf[i + 1];
+          if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return buf.readUInt16BE(i + 7) >= 1100;
+          i += 2 + buf.readUInt16BE(i + 2);
+        }
+        return false;
+      } catch (e) { return false; }
+    }),
+    (study.srcs || []).map((s) => s.split('/').pop()).join(' ') || 'no sources');
+  check('every art layer is masked away from the type column, but the wordmark',
+    study.masked === 6, `${study.masked} of ${study.photos} masked`);
+  check('every art layer wears the palette, and none of them sits in the mock grid',
+    study.tinted === 7 && (study.photoHeading || study.photoPosition || []).every((p) => p === 'absolute'),
+    `${study.tinted} tinted · ${(study.photoPosition || []).join(' ')}`);
+  check('every art layer carries its own scrim', study.scrim === 7, `${study.scrim} scrims`);
   check('the study has a three-step strength control', study.strengths === 3);
   check('the study page runs without errors', study.errors.length === 0,
     study.errors.slice(0, 3).join(' | ') || 'none');

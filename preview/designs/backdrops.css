@@ -1,4 +1,4 @@
-/* the background study: gallery chrome plus the vector veil the five directions draw with */
+/* the background study: gallery chrome plus the real-art layer the seven directions share */
 
 .bg-list {
   max-width: 1330px;
@@ -21,10 +21,6 @@
 .bg-ctl-group button:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
 .bg-ctl-group button.on { color: #0b1018; background: #9db4ff; font-weight: 600; }
 
-body[data-strength="subtle"] .a-veil { opacity: .3; }
-body[data-strength="medium"] .a-veil { opacity: .46; }
-body[data-strength="strong"] .a-veil { opacity: .66; }
-
 /* group headings inside the study */
 .bg-group {
   margin: 6px 0 -22px;
@@ -35,3 +31,87 @@ body[data-strength="strong"] .a-veil { opacity: .66; }
   padding-top: 10px;
   border-top: 1px solid var(--hair);
 }
+
+/* ── the art layer ─────────────────────────────────────────────────────────────
+   One layer for every direction: an <img> carrying the real art, desaturated and pulled down so it
+   can live on a dark screen; an <i> that blends the palette accent into it; and a <b> scrim that
+   takes the bottom third back to the field colour. The layer sits *above* the mock's gradient wash,
+   because underneath it a 1600 px painting survives at about 4 % — the panel (z-index 1) and the
+   layout (z-index 2) still paint over the top of it. */
+
+.m-atrium .a-photo { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; z-index: 0; }
+
+.m-atrium .a-photo img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 58% 42%;
+  filter: grayscale(.78) saturate(.92) contrast(1.06) brightness(.7);
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 16%, rgba(0, 0, 0, .3) 42%, #000 68%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 16%, rgba(0, 0, 0, .3) 42%, #000 68%);
+}
+
+.m-atrium .a-photo i {
+  position: absolute; inset: 0; background: var(--accent); opacity: .3;
+  mix-blend-mode: color;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 16%, rgba(0, 0, 0, .3) 42%, #000 68%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 16%, rgba(0, 0, 0, .3) 42%, #000 68%);
+}
+
+.m-atrium .a-photo b {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .1) 0%, rgba(0, 0, 0, .18) 52%, var(--bg) 97%);
+}
+
+/* 02 — held to the right 56 %, feathered where it meets the type */
+.m-atrium .a-photo.is-splash img,
+.m-atrium .a-photo.is-splash i {
+  left: 44%; width: 56%;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .5) 12%, #000 36%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .5) 12%, #000 36%);
+}
+.m-atrium .a-photo.is-splash img { object-position: 62% 38%; filter: grayscale(.72) saturate(.95) contrast(1.05) brightness(.95); }
+
+/* 04 — Izaro: the painting is green, so it goes all the way to grey */
+.m-atrium .a-photo.is-izaro img { object-position: 68% 16%; filter: grayscale(1) contrast(1.14) brightness(.58); }
+
+/* 05 — the near-black plate lifted until the figure shows through */
+.m-atrium .a-photo.is-figure img {
+  object-position: 74% 30%;
+  filter: grayscale(1) contrast(1.2) brightness(1.15) saturate(.8);
+}
+
+/* 07 — the environment plate, pulled right down so it never competes with a number */
+.m-atrium .a-photo.is-quiet img {
+  object-position: 50% 46%;
+  filter: grayscale(.88) contrast(1.02) brightness(.62) saturate(.8);
+}
+.m-atrium .a-photo.is-quiet i { opacity: .22; }
+
+/* 06 — the art clipped into a hairline gold frame at the right */
+.m-atrium .a-photo.is-plate img {
+  inset: 74px 54px 74px calc(52% + 6px); width: auto; height: auto; border-radius: 2px;
+  filter: grayscale(.7) saturate(.95) contrast(1.08) brightness(.7);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .6), #000 22%, #000 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .6), #000 22%, #000 100%);
+}
+.m-atrium .a-photo.is-plate i { inset: 74px 54px 74px calc(52% + 6px); width: auto; height: auto; border-radius: 2px; opacity: .24; }
+.m-atrium .a-photo.is-plate b {
+  background: linear-gradient(180deg, rgba(0, 0, 0, .1) 0%, rgba(0, 0, 0, .16) 70%, var(--bg) 100%);
+}
+.m-atrium .a-photo.is-plate::after {
+  content: ""; position: absolute; inset: 68px 48px 68px calc(52% + 0px);
+  border: 1px solid var(--gold); border-radius: 2px; opacity: .38; pointer-events: none;
+}
+
+/* 03 — the wordmark, unfiltered, at its own size */
+.m-atrium .a-photo.is-logo img {
+  inset: auto 42px 52px auto; width: 540px; height: auto; object-fit: contain;
+  opacity: .95; filter: drop-shadow(0 18px 44px rgba(0, 0, 0, .6));
+  -webkit-mask-image: none; mask-image: none;
+}
+.m-atrium .a-photo.is-logo i { display: none; }
+.m-atrium .a-photo.is-logo b { background: none; }
+
+/* how loudly the art speaks */
+body[data-strength="subtle"] .a-photo { opacity: .66; }
+body[data-strength="medium"] .a-photo { opacity: .86; }
+body[data-strength="strong"] .a-photo { opacity: 1; }

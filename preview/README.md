@@ -116,37 +116,44 @@ Nothing there is wired to the app, and the app does not link to it.
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
                                              #   /designs/backdrops.html is the background study
-NODE_PATH=… node tools/designs_check.js      # 113 checks: ten dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 114 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
 
 ### Background study — `/designs/backdrops.html`
 
-The frame behind each mock is the ascendancy portrait (`assets/asc/<class>.jpg`): 152 px of jpeg,
-scaled to 1280, held at half opacity under three gradient washes, and graded per palette
-(grayscale, sepia, desaturate, saturate). It is atmosphere, and it says *class*, not *Path of
-Exile*. `backdrops.html` puts nine directions on the same frame in two groups.
+The frame behind each mock is the ascendancy portrait (`assets/asc/<class>.jpg`): 127–152 px of
+jpeg, scaled to 1280, held at half opacity under three gradient washes, and graded per palette. It
+is atmosphere, and it says *class*, not *Path of Exile*. `backdrops.html` puts eight directions on
+the same frame: seven built on **real Path of Exile art**, and the portrait kept as the baseline.
 
-**From the game** — the current pass, and the third. The first failed because it drew *geometry*
-(even rings, ticks, uniform dots — a HUD); the second drew *texture* (clusters, bowed links, grain —
-game-adjacent, not the game). This one draws four things the game actually has, to their real parts:
+Three earlier passes drew their way to it — geometry first, then game-adjacent texture, then the
+game's own heraldry, part by part. All three were rejected for the same reason, and it is the right
+one: a hand-drawn copy of a painted asset is a copy. So this pass stops drawing.
 
 | # | direction | what it is |
 |---|-----------|------------|
-| 01 | The logo | the title cartouche: domed shield plate with three bust medallions on the rim, five tapered feathers fanning off each side, the wordmark engraved in gold, an engraved rule and diamond, five pendants hanging beneath, the blood on the plate as accent droplets |
-| 02 | Izaro | the Labyrinth shield: oval crest with the winged emblem, its tail feathers, the crown threaded on the staff above and the gem boss below, brass scrollwork either side, a maze floor |
-| 03 | Sacred Grove | the ring and its radial paving, the heart tree in the clearing, a branch arch springing off the ring and landing on it again with five lanterns hung along it, and three seed beds in primal, vivid and wild — the accent, the notable and the modifier hues |
-| 04 | Einhar | the bestiary: three cages with scroll tops and a lantern burning inside one, a net thrown across the corner, paw prints crossing the floor, a skull and a bone, a capture tally |
+| 01 | Key art, full bleed | official key art, cover-cropped, desaturated, tinted to the accent, bottom third scrimmed back to the field |
+| 02 | The splash | a Path of Exile 2 loading screen held to the right 56 %, feathered where it meets the type column |
+| 03 | The logo | the real wordmark, background keyed to alpha, 540 px, in the corner, unfiltered |
+| 04 | Izaro | the Emperor, cropped to the shoulder and pushed to full grey (the painting is green) |
+| 05 | The dark figure | a near-black character plate, mirrored, brightness lifted until the silhouette reads |
+| 06 | The plate | key art clipped into a rectangle with a 1 px gold rule and an inset shadow |
+| 07 | The quiet field | an environment plate at low brightness — the safest of the seven to ship |
+| 08 | Portrait wash | the baseline that ships today |
 
-**Earlier attempt**, kept so the difference is visible: the passive tree, the portrait wash (what
-ships today), the filigree frame, the atlas wheel and the jewel socket.
+The originals live in **`assets/splash/`**: 1600 px JPEGs and one keyed PNG, ~1.1 MB in total.
+They are Grinding Gear Games' art, pulled from the open web for a proposal in the same spirit as the
+ascendancy portraits the gallery already ships; the Izaro painting is fan work (torvald2016). None
+of it is wired into `/designs/`, and none of it should ship without GGG's blessing. The wordmark's
+checkerboard background was keyed out with a border flood fill, which is why its alpha edges were
+then eroded by a pixel.
 
-All of it is inline SVG drawn from the palette tokens — the bronze is `var(--gold)` at low opacity,
-which keeps it gold rather than muddying into brown — so nothing upscales and every one of the ten
-palettes re-tints it. A fade mask dissolves the drawing over the card column, and a **subtle /
-medium / strong** control (0.30 / 0.46 / 0.66) settles the veil against the text. Every direction is
-also rendered headless at full size while it is drawn, because the frame edge cuts what it cuts.
-Nothing is wired into the gallery yet: `L.atrium()` is shared through `window.FE`, the study swaps
-the portrait for a drawing and leaves `/designs/` untouched.
+Every direction is one `.a-photo` layer — `<img>`, an `<i>` that blends `--accent` in with
+`mix-blend-mode: color`, and a `<b>` scrim — so the only differences are crop, mask and framing.
+Two things matter about where it sits: it goes **above** `.a-shade` (underneath it a 1600 px
+painting survives at about 4 % and the study looks empty), and it carries its own left-edge mask so
+it never reaches the card column. The panel (`z-index: 1`) and the layout (`z-index: 2`) still paint
+over the top of it. A **subtle / medium / strong** control sets the layer opacity at 0.66 / 0.86 / 1.
 
 ## What is real and what is simulated
 

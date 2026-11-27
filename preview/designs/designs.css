@@ -204,7 +204,7 @@ img { display: block; }
   radial-gradient(70% 60% at 78% 20%, var(--halo), transparent 60%),
   linear-gradient(100deg, var(--bg) 26%, var(--v55) 60%, var(--v86) 100%),
   linear-gradient(180deg, var(--v70), var(--v95) 88%); }
-.m-atrium > *:not(.a-backdrop):not(.a-shade):not(.a-veil) { position: relative; }
+.m-atrium > *:not(.a-backdrop):not(.a-shade):not(.a-veil):not(.a-photo) { position: relative; }
 
 /* a vector background sits above the gradient wash but below everything the layout paints, so it
    can be as crisp as it likes without ever dimming a number */
