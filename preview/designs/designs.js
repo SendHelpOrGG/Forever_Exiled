@@ -207,12 +207,12 @@ const VARIANTS = [
     sw: ['#061318', '#0f242c', '#2ad4e6', '#8fe9f5', '#b58cff'],
   },
   {
-    id: 'slate', layout: 'atrium', theme: 'slate', name: 'Atrium · Slate', tag: 'Neutral',
-    intent: 'No hue in the chrome at all: a steel-grey accent on graphite, near-white numbers, and only the notables and the modifiers carrying a tint. The splash art supplies all of the colour.',
-    keeps: 'The quietest of the five, and the one that looks most like a finished product.',
-    costs: 'Without a hue the buttons lose their pull; the tinted notables do a lot of work.',
-    tags: ['slate', 'quiet', 'graphite'],
-    sw: ['#0a0c10', '#161a21', '#a9b8cc', '#e2ebf5', '#7fa8e0'],
+    id: 'noir', layout: 'atrium', theme: 'noir', name: 'Atrium · Noir', tag: 'Black & white',
+    intent: 'Black and white, aggressively: pure black field, white accent, hard 1px white rules, square corners, no blur and no glow — the glass panel becomes a printed plate with an offset shadow, and the splash art is desaturated so the only colour left is the resource art itself. Hovering a combination inverts it to white-on-black.',
+    keeps: 'The one that looks designed rather than tinted — layout, contrast and type do the work, not hue.',
+    costs: 'The hardest of the five to soften later; white on black at this contrast is loud by default.',
+    tags: ['noir', 'monochrome', 'brutalist'],
+    sw: ['#000000', '#0c0c0e', '#f4f6f8', '#eef0f3', '#9fa8b6'],
   },
 ];
 

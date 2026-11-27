@@ -48,7 +48,7 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Atrium · Crimson', 'Atrium · Violet', 'Atrium · Azure', 'Atrium · Cyan', 'Atrium · Slate',
+  'Atrium · Crimson', 'Atrium · Violet', 'Atrium · Azure', 'Atrium · Cyan', 'Atrium · Noir',
 ];
 
 /* one layout, five palettes: the id is the theme, the class namespace is shared */
@@ -57,7 +57,7 @@ const THEMES = [
   { id: 'violet', prefix: 'a' },
   { id: 'azure', prefix: 'a' },
   { id: 'cyan', prefix: 'a' },
-  { id: 'slate', prefix: 'a' },
+  { id: 'noir', prefix: 'a' },
 ];
 
 const HERO = '[data-hero-name]';
