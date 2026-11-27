@@ -45,7 +45,7 @@ above the combination list already covers it.
 
 ## Design gallery
 
-`/designs/` holds the chosen direction, **Atrium**, in five palettes. It is the merge of the two
+`/designs/` holds the chosen direction, **Atrium**, in ten palettes. It is the merge of the two
 earlier proposals that survived: **04**'s inspector panel and **05**'s cinematic cover. Full-bleed
 splash art, the skill with its ascendancy icons and the character running it, the three numbers, and
 the combinations stacked top-down as full-width cards, with one glass panel on the right carrying the
@@ -59,9 +59,15 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 | 03 | Azure | `#4b8dff` + pale red `#f0b3b8` | `#070c18` |
 | 04 | Cyan | `#2ad4e6` | `#061318` |
 | 05 | Noir | `#f4f6f8` + gold `#d9b45c` | `#000000` — black and white, one gold |
+| 06 | Orchid | `#ff4fd8` + magenta `#c76dbf` | `#120614` — one hue, five lightness steps |
+| 07 | Ember | `#ff7f38` + ice `#9fc6e8` | `#0c0604` — orange chrome, cold modifiers |
+| 08 | Periwinkle | `#8f8dff` + rose `#ffb6cf` | `#08060f` — pale blue-violet |
+| 09 | Honey | `#ffc04a` + steel `#8fb4e8` | `#0b0803` — the gold is the chrome |
+| 10 | Steel | `#a9c9df` + slate `#8fa3b9` | `#06090c` — matte, desaturated, greyscale art |
 
 The layout is written in palette tokens (`--accent`, `--bg`, `--glass`, `--line`, `--note`,
-`--mod`, …) and each palette only redefines those, so the five cannot drift apart. Notables always
+`--mod`, …) and each palette only redefines those, plus the grade of the splash art, so the ten
+cannot drift apart: the DOM, the sizes and the type are identical in all of them. Notables always
 take one colour and cluster modifiers another, so the two feature categories stay readable in every
 palette.
 
@@ -101,7 +107,7 @@ Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
-NODE_PATH=… node tools/designs_check.js      # 92 checks: five dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 104 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
 
 ## What is real and what is simulated

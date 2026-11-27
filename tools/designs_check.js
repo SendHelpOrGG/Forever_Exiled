@@ -2,11 +2,11 @@
 /**
  * Structural check for the design gallery (preview/designs/).
  *
- * There is now one layout — Atrium, the merged 04 + 05 direction — and five palettes of it. That
+ * There is now one layout — Atrium, the merged 04 + 05 direction — and ten palettes of it. That
  * makes the page much easier to get wrong in a different way, so the check guarantees:
  *
- *   1. five variants, each with its own head and palette, all of them the same layout;
- *   2. the palettes really differ: five distinct accents and five distinct fields;
+ *   1. ten variants, each with its own head and palette, all of them the same layout;
+ *   2. the palettes really differ: ten distinct accents and ten distinct fields;
  *   3. every mock shows the whole cluster-jewel surface (notables, modifiers, socketing, uniques,
  *      the ranking, three routes with tries and cost, all-builds totals) — no palette is allowed
  *      to drop a feature;
@@ -49,15 +49,21 @@ const check = (label, ok, detail = '') =>
 
 const EXPECTED = [
   'Atrium · Crimson', 'Atrium · Violet', 'Atrium · Azure', 'Atrium · Cyan', 'Atrium · Noir',
+  'Atrium · Orchid', 'Atrium · Ember', 'Atrium · Periwinkle', 'Atrium · Honey', 'Atrium · Steel',
 ];
 
-/* one layout, five palettes: the id is the theme, the class namespace is shared */
+/* one layout, ten palettes: the id is the theme, the class namespace is shared */
 const THEMES = [
   { id: 'crimson', prefix: 'a' },
   { id: 'violet', prefix: 'a' },
   { id: 'azure', prefix: 'a' },
   { id: 'cyan', prefix: 'a' },
   { id: 'noir', prefix: 'a' },
+  { id: 'orchid', prefix: 'a' },
+  { id: 'ember', prefix: 'a' },
+  { id: 'periwinkle', prefix: 'a' },
+  { id: 'honey', prefix: 'a' },
+  { id: 'steel', prefix: 'a' },
 ];
 
 const HERO = '[data-hero-name]';
@@ -75,14 +81,14 @@ const classesOf = (el) => [...el.querySelectorAll('[class]')].flatMap((n) => [..
 /* ── the gallery itself ─────────────────────────────────────────────────── */
 
 const sections = qa('.variant');
-check('five variants rendered', sections.length === 5, sections.length + ' sections');
+check('ten variants rendered', sections.length === 10, sections.length + ' sections');
 
 const names = sections.map((s) => {
   const h = s.querySelector('h2');
   return text(h).replace(text(h.querySelector('.v-tag')), '').replace(/\s+/g, ' ').trim();
 });
-check('they are the five palettes asked for', names.join(' | ') === EXPECTED.join(' | '), names.join(' · '));
-check('the index lists all five', qa('.gal-index a').length === 5);
+check('they are the ten palettes asked for', names.join(' | ') === EXPECTED.join(' | '), names.join(' · '));
+check('the index lists all ten', qa('.gal-index a').length === 10);
 check('every index link points at a section',
   qa('.gal-index a').every((a) => document.getElementById(a.dataset.target) !== null));
 check('every section has a numbered head and a one-word tag',
@@ -95,9 +101,9 @@ check('every variant has a palette',
 check('every frame can be zoomed to 1:1',
   sections.every((s) => s.querySelectorAll('.frame-zoom').length === 1));
 
-/* ── five mocks, one structure, five palettes ───────────────────────────── */
+/* ── ten mocks, one structure, ten palettes ─────────────────────────────── */
 
-check('five mock sheets', qa('.mock').length === 5, qa('.mock').length + ' mocks');
+check('ten mock sheets', qa('.mock').length === 10, qa('.mock').length + ' mocks');
 
 check('every mock is the same layout', qa('.mock').every((m) => m.classList.contains('m-atrium')));
 
@@ -109,7 +115,7 @@ const shape = (id) => [...mockOf(id).children]
   .map((n) => n.tagName.toLowerCase() + (n.classList.length ? '.' + [...n.classList][0].replace(/^a-/, '') : ''))
   .join('>');
 const shapes = THEMES.map((t) => shape(t.id));
-check('the five are the same DOM, not five diverging layouts', new Set(shapes).size === 1, shapes[0]);
+check('the ten are the same DOM, not ten diverging layouts', new Set(shapes).size === 1, shapes[0]);
 
 check('no mock invents a second layout namespace',
   qa('.mock [class]').every((n) => [...n.classList].every((c) =>
@@ -117,7 +123,7 @@ check('no mock invents a second layout namespace',
       'fx-uniques', 'fx-un', 'fx-routes', 'fx-route', 'fx-tag', 'fx-craft', 'fx-notarow', 'bar', 'stat', 'num', 'val', 'sz'].includes(c))),
   [...new Set(qa('.mock [class]').flatMap((n) => [...n.classList]).filter((c) => /^[b-z]-/.test(c) && !/^(t-|m-|fx-)/.test(c)))].slice(0, 6).join(', ') || 'none');
 
-/* ── the same content in all five ───────────────────────────────────────── */
+/* ── the same content in all ten ────────────────────────────────────────── */
 
 check('every mock names Winter Orb',
   THEMES.every((t) => text(section(t.id).querySelector(HERO)) === 'Winter Orb'),
@@ -369,12 +375,19 @@ check('the layout is written in palette tokens',
 const accents = THEMES.map((t) => [t.id, token(`.m-atrium.t-${t.id}`, 'accent')]);
 check('each palette declares its own accent',
   accents.every(([, hex]) => hex !== null), accents.map(([id, hex]) => `${id}:${hex}`).join(' '));
-check('the five accents are five different colours',
-  new Set(accents.map(([, hex]) => hex)).size === 5, accents.map(([, hex]) => hex).join(' '));
+const baseTokens = [...new Set([...blockOf('.m-atrium').matchAll(/--([\w-]+):/g)].map((m) => m[1]))];
+const missingTokens = THEMES.map((t) => [t.id, baseTokens.filter((n) => token(`.m-atrium.t-${t.id}`, n) === null)]);
+check('every palette defines every token the layout reads',
+  missingTokens.every(([, m]) => m.length === 0),
+  missingTokens.filter(([, m]) => m.length).map(([id, m]) => `${id}:${m.join(',')}`).join(' ')
+    || `${baseTokens.length} tokens in each of ${THEMES.length}`);
+
+check('the ten accents are ten different colours',
+  new Set(accents.map(([, hex]) => hex)).size === 10, accents.map(([, hex]) => hex).join(' '));
 
 const fields = THEMES.map((t) => [t.id, token(`.m-atrium.t-${t.id}`, 'bg')]);
-check('the five fields are five different colours',
-  new Set(fields.map(([, hex]) => hex)).size === 5, fields.map(([id, hex]) => `${id}:${hex}`).join(' '));
+check('the ten fields are ten different colours',
+  new Set(fields.map(([, hex]) => hex)).size === 10, fields.map(([id, hex]) => `${id}:${hex}`).join(' '));
 
 check('each palette keeps the notables / modifiers split',
   THEMES.every((t) => token(`.m-atrium.t-${t.id}`, 'note') && token(`.m-atrium.t-${t.id}`, 'mod')
@@ -593,7 +606,7 @@ check('every mock ranks the most-used notables',
 check('every mock keeps the share percentages',
   THEMES.every((t) => ['68%', '44%', '31%'].every((p) => text(section(t.id)).includes(p))));
 
-/* ── and none of the five may be bright ─────────────────────────────────── */
+/* ── and none of the ten may be bright ──────────────────────────────────── */
 
 const luminance = (hex) => {
   const h = hex.replace('#', '');
@@ -686,7 +699,7 @@ check('the palettes that ask for a second accent declare it',
 setTimeout(() => {
   check('every mock lit its bars on first paint',
     THEMES.every((t) => mockOf(t.id).classList.contains('lit')),
-    THEMES.filter((t) => !mockOf(t.id).classList.contains('lit')).map((t) => t.id).join(', ') || 'all five');
+    THEMES.filter((t) => !mockOf(t.id).classList.contains('lit')).map((t) => t.id).join(', ') || 'all ten');
 
   check('nothing errors after a frame', errors.length === 0, errors.join(' | ') || 'none');
 

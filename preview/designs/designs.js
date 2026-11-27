@@ -107,7 +107,7 @@ const L = {};
 
 /* ══════════════════════════════════════════════════════ ATRIUM — the one ═══
    The merged 04 + 05 direction: cinematic cover, inspector panel, combinations
-   stacked top-down. The five gallery entries below are palettes of this DOM.  */
+   stacked top-down. The ten gallery entries below are palettes of this DOM.  */
 
 L.atrium = () => {
   const sizes = ['Large', 'Medium', 'Small'].map((sz) => ({
@@ -332,6 +332,46 @@ const VARIANTS = [
     tags: ['noir', 'monochrome', 'neutral'],
     sw: ['#000000', '#0c0c0e', '#f4f6f8', '#eef0f3', '#9fa8b6'],
   },
+  {
+    id: 'orchid', layout: 'atrium', theme: 'orchid', name: 'Atrium · Orchid', tag: 'One hue',
+    intent: 'A single hue doing all the work: the chrome, the numbers, the bars, the notables and the modifiers are five lightness steps of the same magenta, so nothing is told apart by colour — only by weight. The splash art is pushed glossier to keep up.',
+    keeps: 'The most graphic of the ten: one hue, five steps, no second accent to dilute it.',
+    costs: 'Notable and modifier read as one family — the split survives on lightness, which is subtler at a glance.',
+    tags: ['orchid', 'monochrome', 'loud'],
+    sw: ['#120614', '#1d0f22', '#ff4fd8', '#ffb0ea', '#c76dbf'],
+  },
+  {
+    id: 'ember', layout: 'atrium', theme: 'ember', name: 'Atrium · Ember', tag: 'Orange + ice',
+    intent: 'Warm soot, an orange chrome, and the cluster modifiers dropped into a cold ice blue: the two feature categories split by temperature rather than by hue, which still holds when the colour is not read at all. The art is graded warm to match.',
+    keeps: 'The strongest hot-and-cold contrast of the ten — the frame reads like forge light.',
+    costs: 'Orange is the loudest chrome here, and the panel competes with the splash art behind it.',
+    tags: ['ember', 'warm', 'duotone'],
+    sw: ['#0c0604', '#1c1210', '#ff7f38', '#ffb27a', '#9fc6e8'],
+  },
+  {
+    id: 'periwinkle', layout: 'atrium', theme: 'periwinkle', name: 'Atrium · Periwinkle', tag: 'Pale blue-violet',
+    intent: 'A pale blue-violet accent on midnight, with rose reserved for the cluster modifiers. It is the coolest chrome of the ten and the one that leaves the splash art closest to its own colours.',
+    keeps: 'The calmest reading after Steel: a lot of air, very little glow.',
+    costs: 'A pale accent loses punch on the bars, so the ranking reads slower than in Crimson.',
+    tags: ['periwinkle', 'cool', 'calm'],
+    sw: ['#08060f', '#14122e', '#8f8dff', '#cfd2ff', '#ffb6cf'],
+  },
+  {
+    id: 'honey', layout: 'atrium', theme: 'honey', name: 'Atrium · Honey', tag: 'Gold chrome',
+    intent: 'Here the gold is not a highlight on someone else\u2019s palette — it is the chrome: tabs, chips, active fills and every value. Warm charcoal underneath and steel blue on the modifiers, so the frame does not sink into one warm blur.',
+    keeps: 'The warmest gold of the ten, and the only palette where a value and the chrome are the same colour.',
+    costs: 'Gold carries weight — any darker and it turns brown, so every value stays high and bright.',
+    tags: ['honey', 'gold', 'warm'],
+    sw: ['#0b0803', '#141311', '#ffc04a', '#ffe3a8', '#8fb4e8'],
+  },
+  {
+    id: 'steel', layout: 'atrium', theme: 'steel', name: 'Atrium · Steel', tag: 'Matte grey-blue',
+    intent: 'A desaturated blue-grey chrome, hairline rules, almost no glow and greyscale art: the frame the data has to carry on its own. No accent competes with a number.',
+    keeps: 'The quietest frame of the ten, and the one that survives a dim monitor.',
+    costs: 'At a glance it is the least distinct — closest to Noir in mood, only bluer.',
+    tags: ['steel', 'matte', 'quiet'],
+    sw: ['#06090c', '#101820', '#a9c9df', '#dcecf8', '#8fa3b9'],
+  },
 ];
 
 function variantSection(v, index) {
@@ -450,12 +490,12 @@ function build() {
   document.getElementById('galList').innerHTML = VARIANTS.map(variantSection).join('');
 
   document.getElementById('galIndex').innerHTML = `
-    <div class="idx-cap">The five</div>
+    <div class="idx-cap">The ten</div>
     ${VARIANTS.map((v, i) => `
       <a href="#${v.id}" data-target="${v.id}">
         <b>${String(i + 1).padStart(2, '0')}</b><span>${v.name}</span>
       </a>`).join('')}
-    <div class="idx-foot">One layout, five palettes. Hover and click inside any frame: skills and combinations all answer.</div>`;
+    <div class="idx-foot">One layout, ten palettes. Hover and click inside any frame: skills and combinations all answer.</div>`;
 
   document.querySelectorAll('.gal-index a').forEach((a) => {
     a.addEventListener('click', (e) => {
