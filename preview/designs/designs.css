@@ -214,7 +214,14 @@ img { display: block; }
 .m-atrium .a-tabs a.on { color: var(--text); border-color: var(--line2); background: rgba(255, 255, 255, .06); }
 .m-atrium .a-tabs a:hover { color: var(--text); background: rgba(255, 255, 255, .05); }
 .m-atrium .a-tabs a:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--accent); }
-.m-atrium .a-sync { margin-left: auto; font-size: 11.5px; font-weight: 600; padding: 9px 18px; border-radius: 999px; background: linear-gradient(180deg, var(--accent-hi), var(--accent-lo)); color: var(--accent-ink); box-shadow: 0 10px 26px -12px var(--glow); }
+.m-atrium .a-barright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.m-atrium .a-gear { display: grid; place-items: center; width: 34px; height: 34px; color: var(--muted); border-radius: 999px; border: 1px solid var(--line2); background: rgba(255, 255, 255, .04); }
+.m-atrium .a-gear svg { display: block; transition: transform .25s ease; }
+.m-atrium .a-gear:hover { color: var(--text); border-color: var(--accent); background: var(--halo); }
+.m-atrium .a-gear:hover svg { transform: rotate(60deg); }
+.m-atrium .a-gear:active { transform: translateY(1px); }
+.m-atrium .a-gear:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.m-atrium .a-sync { font-size: 11.5px; font-weight: 600; padding: 9px 18px; border-radius: 999px; background: linear-gradient(180deg, var(--accent-hi), var(--accent-lo)); color: var(--accent-ink); box-shadow: 0 10px 26px -12px var(--glow); }
 .m-atrium .a-sync:hover { box-shadow: 0 0 0 1px var(--accent-soft), 0 14px 32px -12px var(--glow); }
 .m-atrium .a-sync:active { transform: translateY(1px); }
 
@@ -401,6 +408,21 @@ img { display: block; }
 .m-atrium .a-selected .fx-gear { font-size: 11px; }
 .m-atrium .a-selected .a-selbar { margin-top: 6px; }
 
+/* 05 · the gold is the only colour in the frame, and it lands on values */
+.m-atrium.t-noir .a-kicker,
+.m-atrium.t-noir .a-stats .stat:first-child .num,
+.m-atrium.t-noir .a-stats .val,
+.m-atrium.t-noir .a-cardpct,
+.m-atrium.t-noir .a-notrow b,
+.m-atrium.t-noir .a-target,
+.m-atrium.t-noir .fx-route.best b,
+.m-atrium.t-noir .a-tiphead b { color: var(--gold); }
+.m-atrium.t-noir .a-notrow i,
+.m-atrium.t-noir .a-cardbody .bar i,
+.m-atrium.t-noir .a-selected .bar i { background: linear-gradient(90deg, var(--gold), var(--gold-soft)); }
+.m-atrium.t-noir .a-gem { border-color: rgba(217, 180, 92, .45); }
+.m-atrium.t-noir .a-gear:hover { border-color: var(--gold); color: var(--gold); }
+
 /* ── the five palettes ──────────────────────────────────────────────────── */
 
 /* 01 · crimson + gold — red chrome, yellow for every value the eye should land on */
@@ -480,6 +502,7 @@ img { display: block; }
   --v55: rgba(0, 0, 0, .55); --v70: rgba(0, 0, 0, .70); --v86: rgba(0, 0, 0, .86); --v95: rgba(0, 0, 0, .95);
   --line: rgba(255, 255, 255, .26); --line2: rgba(255, 255, 255, .5);
   --note: #f4f6f8; --mod: #9fa8b6;
+  --gold: #d9b45c; --gold-soft: #efd9a0;
   --text: #f4f6f8; --muted: #b4b8bf; --faint: #7e828a;
 }
 

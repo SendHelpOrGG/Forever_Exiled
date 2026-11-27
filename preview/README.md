@@ -58,7 +58,7 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 | 02 | Violet | `#a06bff` + pale yellow `#efe4b0` | `#0a0817` |
 | 03 | Azure | `#4b8dff` + pale red `#f0b3b8` | `#070c18` |
 | 04 | Cyan | `#2ad4e6` | `#061318` |
-| 05 | Noir | `#f4f6f8` | `#000000` — black and white, colour only |
+| 05 | Noir | `#f4f6f8` + gold `#d9b45c` | `#000000` — black and white, one gold |
 
 The layout is written in palette tokens (`--accent`, `--bg`, `--glass`, `--line`, `--note`,
 `--mod`, …) and each palette only redefines those, so the five cannot drift apart. Notables always
@@ -81,6 +81,8 @@ Four controls are real, not decoration:
   `preview/assets/asc_icons/`;
 - the **unique cluster jewels** can be switched off and back on from the panel header — the switch is
   a real toggle, not a hover;
+- the top bar carries a **settings control** beside the Sync ladder button — a real button with
+  `aria-label`, a rotating gear on hover, a pressed state and a focus ring;
 - hovering any combination flies out the **cluster jewel tooltip**: generated name, base type
   (`Large / Medium / Small Cluster Jewel`), item level, passive count, the jewel-socket line, the
   cluster modifiers, the notables and the jewel itself. It is anchored to the row (centre for the top

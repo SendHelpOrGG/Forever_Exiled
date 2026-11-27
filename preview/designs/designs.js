@@ -136,7 +136,16 @@ L.atrium = () => {
   <header class="a-bar">
     <span class="a-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
     <nav class="a-tabs">${navLinks('')}</nav>
-    <button class="a-sync" data-press>Sync ladder</button>
+    <div class="a-barright">
+      <button class="a-gear" data-press title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.1"></circle>
+          <circle cx="12" cy="12" r="7.6" stroke-dasharray="2.4 4.1"></circle>
+          <path d="M12 1.9v2.4M12 19.7v2.4M3.1 12h2.4M18.5 12h2.4"></path>
+        </svg>
+      </button>
+      <button class="a-sync" data-press>Sync ladder</button>
+    </div>
   </header>
 
   <div class="a-body">

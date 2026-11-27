@@ -151,6 +151,18 @@ check('every mock has a craft target',
 check('every mock has a status line that agrees on 234 characters',
   THEMES.every((t) => /234/.test(text(section(t.id).querySelector(STATUS)))));
 
+check('every mock has a settings control in the top bar',
+  THEMES.every((t) => {
+    const gear = section(t.id).querySelector('.a-bar .a-gear');
+    return gear && (gear.getAttribute('aria-label') || '').length > 2 && gear.querySelector('svg');
+  }),
+  text(section('crimson').querySelector('.a-gear') || 'none'));
+
+check('the settings control answers the pointer and the keyboard',
+  /\.m-atrium \.a-gear:hover \{[^}]*border-color: var\(--accent\)/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-gear:hover svg \{[^}]*rotate/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-gear:focus-visible \{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
+
 check('every mock has the five-tab navigation',
   THEMES.every((t) => section(t.id).querySelectorAll(NAV).length >= 5),
   THEMES.map((t) => section(t.id).querySelectorAll(NAV).length).join(' '));
@@ -583,7 +595,7 @@ check('no palette is accented in brown or green',
 
 
 
-check('the two new palettes carry their second accent',
+check('the palettes that ask for a second accent declare it',
   (() => {
     const warm = (sel, name) => {
       const hex = token(sel, name);
@@ -591,9 +603,10 @@ check('the two new palettes carry their second accent',
       const c = hslOf(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16));
       return c.l > 0.6 && !brownOrGreen(c);
     };
-    return warm('.m-atrium.t-violet', 'gold') && warm('.m-atrium.t-azure', 'warm');
+    return warm('.m-atrium.t-violet', 'gold') && warm('.m-atrium.t-azure', 'warm')
+      && warm('.m-atrium.t-noir', 'gold');
   })(),
-  `violet ${token('.m-atrium.t-violet', 'gold')} · azure ${token('.m-atrium.t-azure', 'warm')}`);
+  `violet ${token('.m-atrium.t-violet', 'gold')} · azure ${token('.m-atrium.t-azure', 'warm')} · noir ${token('.m-atrium.t-noir', 'gold')}`);
 
 /* ── report ─────────────────────────────────────────────────────────────── */
 
