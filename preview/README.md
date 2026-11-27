@@ -116,7 +116,7 @@ Nothing there is wired to the app, and the app does not link to it.
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
                                              #   /designs/backdrops.html is the background study
-NODE_PATH=… node tools/designs_check.js      # 109 checks: ten dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 111 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
 
 ### Background study — `/designs/backdrops.html`

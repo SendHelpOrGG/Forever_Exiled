@@ -369,6 +369,9 @@ const token = (sel, name) => {
 }
 
 
+check('the generic row rule excludes the background layers',
+  /\.m-atrium > \*:not\(\.a-backdrop\):not\(\.a-shade\):not\(\.a-veil\)/.test(css));
+
 check('the layout is written in palette tokens',
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].every((n) => token('.m-atrium', n) !== null),
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].filter((n) => !token('.m-atrium', n)).join(', ') || 'all present');
@@ -729,6 +732,7 @@ check('every palette declares a pale, legal action colour',
           portraits: d.querySelectorAll('img.a-backdrop').length,
           strengths: d.querySelectorAll('[data-strength]').length,
           hex: (veils.match(/(?:fill|stroke)="#[0-9a-f]{3,8}"/gi) || []).length,
+          veilPosition: [...d.querySelectorAll('.a-veil')].map((v) => dom.window.getComputedStyle(v).position),
           tokens: (veils.match(/var\\(--/g) || []).length,
           errors,
         }));
@@ -754,6 +758,9 @@ check('every palette declares a pale, legal action colour',
     `${study.portraits} portrait · ${study.veils} vector`);
   check('the vectors are drawn from tokens, never from hex',
     study.hex === 0 && study.tokens >= 8, study.hex ? `${study.hex} hex fills` : `${study.tokens} token reads`);
+  check('the vector backgrounds stay out of the mock grid',
+    (study.veilPosition || []).length === 4 && study.veilPosition.every((p) => p === 'absolute'),
+    (study.veilPosition || []).join(' ') || 'no veils measured');
   check('the study has a three-step strength control', study.strengths === 3);
   check('the study page runs without errors', study.errors.length === 0,
     study.errors.slice(0, 3).join(' | ') || 'none');

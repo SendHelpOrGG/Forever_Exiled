@@ -106,8 +106,8 @@
     return veil(`
     <defs>${fadeMask('veilTree')}</defs>
     <g mask="url(#veilTree-m)">
-      <g stroke="var(--line2)" stroke-width=".9" opacity=".5">${edges}</g>
-      <g fill="var(--line2)" opacity=".72">${dots}</g>
+      <g stroke="var(--faint)" stroke-width="1" opacity=".55">${edges}</g>
+      <g fill="var(--faint)" opacity=".8">${dots}</g>
       <g stroke="var(--accent)" stroke-width="1.6" opacity=".9">${litEdges}</g>
       <g fill="var(--accent)" opacity=".95">${litDots}${socket}</g>
     </g>`);
@@ -136,11 +136,11 @@
     <g mask="url(#veilCluster-m)">
       <image href="../assets/cluster_large.png" x="${cx - 170}" y="${cy - 170}" width="340" height="340"
              opacity=".18" preserveAspectRatio="xMidYMid meet"/>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke-width="1.2" stroke-dasharray="2 8" stroke="var(--line2)"/>
-      <circle cx="${cx}" cy="${cy}" r="${R * 0.62}" fill="none" stroke-width="1" stroke-dasharray="4 11" stroke="var(--line2)" opacity=".8"/>
-      <circle cx="${cx}" cy="${cy}" r="${R * 0.3}" fill="none" stroke-width="1" stroke="var(--line2)" opacity=".55"/>
-      <g stroke="var(--line2)" stroke-width=".8" opacity=".45">${spokes.join('')}</g>
-      <g fill="var(--line2)" stroke="var(--line2)" stroke-width=".9" opacity=".8">${dots.join('')}</g>
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke-width="1.2" stroke-dasharray="2 8" stroke="var(--faint)"/>
+      <circle cx="${cx}" cy="${cy}" r="${R * 0.62}" fill="none" stroke-width="1" stroke-dasharray="4 11" stroke="var(--faint)" opacity=".8"/>
+      <circle cx="${cx}" cy="${cy}" r="${R * 0.3}" fill="none" stroke-width="1" stroke="var(--faint)" opacity=".55"/>
+      <g stroke="var(--faint)" stroke-width=".9" opacity=".5">${spokes.join('')}</g>
+      <g fill="var(--faint)" stroke="var(--faint)" stroke-width=".9" opacity=".8">${dots.join('')}</g>
       <circle cx="${cx}" cy="${cy}" r="9" fill="none" stroke="var(--accent)" stroke-width="1.4" opacity=".9"/>
       <circle cx="${cx}" cy="${cy}" r="3.4" fill="var(--accent)" opacity=".95"/>
     </g>`);
@@ -173,11 +173,11 @@
     <defs>${fadeMask('veilGlyph', 0.34, 0.82)}</defs>
     <g mask="url(#veilGlyph-m)">
       <g class="spin" style="transform-origin:${cx}px ${cy}px">
-        <circle cx="${cx}" cy="${cy}" r="330" fill="none" stroke="var(--line2)" stroke-width="1.1"/>
-        <g stroke="var(--line2)" stroke-width=".8" opacity=".6">${ticks.join('')}</g>
+        <circle cx="${cx}" cy="${cy}" r="330" fill="none" stroke="var(--faint)" stroke-width="1.1"/>
+        <g stroke="var(--faint)" stroke-width=".9" opacity=".6">${ticks.join('')}</g>
       </g>
-      <circle cx="${cx}" cy="${cy}" r="252" fill="none" stroke="var(--line2)" stroke-width="1.1" stroke-dasharray="6 10"/>
-      <circle cx="${cx}" cy="${cy}" r="176" fill="none" stroke="var(--line2)" stroke-width="1" opacity=".7"/>
+      <circle cx="${cx}" cy="${cy}" r="252" fill="none" stroke="var(--faint)" stroke-width="1.1" stroke-dasharray="6 10"/>
+      <circle cx="${cx}" cy="${cy}" r="176" fill="none" stroke="var(--faint)" stroke-width="1" opacity=".7"/>
       <g stroke="var(--accent)" opacity=".85">${runes}</g>
       <circle cx="${cx}" cy="${cy}" r="112" fill="none" stroke="var(--accent)" stroke-width="1.2" opacity=".5" stroke-dasharray="1 7"/>
       <circle cx="${cx}" cy="${cy}" r="5" fill="var(--accent)" opacity=".9"/>
@@ -193,7 +193,7 @@
     /* lift the drawing out of its wrapper and drop the jewel wheel into the nexus */
     const inner = tree.slice(tree.indexOf('>') + 1, tree.lastIndexOf('</svg>'));
     const wheel = `
-      <circle cx="${cx}" cy="${cy}" r="96" fill="none" stroke="var(--line2)" stroke-width="1" stroke-dasharray="2 7" opacity=".8"/>
+      <circle cx="${cx}" cy="${cy}" r="96" fill="none" stroke="var(--faint)" stroke-width="1" stroke-dasharray="2 7" opacity=".8"/>
       <image href="../assets/cluster_large.png" x="${cx - 54}" y="${cy - 54}" width="108" height="108" opacity=".22" preserveAspectRatio="xMidYMid meet"/>
       <circle cx="${cx}" cy="${cy}" r="26" fill="none" stroke="var(--accent)" stroke-width="1.3" opacity=".8"/>`;
     return veil(inner.replace('<g mask="url(#veilTree-m)">', wheel + `<g mask="url(#veilTree-m)">`));

@@ -204,11 +204,13 @@ img { display: block; }
   radial-gradient(70% 60% at 78% 20%, var(--halo), transparent 60%),
   linear-gradient(100deg, var(--bg) 26%, var(--v55) 60%, var(--v86) 100%),
   linear-gradient(180deg, var(--v70), var(--v95) 88%); }
-.m-atrium > *:not(.a-backdrop):not(.a-shade) { position: relative; }
+.m-atrium > *:not(.a-backdrop):not(.a-shade):not(.a-veil) { position: relative; }
 
 /* a vector background sits above the gradient wash but below everything the layout paints, so it
    can be as crisp as it likes without ever dimming a number */
-.m-atrium .a-veil { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .4; pointer-events: none; }
+/* the veil is a background layer, not a row: it must stay out of the mock's 64 / 1fr / 30 grid.
+   The generic `> *:not(...)` rule above wins on specificity (0,3,0) unless it excludes it too. */
+.m-atrium > .a-veil { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .4; pointer-events: none; }
 .m-atrium .a-veil line,
 .m-atrium .a-veil circle { vector-effect: non-scaling-stroke; }
 .m-atrium .a-veil .spin { animation: veil-spin 72s linear infinite; }
