@@ -107,7 +107,7 @@ input, select { font-family: inherit; color: inherit; }
 .sidebar { grid-column: 1; grid-row: 1 / -1; }
 .topnav { grid-column: 2; grid-row: 1; }
 
-.stage { min-height: 0; }
+.stage { min-height: 0; container-type: inline-size; container-name: stage; }
 .view { min-height: 0; }
 .view[hidden] { display: none !important; }
 .notice { grid-column: 2; grid-row: 2; }
@@ -190,6 +190,7 @@ input, select { font-family: inherit; color: inherit; }
 /* breadcrumb in the top bar */
 .crumb {
   display: flex; align-items: center; gap: 7px;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis;
   align-self: center; margin-left: 4px;
   font-size: 13px; font-weight: 600; color: var(--text);
   letter-spacing: .01em; white-space: nowrap;
@@ -211,7 +212,7 @@ input, select { font-family: inherit; color: inherit; }
 }
 .brand-word span { color: var(--green); }
 
-.nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
 .game-pills { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
 .game-pills span {
   padding: 3px 8px; font-size: 13px; font-weight: 600; letter-spacing: .04em;
@@ -356,11 +357,12 @@ label.field { cursor: text; }
 /* ─────────────────────── cluster lab layout ─────────────────── */
 .lab {
   display: grid;
-  grid-template-columns: 480px minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(320px, 420px) minmax(340px, 1fr) minmax(220px, 260px);
   grid-template-rows: auto minmax(0, 1fr);
   gap: 12px; padding: 14px 16px 16px;
   min-height: 0; height: 100%;
 }
+.lab > * { min-width: 0; }
 .lab > .page-head { grid-column: 1 / -1; }
 
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -457,22 +459,29 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .skill.on .skill-avg { color: #a9d9c0; }
 
 /* skill hero — poe.ninja "build" header */
-.hero-card { padding: 16px; display: flex; align-items: center; gap: 14px; }
+/* the hero holds two tiles, a text block and two numbers: it needs ~590px to sit on one
+   line, so below that the numbers wrap under the text instead of squeezing the name to
+   three characters and letting the class list run under the stats */
+.hero-card { padding: 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .slot.portrait img { width: 100%; height: 100%; object-fit: cover; }
 .hero-card .slot { width: 88px; height: 88px; }
 .hero-card .slot img { width: 77px; height: 77px; }
-.hero-main { min-width: 0; flex: 1; }
-.hero-eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
-.hero-name { font-size: 26px; font-weight: 600; letter-spacing: -.015em; line-height: 1.15; }
+.hero-main { min-width: 0; flex: 1 1 220px; }
+.hero-eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
+.hero-eyebrow .cap { min-width: 0; overflow-wrap: anywhere; }
+.hero-name { font-size: 26px; font-weight: 600; letter-spacing: -.015em; line-height: 1.15; overflow-wrap: anywhere; }
 .hero-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-.hero-stats { display: flex; gap: 18px; text-align: right; font-variant-numeric: tabular-nums; }
+.hero-chips .chip { max-width: 100%; }
+.hero-stats { display: flex; gap: 18px; text-align: right; font-variant-numeric: tabular-nums; flex: 0 0 auto; margin-left: auto; }
+.hero-stats .hero-stat { min-width: 0; }
 .hero-stat .k { font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--text-3); }
 .hero-stat .v { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1.2; }
 .hero-stat .v.green { color: var(--green); }
 
 /* controls row */
-.controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.pills { display: inline-flex; gap: 4px; }
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; row-gap: 8px; }
+.controls > .cap { flex: 1 1 100%; white-space: normal; text-align: left; }
+.pills { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .pill {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--panel); border: 1px solid var(--line);
@@ -489,7 +498,9 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .pill.on .n { color: var(--green); background: rgba(63,174,122,.14); }
 .pill .swatch { width: 2px; height: 10px; border-radius: 1px; background: var(--c); }
 
-.list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.list-head > .micro { white-space: nowrap; }
+.list-head > .cap { flex: 1 1 180px; min-width: 0; white-space: normal; text-align: right; }
 
 /* result cards — modelled on poe.ninja build cards */
 .combo {
@@ -548,8 +559,8 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
   background: var(--panel-2); margin-bottom: 8px;
 }
 .craft-route.best { border-color: rgba(63,174,122,.5); background: rgba(63,174,122,.06); }
-.craft-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.craft-head b { font-size: 15px; font-weight: 600; }
+.craft-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.craft-head b { font-size: 15px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .craft-tries { font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
 .craft-cost { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 5px 0 6px; font-size: 13px; color: var(--text-2); }
 .craft-cost b { color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -594,8 +605,9 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 
 .stat-row {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  padding: 5px 0; font-size: 15px;
+  padding: 5px 0; font-size: 15px; flex-wrap: wrap;
 }
+.stat-row > * { min-width: 0; }
 .stat-row + .stat-row { border-top: 1px solid rgba(38,49,61,.55); }
 .stat-row .k { color: var(--text-3); }
 .stat-row .v { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -795,7 +807,8 @@ img.asc.xl { width: 26px; height: 26px; border-radius: 3px; vertical-align: -7px
 .settings-head { margin-bottom: 12px; }
 .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; align-items: start; max-width: 1180px; }
 .settings-grid .panel-body { display: flex; flex-direction: column; gap: 10px; }
-.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.setting-row > * { min-width: 0; }
 .setting-row.col { flex-direction: column; align-items: stretch; gap: 6px; }
 .setting-row label { font-size: 15.5px; color: var(--text-2); display: flex; justify-content: space-between; }
 .setting-row label b { color: var(--green); font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -883,20 +896,9 @@ input[type="range"]::-moz-range-thumb {
 @keyframes fade { to { opacity: 0; transform: translateY(4px); } }
 
 /* ─────────────────────────── responsive ─────────────────────── */
-@media (max-width: 1400px) {
-  .lab { grid-template-columns: 420px minmax(0, 1fr) 268px; }
-  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+
 @media (max-width: 1240px) {
-  .lab { grid-template-columns: 380px minmax(0, 1fr) 250px; gap: 10px; padding: 12px; }
-  .hero-name { font-size: 22px; }
-  .meta-grid { grid-template-columns: 1fr; }
   .brand-word { display: none; }
-}
-@media (max-width: 1080px) {
-  .lab { grid-template-columns: 340px minmax(0, 1fr) 236px; }
-  .hero-stats .hero-stat:nth-child(2) { display: none; }
-  .table-head, .trow { grid-template-columns: 40px minmax(0, 1.2fr) minmax(0, .8fr) minmax(0, 1fr) 76px 56px; }
 }
 @media (max-width: 1020px) {
   .app { grid-template-columns: 60px minmax(0, 1fr); min-width: 0; }
@@ -907,11 +909,35 @@ input[type="range"]::-moz-range-thumb {
 @media (max-width: 940px) {
   .app { min-width: 0; }
   .game-pills, .nav-right .cap { display: none; }
+}
+
+/* ───────────────────────── the stage measures itself ─────────────────────────
+   The sidebar takes 214px off the window, so window-width breakpoints put the lab's
+   fixed columns 214px too wide: at a 1440px window the centre column was left with
+   ~20px, the skill name collapsed to "Fi…", the class list ran under the DPS numbers
+   and the MEDIUM pill sat on top of UNIQUES. These queries watch the stage instead. */
+
+@container stage (max-width: 1400px) {
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@container stage (max-width: 1180px) {
+  .lab { grid-template-columns: minmax(300px, 360px) minmax(320px, 1fr) minmax(210px, 240px); gap: 10px; padding: 12px; }
+  .hero-name { font-size: 22px; }
+  .meta-grid { grid-template-columns: 1fr; }
+  .table-head, .trow { grid-template-columns: 40px minmax(0, 1.2fr) minmax(0, .8fr) minmax(0, 1fr) 76px 56px; }
+}
+
+@container stage (max-width: 1060px) {
+  .lab { grid-template-columns: minmax(280px, 320px) minmax(300px, 1fr) minmax(200px, 226px); }
+  /* the numbers drop under the name rather than into it - both stay visible */
+  .hero-stats { flex: 1 1 100%; margin-left: 0; text-align: left; justify-content: flex-start; gap: 26px; }
+}
+
+@container stage (max-width: 900px) {
   .lab { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); overflow-y: auto; }
   .rail-card { max-height: 210px; }
   .rail-right { overflow: visible; }
-  .hero-card { flex-wrap: wrap; }
-  .hero-stats { text-align: left; width: 100%; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .table-head, .trow { grid-template-columns: 36px minmax(0, 1.4fr) 70px 50px; }
   .table-head .th:nth-child(3), .table-head .th:nth-child(4),

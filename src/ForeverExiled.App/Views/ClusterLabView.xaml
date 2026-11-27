@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:ForeverExiled.App.Views.Controls"
              xmlns:behaviors="clr-namespace:ForeverExiled.App.Behaviors">
 
-    <Grid x:Name="LabRoot" ColumnDefinitions="470,*,276" ColumnSpacing="12" Padding="12">
+    <Grid x:Name="LabRoot" ColumnDefinitions="470,*,250" ColumnSpacing="12" Padding="12">
 
         <!-- ========================= Main skill rail ========================= -->
         <Border Grid.Column="0" Style="{StaticResource CardFlush}">
@@ -133,8 +133,10 @@
 
                 <!-- skill hero -->
                 <Border Style="{StaticResource Card}" Padding="18,16">
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Start">
+                    <!-- a row that wraps: 88 + 88 + the text + two four-digit numbers needs ~590px,
+                         and the centre column is not always that wide -->
+                    <FlexLayout Direction="Row" Wrap="Wrap" AlignItems="Center">
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <Border Style="{StaticResource GemTile}"
                                     WidthRequest="84" HeightRequest="84"
                                     Padding="4"
@@ -150,7 +152,7 @@
                             </Border>
                         </HorizontalStackLayout>
 
-                        <VerticalStackLayout Grid.Column="1" Spacing="8">
+                        <VerticalStackLayout Spacing="8" Margin="16,0,0,0" FlexLayout.Basis="240" FlexLayout.Grow="1">
                             <HorizontalStackLayout Spacing="8">
                                 <Border WidthRequest="6" HeightRequest="6"
                                         StrokeThickness="0"
@@ -162,7 +164,10 @@
                                 <Label Text="{Binding SelectedSkillClasses}" Style="{StaticResource Caption}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
 
-                            <Label Text="{Binding SelectedSkillName}" Style="{StaticResource Hero}" />
+                            <Label Text="{Binding SelectedSkillName}"
+                                   Style="{StaticResource Hero}"
+                                   LineBreakMode="WordWrap"
+                                   MaxLines="2" />
 
                             <FlexLayout Direction="Row" Wrap="Wrap" AlignItems="Center">
                                 <Border Style="{StaticResource Chip}" Margin="0,0,6,0">
@@ -180,7 +185,7 @@
                             </FlexLayout>
                         </VerticalStackLayout>
 
-                        <HorizontalStackLayout Grid.Column="2" Spacing="20" VerticalOptions="Start">
+                        <HorizontalStackLayout Spacing="20" VerticalOptions="Center" Margin="18,0,0,0">
                             <VerticalStackLayout Spacing="0">
                                 <Label Text="AVG DPS" Style="{StaticResource Micro}" HorizontalTextAlignment="End" />
                                 <Label Text="{Binding SelectedSkillAverageDps}" Style="{StaticResource StatValueAccent}" FontSize="31" HorizontalTextAlignment="End" />
@@ -190,15 +195,16 @@
                                 <Label Text="{Binding SelectedSkillPeakDps}" Style="{StaticResource StatValue}" FontSize="31" HorizontalTextAlignment="End" />
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
-                    </Grid>
+                    </FlexLayout>
                 </Border>
 
                 <!-- controls -->
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center" BindableLayout.ItemsSource="{Binding SizePills}">
+                    <FlexLayout Direction="Row" Wrap="Wrap" AlignItems="Center"
+                                BindableLayout.ItemsSource="{Binding SizePills}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource Pill}" Padding="12,7">
+                                <Border Style="{StaticResource Pill}" Padding="12,7" Margin="0,0,6,6">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding Command}" />
                                     </Border.GestureRecognizers>
@@ -214,7 +220,7 @@
                                 </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
-                    </HorizontalStackLayout>
+                    </FlexLayout>
 
                     <HorizontalStackLayout Grid.Column="1" Spacing="8">
                         <!-- the two unique cluster jewels are not rollable combinations -->
@@ -250,9 +256,18 @@
                 </Grid>
 
                 <!-- list header -->
-                <Grid ColumnDefinitions="*,Auto" Margin="2,4,2,0">
-                    <Label Text="{Binding ComboHeaderText}" Style="{StaticResource Micro}" VerticalOptions="Center" />
-                    <Label Grid.Column="1" Text="{Binding ComboHintText}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="2,4,2,0">
+                    <Label Text="{Binding ComboHeaderText}"
+                           Style="{StaticResource Micro}"
+                           VerticalOptions="Center"
+                           LineBreakMode="TailTruncation" />
+                    <Label Grid.Column="1"
+                           Text="{Binding ComboHintText}"
+                           Style="{StaticResource Caption}"
+                           VerticalOptions="Center"
+                           HorizontalTextAlignment="End"
+                           LineBreakMode="TailTruncation"
+                           MaxLines="1" />
                 </Grid>
 
                 <!-- combinations -->

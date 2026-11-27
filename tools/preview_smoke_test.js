@@ -80,6 +80,17 @@ setTimeout(async () => {
   check('ladder-builds tile is marked as a demo figure',
     txt('#metaTiles .tile .sub').includes('demo'), txt('#metaTiles .tile .sub'));
 
+  /* ── layout guards: the sidebar takes 214px, so fixed columns crush the centre ── */
+  const css = read('styles.css');
+  check('the stage measures its own width, not the window',
+    /\.stage\s*\{[^}]*container-type:\s*inline-size/.test(css),
+    'container queries carry the lab breakpoints');
+  check('the hero wraps instead of crushing its name',
+    /\.hero-card\s*\{[^}]*flex-wrap:\s*wrap/.test(css));
+  check('the lab rails are allowed to shrink',
+    !/\.lab\s*\{[^}]*grid-template-columns:\s*\d+px/.test(css),
+    'fixed pixel rails would leave the centre with nothing');
+
   /* ── the shell: a sidebar of destinations, one tab for the cluster jewels ── */
   const navRows = qa('#sideNav .nav-item').map((n) => n.dataset.tab);
   check('sidebar lists the cluster tab plus the four planned features',
