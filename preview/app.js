@@ -1694,6 +1694,8 @@ function setTab(tab) {
   if (!TAB_LABELS[tab]) tab = 'clusters';
 
   state.tab = tab;
+  /* the frame's art is chosen by the tab, so it is written on the body, not on a view */
+  document.body.dataset.tab = tab;
   for (const key of Object.keys(TAB_LABELS)) {
     const el = $('view-' + key);
     if (el) el.hidden = key !== tab;

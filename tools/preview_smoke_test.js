@@ -128,6 +128,58 @@ setTimeout(async () => {
 
   click(qa('.nav-item').find((n) => n.dataset.tab === 'clusters'));
 
+  /* ── per-tab background art: one layer, six plates, keyed off data-tab ── */
+  const artLayer = q('.app-art');
+  const artImgs = qa('.app-art img');
+  const plates = {
+    clusters: 'bleed_grove.jpg',
+    watchers: 'bleed_colossus.jpg',
+    rare: 'bg_izaro_wide.jpg',
+    flasks: 'bleed_heroine.jpg',
+    economy: 'bleed_beast.jpg',
+    settings: 'bleed_graveyard.jpg',
+  };
+  check('the shell hangs one art layer behind the chrome',
+    !!artLayer && artLayer === q('.app').firstElementChild &&
+      artLayer.getAttribute('aria-hidden') === 'true' &&
+      qa('.app-art button, .app-art a, .app-art input').length === 0,
+    artLayer ? artLayer.children.length + ' nodes, all decorative' : 'missing');
+  check('every tab has a plate of its own',
+    Object.keys(plates).every((tab) =>
+      artImgs.some((img) => img.classList.contains('art-' + tab) &&
+        String(img.getAttribute('src')).endsWith('assets/splash/' + plates[tab]))),
+    artImgs.length + ' plates');
+  check('all six plates are on disk',
+    artImgs.length === 6 && artImgs.every((img) => fs.existsSync(path.join(root, img.getAttribute('src')))),
+    artImgs.map((img) => String(img.getAttribute('src')).replace('assets/splash/', '')).join(' · '));
+  const wrongKey = [];
+  for (const tab of Object.keys(plates)) {
+    click(qa('.nav-item').find((n) => n.dataset.tab === tab));
+    if (document.body.dataset.tab !== tab) wrongKey.push(tab + '→' + document.body.dataset.tab);
+  }
+  check('switching a tab hands the frame its own plate', wrongKey.length === 0,
+    wrongKey.length ? wrongKey.join(' · ') : Object.keys(plates).length + ' tabs keyed on the body');
+  click(q('#paneNav button[data-pane="meta"]'));
+  check('a cluster pane keeps the cluster plate', document.body.dataset.tab === 'clusters',
+    'cluster pane → ' + document.body.dataset.tab);
+  click(q('#paneNav button[data-pane="lab"]'));
+  const sheetCss = read('styles.css').replace(/\s+/g, ' ');
+  const unfaded = Object.keys(plates).filter((tab) =>
+    !new RegExp('body\\[data-tab="' + tab + '"\\] \\.app-art \\.art-' + tab).test(sheetCss));
+  check('the stylesheet cross-fades exactly one plate per tab', unfaded.length === 0,
+    unfaded.join(', ') || 'six fades');
+  const loud = Object.keys(plates).map((tab) => {
+    const m = sheetCss.match(new RegExp('body\\[data-tab="' + tab + '"\\] \\{ --art-o: \\.(\\d+)'));
+    return m ? Number('.' + m[1]) : NaN;
+  });
+  check('every plate is told how loud to be', loud.every((v) => v > 0.2 && v <= 0.7),
+    loud.map((v) => (Number.isNaN(v) ? '—' : v)).join(' · '));
+  check('the layer never takes the pointer', /\.app-art \{[^}]*pointer-events: none/.test(sheetCss));
+  check('the empty copy floats on a pocket, not on a card',
+    /\.empty-view::before \{[^}]*radial-gradient/.test(sheetCss) &&
+      !/\.empty-state \{[^}]*background/.test(sheetCss),
+    'a card would fence the plate in');
+
   /* ── cluster lab ── */
   const skills = qa('#skillList .skill');
   check('skill rail populated', skills.length === snapshot.skills.length, skills.length + ' skills');
