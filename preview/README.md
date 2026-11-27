@@ -10,7 +10,8 @@ interface long before the first `dotnet build`.
 > `SYNTHETIC SAMPLE`, and calls the league `Allflame (demo)`. None of it is the live ladder.
 
 ```bash
-python3 preview/serve.py        # → http://localhost:8080
+python3 preview/serve.py            # → http://localhost:8080   the app
+python3 preview/serve_designs.py    # → http://localhost:8081   the design gallery
 ```
 
 Open the URL, press `1`–`6` to walk the sidebar, `/` to focus the skill search.
