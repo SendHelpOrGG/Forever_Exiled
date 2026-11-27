@@ -49,21 +49,21 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Obsidian', 'Blueprint', 'Terminal', 'Studio', 'Ember',
-  'Atlas', 'Switchboard', 'Prism', 'Ledger', 'Trophy',
+  'Waveform', 'Board', 'Chronicle', 'Orbit', 'Nocturne',
+  'Tiers', 'Deck', 'Prism', 'Outline', 'Trophy',
 ];
 
 /* every layout shares the same contract; only its class namespace differs */
 const LAYOUTS = [
-  { id: 'obsidian', prefix: 'o' },
-  { id: 'blueprint', prefix: 'g' },
-  { id: 'terminal', prefix: 't' },
-  { id: 'studio', prefix: 'u' },
-  { id: 'ember', prefix: 'e' },
-  { id: 'atlas', prefix: 'a' },
-  { id: 'switchboard', prefix: 'h' },
+  { id: 'waveform', prefix: 'q' },
+  { id: 'board', prefix: 'k' },
+  { id: 'chronicle', prefix: 'c' },
+  { id: 'orbit', prefix: 'r' },
+  { id: 'nocturne', prefix: 'e' },
+  { id: 'tiers', prefix: 't' },
+  { id: 'deck', prefix: 'd' },
   { id: 'prism', prefix: 'p' },
-  { id: 'ledger', prefix: 'l' },
+  { id: 'outline', prefix: 'n' },
   { id: 'trophy', prefix: 'w' },
 ];
 
@@ -207,8 +207,8 @@ for (const l of LAYOUTS) {
 
 /* the size chips are a real filter, not decoration */
 {
-  const rows = () => [...section('obsidian').querySelectorAll('[data-combo][data-cluster-size]')];
-  const pills = [...section('obsidian').querySelectorAll('[data-size]')];
+  const rows = () => [...section('waveform').querySelectorAll('[data-combo][data-cluster-size]')];
+  const pills = [...section('waveform').querySelectorAll('[data-size]')];
   const large = pills.find((p) => p.dataset.size === 'large');
   click(large);
   const onlyLarge = rows().filter((r) => !r.classList.contains('off')).map((r) => r.dataset.clusterSize);
@@ -352,6 +352,56 @@ check('every direction is dark — no light variant survives',
 
 const bright = (css.match(/#(?:fff|ffffff|f8f8f8|fafafa|fbfbfb|fdf6e3|f6efe4)\b/gi) || []);
 check('the sheet paints no white or cream surface', bright.length === 0, bright.join(', ') || 'none');
+
+/* ── no brown and no green, in any palette ──────────────────────────────── */
+
+const hslOf = (r, g, b) => {
+  const [rr, gg, bb] = [r, g, b].map((v) => v / 255);
+  const max = Math.max(rr, gg, bb);
+  const min = Math.min(rr, gg, bb);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d !== 0) {
+    if (max === rr) h = ((gg - bb) / d) % 6;
+    else if (max === gg) h = (bb - rr) / d + 2;
+    else h = (rr - gg) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h, sat, l };
+};
+
+const brownOrGreen = ({ h, sat, l }) =>
+  sat >= 0.22 && l > 0.06 && l < 0.92 && ((h >= 18 && h <= 58) || (h >= 62 && h <= 172));
+
+const paletteColours = [];
+for (const m of css.matchAll(/#([0-9a-f]{6})\b/gi)) {
+  const hex = m[1];
+  paletteColours.push(['#' + hex, hslOf(parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4), 16))]);
+}
+for (const m of css.matchAll(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/g)) {
+  const [, r, g, b] = m.map(Number);
+  paletteColours.push([`rgb(${r},${g},${b})`, hslOf(r, g, b)]);
+}
+const banned = paletteColours.filter(([, c]) => brownOrGreen(c));
+
+check('no brown or green anywhere in the palettes', banned.length === 0,
+  banned.length
+    ? banned.slice(0, 8).map(([n, c]) => `${n} h${Math.round(c.h)}`).join(', ')
+    : `${new Set(paletteColours.map(([n]) => n)).size} colours, all outside the brown and green bands`);
+
+/* and every direction's accent has to survive the same test on its own */
+const accentHues = LAYOUTS.map((l) => {
+  const start = css.indexOf('.m-' + l.id + ' {');
+  const block = css.slice(start, css.indexOf('}', start));
+  const m = block.match(/--accent:\s*(#[0-9a-f]{3,6})/i);
+  return [l.id, m ? hslOf(parseInt(m[1].slice(1, 3), 16), parseInt(m[1].slice(3, 5), 16), parseInt(m[1].slice(5, 7), 16)) : null];
+});
+check('no direction is accented in brown or green',
+  accentHues.every(([, c]) => c && !brownOrGreen(c)),
+  accentHues.map(([id, c]) => `${id}:h${c ? Math.round(c.h) : '?'}`).join(' '));
 
 /* ── report ─────────────────────────────────────────────────────────────── */
 

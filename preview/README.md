@@ -46,27 +46,28 @@ above the combination list already covers it.
 ## Design gallery
 
 `/designs/` holds **ten directions for the interface**, built to be compared rather than used.
-They are ten different layouts, not ten colour schemes of one: a bento cockpit, a technical
-schematic on dark drafting paper, a market terminal with a tape, a creative editor with a canvas
-and an inspector, a cinematic full-bleed hero, a treemap of the meta, a control-room console with
-faders and meters, a command palette over blurred art, a dense master/detail ledger and an art
-wall. **All ten are dark** — no light or cream variant survives.
+They are ten different layouts, not ten colour schemes of one: an instrument bench with a scope
+trace, a kanban board with one column per cluster size, a chronicle timeline of the ladder, a
+radial graph around the skill, a cinematic full-bleed hero, a three-plan comparison table, a card
+deck, a command palette over blurred art, a tree browser and an art wall. **All ten are dark, and
+no palette uses brown or green** — the accents run cyan, violet, crimson, magenta, rose, azure,
+ice, indigo, steel and blush.
 
 Each shows the same screen, and the same *whole* cluster-jewel surface, so the comparison is fair:
-share, average and peak DPS, the three combinations with their notables (gold) and their cluster
-modifiers (blue), socketing (size · passives · iLvl floor · price), the unique cluster jewels
+share, average and peak DPS, the three combinations with their notables (rose) and their cluster
+modifiers (azure), socketing (size · passives · iLvl floor · price), the unique cluster jewels
 (Voices 21, Megalomaniac 34), the most-used notables, the three crafting routes with tries and
 cost, and the all-builds totals (124,363 builds · 234 characters · 592 jewels).
 
 The frames are interactive, because a direction has to be judged by using it: every control lifts
 and glows on hover, presses under the cursor and takes focus; clicking a skill rewrites the build
-name; clicking a combination rewrites the crafting target; the size pills in the first frame really
-narrow the list; bars grow to their share when a frame scrolls into view; `1:1` opens a frame at
-full size. Nothing there is wired to the app, and the app does not link to it.
+name; clicking a combination rewrites the crafting target; the size chips in the first two frames
+really narrow the list; bars grow to their share when a frame scrolls into view; `1:1` opens a
+frame at full size. Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
-NODE_PATH=… node tools/designs_check.js      # 67 checks: ten dark layouts, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 69 checks: ten dark layouts, no brown or green, full feature surface, live controls
 ```
 
 ## What is real and what is simulated
