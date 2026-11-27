@@ -24,3 +24,14 @@
 body[data-strength="subtle"] .a-veil { opacity: .24; }
 body[data-strength="medium"] .a-veil { opacity: .4; }
 body[data-strength="strong"] .a-veil { opacity: .58; }
+
+/* group headings inside the study */
+.bg-group {
+  margin: 6px 0 -22px;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-top: 10px;
+  border-top: 1px solid var(--hair);
+}

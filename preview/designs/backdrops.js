@@ -199,42 +199,248 @@
     return veil(inner.replace('<g mask="url(#veilTree-m)">', wheel + `<g mask="url(#veilTree-m)">`));
   }
 
-  /* ── the five directions ───────────────────────────────────────────────────── */
+  /* ── the game's own language ──────────────────────────────────────────────── */
+
+  /* The first pass drew geometry: even rings, ticks, uniform dots. PoE does not look like that.
+     Its passive tree is clusters of small round nodes with bronze rims joined by gently bowed
+     links, sitting on a vignetted near-black field with grain over it. Everything below is built
+     from those three things — clusters, bows, rims — plus the vignette and the grain. */
+
+  const GOLD = 'var(--gold)';
+
+  const pnode = (x, y, r, opts = {}) => {
+    const bright = !!opts.bright;
+    const glyph = opts.glyph === false ? '' : `<path d="M0 ${(-r * 0.44).toFixed(1)} L${(r * 0.38).toFixed(1)} 0 L0 ${(r * 0.44).toFixed(1)} L${(-r * 0.38).toFixed(1)} 0 Z" fill="${GOLD}" fill-opacity="${bright ? 0.62 : 0.3}"/>`;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">
+        <circle r="${r}" fill="var(--bg)" fill-opacity=".8" stroke="${GOLD}" stroke-opacity="${bright ? 0.8 : 0.44}" stroke-width="${bright ? 1.6 : 1.1}"/>
+        <circle r="${(r * 0.67).toFixed(1)}" fill="none" stroke="${GOLD}" stroke-opacity="${bright ? 0.46 : 0.22}" stroke-width=".8"/>
+        ${glyph}
+      </g>`;
+  };
+
+  /* a link that sags like the game's: quadratic, bowed off the straight line */
+  const curve = (a, b, bow = 0.12) => {
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const mx = (a[0] + b[0]) / 2 - dy * bow;
+    const my = (a[1] + b[1]) / 2 + dx * bow;
+    return `M${a[0].toFixed(1)} ${a[1].toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+  };
+
+  /* the ground the game sits on: vignette in the field colour, plus film grain */
+  const atmosphereDefs = (id) => `
+      <radialGradient id="${id}-vig" cx=".63" cy=".26" r=".82">
+        <stop offset=".28" style="stop-color:var(--bg);stop-opacity:0"/>
+        <stop offset="1" style="stop-color:var(--bg);stop-opacity:.94"/>
+      </radialGradient>
+      <filter id="${id}-grain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>`;
+
+  const atmosphere = (id) => `
+      <rect width="1280" height="720" fill="url(#${id}-vig)"/>
+      <rect width="1280" height="720" filter="url(#${id}-grain)" opacity=".09"/>`;
+
+  /* 06 — the tree the way the game draws it: notables with a minor cluster around each, clusters
+     chained together through a waypoint node, every link bowed, every disc rimmed in bronze. */
+  const treeGameSvg = () => {
+    const R = rnd(137);
+    const centres = [[962, 138], [858, 274], [1104, 300], [992, 424], [1178, 520], [872, 566], [1218, 190]];
+    const nodes = [];
+    const links = [];
+    centres.forEach(([cx, cy]) => {
+      const count = 4 + Math.floor(R() * 3);
+      const base = R() * Math.PI * 2;
+      const minors = [];
+      nodes.push([cx, cy, 11.8, true]);
+      for (let i = 0; i < count; i++) {
+        const a = base + (i / count) * Math.PI * 2 + (R() - 0.5) * 0.3;
+        const d = 36 + R() * 20;
+        const p = [cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.92];
+        minors.push(p);
+        nodes.push([p[0], p[1], 6.2 + R() * 1.6, false]);
+        links.push([[cx, cy], p, (R() - 0.5) * 0.32]);
+      }
+      for (let i = 0; i < minors.length; i++) {
+        links.push([minors[i], minors[(i + 1) % minors.length], 0.08 + R() * 0.12]);
+      }
+    });
+    for (let i = 0; i < centres.length - 1; i++) {
+      const a = centres[i];
+      const b = centres[i + 1];
+      const mid = [(a[0] + b[0]) / 2 + (R() - 0.5) * 34, (a[1] + b[1]) / 2 + (R() - 0.5) * 34];
+      nodes.push([mid[0], mid[1], 5.4, false]);
+      links.push([a, mid, (R() - 0.5) * 0.3], [mid, b, (R() - 0.5) * 0.3]);
+    }
+
+    const paths = links.map(([a, b, bow]) => `<path d="${curve(a, b, bow)}"/>`).join('');
+    const discs = nodes.map(([x, y, r, bright]) => pnode(x, y, r, { bright })).join('');
+
+    return veil(`
+      <defs>${fadeMask('veilTree3', 0.3, 0.8)}${atmosphereDefs('veilTree3')}</defs>
+      <g mask="url(#veilTree3-m)">
+        <g fill="none" stroke="${GOLD}" stroke-opacity=".26" stroke-width=".9">${paths}</g>
+        ${discs}
+      </g>
+      ${atmosphere('veilTree3')}`);
+  };
+
+  /* 07 — the game's window chrome rather than its art: double bronze hairline, a scrollwork
+     bracket in each corner, a crest at the top, diamond studs down the edges, grain over it all. */
+  const filigreeSvg = () => {
+    const corner = (x, y, sx, sy) => `
+      <g transform="translate(${x} ${y}) scale(${sx} ${sy})" fill="none" stroke="${GOLD}" stroke-linecap="round">
+        <path d="M2 46 L2 2 L46 2" stroke-opacity=".42" stroke-width="1.3"/>
+        <path d="M9 9 Q9 27 27 27 Q9 27 9 41" stroke-opacity=".2"/>
+        <path d="M9 9 Q27 9 27 27 Q27 9 41 9" stroke-opacity=".2"/>
+        <path d="M17 17 L25 25 M25 17 L17 25" stroke-opacity=".13" stroke-width=".9"/>
+        <path d="M2 64 L2 54 M64 2 L54 2" stroke-opacity=".26" stroke-width="1.1"/>
+      </g>`;
+    const stud = (x, y) => `<path d="M${x} ${y - 3.6} L${x + 3.6} ${y} L${x} ${y + 3.6} L${x - 3.6} ${y} Z" fill="${GOLD}" fill-opacity=".26"/>`;
+    const studs = [320, 640, 960].flatMap((x) => [stud(x, 13), stud(x, 707)])
+      .concat([200, 480, 760].flatMap((y) => [stud(13, y), stud(1267, y)])).join('');
+    const crest = `
+      <g transform="translate(640 0)" fill="none" stroke="${GOLD}" stroke-linecap="round">
+        <path d="M-52 10 Q-52 27 -34 27 Q-16 27 -16 10" stroke-opacity=".2"/>
+        <path d="M52 10 Q52 27 34 27 Q16 27 16 10" stroke-opacity=".2"/>
+        <path d="M-16 10 L0 27 L16 10" stroke-opacity=".34" stroke-width="1.2"/>
+        <path d="M0 27 L0 40" stroke-opacity=".22"/>
+        <path d="M-9 40 L9 40" stroke-opacity=".22"/>
+      </g>`;
+    return veil(`
+      <defs>${atmosphereDefs('veilFil')}</defs>
+      <rect x="9" y="9" width="1262" height="702" fill="none" stroke="${GOLD}" stroke-opacity=".3" stroke-width="1.2"/>
+      <rect x="17" y="17" width="1246" height="686" fill="none" stroke="${GOLD}" stroke-opacity=".13"/>
+      ${corner(9, 9, 1, 1)}${corner(1271, 9, -1, 1)}${corner(9, 711, 1, -1)}${corner(1271, 711, -1, -1)}
+      ${studs}${crest}
+      ${atmosphere('veilFil')}`);
+  };
+
+  /* 08 — a jewel socket the size of the frame: bronze ring, claw prongs, tick collar, and the
+     real cluster-jewel art sitting in the cup. */
+  const socketSvg = () => {
+    const cx = 1012;
+    const cy = 334;
+    const claw = (a) => {
+      const p = (r, off) => `${(cx + Math.cos(a + off) * r).toFixed(1)} ${(cy + Math.sin(a + off) * r).toFixed(1)}`;
+      return `<path d="M${p(196, 0)} L${p(238, -0.08)} L${p(238, 0.08)} Z" fill="${GOLD}" fill-opacity=".2" stroke="${GOLD}" stroke-opacity=".4"/>`;
+    };
+    const claws = [0, 1, 2, 3].map((i) => claw(-Math.PI / 2 + (i * Math.PI) / 2)).join('');
+    const ticks = Array.from({ length: 48 }, (_, i) => {
+      const a = (i / 48) * Math.PI * 2;
+      const r1 = 208;
+      const r2 = i % 4 === 0 ? 222 : 216;
+      return `<line x1="${(cx + Math.cos(a) * r1).toFixed(1)}" y1="${(cy + Math.sin(a) * r1).toFixed(1)}" x2="${(cx + Math.cos(a) * r2).toFixed(1)}" y2="${(cy + Math.sin(a) * r2).toFixed(1)}"/>`;
+    }).join('');
+    return veil(`
+      <defs>${fadeMask('veilSock', 0.3, 0.82)}${atmosphereDefs('veilSock')}</defs>
+      <g mask="url(#veilSock-m)">
+        <circle cx="${cx}" cy="${cy}" r="196" fill="none" stroke="${GOLD}" stroke-opacity=".38" stroke-width="1.3"/>
+        <circle cx="${cx}" cy="${cy}" r="186" fill="none" stroke="${GOLD}" stroke-opacity=".15"/>
+        <circle cx="${cx}" cy="${cy}" r="150" fill="none" stroke="${GOLD}" stroke-opacity=".2" stroke-dasharray="1 9"/>
+        <g stroke="${GOLD}" stroke-opacity=".24">${ticks}</g>
+        ${claws}
+        <image href="../assets/cluster_large.png" x="${cx - 96}" y="${cy - 96}" width="192" height="192" opacity=".22" preserveAspectRatio="xMidYMid meet"/>
+        <circle cx="${cx}" cy="${cy}" r="11" fill="none" stroke="${GOLD}" stroke-opacity=".5" stroke-width="1.2"/>
+      </g>
+      ${atmosphere('veilSock')}`);
+  };
+
+  /* 09 — the Atlas: constellations, not a grid. Stars, a few bronze nodes, bowed links and a
+     soft nebula under it all. */
+  const atlasSvg = () => {
+    const R = rnd(4242);
+    const pts = Array.from({ length: 15 }, () => [720 + R() * 520, 40 + R() * 640]);
+    const links = [];
+    pts.forEach((p, i) => {
+      const near = pts
+        .filter((q) => q !== p)
+        .map((q) => [q, (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2])
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, i % 2 ? 2 : 3);
+      near.forEach(([q]) => links.push([p, q, (R() - 0.5) * 0.22]));
+    });
+    const paths = links.map(([a, b, bow]) => `<path d="${curve(a, b, bow)}"/>`).join('');
+    const bodies = pts.map(([x, y], i) => {
+      const stars = Array.from({ length: 3 }, () => {
+        const a = R() * Math.PI * 2;
+        const d = 16 + R() * 16;
+        return `<circle cx="${(x + Math.cos(a) * d).toFixed(1)}" cy="${(y + Math.sin(a) * d).toFixed(1)}" r="${(0.9 + R() * 0.9).toFixed(1)}" fill="${GOLD}" fill-opacity=".3"/>`;
+      }).join('');
+      return i % 3 === 0 ? pnode(x, y, 7.4, { bright: i % 6 === 0 }) + stars : stars + pnode(x, y, 4.4, { glyph: false });
+    }).join('');
+
+    return veil(`
+      <defs>${fadeMask('veilAtlas', 0.28, 0.8)}${atmosphereDefs('veilAtlas')}
+        <radialGradient id="veilAtlas-neb" cx=".72" cy=".34" r=".6">
+          <stop offset="0" style="stop-color:var(--accent);stop-opacity:.14"/>
+          <stop offset="1" style="stop-color:var(--accent);stop-opacity:0"/>
+        </radialGradient>
+      </defs>
+      <rect width="1280" height="720" fill="url(#veilAtlas-neb)"/>
+      <g mask="url(#veilAtlas-m)">
+        <g fill="none" stroke="${GOLD}" stroke-opacity=".2" stroke-width=".85">${paths}</g>
+        ${bodies}
+      </g>
+      ${atmosphere('veilAtlas')}`);
+  };
+
+  /* ── the directions ───────────────────────────────────────────────────────── */
 
   const DIRECTIONS = [
     {
-      id: 'bg-portrait',
-      name: 'Portrait wash', tag: 'what ships today',
+      id: 'bg-tree3', group: 'Closer to the game', name: 'Passive tree', tag: 'clusters + bronze rims',
+      note: 'Redrawn from the game rather than from geometry: notables with a cluster of minor nodes around each, the clusters chained through waypoint nodes, every link bowed instead of straight, every disc a dark cup with a bronze rim and a glyph. Vignette and film grain on top, which is half of why PoE looks like PoE.',
+      tags: ['clusters', 'bowed links', 'grain'],
+      kind: 'svg', draw: treeGameSvg,
+    },
+    {
+      id: 'bg-filigree', group: 'Closer to the game', name: 'Filigree frame', tag: 'window chrome',
+      note: 'The game’s frame language instead of its art: double bronze hairline, a scrollwork bracket in each corner, a crest at the top and diamond studs down the edges, with grain over the field. The content stops floating and starts sitting in a window.',
+      tags: ['window chrome', 'corners', 'cheap'],
+      kind: 'svg', draw: filigreeSvg,
+    },
+    {
+      id: 'bg-socket', group: 'Closer to the game', name: 'Jewel socket', tag: 'cluster jewel',
+      note: 'A jewel socket the size of the frame: bronze ring, four claw prongs, a tick collar, and the real cluster-jewel art sitting in the cup. Half artwork, half product — the socket is what the whole screen is about.',
+      tags: ['socket', 'jewel art', 'on-topic'],
+      kind: 'svg', draw: socketSvg,
+    },
+    {
+      id: 'bg-atlas', group: 'Closer to the game', name: 'Atlas', tag: 'constellation',
+      note: 'Constellations rather than a wheel: fifteen star groups joined by bowed links, a few bronze nodes, a nebula in the accent under it. The one that says “endgame map” without drawing a single UI element.',
+      tags: ['constellation', 'nebula', 'quiet'],
+      kind: 'svg', draw: atlasSvg,
+    },
+    {
+      id: 'bg-portrait', group: 'Earlier attempt', name: 'Portrait wash', tag: 'what ships today',
       note: 'The ascendancy portrait at 152 px, scaled to the frame, held at 50 % and buried under the gradient. It is atmosphere and it is soft — this is the baseline, not a proposal.',
       tags: ['jpeg', 'soft', 'baseline'],
       kind: 'portrait',
     },
     {
-      id: 'bg-tree',
-      name: 'Passive tree', tag: 'vector',
-      note: 'The tree behind everything: five rings of nodes, every link, and one allocated path lit in the accent, starting from a socket. Drawn in SVG from palette tokens, so it is sharp at any size and re-tints with each of the ten palettes.',
-      tags: ['svg', 'crisp', 'recognisable'],
+      id: 'bg-tree', group: 'Earlier attempt', name: 'Rings of nodes', tag: 'first pass',
+      note: 'The first attempt: five even rings of dots around a socket, straight links, one allocated path lit. Read as a diagram, not as the game — kept here only so the difference is visible.',
+      tags: ['geometric', 'first pass'],
       kind: 'svg', draw: treeSvg,
     },
     {
-      id: 'bg-cluster',
-      name: 'Cluster wheel', tag: 'vector + jewel art',
-      note: 'The product itself as the backdrop: the jewel radius as a dashed ring, its sockets and notables around it, and the real cluster-jewel art at the centre. The most on-topic of the five, and the one that reads as a tool rather than a game.',
-      tags: ['svg', 'on-topic', 'jewel art'],
+      id: 'bg-cluster', group: 'Earlier attempt', name: 'Cluster wheel', tag: 'first pass',
+      note: 'Dashed rings and sockets around the jewel art: on topic, but drawn as a schematic. The socket in 04 is the same idea with the game’s ornament instead of ours.',
+      tags: ['schematic', 'first pass'],
       kind: 'svg', draw: clusterSvg,
     },
     {
-      id: 'bg-glyph',
-      name: 'Atlas wheel', tag: 'vector',
-      note: 'Concentric rings, 120 ticks and three runes: the map device read as an astrolabe. The outer ring turns once every seventy seconds unless the system asks for reduced motion. Cold, mechanical, nothing decorative about it.',
-      tags: ['svg', 'mechanical', 'slow spin'],
+      id: 'bg-glyph', group: 'Earlier attempt', name: 'Atlas wheel', tag: 'first pass',
+      note: 'Concentric rings, 120 ticks, three runes. It reads as an astrolabe from a science-fiction HUD, which is exactly the note that made this pass happen.',
+      tags: ['mechanical', 'first pass'],
       kind: 'svg', draw: glyphSvg,
     },
     {
-      id: 'bg-combo',
-      name: 'Tree + socket', tag: 'recommended',
-      note: 'The two PoE ideas that actually belong to this screen, fused: the tree, and at its heart the cluster jewel the tree is being planned around. One drawing, one accent, and the jewel art is already in the repo.',
-      tags: ['svg', 'product-specific', 'recommended'],
+      id: 'bg-combo', group: 'Earlier attempt', name: 'Tree + socket', tag: 'first pass',
+      note: 'The rings and the jewel fused at the centre. Superseded by the passive tree and the socket above, which do the same two ideas properly.',
+      tags: ['fused', 'first pass'],
       kind: 'svg', draw: comboSvg,
     },
   ];
@@ -272,7 +478,12 @@
 
   function paint() {
     const list = document.getElementById('bgList');
-    list.innerHTML = DIRECTIONS.map(section).join('');
+    let group = null;
+    list.innerHTML = DIRECTIONS.map((d, i) => {
+      const head = d.group !== group ? `<p class="bg-group">${d.group}</p>` : '';
+      group = d.group;
+      return head + section(d, i);
+    }).join('');
 
     /* swap the portrait for the drawing the direction asks for */
     [...list.querySelectorAll('.bg-sec')].forEach((sec) => {

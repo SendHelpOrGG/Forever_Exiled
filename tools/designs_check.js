@@ -727,13 +727,15 @@ check('every palette declares a pale, legal action colour',
         const veils = [...d.querySelectorAll('.a-veil')].map((v) => v.outerHTML).join('');
         process.stdout.write(JSON.stringify({
           sections: [...d.querySelectorAll('.bg-sec')].map((x) => x.id),
+          groups: [...d.querySelectorAll('.bg-group')].map((g) => g.textContent.trim()),
           mocks: d.querySelectorAll('.mock').length,
           veils: d.querySelectorAll('.a-veil').length,
           portraits: d.querySelectorAll('img.a-backdrop').length,
           strengths: d.querySelectorAll('[data-strength]').length,
           hex: (veils.match(/(?:fill|stroke)="#[0-9a-f]{3,8}"/gi) || []).length,
           veilPosition: [...d.querySelectorAll('.a-veil')].map((v) => dom.window.getComputedStyle(v).position),
-          tokens: (veils.match(/var\\(--/g) || []).length,
+          gold: veils.split('var(--gold)').length - 1,
+          tokens: veils.split('var(--').length - 1,
           errors,
         }));
       })
@@ -751,15 +753,19 @@ check('every palette declares a pale, legal action colour',
   }
 
   check('the background study loads like a page, not like a snippet',
-    study.sections.length === 5 && study.mocks === 5,
+    study.sections.length === 9 && study.mocks === 9,
     study.sections.join(' ') || 'no sections rendered');
-  check('one direction keeps the portrait and four draw vectors',
-    study.portraits === 1 && study.veils === 4,
+  check('the study separates the game-accurate pass from the first one',
+    (study.groups || []).join(' |') === 'Closer to the game |Earlier attempt',
+    (study.groups || []).join(' · ') || 'no groups');
+  check('one direction keeps the portrait and eight draw vectors',
+    study.portraits === 1 && study.veils === 8,
     `${study.portraits} portrait · ${study.veils} vector`);
   check('the vectors are drawn from tokens, never from hex',
-    study.hex === 0 && study.tokens >= 8, study.hex ? `${study.hex} hex fills` : `${study.tokens} token reads`);
+    study.hex === 0 && study.tokens >= 60 && study.gold >= 8,
+    study.hex ? `${study.hex} hex fills` : `${study.tokens} token reads, ${study.gold} of them gold`);
   check('the vector backgrounds stay out of the mock grid',
-    (study.veilPosition || []).length === 4 && study.veilPosition.every((p) => p === 'absolute'),
+    (study.veilPosition || []).length === 8 && study.veilPosition.every((p) => p === 'absolute'),
     (study.veilPosition || []).join(' ') || 'no veils measured');
   check('the study has a three-step strength control', study.strengths === 3);
   check('the study page runs without errors', study.errors.length === 0,
