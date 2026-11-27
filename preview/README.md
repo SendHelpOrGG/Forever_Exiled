@@ -57,19 +57,27 @@ crafting routes and the totals. **All ten palettes are dark, and none uses brown
 | 01 | Crimson | `#ff4d5e` + gold `#f2c94c` | `#0b080d` — the original, de-pinked |
 | 02 | Violet | `#a06bff` + pale yellow `#efe4b0` | `#0a0817` |
 | 03 | Azure | `#4b8dff` + pale red `#f0b3b8` | `#070c18` |
-| 04 | Cyan | `#2ad4e6` | `#061318` |
+| 04 | Cyan | `#2ad4e6` + violet `#b58cff` + amber `#ffd88a` | `#061318` |
 | 05 | Noir | `#f4f6f8` + gold `#d9b45c` | `#000000` — black and white, one gold |
 | 06 | Neon | `#ff3ea5` + cyan `#63e6ff` + amber `#ffc861` | `#08060c` — three hues, three jobs |
-| 07 | Ember | `#ff7f38` + ice `#9fc6e8` | `#0c0604` — orange chrome, cold modifiers |
-| 08 | Rose Gold | `#f07d9f` + gold `#ffd479` + periwinkle `#9dc4ff` | `#0a0614` — warm metal on plum |
-| 09 | Honey | `#ffc04a` + steel `#8fb4e8` | `#0b0803` — the gold is the chrome |
-| 10 | Steel | `#a9c9df` + slate `#8fa3b9` | `#06090c` — matte, desaturated, greyscale art |
+| 07 | Ember | `#ff7f38` + ice `#9fc6e8` + violet `#c3a2ff` | `#0c0604` — orange chrome, cold modifiers |
+| 08 | Rose Gold | `#f07d9f` + gold `#ffd479` + periwinkle `#9dc4ff` + coral `#ff9d84` | `#0a0614` — warm metal on plum |
+| 09 | Honey | `#ffc04a` + steel `#8fb4e8` + rose `#ffb3c1` | `#0b0803` — the gold is the chrome |
+| 10 | Steel | `#a9c9df` + slate `#8fa3b9` + amber `#ffcf8a` | `#06090c` — matte, desaturated, greyscale art |
+
+Every palette carries the same **seven colours in five jobs**: a field, a panel and its glass; the
+chrome (`--accent`); the value colour (`--accent-soft`); one hue for the notables (`--note`) and a
+different one for the cluster modifiers (`--mod`); and an **action** colour (`--gold`) for the craft
+target, the best route and the gem ring. The gallery shows all seven swatches under each frame.
+Notables and cluster modifiers never share a hue, and every palette runs three hues or four —
+Crimson, Violet, Azure and Noir let their gold do the values and the action both, the other six give
+the action a hue of its own.
 
 The layout is written in palette tokens (`--accent`, `--bg`, `--glass`, `--line`, `--note`,
-`--mod`, …) and each palette only redefines those, plus the grade of the splash art, so the ten
-cannot drift apart: the DOM, the sizes and the type are identical in all of them. Notables always
-take one colour and cluster modifiers another, so the two feature categories stay readable in every
-palette.
+`--mod`, `--gold`, …) and each palette only redefines those, plus the grade of the splash art, so
+the ten cannot drift apart: the DOM, the sizes and the type are identical in all of them. Notables
+always take one colour and cluster modifiers another, so the two feature categories stay readable in
+every palette.
 
 Every frame shows the whole cluster-jewel surface: share, average and peak DPS, the three
 combinations with their notables and modifiers, socketing (size · passives · iLvl floor · price),

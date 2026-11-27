@@ -298,7 +298,7 @@ const VARIANTS = [
     keeps: 'The atmosphere of the first pass — the halo, the art washing into the field — now with a codified highlight colour.',
     costs: 'Red and gold together are the loudest pairing here; in noir they would be unthinkable.',
     tags: ['crimson', 'gold', 'warm'],
-    sw: ['#0b080d', '#191320', '#ff4d5e', '#f2c94c', '#86b6ff'],
+    sw: ['#0b080d', '#191320', '#ff4d5e', '#ffb0b8', '#f2c94c', '#86b6ff', '#ffe08a'],
   },
   {
     id: 'violet', layout: 'atrium', theme: 'violet', name: 'Atrium · Violet', tag: 'Violet',
@@ -306,7 +306,7 @@ const VARIANTS = [
     keeps: 'The most theatrical of the five — closest to the splash art in the backdrop.',
     costs: 'Violet on violet is the lowest contrast pairing here; small caps lose a little weight.',
     tags: ['violet', 'theatrical', 'cool'],
-    sw: ['#0a0817', '#191233', '#a06bff', '#c9a9ff', '#6fd6ff'],
+    sw: ['#0a0817', '#191233', '#a06bff', '#d9c8ff', '#c9a9ff', '#6fd6ff', '#efe4b0'],
   },
   {
     id: 'azure', layout: 'atrium', theme: 'azure', name: 'Atrium · Azure', tag: 'Blue',
@@ -314,7 +314,7 @@ const VARIANTS = [
     keeps: 'The easiest to read for long — nothing in the palette asks for attention.',
     costs: 'The safest and the least distinctive; blue is what every tool already uses.',
     tags: ['azure', 'legible', 'tooling'],
-    sw: ['#070c18', '#131c33', '#4b8dff', '#9dc0ff', '#c8a6ff'],
+    sw: ['#070c18', '#131c33', '#4b8dff', '#b3ccff', '#9dc0ff', '#c8a6ff', '#f0b3b8'],
   },
   {
     id: 'cyan', layout: 'atrium', theme: 'cyan', name: 'Atrium · Cyan', tag: 'Cyan',
@@ -322,7 +322,7 @@ const VARIANTS = [
     keeps: 'The accent and the content agree — a cold skill in a cold palette.',
     costs: 'Cyan glows, so the frame feels brighter than the others even at the same darkness.',
     tags: ['cyan', 'cold', 'atmospheric'],
-    sw: ['#061318', '#0f242c', '#2ad4e6', '#8fe9f5', '#b58cff'],
+    sw: ['#061318', '#0f242c', '#2ad4e6', '#a6ecf6', '#8fe9f5', '#b58cff', '#ffd88a'],
   },
   {
     id: 'noir', layout: 'atrium', theme: 'noir', name: 'Atrium · Noir', tag: 'Black & white',
@@ -330,7 +330,7 @@ const VARIANTS = [
     keeps: 'The most neutral reading of the screen — the data is the only thing with contrast.',
     costs: 'Without a hue the panel and the art flatten into one another more than in the coloured palettes.',
     tags: ['noir', 'monochrome', 'neutral'],
-    sw: ['#000000', '#0c0c0e', '#f4f6f8', '#eef0f3', '#9fa8b6'],
+    sw: ['#000000', '#0c0c0e', '#f4f6f8', '#eef0f3', '#9fa8b6', '#d9b45c', '#efd9a0'],
   },
   {
     id: 'neon', layout: 'atrium', theme: 'neon', name: 'Atrium · Neon', tag: 'Magenta + cyan',
@@ -338,7 +338,7 @@ const VARIANTS = [
     keeps: 'The most electric of the ten, and the only one with a three-stop read: chrome, value, action.',
     costs: 'Three accents is about the most a screen this dense can hold; nothing in it is calm.',
     tags: ['neon', 'tri-tone', 'loud'],
-    sw: ['#08060c', '#12101c', '#ff3ea5', '#63e6ff', '#ffc861', '#ff9ecf'],
+    sw: ['#08060c', '#12101c', '#ff3ea5', '#ff9ecf', '#63e6ff', '#ffc861', '#ffd79a'],
   },
   {
     id: 'ember', layout: 'atrium', theme: 'ember', name: 'Atrium · Ember', tag: 'Orange + ice',
@@ -346,15 +346,15 @@ const VARIANTS = [
     keeps: 'The strongest hot-and-cold contrast of the ten — the frame reads like forge light.',
     costs: 'Orange is the loudest chrome here, and the panel competes with the splash art behind it.',
     tags: ['ember', 'warm', 'duotone'],
-    sw: ['#0c0604', '#1c1210', '#ff7f38', '#ffb27a', '#9fc6e8'],
+    sw: ['#0c0604', '#1c1210', '#ff7f38', '#ffd2a6', '#ffb27a', '#9fc6e8', '#c3a2ff'],
   },
   {
     id: 'rose', layout: 'atrium', theme: 'rose', name: 'Atrium · Rose Gold', tag: 'Rose + gold',
-    intent: 'A rose chrome on a plum-black field, gold on the notables and periwinkle on the cluster modifiers: warm metal against a cold field, and not one hue used twice. The gold ring on the skill gem ties the two warm notes together.',
+    intent: 'A rose chrome on a plum-black field, gold on the notables and periwinkle on the cluster modifiers: warm metal against a cold field, and not one hue used twice. A coral marks the craft target, so the warm notes have somewhere to point.',
     keeps: 'The only rose chrome in the set, and the softest warm-against-cool pairing of the ten.',
     costs: 'Rose reads as a mood more than as a signal, so the values have to stay gold to be found.',
     tags: ['rose', 'gold', 'jewel'],
-    sw: ['#0a0614', '#171029', '#f07d9f', '#ffd479', '#9dc4ff', '#ffb9cb'],
+    sw: ['#0a0614', '#171029', '#f07d9f', '#ffb9cb', '#ffd479', '#9dc4ff', '#ff9d84'],
   },
   {
     id: 'honey', layout: 'atrium', theme: 'honey', name: 'Atrium · Honey', tag: 'Gold chrome',
@@ -362,7 +362,7 @@ const VARIANTS = [
     keeps: 'The warmest gold of the ten, and the only palette where a value and the chrome are the same colour.',
     costs: 'Gold carries weight — any darker and it turns brown, so every value stays high and bright.',
     tags: ['honey', 'gold', 'warm'],
-    sw: ['#0b0803', '#141311', '#ffc04a', '#ffe3a8', '#8fb4e8'],
+    sw: ['#0b0803', '#141311', '#ffc04a', '#ffd98f', '#ffe3a8', '#8fb4e8', '#ffb3c1'],
   },
   {
     id: 'steel', layout: 'atrium', theme: 'steel', name: 'Atrium · Steel', tag: 'Matte grey-blue',
@@ -370,7 +370,7 @@ const VARIANTS = [
     keeps: 'The quietest frame of the ten, and the one that survives a dim monitor.',
     costs: 'At a glance it is the least distinct — closest to Noir in mood, only bluer.',
     tags: ['steel', 'matte', 'quiet'],
-    sw: ['#06090c', '#101820', '#a9c9df', '#dcecf8', '#8fa3b9'],
+    sw: ['#06090c', '#101820', '#a9c9df', '#d5e6f2', '#dcecf8', '#8fa3b9', '#ffcf8a'],
   },
 ];
 

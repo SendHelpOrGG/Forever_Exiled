@@ -521,8 +521,12 @@ img { display: block; }
   --v55: rgba(6, 19, 24, .55); --v70: rgba(6, 19, 24, .70); --v86: rgba(6, 19, 24, .86); --v95: rgba(6, 19, 24, .95);
   --line: rgba(160, 235, 245, .14); --line2: rgba(160, 235, 245, .26);
   --note: #8fe9f5; --mod: #b58cff;
+  --gold: #ffd88a; --gold-soft: #ffecc4;
   --text: #e9f8fb; --muted: #9ab4bd; --faint: #75909a;
 }
+.m-atrium.t-cyan .a-target,
+.m-atrium.t-cyan .fx-route.best b { color: var(--gold); }
+.m-atrium.t-cyan .a-gem { border-color: rgba(255, 216, 138, .4); }
 
 /* 05 · noir — black and white, colour only: the layout, the sizes and the type are
    untouched, so this is the same screen with the hue and the grey scale removed */
@@ -564,15 +568,19 @@ img { display: block; }
 /* 07 · ember — warm soot behind an orange chrome, with the cluster modifiers dropped into a
    cold ice blue so the two feature categories split by temperature, not just by hue. */
 .m-atrium.t-ember {
-  --accent: #ff7f38; --accent-soft: #ffb27a; --accent-hi: #ff9a5c; --accent-lo: #e06a24; --accent-ink: #170703;
+  --accent: #ff7f38; --accent-soft: #ffd2a6; --accent-hi: #ff9a5c; --accent-lo: #e06a24; --accent-ink: #170703;
   --bg: #0c0604; --panel: #1c1210;
   --glass: rgba(24, 17, 15, .72); --glass-hi: rgba(30, 21, 18, .55); --glass-on: rgba(52, 30, 22, .78); --glass-sel: rgba(48, 28, 21, .55);
   --glow: rgba(255, 127, 56, .9); --halo: rgba(255, 127, 56, .2);
   --v55: rgba(12, 6, 4, .55); --v70: rgba(12, 6, 4, .70); --v86: rgba(12, 6, 4, .86); --v95: rgba(12, 6, 4, .95);
   --line: rgba(255, 200, 160, .14); --line2: rgba(255, 200, 160, .27);
   --note: #ffb27a; --mod: #9fc6e8;
+  --gold: #c3a2ff; --gold-soft: #e2d2ff;
   --text: #f8efe9; --muted: #c3ada2; --faint: #968175;
 }
+.m-atrium.t-ember .a-target,
+.m-atrium.t-ember .fx-route.best b { color: var(--gold); }
+.m-atrium.t-ember .a-gem { border-color: rgba(195, 162, 255, .42); }
 .m-atrium.t-ember .a-backdrop { filter: sepia(.26) saturate(1.35) hue-rotate(-12deg) contrast(1.04); }
 
 /* 08 · rose gold — a rose chrome on plum-black, gold on the notables, periwinkle on the
@@ -585,10 +593,13 @@ img { display: block; }
   --v55: rgba(10, 6, 20, .55); --v70: rgba(10, 6, 20, .70); --v86: rgba(10, 6, 20, .86); --v95: rgba(10, 6, 20, .95);
   --line: rgba(255, 200, 220, .14); --line2: rgba(255, 200, 220, .27);
   --note: #ffd479; --mod: #9dc4ff;
+  --gold: #ff9d84; --gold-soft: #ffc9b6;
   --text: #fbf0f4; --muted: #c4aeb8; --faint: #998494;
 }
 .m-atrium.t-rose .a-backdrop { filter: saturate(1.12) hue-rotate(-8deg) brightness(1.02); }
-.m-atrium.t-rose .a-gem { border-color: rgba(255, 212, 121, .4); }
+.m-atrium.t-rose .a-target,
+.m-atrium.t-rose .fx-route.best b { color: var(--gold); }
+.m-atrium.t-rose .a-gem { border-color: rgba(255, 157, 132, .42); }
 
 /* 09 · honey — the gold becomes the chrome itself: chips, tabs, active fills and every value.
    Warm charcoal behind it, steel blue for the modifiers so the frame is not one warm blur. */
@@ -600,8 +611,12 @@ img { display: block; }
   --v55: rgba(11, 8, 3, .55); --v70: rgba(11, 8, 3, .70); --v86: rgba(11, 8, 3, .86); --v95: rgba(11, 8, 3, .95);
   --line: rgba(255, 225, 170, .15); --line2: rgba(255, 225, 170, .28);
   --note: #ffe3a8; --mod: #8fb4e8;
+  --gold: #ffb3c1; --gold-soft: #ffd6dd;
   --text: #fbf4e6; --muted: #c0b39b; --faint: #918772;
 }
+.m-atrium.t-honey .a-target,
+.m-atrium.t-honey .fx-route.best b { color: var(--gold); }
+.m-atrium.t-honey .a-gem { border-color: rgba(255, 179, 193, .42); }
 .m-atrium.t-honey .a-backdrop { filter: sepia(.3) saturate(1.22) brightness(1.02); }
 
 /* 10 · steel — the matte one. A desaturated blue-grey chrome, thin hairlines, almost no glow
@@ -614,6 +629,11 @@ img { display: block; }
   --v55: rgba(6, 9, 12, .55); --v70: rgba(6, 9, 12, .70); --v86: rgba(6, 9, 12, .86); --v95: rgba(6, 9, 12, .95);
   --line: rgba(200, 225, 245, .16); --line2: rgba(200, 225, 245, .3);
   --note: #dcecf8; --mod: #8fa3b9;
+  --gold: #ffcf8a; --gold-soft: #ffe8c6;
   --text: #eef4f9; --muted: #a7b6c2; --faint: #7b8b98;
 }
+.m-atrium.t-steel .a-kicker,
+.m-atrium.t-steel .a-target,
+.m-atrium.t-steel .fx-route.best b { color: var(--gold); }
+.m-atrium.t-steel .a-gem { border-color: rgba(255, 207, 138, .42); }
 .m-atrium.t-steel .a-backdrop { filter: saturate(.32) contrast(1.08) brightness(.95); }

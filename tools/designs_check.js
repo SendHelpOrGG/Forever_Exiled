@@ -96,8 +96,8 @@ check('every section has a numbered head and a one-word tag',
   sections.map((s) => text(s.querySelector('.v-tag'))).join(' · '));
 check('styling notes are written for every variant',
   sections.every((s) => s.querySelectorAll('.v-notes > div').length === 2));
-check('every variant has a palette of at least five swatches',
-  sections.every((s) => s.querySelectorAll('.v-swatches i').length >= 5),
+check('every variant shows the whole palette — six swatches or more',
+  sections.every((s) => s.querySelectorAll('.v-swatches i').length >= 6),
   sections.map((s) => s.querySelectorAll('.v-swatches i').length).join(' '));
 check('every frame can be zoomed to 1:1',
   sections.every((s) => s.querySelectorAll('.frame-zoom').length === 1));
@@ -681,18 +681,18 @@ check('no palette is accented in brown or green',
   accentHues.map(([id, c]) => `${id}:h${c ? Math.round(c.h) : '?'}`).join(' '));
 
 
-check('the palettes that ask for a second accent declare it',
-  (() => {
-    const warm = (sel, name) => {
-      const hex = token(sel, name);
-      if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return false;
-      const c = hslOf(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16));
-      return c.l > 0.6 && !brownOrGreen(c);
-    };
-    return warm('.m-atrium.t-violet', 'gold') && warm('.m-atrium.t-azure', 'warm')
-      && warm('.m-atrium.t-noir', 'gold') && warm('.m-atrium.t-neon', 'gold');
-  })(),
-  `violet ${token('.m-atrium.t-violet', 'gold')} · azure ${token('.m-atrium.t-azure', 'warm')} · noir ${token('.m-atrium.t-noir', 'gold')} · neon ${token('.m-atrium.t-neon', 'gold')}`);
+/* every palette carries a third, separate colour for the action — the craft target, the best
+   route, the gem ring — so no two jobs are ever asked to share one hue */
+const golds = THEMES.map((t) => {
+  const hex = token(`.m-atrium.t-${t.id}`, 'gold') || token(`.m-atrium.t-${t.id}`, 'warm');
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return [t.id, hex, false];
+  const c = hslOf(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16));
+  const note = token(`.m-atrium.t-${t.id}`, 'note');
+  const mod = token(`.m-atrium.t-${t.id}`, 'mod');
+  return [t.id, hex, c.l > 0.55 && !brownOrGreen(c) && hex !== note && hex !== mod];
+});
+check('every palette declares a pale, legal action colour',
+  golds.every(([, , ok]) => ok), golds.map(([id, hex]) => `${id}:${hex}`).join(' '));
 
 /* ── report ─────────────────────────────────────────────────────────────── */
 
