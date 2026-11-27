@@ -160,7 +160,6 @@ L.atrium = () => {
             <img class="a-cardart" src="${art.cluster(c.art)}" alt="">
             <span class="a-cardbody">
               <b>${c.notables.join(' + ')}</b>
-              ${notablesOf(c)}
               ${modsOf(c)}
               ${gearOf(c)}
               ${bar(c.pct)}

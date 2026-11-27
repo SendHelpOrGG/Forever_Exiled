@@ -302,6 +302,77 @@ check('each palette keeps the notables / modifiers split',
 const hoverInLayout = (css.match(/\.m-atrium[^{},]*:hover/g) || []).length;
 check('the layout has bespoke hover states', hoverInLayout >= 6, hoverInLayout + ' states');
 
+/* ── geometry: nothing may collide, and every container must space its children ── */
+
+const cssVal = (sel, prop) => {
+  const b = blockOf(sel);
+  const m = b.match(new RegExp('(?:^|[;{\\s])' + prop.replace(/-/g, '\\-') + ':\s*([^;]+)'));
+  return m ? m[1].trim() : '';
+};
+const cssNum = (sel, prop, fallback) => {
+  const m = cssVal(sel, prop).match(/(-?[\d.]+)px/);
+  return m ? parseFloat(m[1]) : fallback;
+};
+const boxNums = (sel, prop, fallback) => {
+  const list = (cssVal(sel, prop).match(/-?[\d.]+/g) || []).map(Number);
+  return list.length ? list : fallback;
+};
+
+const SHEET_H = 720;
+const BAR_H = 64;
+const STATUS_H = 30;
+const bodyPad = boxNums('.m-atrium .a-body', 'padding', [24, 34, 20]);
+const padY = bodyPad[0] + (bodyPad[2] !== undefined ? bodyPad[2] : bodyPad[0]);
+const padX = bodyPad[1] !== undefined ? bodyPad[1] : bodyPad[0];
+const gapBody = cssNum('.m-atrium .a-body', 'gap', 32);
+const panelW = (cssVal('.m-atrium .a-body', 'grid-template-columns').match(/(\d+)px/) || [0, 344])[1] * 1;
+const available = SHEET_H - BAR_H - STATUS_H - padY;
+
+/* the main column: head row, hero block, then three-to-four cards */
+const cardPad = boxNums('.m-atrium .a-card', 'padding', [10, 14])[0];
+const cardH = cardPad * 2
+  + cssNum('.m-atrium .a-cardbody b', 'font-size', 12) * 1.2
+  + 2 * (cssNum('.m-atrium .a-cardbody .fx-mod', 'font-size', 9.5) * 1.35 + 1)
+  + cssNum('.m-atrium .a-cardbody .fx-gear', 'font-size', 9) * 1.2
+  + 7 + 6;
+const rows = section('crimson').querySelectorAll('[data-combo]').length;
+const listH = rows * cardH + (rows - 1) * cssNum('.m-atrium .a-list', 'gap', 8);
+const heroH = 22
+  + cssNum('.m-atrium .a-titlerow h1', 'font-size', 50) * 0.95
+  + cssNum('.m-atrium .a-sub', 'font-size', 12) * 1.35 + 4 + 29
+  + cssNum('.m-atrium .a-stats', 'margin-top', 20) + 11 + cssNum('.m-atrium .a-stats .num', 'font-size', 32) * 1.05;
+const mainSlack = available - (heroH + listH);
+check('the main column fits above the status bar, with room to spare',
+  mainSlack >= 8, `${(heroH + listH).toFixed(0)} of ${available}px used, ${mainSlack.toFixed(0)}px spare`);
+
+/* the panel: selected block, gem picker, ranking, uniques, routes, totals */
+const panelPad = boxNums('.m-atrium .a-panel', 'padding', [16])[0];
+const notRow = cssNum('.m-atrium .a-notrow', 'font-size', 10.5) * 1.35;
+const panelH = panelPad * 2
+  + 157 + 42 + 3 * 20
+  + (5 * notRow + 12) + 24 + 15 + 3 * 20 + (8 + 3 * 15) + 20;
+const panelSlack = available - panelH;
+check('the panel fits inside its own box',
+  panelSlack >= 8, `${panelH.toFixed(0)} of ${available}px used, ${panelSlack.toFixed(0)}px spare`);
+
+const mainW = 1280 - padX * 2 - panelW - gapBody;
+check('the two columns share the sheet without touching',
+  mainW >= 700 && panelW >= 320 && gapBody >= 24,
+  `main ${mainW}px · gap ${gapBody}px · panel ${panelW}px`);
+
+check('no region can spill into its neighbour',
+  ['.m-atrium .a-body', '.m-atrium .a-main', '.m-atrium .a-panel']
+    .every((sel) => /overflow:\s*hidden/.test(blockOf(sel)) && /min-height:\s*0/.test(blockOf(sel))));
+
+const spaced = [
+  '.m-atrium .a-headline', '.m-atrium .a-meta', '.m-atrium .a-stats', '.m-atrium .a-list',
+  '.m-atrium .a-card', '.m-atrium .a-panel', '.m-atrium .a-picks', '.m-atrium .a-classrow',
+  '.m-atrium .a-sizes', '.m-atrium .a-body',
+];
+const unspaced = spaced.filter((sel) => !/gap:\s*[\d.]+px/.test(blockOf(sel)));
+check('every container spaces its children deliberately',
+  unspaced.length === 0, unspaced.length ? unspaced.join(', ') : spaced.length + ' containers, all with an explicit gap');
+
 /* the sheets are drawn at 1280×720 and scaled; nothing may claim to be bigger */
 check('the mock sheets are 1280×720',
   /\.mock\s*\{\s*[^}]*width:\s*1280px[^}]*height:\s*720px/.test(css.replace(/\n/g, ' ')));
