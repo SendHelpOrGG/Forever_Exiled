@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "jsdom": "^31.0.1"
+  },
+  "private": true,
+  "description": "Dev-only harness for the static preview and the design gallery. The app itself is .NET MAUI.",
+  "scripts": {
+    "check:preview": "node tools/preview_smoke_test.js",
+    "check:designs": "node tools/designs_check.js"
+  }
+}

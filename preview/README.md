@@ -45,13 +45,22 @@ above the combination list already covers it.
 
 ## Design gallery
 
-`/designs/` holds **ten directions for the interface**, built to be compared rather than used:
-one mock screen, ten skins, the same content in each. Nothing there is wired to the app, and the
-app does not link to it — it exists to be argued about. Each direction carries what it keeps, what
-it costs, and its palette; every frame can be switched to 1:1 to read the type at full size.
+`/designs/` holds **ten directions for the interface**, built to be compared rather than used.
+They are ten different layouts, not ten colour schemes of one: a sidebar shell, a printed page with
+a contents column, a monospace table with an inspector, a light magazine, a cinematic banner, a KPI
+dashboard, a brutalist poster, a command palette over blurred art, a master/detail ledger and an art
+wall. Each shows the same screen — Winter Orb, its three combinations, the crafting card, the same
+234 sampled characters — so the comparison is fair.
+
+The frames are interactive, because a direction has to be judged by using it: every control lifts
+and glows on hover, presses under the cursor and takes focus; clicking a skill rewrites the build
+name; clicking a combination rewrites the crafting target; the size pills in the first frame really
+narrow the list; bars grow to their share when a frame scrolls into view; `1:1` opens a frame at
+full size. Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
-NODE_PATH=… node tools/designs_check.js      # ten mocks, same content, art resolved
+python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
+NODE_PATH=… node tools/designs_check.js      # 55 checks: ten layouts, same content, live controls
 ```
 
 ## What is real and what is simulated
