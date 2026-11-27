@@ -48,16 +48,16 @@ const check = (label, ok, detail = '') =>
   results.push(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}`);
 
 const EXPECTED = [
-  'Atrium · Rose', 'Atrium · Amethyst', 'Atrium · Cobalt', 'Atrium · Glacier', 'Atrium · Ash',
+  'Atrium · Crimson', 'Atrium · Violet', 'Atrium · Azure', 'Atrium · Cyan', 'Atrium · Slate',
 ];
 
 /* one layout, five palettes: the id is the theme, the class namespace is shared */
 const THEMES = [
-  { id: 'rose', prefix: 'a' },
-  { id: 'amethyst', prefix: 'a' },
-  { id: 'cobalt', prefix: 'a' },
-  { id: 'glacier', prefix: 'a' },
-  { id: 'ash', prefix: 'a' },
+  { id: 'crimson', prefix: 'a' },
+  { id: 'violet', prefix: 'a' },
+  { id: 'azure', prefix: 'a' },
+  { id: 'cyan', prefix: 'a' },
+  { id: 'slate', prefix: 'a' },
 ];
 
 const HERO = '[data-hero-name]';
@@ -79,7 +79,7 @@ check('five variants rendered', sections.length === 5, sections.length + ' secti
 
 const names = sections.map((s) => {
   const h = s.querySelector('h2');
-  return text(h).replace(text(h.querySelector('.v-tag')), '').trim();
+  return text(h).replace(text(h.querySelector('.v-tag')), '').replace(/\s+/g, ' ').trim();
 });
 check('they are the five palettes asked for', names.join(' | ') === EXPECTED.join(' | '), names.join(' · '));
 check('the index lists all five', qa('.gal-index a').length === 5);
@@ -191,7 +191,7 @@ check('nothing errors while being used', errors.length === 0, errors.join(' | ')
 /* ── the CSS actually styles what the layout invented ───────────────────── */
 
 const unstyled = [];
-for (const cls of new Set(classesOf(mockOf('rose')))) {
+for (const cls of new Set(classesOf(mockOf('crimson')))) {
   if (['on', 'off', 'bar', 'num', 'val', 'stat', 'sz', 'lit'].includes(cls)) continue;
   if (!css.includes('.' + cls)) unstyled.push(cls);
 }

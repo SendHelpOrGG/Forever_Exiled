@@ -54,11 +54,11 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 
 | # | palette | accent | field |
 |---|---------|--------|-------|
-| 01 | Rose | `#ff6b9d` | `#0b0812` — the original |
-| 02 | Amethyst | `#a78bfa` | `#0a0716` |
-| 03 | Cobalt | `#6d8cff` | `#080b18` |
-| 04 | Glacier | `#38bdf8` | `#06121a` |
-| 05 | Ash | `#c9d3e0` | `#0a0c11` |
+| 01 | Crimson | `#ff4d5e` | `#0b080d` — the original, de-pinked |
+| 02 | Violet | `#a06bff` | `#0a0817` |
+| 03 | Azure | `#4b8dff` | `#070c18` |
+| 04 | Cyan | `#2ad4e6` | `#061318` |
+| 05 | Slate | `#a9b8cc` | `#0a0c10` |
 
 The layout is written in palette tokens (`--accent`, `--bg`, `--glass`, `--line`, `--note`,
 `--mod`, …) and each palette only redefines those, so the five cannot drift apart. Notables always

@@ -168,18 +168,6 @@ img { display: block; }
    the DOM, the sizes and the interaction are identical on purpose.
    ========================================================================== */
 
-/* ── the five palettes ──────────────────────────────────────────────────── */
-
-/* 01 · rose — the original 05 */
-
-/* 02 · amethyst */
-
-/* 03 · cobalt */
-
-/* 04 · glacier */
-
-/* 05 · ash */
-
 /* ============================================================================
    ATRIUM — one layout, five palettes
    The merged 04 + 05 direction kept as the only structure: a cinematic cover
@@ -294,7 +282,8 @@ img { display: block; }
 .m-atrium .a-notrow b { text-align: right; color: var(--accent-soft); font-variant-numeric: tabular-nums; }
 .m-atrium .a-notrow:hover span { color: var(--text); }
 .m-atrium .a-notrow:hover b { color: var(--text); }
-.m-atrium .a-selbar:hover .bar i { filter: saturate(150%) brightness(1.12); }
+.m-atrium .a-selbar:hover .bar i { filter: saturate(160%) brightness(1.15); }
+.m-atrium .a-panel .fx-uniques:hover .fx-un { opacity: 1; }
 .m-atrium .a-panel .fx-uniques { margin-bottom: 2px; }
 .m-atrium .a-panel .fx-un:hover { border-color: var(--line2); }
 .m-atrium .a-target { display: block; margin-bottom: 3px; font-size: 11.5px; font-weight: 600; color: var(--accent-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -312,62 +301,62 @@ img { display: block; }
 
 /* ── the five palettes ──────────────────────────────────────────────────── */
 
-/* 01 · rose — the original 05 */
-.m-atrium.t-rose {
-  --accent: #ff6b9d; --accent-soft: #ffbcd4; --accent-hi: #ff87b0; --accent-lo: #c2457a; --accent-ink: #100a1c;
-  --bg: #0b0812; --panel: #1a1329;
-  --glass: rgba(22, 16, 36, .72); --glass-hi: rgba(26, 18, 42, .55); --glass-on: rgba(40, 26, 62, .78); --glass-sel: rgba(46, 30, 62, .55);
-  --glow: rgba(255, 107, 157, .95); --halo: rgba(255, 107, 157, .18);
-  --v55: rgba(11, 8, 18, .55); --v70: rgba(11, 8, 18, .70); --v86: rgba(11, 8, 18, .86); --v95: rgba(11, 8, 18, .95);
-  --line: rgba(255, 196, 219, .14); --line2: rgba(255, 196, 219, .26);
-  --note: #f08fae; --mod: #7fb3f5;
-  --text: #f5ecf4; --muted: #b6a7c2; --faint: #8d7f96;
+/* 01 · crimson — the original, with the pink pulled out of it */
+.m-atrium.t-crimson {
+  --accent: #ff4d5e; --accent-soft: #ffb0b8; --accent-hi: #ff6f7d; --accent-lo: #c22f3f; --accent-ink: #12080c;
+  --bg: #0b080d; --panel: #191320;
+  --glass: rgba(22, 16, 26, .72); --glass-hi: rgba(26, 18, 30, .55); --glass-on: rgba(42, 26, 38, .78); --glass-sel: rgba(46, 30, 40, .55);
+  --glow: rgba(255, 77, 94, .85); --halo: rgba(255, 77, 94, .17);
+  --v55: rgba(11, 8, 13, .55); --v70: rgba(11, 8, 13, .70); --v86: rgba(11, 8, 13, .86); --v95: rgba(11, 8, 13, .95);
+  --line: rgba(255, 190, 194, .14); --line2: rgba(255, 190, 194, .26);
+  --note: #ff9aa4; --mod: #86b6ff;
+  --text: #f4eef1; --muted: #b5a9b0; --faint: #8a7f86;
 }
 
-/* 02 · amethyst */
-.m-atrium.t-amethyst {
-  --accent: #a78bfa; --accent-soft: #d7c8ff; --accent-hi: #bda6ff; --accent-lo: #6d4fd6; --accent-ink: #0d0820;
-  --bg: #0a0716; --panel: #191233;
+/* 02 · violet */
+.m-atrium.t-violet {
+  --accent: #a06bff; --accent-soft: #d9c8ff; --accent-hi: #b48cff; --accent-lo: #6a3fd8; --accent-ink: #0c0718;
+  --bg: #0a0817; --panel: #191233;
   --glass: rgba(20, 14, 40, .72); --glass-hi: rgba(26, 18, 52, .55); --glass-on: rgba(44, 30, 80, .78); --glass-sel: rgba(44, 32, 74, .55);
-  --glow: rgba(167, 139, 250, .9); --halo: rgba(167, 139, 250, .2);
-  --v55: rgba(10, 7, 22, .55); --v70: rgba(10, 7, 22, .70); --v86: rgba(10, 7, 22, .86); --v95: rgba(10, 7, 22, .95);
-  --line: rgba(206, 190, 255, .14); --line2: rgba(206, 190, 255, .26);
-  --note: #c9b6ff; --mod: #7ee0ff;
-  --text: #f3f0ff; --muted: #b3a9cc; --faint: #8b81a6;
+  --glow: rgba(160, 107, 255, .9); --halo: rgba(160, 107, 255, .2);
+  --v55: rgba(10, 8, 23, .55); --v70: rgba(10, 8, 23, .70); --v86: rgba(10, 8, 23, .86); --v95: rgba(10, 8, 23, .95);
+  --line: rgba(205, 186, 255, .14); --line2: rgba(205, 186, 255, .26);
+  --note: #c9a9ff; --mod: #6fd6ff;
+  --text: #f2efff; --muted: #b0a8c8; --faint: #8880a4;
 }
 
-/* 03 · cobalt */
-.m-atrium.t-cobalt {
-  --accent: #6d8cff; --accent-soft: #b9c8ff; --accent-hi: #8ba4ff; --accent-lo: #3f5ad8; --accent-ink: #070b1c;
-  --bg: #080b18; --panel: #131a33;
-  --glass: rgba(16, 22, 44, .72); --glass-hi: rgba(20, 28, 56, .55); --glass-on: rgba(34, 48, 92, .78); --glass-sel: rgba(30, 42, 80, .55);
-  --glow: rgba(109, 140, 255, .9); --halo: rgba(109, 140, 255, .2);
-  --v55: rgba(8, 11, 24, .55); --v70: rgba(8, 11, 24, .70); --v86: rgba(8, 11, 24, .86); --v95: rgba(8, 11, 24, .95);
-  --line: rgba(186, 200, 255, .14); --line2: rgba(186, 200, 255, .26);
-  --note: #a9bcff; --mod: #ff9ecd;
-  --text: #eef2ff; --muted: #a3aecb; --faint: #7d88a6;
+/* 03 · azure */
+.m-atrium.t-azure {
+  --accent: #4b8dff; --accent-soft: #b3ccff; --accent-hi: #6ba2ff; --accent-lo: #2f63d6; --accent-ink: #060b18;
+  --bg: #070c18; --panel: #131c33;
+  --glass: rgba(14, 22, 44, .72); --glass-hi: rgba(18, 28, 56, .55); --glass-on: rgba(30, 48, 92, .78); --glass-sel: rgba(28, 44, 80, .55);
+  --glow: rgba(75, 141, 255, .9); --halo: rgba(75, 141, 255, .2);
+  --v55: rgba(7, 12, 24, .55); --v70: rgba(7, 12, 24, .70); --v86: rgba(7, 12, 24, .86); --v95: rgba(7, 12, 24, .95);
+  --line: rgba(180, 205, 255, .14); --line2: rgba(180, 205, 255, .26);
+  --note: #9dc0ff; --mod: #c8a6ff;
+  --text: #eef3ff; --muted: #a2aecb; --faint: #7c88a6;
 }
 
-/* 04 · glacier */
-.m-atrium.t-glacier {
-  --accent: #38bdf8; --accent-soft: #a5e3ff; --accent-hi: #6ccdfb; --accent-lo: #1b7fae; --accent-ink: #04121a;
-  --bg: #06121a; --panel: #0f2230;
-  --glass: rgba(12, 30, 42, .72); --glass-hi: rgba(16, 38, 52, .55); --glass-on: rgba(24, 58, 78, .8); --glass-sel: rgba(22, 52, 70, .55);
-  --glow: rgba(56, 189, 248, .9); --halo: rgba(56, 189, 248, .2);
-  --v55: rgba(6, 18, 26, .55); --v70: rgba(6, 18, 26, .70); --v86: rgba(6, 18, 26, .86); --v95: rgba(6, 18, 26, .95);
-  --line: rgba(165, 227, 255, .14); --line2: rgba(165, 227, 255, .26);
-  --note: #9fdcff; --mod: #ffa8c6;
-  --text: #eaf6ff; --muted: #9db4c2; --faint: #77909f;
+/* 04 · cyan */
+.m-atrium.t-cyan {
+  --accent: #2ad4e6; --accent-soft: #a6ecf6; --accent-hi: #58e0ee; --accent-lo: #13879a; --accent-ink: #04141a;
+  --bg: #061318; --panel: #0f242c;
+  --glass: rgba(12, 32, 40, .72); --glass-hi: rgba(16, 40, 50, .55); --glass-on: rgba(22, 60, 72, .8); --glass-sel: rgba(20, 54, 66, .55);
+  --glow: rgba(42, 212, 230, .85); --halo: rgba(42, 212, 230, .2);
+  --v55: rgba(6, 19, 24, .55); --v70: rgba(6, 19, 24, .70); --v86: rgba(6, 19, 24, .86); --v95: rgba(6, 19, 24, .95);
+  --line: rgba(160, 235, 245, .14); --line2: rgba(160, 235, 245, .26);
+  --note: #8fe9f5; --mod: #b58cff;
+  --text: #e9f8fb; --muted: #9ab4bd; --faint: #75909a;
 }
 
-/* 05 · ash */
-.m-atrium.t-ash {
-  --accent: #c9d3e0; --accent-soft: #e8eef7; --accent-hi: #dae2ee; --accent-lo: #8d98a8; --accent-ink: #0a0d12;
-  --bg: #0a0c11; --panel: #171b22;
-  --glass: rgba(20, 24, 31, .72); --glass-hi: rgba(24, 29, 38, .55); --glass-on: rgba(40, 47, 60, .8); --glass-sel: rgba(38, 44, 56, .55);
-  --glow: rgba(201, 211, 224, .55); --halo: rgba(140, 160, 190, .16);
-  --v55: rgba(10, 12, 17, .55); --v70: rgba(10, 12, 17, .70); --v86: rgba(10, 12, 17, .86); --v95: rgba(10, 12, 17, .95);
-  --line: rgba(206, 216, 230, .14); --line2: rgba(206, 216, 230, .26);
-  --note: #e6edf7; --mod: #8fb8ff;
-  --text: #eef1f6; --muted: #a2acba; --faint: #7c869a;
+/* 05 · slate */
+.m-atrium.t-slate {
+  --accent: #a9b8cc; --accent-soft: #dbe4f0; --accent-hi: #c4d0e0; --accent-lo: #7b8798; --accent-ink: #0a0d12;
+  --bg: #0a0c10; --panel: #161a21;
+  --glass: rgba(20, 24, 30, .72); --glass-hi: rgba(24, 28, 36, .55); --glass-on: rgba(38, 45, 56, .8); --glass-sel: rgba(36, 42, 52, .55);
+  --glow: rgba(169, 184, 204, .5); --halo: rgba(150, 170, 200, .16);
+  --v55: rgba(10, 12, 16, .55); --v70: rgba(10, 12, 16, .70); --v86: rgba(10, 12, 16, .86); --v95: rgba(10, 12, 16, .95);
+  --line: rgba(200, 210, 225, .14); --line2: rgba(200, 210, 225, .26);
+  --note: #e2ebf5; --mod: #7fa8e0;
+  --text: #eef1f5; --muted: #a0a9b6; --faint: #7a8393;
 }
