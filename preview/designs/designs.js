@@ -87,7 +87,7 @@ const D = {
 
 const bar = (pct) => `<span class="bar" style="--pct:${pct}%"><i></i></span>`;
 const stat = (label, value) => `<div class="stat"><em>${label}</em><b class="num">${value}</b></div>`;
-const navLinks = (cls) => D.nav.map((n, i) => `<a class="${cls}${i === 0 ? ' on' : ''}" data-nav>${n}</a>`).join('');
+const navLinks = (cls) => D.nav.map((n, i) => `<a class="${cls}${i === 0 ? ' on' : ''}" data-nav data-view="main">${n}</a>`).join('');
 const sizeChips = () => ['LARGE 13', 'MEDIUM 5', 'SMALL 2']
   .map((l) => `<button class="sz" data-size="${l.split(' ')[0].toLowerCase()}">${l}</button>`).join('');
 
@@ -135,15 +135,8 @@ L.atrium = () => {
 
   <header class="a-bar">
     <span class="a-brand"><img src="${A}/logo.png" alt="">forever exiled</span>
-    <nav class="a-tabs">${navLinks('')}</nav>
+    <nav class="a-tabs">${navLinks('')}<span class="a-navsep"></span><a class="a-tab-set" data-nav data-view="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"></circle><circle cx="12" cy="12" r="7.6" stroke-dasharray="2.4 4.1"></circle><path d="M12 1.9v2.4M12 19.7v2.4M3.1 12h2.4M18.5 12h2.4"></path></svg><span>Settings</span></a></nav>
     <div class="a-barright">
-      <button class="a-gear" data-panel="settings" aria-haspopup="dialog" aria-expanded="false" title="Settings" aria-label="Settings">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3.1"></circle>
-          <circle cx="12" cy="12" r="7.6" stroke-dasharray="2.4 4.1"></circle>
-          <path d="M12 1.9v2.4M12 19.7v2.4M3.1 12h2.4M18.5 12h2.4"></path>
-        </svg>
-      </button>
       <button class="a-sync" data-press>Sync ladder</button>
     </div>
   </header>
@@ -228,58 +221,66 @@ L.atrium = () => {
     </aside>
   </div>
 
-  <div class="a-panelwrap">
-    <span class="a-scrim" data-close></span>
-    <div class="a-sheet" role="dialog" aria-modal="true" aria-label="Settings">
-      <div class="a-sheethead">
-        <h2>Settings</h2>
-        <button class="a-x" data-close title="Close" aria-label="Close settings">&#10005;</button>
-      </div>
+  <div class="a-settings" role="tabpanel" aria-label="Settings">
+    <div class="a-sethead">
+      <h1>Settings</h1>
+      <p>Stored on this device. Applies to every snapshot and every ladder page.</p>
+    </div>
 
-      <p class="a-sec">Ladder</p>
-      <div class="a-row"><span>League</span>
-        <div class="a-seggroup" data-seggroup>
-          <button class="a-seg on" data-seg>Standard</button>
-          <button class="a-seg" data-seg>Hardcore</button>
-          <button class="a-seg" data-seg>Ruthless</button>
+    <div class="a-setcards">
+      <section class="a-setcard">
+        <h2>Ladder</h2>
+        <div class="a-row"><span>League</span>
+          <div class="a-seggroup" data-seggroup>
+            <button class="a-seg on" data-seg>Standard</button>
+            <button class="a-seg" data-seg>Hardcore</button>
+            <button class="a-seg" data-seg>Ruthless</button>
+          </div>
         </div>
-      </div>
-      <div class="a-row"><span>Snapshot</span><b class="a-val">demo-2026-11-07</b></div>
-      <div class="a-row"><span>Auto-refresh</span>
-        <div class="a-seggroup" data-seggroup>
-          <button class="a-seg" data-seg>Off</button>
-          <button class="a-seg" data-seg>5 min</button>
-          <button class="a-seg on" data-seg>15 min</button>
-          <button class="a-seg" data-seg>1 h</button>
+        <div class="a-row"><span>Snapshot</span><b class="a-val">demo-2026-11-07</b></div>
+        <div class="a-row"><span>Auto-refresh</span>
+          <div class="a-seggroup" data-seggroup>
+            <button class="a-seg" data-seg>Off</button>
+            <button class="a-seg" data-seg>5 min</button>
+            <button class="a-seg on" data-seg>15 min</button>
+            <button class="a-seg" data-seg>1 h</button>
+          </div>
         </div>
-      </div>
+        <div class="a-row"><span>Include offline builds</span><button class="a-switch" data-switch aria-pressed="false" aria-label="Include offline builds"><i></i></button></div>
+      </section>
 
-      <p class="a-sec">Cluster jewels</p>
-      <div class="a-row"><span>Show unique cluster jewels</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Show unique cluster jewels"><i></i></button></div>
-      <div class="a-row"><span>Group combinations by notable</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Group combinations by notable"><i></i></button></div>
-      <div class="a-row"><span>Show item tooltip on hover</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Show item tooltip on hover"><i></i></button></div>
-      <div class="a-row"><span>Include jewels under iLvl 68</span><button class="a-switch" data-switch aria-pressed="false" aria-label="Include jewels under iLvl 68"><i></i></button></div>
+      <section class="a-setcard">
+        <h2>Cluster jewels</h2>
+        <div class="a-row"><span>Show unique cluster jewels</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Show unique cluster jewels"><i></i></button></div>
+        <div class="a-row"><span>Group combinations by notable</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Group combinations by notable"><i></i></button></div>
+        <div class="a-row"><span>Show item tooltip on hover</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Show item tooltip on hover"><i></i></button></div>
+        <div class="a-row"><span>Include jewels under iLvl 68</span><button class="a-switch" data-switch aria-pressed="false" aria-label="Include jewels under iLvl 68"><i></i></button></div>
+        <div class="a-row"><span>Highlight notables in lists</span><button class="a-switch on" data-switch aria-pressed="true" aria-label="Highlight notables in lists"><i></i></button></div>
+      </section>
 
-      <p class="a-sec">Display</p>
-      <div class="a-row"><span>Density</span>
-        <div class="a-seggroup" data-seggroup>
-          <button class="a-seg on" data-seg>Comfortable</button>
-          <button class="a-seg" data-seg>Compact</button>
+      <section class="a-setcard">
+        <h2>Display</h2>
+        <div class="a-row"><span>Density</span>
+          <div class="a-seggroup" data-seggroup>
+            <button class="a-seg on" data-seg>Comfortable</button>
+            <button class="a-seg" data-seg>Compact</button>
+          </div>
         </div>
-      </div>
-      <div class="a-row"><span>Numbers</span>
-        <div class="a-seggroup" data-seggroup>
-          <button class="a-seg on" data-seg>34.5M</button>
-          <button class="a-seg" data-seg>34,532,119</button>
+        <div class="a-row"><span>Numbers</span>
+          <div class="a-seggroup" data-seggroup>
+            <button class="a-seg on" data-seg>34.5M</button>
+            <button class="a-seg" data-seg>34,532,119</button>
+          </div>
         </div>
-      </div>
+        <div class="a-row"><span>Compact panel headers</span><button class="a-switch" data-switch aria-pressed="false" aria-label="Compact panel headers"><i></i></button></div>
+      </section>
+    </div>
 
-      <div class="a-sheetfoot">
-        <span class="a-note">Saved to this device</span>
-        <div class="a-sheetbtns">
-          <button class="a-btn" data-close>Cancel</button>
-          <button class="a-btn primary" data-close>Save</button>
-        </div>
+    <div class="a-setfoot">
+      <span class="a-note">Saved to this device · v0.9.4</span>
+      <div class="a-setbtns">
+        <button class="a-btn" data-return>Cancel</button>
+        <button class="a-btn primary" data-return>Save</button>
       </div>
     </div>
   </div>
@@ -366,20 +367,23 @@ function wireMock(mock) {
     if (!target || typeof target.closest !== 'function') return;
 
     const nav = target.closest('[data-nav]');
-    if (nav) { pickAll('[data-nav]', nav); return; }
-
-    const panel = target.closest('[data-panel]');
-    if (panel) {
-      const open = !mock.classList.contains('panel-open');
-      mock.classList.toggle('panel-open', open);
-      panel.setAttribute('aria-expanded', String(open));
+    if (nav) {
+      // Remember which destination we came from, so Cancel / Save can put the bar back.
+      const main = [...mock.querySelectorAll('[data-nav][data-view="main"]')];
+      const at = main.indexOf(nav);
+      if (at !== -1) mock.dataset.lastTab = String(at);
+      pickAll('[data-nav]', nav);
+      mock.classList.toggle('view-settings', nav.dataset.view === 'settings');
       return;
     }
 
-    if (target.closest('[data-close]')) {
-      mock.classList.remove('panel-open');
-      const gearBtn = mock.querySelector('[data-panel="settings"]');
-      if (gearBtn) gearBtn.setAttribute('aria-expanded', 'false');
+    if (target.closest('[data-return]')) {
+      mock.classList.remove('view-settings');
+      const main = [...mock.querySelectorAll('[data-nav][data-view="main"]')];
+      const back = Math.min(Number(mock.dataset.lastTab || 0), main.length - 1);
+      main.forEach((n, i) => n.classList.toggle('on', i === back));
+      const setTab = mock.querySelector('[data-nav][data-view="settings"]');
+      if (setTab) setTab.classList.remove('on');
       return;
     }
 

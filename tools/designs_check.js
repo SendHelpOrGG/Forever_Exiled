@@ -151,17 +151,16 @@ check('every mock has a craft target',
 check('every mock has a status line that agrees on 234 characters',
   THEMES.every((t) => /234/.test(text(section(t.id).querySelector(STATUS)))));
 
-check('every mock has a settings control in the top bar',
+check('every mock has a settings tab in the navigation',
   THEMES.every((t) => {
-    const gear = section(t.id).querySelector('.a-bar .a-gear');
-    return gear && (gear.getAttribute('aria-label') || '').length > 2 && gear.querySelector('svg');
+    const tab = section(t.id).querySelector('[data-nav][data-view="settings"]');
+    return tab && /Settings/.test(text(tab)) && tab.querySelector('svg');
   }),
-  text(section('crimson').querySelector('.a-gear') || 'none'));
+  text(section('crimson').querySelector('[data-view="settings"]')));
 
-check('the settings control answers the pointer and the keyboard',
-  /\.m-atrium \.a-gear:hover \{[^}]*border-color: var\(--accent\)/.test(css.replace(/\n/g, ' '))
-  && /\.m-atrium \.a-gear:hover svg \{[^}]*rotate/.test(css.replace(/\n/g, ' '))
-  && /\.m-atrium \.a-gear:focus-visible \{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
+check('the settings tab answers the pointer and the keyboard',
+  /\.m-atrium \.a-tab-set:hover svg \{[^}]*rotate/.test(css.replace(/\n/g, ' '))
+  && /\.m-atrium \.a-tab-set:focus-visible \{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
 
 check('every mock has the five-tab navigation',
   THEMES.every((t) => section(t.id).querySelectorAll(NAV).length >= 5),
@@ -291,53 +290,60 @@ const token = (sel, name) => {
   return m ? m[1].trim() : null;
 };
 
-/* ── the settings sheet behind the gear ─────────────────────────────────── */
+/* ── settings is a page of its own, reached from the nav ─────────────────── */
 
 {
   const mock = mockOf('crimson');
-  const gear = mock.querySelector('.a-gear');
-  const sheet = mock.querySelector('.a-sheet');
-  check('the gear opens a settings sheet',
-    Boolean(gear && sheet) && gear.dataset.panel === 'settings'
-    && gear.getAttribute('aria-haspopup') === 'dialog',
-    gear ? gear.dataset.panel : 'no gear');
+  const tab = mock.querySelector('[data-nav][data-view="settings"]');
+  const page = mock.querySelector('.a-settings');
+  const mainTabs = [...mock.querySelectorAll('[data-nav][data-view="main"]')];
 
-  check('the settings sheet has sections and real controls',
-    Boolean(sheet)
-    && sheet.querySelectorAll('.a-sec').length >= 3
-    && sheet.querySelectorAll('[data-switch]').length >= 3
-    && sheet.querySelectorAll('[data-seggroup]').length >= 3,
-    sheet ? `${sheet.querySelectorAll('.a-sec').length} sections, ${sheet.querySelectorAll('[data-switch]').length} switches, ${sheet.querySelectorAll('[data-seg]').length} segments` : 'none');
+  check('the settings page has groups with real controls',
+    Boolean(page)
+    && page.querySelectorAll('.a-setcard').length === 3
+    && page.querySelectorAll('[data-switch]').length >= 6
+    && page.querySelectorAll('[data-seggroup]').length >= 3,
+    page ? `${page.querySelectorAll('.a-setcard').length} cards, ${page.querySelectorAll('[data-switch]').length} switches, ${page.querySelectorAll('[data-seg]').length} segments` : 'none');
 
-  click(gear);
-  const opened = mock.classList.contains('panel-open') && gear.getAttribute('aria-expanded') === 'true';
+  // Leave from a tab that is not the first one, so a lazy restore would show up.
+  click(mainTabs[mainTabs.length - 1]);
+  click(tab);
+  const opened = mock.classList.contains('view-settings')
+    && tab.classList.contains('on')
+    && mainTabs.filter((n) => n.classList.contains('on')).length === 0;
 
-  const sw = sheet.querySelector('[data-switch]');
+  const sw = page.querySelector('[data-switch]');
   const before = sw.classList.contains('on');
   click(sw);
   const toggled = sw.classList.contains('on') !== before
     && sw.getAttribute('aria-pressed') === String(!before);
 
-  const group = sheet.querySelector('[data-seggroup]');
+  const group = page.querySelector('[data-seggroup]');
   const segs = [...group.querySelectorAll('[data-seg]')];
   click(segs[segs.length - 1]);
   const segOk = segs[segs.length - 1].classList.contains('on')
     && segs.filter((n) => n.classList.contains('on')).length === 1;
 
-  check('the settings sheet opens from the gear', opened);
+  check('the settings tab swaps the whole screen', opened);
   check('the settings switches and segments really change', toggled && segOk,
-    `switch ${before ? 'on' : 'off'} → ${!before ? 'on' : 'off'}, segment ${segs.length} kept one selected`);
+    `switch ${before ? 'on' : 'off'} → ${!before ? 'on' : 'off'}, ${segs.length} segments kept one selected`);
 
-  click(sheet.querySelector('.a-x'));
-  const closed = !mock.classList.contains('panel-open') && gear.getAttribute('aria-expanded') === 'false';
-  check('the settings sheet closes again', closed);
+  click(page.querySelector('[data-return]'));
+  const lit = mainTabs.filter((n) => n.classList.contains('on'));
+  const returned = !mock.classList.contains('view-settings')
+    && lit.length === 1
+    && lit[0] === mainTabs[mainTabs.length - 1]
+    && !tab.classList.contains('on');
+  check('leaving settings restores the tab you came from', returned,
+    lit.length ? lit.map((n) => n.textContent.trim()).join(' + ') : 'nothing selected');
 
-  check('the sheet is a centred overlay, not another column',
-    /\.m-atrium \.a-panelwrap \{[^}]*position:\s*absolute[^}]*inset:\s*0/.test(css.replace(/\n/g, ' '))
-    && /\.m-atrium\.panel-open \.a-panelwrap \{[^}]*display:\s*flex/.test(css.replace(/\n/g, ' '))
-    && Number((blockOf('.m-atrium .a-sheet').match(/width:\s*(\d+)px/) || [0, 0])[1]) <= 560
-    && Number((blockOf('.m-atrium .a-sheet').match(/max-height:\s*(\d+)px/) || [0, 0])[1]) <= 560);
+  check('the settings page replaces the columns instead of floating over them',
+    /\.m-atrium \.a-settings \{[^}]*position:\s*absolute[^}]*top:\s*64px[^}]*bottom:\s*30px/.test(css.replace(/\n/g, ' '))
+    && /\.m-atrium\.view-settings \.a-settings \{[^}]*display:\s*flex/.test(css.replace(/\n/g, ' '))
+    && /\.m-atrium\.view-settings \.a-body \{[^}]*display:\s*none/.test(css.replace(/\n/g, ' '))
+    && /overflow:\s*auto/.test(blockOf('.m-atrium .a-settings')));
 }
+
 
 check('the layout is written in palette tokens',
   ['accent', 'bg', 'line', 'note', 'mod', 'text', 'muted'].every((n) => token('.m-atrium', n) !== null),
@@ -640,7 +646,6 @@ check('the first palette carries a second, warm accent',
 check('no palette is accented in brown or green',
   accentHues.every(([, c]) => c && !brownOrGreen(c)),
   accentHues.map(([id, c]) => `${id}:h${c ? Math.round(c.h) : '?'}`).join(' '));
-
 
 
 check('the palettes that ask for a second accent declare it',

@@ -71,7 +71,7 @@ the unique cluster jewels (Voices 21, Megalomaniac 34), the most-used notables, 
 routes with tries and cost, and the all-builds totals (124,363 builds · 234 characters · 592
 jewels).
 
-Four controls are real, not decoration:
+The controls are real, not decoration:
 
 - the **size switch** (`All · Large · Medium · Small`, with counts) filters the combination list, and
   each row carries its own size so the filter can be checked;
@@ -81,12 +81,14 @@ Four controls are real, not decoration:
   `preview/assets/asc_icons/`;
 - the **unique cluster jewels** can be switched off and back on from the panel header — the switch is
   a real toggle, not a hover;
-- the top bar carries a **settings control** beside the Sync ladder button — a real button with
-  `aria-label`, a rotating gear on hover, a pressed state and a focus ring;
-- pressing it opens a **settings sheet** over a blurred scrim: league and snapshot, auto-refresh
-  interval, four cluster-jewel switches (unique jewels, group by notable, item tooltip on hover,
-  include jewels under iLvl 68), density and number format. The switches and segments really change
-  state, and the sheet closes on the ×, Cancel, Save or the scrim;
+- the top bar carries **Settings** as a tab of its own, after a hairline rule and the five ladder
+  tabs — a gear that turns 60° on hover and when selected, with a label and a focus ring;
+- clicking that tab swaps the whole body for a **settings page** (never a dialog): three cards —
+  Ladder (league, snapshot, auto-refresh, include offline builds), Cluster jewels (five switches:
+  unique jewels, group by notable, item tooltip, jewels under iLvl 68, highlight notables) and
+  Display (density, number format, compact headers). The switches and segments really change state,
+  and **Cancel**, **Save** or any ladder tab returns to the combination list with the tab states
+  restored;
 - hovering any combination flies out the **cluster jewel tooltip**: generated name, base type
   (`Large / Medium / Small Cluster Jewel`), item level, passive count, the jewel-socket line, the
   cluster modifiers, the notables and the jewel itself. It is anchored to the row (centre for the top
@@ -99,7 +101,7 @@ Nothing there is wired to the app, and the app does not link to it.
 
 ```bash
 python3 preview/serve_designs.py 8081        # → http://localhost:8081/designs/
-NODE_PATH=… node tools/designs_check.js      # 69 checks: ten dark layouts, no brown or green, full feature surface, live controls
+NODE_PATH=… node tools/designs_check.js      # 92 checks: five dark layouts, no brown or green, full feature surface, live controls
 ```
 
 ## What is real and what is simulated
