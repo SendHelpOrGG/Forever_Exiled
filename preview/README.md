@@ -136,12 +136,18 @@ Flasks a flask, Economy currency and Rare Items a piece of gear. All six are 144
 | Economy | `tab_economy.jpg` | an **Exalted Orb** |
 | Settings | `tab_settings.jpg` | the **path of exile** wordmark — the one tab about the app, not a feature |
 
-The five item plates are composed, not cropped: the inventory art is small, so
-`tools/make_tab_plates.py` upscales it with an unsharp pass, stands it on the point the frame's mask
-is centred on (52 % / 40 %, the open band), puts a blurred oversized copy of the same art behind it
-at a third of the alpha, gives it a wide glow and vignettes the corners back to the field. The item
-icons and the wordmark are Grinding Gear Games' art, held in `assets/splash/src/` next to the
-plates so the build can be repeated.
+The five item plates are **composed, not cropped** — GGG's inventory art tops out at 78 px for a
+jewel and 156–300 px for flasks and currency, so thrown up whole it is a blur, which is what the
+first version of these plates was. `tools/make_tab_plates.py` builds each one like a photograph of
+an object in a room: the room is the cemetery painting blurred past legibility and pulled to 20 %
+(texture and depth, no subject), with a pool of light, fine grain and a vignette all rendered at
+1440 × 810 so the field is sharp everywhere the icon is not; the artefact is upscaled in steps
+(2× → sharpen → 2× → the last resize) rather than one jump, its near-invisible dark margin is
+thresholded off first, and then it gets a contact shadow, a soft light under it, a blurred halo of
+itself and a faint reflection, so it sits *in* the room. It stands on the point the frame's mask is
+centred on (52 % / 40 %, the open band) and never grows past about 3× its source. The item icons and
+the wordmark are Grinding Gear Games' art, held in `assets/splash/src/` next to the plates so the
+build can be repeated: `/path/to/python tools/make_tab_plates.py`.
 
 One layer, three parts: the six `<img>`, an `<i>` that blends that palette's own `--accent` into
 whichever picture is lit with `mix-blend-mode: color`, and a `<b>` scrim. The chosen destination is
