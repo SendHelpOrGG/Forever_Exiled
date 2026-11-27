@@ -341,8 +341,9 @@ const hslOf = (r, g, b) => {
   return { h, sat, l };
 };
 
+/* brown is the dark amber band; a bright gold sits above it and is not brown */
 const brownOrGreen = ({ h, sat, l }) =>
-  sat >= 0.22 && l > 0.06 && l < 0.92 && ((h >= 18 && h <= 58) || (h >= 62 && h <= 172));
+  sat >= 0.22 && l > 0.06 && l < 0.92 && ((h >= 18 && h <= 58 && l < 0.5) || (h >= 62 && h <= 172));
 
 const paletteColours = [];
 for (const m of css.matchAll(/#([0-9a-f]{6})\b/gi)) {
@@ -364,6 +365,14 @@ check('no brown or green anywhere in the palettes', banned.length === 0,
 const accentHues = accents.map(([id, hex]) => [id, hex
   ? hslOf(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16))
   : null]);
+check('the first palette carries a second, warm accent',
+  (() => {
+    const note = token('.m-atrium.t-crimson', 'note');
+    const c = hslOf(parseInt(note.slice(1, 3), 16), parseInt(note.slice(3, 5), 16), parseInt(note.slice(5, 7), 16));
+    return c.h >= 34 && c.h <= 60 && c.l > 0.55;
+  })(),
+  'note ' + token('.m-atrium.t-crimson', 'note'));
+
 check('no palette is accented in brown or green',
   accentHues.every(([, c]) => c && !brownOrGreen(c)),
   accentHues.map(([id, c]) => `${id}:h${c ? Math.round(c.h) : '?'}`).join(' '));

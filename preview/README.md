@@ -54,7 +54,7 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 
 | # | palette | accent | field |
 |---|---------|--------|-------|
-| 01 | Crimson | `#ff4d5e` | `#0b080d` — the original, de-pinked |
+| 01 | Crimson | `#ff4d5e` + gold `#f2c94c` | `#0b080d` — the original, de-pinked |
 | 02 | Violet | `#a06bff` | `#0a0817` |
 | 03 | Azure | `#4b8dff` | `#070c18` |
 | 04 | Cyan | `#2ad4e6` | `#061318` |

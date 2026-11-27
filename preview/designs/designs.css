@@ -301,17 +301,34 @@ img { display: block; }
 
 /* ── the five palettes ──────────────────────────────────────────────────── */
 
-/* 01 · crimson — the original, with the pink pulled out of it */
+/* 01 · crimson + gold — red chrome, yellow for every value the eye should land on */
 .m-atrium.t-crimson {
   --accent: #ff4d5e; --accent-soft: #ffb0b8; --accent-hi: #ff6f7d; --accent-lo: #c22f3f; --accent-ink: #12080c;
+  --gold: #f5c542; --gold-soft: #ffe08a;
   --bg: #0b080d; --panel: #191320;
   --glass: rgba(22, 16, 26, .72); --glass-hi: rgba(26, 18, 30, .55); --glass-on: rgba(42, 26, 38, .78); --glass-sel: rgba(46, 30, 40, .55);
   --glow: rgba(255, 77, 94, .85); --halo: rgba(255, 77, 94, .17);
   --v55: rgba(11, 8, 13, .55); --v70: rgba(11, 8, 13, .70); --v86: rgba(11, 8, 13, .86); --v95: rgba(11, 8, 13, .95);
   --line: rgba(255, 190, 194, .14); --line2: rgba(255, 190, 194, .26);
-  --note: #ff9aa4; --mod: #86b6ff;
+  --note: #f2c94c; --mod: #86b6ff;
   --text: #f4eef1; --muted: #b5a9b0; --faint: #8a7f86;
 }
+
+/* the yellow only ever lands on a number, a share or a notable — never on a surface */
+.m-atrium.t-crimson .a-kicker { color: var(--gold); }
+.m-atrium.t-crimson .a-gem { border-color: rgba(245, 197, 66, .42); }
+.m-atrium.t-crimson .a-tabs a.on { border-color: rgba(245, 197, 66, .45); }
+.m-atrium.t-crimson .a-stats .stat:first-child .num { color: var(--gold); }
+.m-atrium.t-crimson .a-stats .val { color: var(--gold-soft); }
+.m-atrium.t-crimson .a-cardpct { color: var(--gold); }
+.m-atrium.t-crimson .a-target { color: var(--gold); }
+.m-atrium.t-crimson .a-notrow b { color: var(--gold); }
+.m-atrium.t-crimson .a-notrow i { background: linear-gradient(90deg, var(--gold), var(--gold-soft)); opacity: .95; }
+.m-atrium.t-crimson .a-selected .bar i { background: linear-gradient(90deg, var(--gold), var(--gold-soft)); }
+.m-atrium.t-crimson .a-cardbody .bar i { background: linear-gradient(90deg, rgba(245, 197, 66, .8), var(--gold-soft)); }
+.m-atrium.t-crimson .fx-route.best b { color: var(--gold); }
+.m-atrium.t-crimson .a-card.on { box-shadow: 0 0 0 1px var(--gold), 0 22px 44px -26px var(--glow); }
+.m-atrium.t-crimson .a-selected { border-color: rgba(245, 197, 66, .3); }
 
 /* 02 · violet */
 .m-atrium.t-violet {

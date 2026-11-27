@@ -175,12 +175,12 @@ L.atrium = () => `
 
 const VARIANTS = [
   {
-    id: 'crimson', layout: 'atrium', theme: 'crimson', name: 'Atrium · Crimson', tag: 'Red',
-    intent: 'The original direction with the pink taken out: a vivid red accent on a near-neutral warm black, red-tinted hairlines, and the same glass panel. Notables sit in light red, cluster modifiers stay steel blue, so the screen reads red-and-blue rather than pink.',
-    keeps: 'The atmosphere of the first pass — the halo, the art washing into the field — without the candy tint.',
-    costs: 'Red carries more urgency than pink did; the panel is a little less soft.',
-    tags: ['crimson', 'warm', 'high contrast'],
-    sw: ['#0b080d', '#191320', '#ff4d5e', '#ff9aa4', '#86b6ff'],
+    id: 'crimson', layout: 'atrium', theme: 'crimson', name: 'Atrium · Crimson', tag: 'Red + gold',
+    intent: 'The original direction with the pink taken out and a warm gold added: a red accent on a near-neutral warm black for the chrome, and yellow reserved for the things the eye should land on first — the average DPS, the share percentages, the craft target, the best route and the notables. The gold never touches a surface, only a value.',
+    keeps: 'The atmosphere of the first pass — the halo, the art washing into the field — now with a codified highlight colour.',
+    costs: 'Red and gold together are the loudest pairing here; in noir they would be unthinkable.',
+    tags: ['crimson', 'gold', 'warm'],
+    sw: ['#0b080d', '#191320', '#ff4d5e', '#f2c94c', '#86b6ff'],
   },
   {
     id: 'violet', layout: 'atrium', theme: 'violet', name: 'Atrium · Violet', tag: 'Violet',
