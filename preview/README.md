@@ -58,7 +58,7 @@ crafting routes and the totals. **All five palettes are dark, and none uses brow
 | 02 | Violet | `#a06bff` | `#0a0817` |
 | 03 | Azure | `#4b8dff` | `#070c18` |
 | 04 | Cyan | `#2ad4e6` | `#061318` |
-| 05 | Noir | `#f4f6f8` | `#000000` — black and white, square corners, no blur, inverting hover |
+| 05 | Noir | `#f4f6f8` | `#000000` — black and white, colour only |
 
 The layout is written in palette tokens (`--accent`, `--bg`, `--glass`, `--line`, `--note`,
 `--mod`, …) and each palette only redefines those, so the five cannot drift apart. Notables always

@@ -208,10 +208,10 @@ const VARIANTS = [
   },
   {
     id: 'noir', layout: 'atrium', theme: 'noir', name: 'Atrium · Noir', tag: 'Black & white',
-    intent: 'Black and white, aggressively: pure black field, white accent, hard 1px white rules, square corners, no blur and no glow — the glass panel becomes a printed plate with an offset shadow, and the splash art is desaturated so the only colour left is the resource art itself. Hovering a combination inverts it to white-on-black.',
-    keeps: 'The one that looks designed rather than tinted — layout, contrast and type do the work, not hue.',
-    costs: 'The hardest of the five to soften later; white on black at this contrast is loud by default.',
-    tags: ['noir', 'monochrome', 'brutalist'],
+    intent: 'The same screen with no hue left in it: pure black field, white accent, white hairlines, white notables and a single cool grey for the cluster modifiers. Nothing about the layout, the type or the controls changes — only the colour, plus the desaturated splash art behind it.',
+    keeps: 'The most neutral reading of the screen — the data is the only thing with contrast.',
+    costs: 'Without a hue the panel and the art flatten into one another more than in the coloured palettes.',
+    tags: ['noir', 'monochrome', 'neutral'],
     sw: ['#000000', '#0c0c0e', '#f4f6f8', '#eef0f3', '#9fa8b6'],
   },
 ];

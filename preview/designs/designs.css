@@ -349,7 +349,8 @@ img { display: block; }
   --text: #e9f8fb; --muted: #9ab4bd; --faint: #75909a;
 }
 
-/* 05 · noir — black and white, no grey compromise */
+/* 05 · noir — black and white, colour only: the layout, the sizes and the type are
+   untouched, so this is the same screen with the hue and the grey scale removed */
 .m-atrium.t-noir {
   --accent: #f4f6f8; --accent-soft: #eef0f3; --accent-hi: #e6e9ee; --accent-lo: #b9bfc8; --accent-ink: #050506;
   --bg: #000000; --panel: #0c0c0e;
@@ -361,47 +362,5 @@ img { display: block; }
   --text: #f4f6f8; --muted: #b4b8bf; --faint: #7e828a;
 }
 
-/* no glass, no rounding, no glow — hard edges and a monochrome plate */
-.m-atrium.t-noir .a-backdrop { filter: grayscale(1) contrast(1.25) brightness(.85); opacity: .34; }
-.m-atrium.t-noir .a-bar { border-bottom-color: rgba(255, 255, 255, .5); }
-.m-atrium.t-noir .a-brand { font-weight: 800; letter-spacing: .24em; }
-.m-atrium.t-noir .a-tabs a { border-radius: 0; }
-.m-atrium.t-noir .a-tabs a.on { background: #f4f6f8; border-color: #f4f6f8; color: #050506; }
-.m-atrium.t-noir .a-tabs a:hover { color: #050506; background: #b9bfc8; }
-.m-atrium.t-noir .a-sync { border-radius: 0; text-transform: uppercase; letter-spacing: .14em; font-weight: 800; background: #f4f6f8; color: #050506; box-shadow: 4px 4px 0 rgba(255, 255, 255, .24); }
-.m-atrium.t-noir .a-sync:hover { box-shadow: 6px 6px 0 rgba(255, 255, 255, .4); }
-.m-atrium.t-noir .a-kicker { letter-spacing: .3em; color: #eef0f3; }
-.m-atrium.t-noir .a-titlerow h1 { font-weight: 800; letter-spacing: -.02em; text-transform: uppercase; }
-.m-atrium.t-noir .a-gem { border-radius: 0; border-color: rgba(255, 255, 255, .42); background: #000; }
-.m-atrium.t-noir .a-stats .stat { border-right-color: rgba(255, 255, 255, .34); }
-.m-atrium.t-noir .a-stats .num, .m-atrium.t-noir .a-stats .val { font-weight: 800; letter-spacing: -.02em; }
-.m-atrium.t-noir .a-list { gap: 8px; }
-
-.m-atrium.t-noir .a-card { border-radius: 0; border-color: rgba(255, 255, 255, .42); background: #0a0a0c; backdrop-filter: none; box-shadow: 6px 6px 0 rgba(0, 0, 0, .85); }
-.m-atrium.t-noir .a-cardart { border-radius: 0; border-color: rgba(255, 255, 255, .4); background: #000; filter: grayscale(1) contrast(1.15); }
-.m-atrium.t-noir .a-card b { text-transform: uppercase; letter-spacing: .05em; font-weight: 800; }
-.m-atrium.t-noir .a-cardpct { font-weight: 800; color: #f4f6f8; }
-.m-atrium.t-noir .a-card:hover { background: #f4f6f8; border-color: #f4f6f8; color: #050506; transform: translate(-2px, -2px); box-shadow: 8px 8px 0 rgba(255, 255, 255, .3); }
-.m-atrium.t-noir .a-card:hover b,
-.m-atrium.t-noir .a-card:hover .fx-notable,
-.m-atrium.t-noir .a-card:hover .fx-mod,
-.m-atrium.t-noir .a-card:hover .fx-gear,
-.m-atrium.t-noir .a-card:hover .a-cardpct { color: #050506; }
-.m-atrium.t-noir .a-card:hover .fx-notable { border-color: rgba(0, 0, 0, .3); }
-.m-atrium.t-noir .a-card:hover .bar { background: rgba(0, 0, 0, .22); }
-.m-atrium.t-noir .a-card.on { border-color: #f4f6f8; box-shadow: inset 0 0 0 1px #f4f6f8, 6px 6px 0 rgba(0, 0, 0, .85); }
-
-.m-atrium.t-noir .a-panel { border-radius: 0; border-color: rgba(255, 255, 255, .5); background: #08080a; backdrop-filter: none; box-shadow: 10px 10px 0 rgba(255, 255, 255, .13); }
-.m-atrium.t-noir .a-selected { border-radius: 0; background: #101012; border-color: rgba(255, 255, 255, .34); }
-.m-atrium.t-noir .a-cap { color: #f4f6f8; letter-spacing: .26em; }
-.m-atrium.t-noir .a-pick { border-radius: 0; border-color: rgba(255, 255, 255, .3); }
-.m-atrium.t-noir .a-pick.on { background: #f4f6f8; border-color: #f4f6f8; }
-.m-atrium.t-noir .a-pick.on img { filter: grayscale(1) contrast(1.5); }
-.m-atrium.t-noir .a-pick:hover { transform: none; border-color: #f4f6f8; }
-.m-atrium.t-noir .a-notrow { color: #b4b8bf; }
-.m-atrium.t-noir .a-notrow i { background: #f4f6f8; opacity: .92; border-radius: 0; }
-.m-atrium.t-noir .a-notrow b { color: #f4f6f8; }
-.m-atrium.t-noir .a-target { color: #f4f6f8; text-transform: uppercase; letter-spacing: .06em; }
-.m-atrium.t-noir .a-routes .fx-route { border-top-color: rgba(255, 255, 255, .2); }
-.m-atrium.t-noir .a-totals { border-top-color: rgba(255, 255, 255, .42); }
-.m-atrium.t-noir .a-status { border-top-color: rgba(255, 255, 255, .42); }
+/* the splash art is desaturated as well — otherwise the frame is not black and white */
+.m-atrium.t-noir .a-backdrop { filter: grayscale(1) contrast(1.1); }

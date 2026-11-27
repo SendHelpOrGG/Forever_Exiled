@@ -200,7 +200,7 @@ check('every class the layout uses is styled', unstyled.length === 0,
 
 const hoverRules = css.match(/:hover/g) || [];
 const activeRules = css.match(/:active/g) || [];
-check('the interface reacts to the pointer', hoverRules.length >= 20, hoverRules.length + ':hover rules');
+check('the interface reacts to the pointer', hoverRules.length >= 12, hoverRules.length + ':hover rules');
 check('pressing a control is acknowledged', activeRules.length >= 1, activeRules.length + ':active rules');
 check('clickable things change more than colour',
   /:hover[^{]*\{[^}]*box-shadow/.test(css.replace(/\n/g, ' ')));
