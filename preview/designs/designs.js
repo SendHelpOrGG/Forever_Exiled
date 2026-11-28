@@ -254,6 +254,12 @@ L.atrium = () => {
       <p>Stored on this device. Applies to every snapshot and every ladder page.</p>
     </div>
 
+    <div class="a-subtabs" role="tablist" aria-label="Settings sections">
+      <button class="a-subtab on" role="tab" data-subtab="general" aria-selected="true">General</button>
+      <button class="a-subtab" role="tab" data-subtab="themes" aria-selected="false">Themes</button>
+    </div>
+
+    <div class="a-setpane" data-pane="general">
     <div class="a-setcards">
       <section class="a-setcard">
         <h2>Ladder</h2>
@@ -301,6 +307,19 @@ L.atrium = () => {
         </div>
         <div class="a-row"><span>Compact panel headers</span><button class="a-switch" data-switch aria-pressed="false" aria-label="Compact panel headers"><i></i></button></div>
       </section>
+    </div>
+    </div>
+
+    <div class="a-setpane" data-pane="themes" hidden>
+      <p class="a-sethint">The same layout in ten palettes. Pick one and the whole frame changes under it — chrome, values, modifiers and the halo with it.</p>
+      <div class="a-themes">
+        ${VARIANTS.map((v) => `
+        <button class="a-theme" data-theme="${v.theme}" aria-pressed="false" title="${v.name}">
+          <span class="a-themesw">${v.sw.slice(0, 5).map((c) => `<i style="background:${c}"></i>`).join('')}</span>
+          <b>${v.name.replace('Atrium \u00b7 ', '')}</b>
+          <em>${v.tag}</em>
+        </button>`).join('')}
+      </div>
     </div>
 
     <div class="a-setfoot">
@@ -429,6 +448,12 @@ function variantSection(v, index) {
 function wireMock(mock) {
   const pickAll = (sel, el) => mock.querySelectorAll(sel).forEach((n) => n.classList.toggle('on', n === el));
 
+  mock.querySelectorAll('[data-theme]').forEach((b) => {
+    const on = mock.classList.contains('t-' + b.dataset.theme);
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+
   mock.addEventListener('click', (event) => {
     const target = event.target;
     if (!target || typeof target.closest !== 'function') return;
@@ -454,6 +479,29 @@ function wireMock(mock) {
       if (main[back]) mock.dataset.tab = main[back].dataset.tab || 'clusters';
       const setTab = mock.querySelector('[data-nav][data-view="settings"]');
       if (setTab) setTab.classList.remove('on');
+      return;
+    }
+
+    const sub = target.closest('[data-subtab]');
+    if (sub) {
+      mock.querySelectorAll('[data-subtab]').forEach((b) => {
+        const on = b === sub;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-selected', String(on));
+      });
+      mock.querySelectorAll('.a-setpane[data-pane]').forEach((pane) => { pane.hidden = pane.dataset.pane !== sub.dataset.subtab; });
+      return;
+    }
+
+    const theme = target.closest('[data-theme]');
+    if (theme) {
+      VARIANTS.forEach((v) => mock.classList.remove('t-' + v.theme));
+      mock.classList.add('t-' + theme.dataset.theme);
+      mock.querySelectorAll('[data-theme]').forEach((b) => {
+        const on = b === theme;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
       return;
     }
 

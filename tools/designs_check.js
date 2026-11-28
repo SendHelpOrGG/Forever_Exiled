@@ -368,6 +368,51 @@ const token = (sel, name) => {
     && /\.m-atrium\.view-settings \.a-settings \{[^}]*display:\s*flex/.test(css.replace(/\n/g, ' '))
     && /\.m-atrium\.view-settings \.a-body \{[^}]*display:\s*none/.test(css.replace(/\n/g, ' '))
     && /overflow:\s*auto/.test(blockOf('.m-atrium .a-settings')));
+
+  // The panel is absolute, but a zippier sibling rule used to out-specify it
+  // and drop it back into the grid, which pushed the whole page down the frame.
+  const flat = css.replace(/\n/g, ' ');
+  const sibRules = (flat.match(/\.m-atrium\s*>\s*\*(?::not\([^)]*\))+[^{]*\{[^}]*\}/g) || [])
+    .filter((r) => /position:\s*relative/.test(r));
+  check('no broad .m-atrium child rule out-specifies the settings panel',
+    sibRules.length > 0 && sibRules.every((r) => /:not\(\.a-settings\)/.test(r)),
+    sibRules.length ? sibRules.map((r) => r.slice(0, 54) + '…').join(' · ') : 'no such rule');
+
+  // Prove it with the cascade, not just the text: with the sheet live, the panel must
+  // still be the absolute layer and not a grid row pushed down the frame.
+  const probe = document.createElement('style');
+  probe.textContent = css;
+  document.head.appendChild(probe);
+  const laid = window.getComputedStyle(page);
+  const place = { position: laid.position, top: laid.top, bottom: laid.bottom };
+  probe.remove();
+  check('the settings panel actually lays out against the top of the frame',
+    place.position === 'absolute' && place.top === '64px' && place.bottom === '30px',
+    `${place.position} ${place.top} / ${place.bottom}`);
+
+  const subTabs = [...page.querySelectorAll('[data-subtab]')];
+  click(page.querySelector('[data-subtab="themes"]'));
+  const themesPane = page.querySelector('.a-setpane[data-pane="themes"]');
+  const generalPane = page.querySelector('.a-setpane[data-pane="general"]');
+  const swatches = [...page.querySelectorAll('[data-theme]')];
+  check('settings has its own Themes sub-tab, apart from the general cards',
+    subTabs.length === 2
+    && Boolean(themesPane) && !themesPane.hidden && generalPane.hidden
+    && swatches.length === 10,
+    `${subTabs.map((n) => n.textContent.trim()).join(' + ')}, ${swatches.length} palettes`);
+
+  const wasTheme = [...mock.classList].find((c) => /^t-/.test(c));
+  click(page.querySelector('[data-theme="honey"]'));
+  const repainted = mock.classList.contains('t-honey')
+    && page.querySelector('[data-theme="honey"]').classList.contains('on')
+    && page.querySelectorAll('[data-theme].on').length === 1;
+  click(page.querySelector('[data-subtab="general"]'));
+  const backToGeneral = !generalPane.hidden && themesPane.hidden;
+  check('picking a palette in Settings repaints the frame and marks the swatch',
+    repainted && backToGeneral,
+    `${wasTheme || 'none'} → ${[...mock.classList].find((c) => /^t-/.test(c)) || 'none'}`);
+  mock.classList.remove('t-honey');
+  if (wasTheme) mock.classList.add(wasTheme);
 }
 
 
