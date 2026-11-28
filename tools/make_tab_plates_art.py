@@ -41,12 +41,14 @@ PLATES = [
     ('rare',     TABS / 'src' / 'rare-items.png',       (0.0000, 0.3150, 1.0000, 0.5625)),
     ('flasks',   TABS / 'src' / 'flasks-scene.png',     (0.0000, 0.0358, 1.0000, 0.9284)),
     ('economy',  TABS / 'economy.jpg',                  (0.0000, 0.0000, 1.0000, 1.0000)),
+    ('settings', TABS / 'src' / 'settings-keyart.png',  (0.0278, 0.0000, 0.9443, 1.0000)),
 ]
 OUT = {
     'watchers': SPLASH / 'tab_watchers_eye.jpg',
     'rare': SPLASH / 'tab_rare_items.jpg',
     'flasks': SPLASH / 'tab_flasks.jpg',
     'economy': SPLASH / 'tab_economy.jpg',
+    'settings': SPLASH / 'tab_settings.jpg',
 }
 
 
