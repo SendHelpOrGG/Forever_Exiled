@@ -93,7 +93,9 @@ const stat = (label, value) => `<div class="stat"><em>${label}</em><b class="num
    the game's wordmark — the one panel that is about the app rather than about a feature.
    All six are 16:9 and 1440 x 810, so the frame never crops them; the five composed plates are built
    by tools/make_tab_plates.py with the artefact on the mask's centre (52 % / 40 %), the grove is the
-   painting the frame shipped with. */
+   painting the frame shipped with. The Watcher's Eye plate is now built by tools/make_watchers_tab.py
+   instead: the jewel set into the summoner painting, zoomed so it lands on that same 52 % / 40 % core,
+   and saturation-boosted to survive the grayscale(.86) the stylesheet grades every plate with. */
 const PLATES = [
   ['clusters', 'bleed_grove.jpg'],
   ['watchers', 'tab_watchers_eye.jpg'],
