@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forever Exiled — plate directions, 1920 × 1080</title>
+<title>Forever Exiled — plates from real game assets</title>
 <style>
   :root {
     --page: #07060b;
@@ -12,7 +12,6 @@
     --ink-3: #6f6579;
     --hair: rgba(255, 255, 255, .09);
     --accent: #ff4d5e;
-    --gold: #f2c94c;
     --ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; }
@@ -27,56 +26,42 @@
   h1 { margin: 12px 0 0; font-size: 38px; line-height: 1.08; letter-spacing: -.025em; font-weight: 600; }
   .sub { margin: 14px 0 0; max-width: 900px; font-size: 14.5px; line-height: 1.7; color: var(--ink-2); }
   .sub b { color: var(--ink); font-weight: 600; }
-  .sub i { color: var(--gold); font-style: normal; }
   .hint { margin: 12px 0 0; max-width: 900px; font-size: 12.5px; line-height: 1.7; color: var(--ink-3); }
   .hint b { color: var(--ink-2); font-weight: 600; }
-  .rule { max-width: 900px; margin: 16px 0 0; padding: 12px 15px; border-left: 2px solid var(--accent);
-          background: rgba(255, 77, 94, .05); font-size: 12.8px; line-height: 1.65; color: #cbbfc9; border-radius: 0 8px 8px 0; }
+  .rule { max-width: 900px; margin: 16px 0 0; padding: 13px 16px; border-left: 2px solid var(--accent);
+          background: rgba(255, 77, 94, .05); font-size: 12.9px; line-height: 1.7; color: #cbbfc9; border-radius: 0 8px 8px 0; }
+  .rule b { color: #fff; }
 
-  .bar {
-    position: sticky; top: 0; z-index: 5;
-    margin: 26px 0 0; padding: 12px 32px;
-    background: linear-gradient(180deg, rgba(7, 6, 11, .96), rgba(7, 6, 11, .82) 70%, transparent);
-    backdrop-filter: blur(12px);
-  }
+  .bar { position: sticky; top: 0; z-index: 5; margin: 26px 0 0; padding: 12px 32px;
+         background: linear-gradient(180deg, rgba(7, 6, 11, .96), rgba(7, 6, 11, .82) 70%, transparent);
+         backdrop-filter: blur(12px); }
   .bar-in { max-width: 1440px; margin: 0 auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .tab {
-    padding: 9px 16px; border-radius: 999px; border: 1px solid var(--hair);
-    font-size: 13px; color: var(--ink-2); transition: .18s ease;
-  }
+  .tab { padding: 9px 16px; border-radius: 999px; border: 1px solid var(--hair);
+         font-size: 13px; color: var(--ink-2); transition: .18s ease; }
   .tab:hover { color: var(--ink); border-color: rgba(255, 255, 255, .2); }
-  .tab[aria-selected="true"] {
-    color: #12060a; background: linear-gradient(180deg, #ff7b88, var(--accent));
-    border-color: transparent; font-weight: 600; box-shadow: 0 6px 22px -8px rgba(255, 77, 94, .9);
-  }
+  .tab[aria-selected="true"] { color: #12060a; background: linear-gradient(180deg, #ff7b88, var(--accent));
+    border-color: transparent; font-weight: 600; box-shadow: 0 6px 22px -8px rgba(255, 77, 94, .9); }
   .tab .n { opacity: .55; font-variant-numeric: tabular-nums; margin-left: 6px; font-size: 11.5px; }
-  .tab[aria-selected="true"] .n { opacity: .7; }
 
   main { max-width: 1440px; margin: 0 auto; padding: 22px 32px 90px; }
   .set { display: none; }
   .set.on { display: block; animation: fade .28s ease both; }
   @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; }
-  .card { position: relative; border: 1px solid var(--hair); border-radius: 14px; overflow: hidden; background: #0c0a12; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 22px; }
+  .card { border: 1px solid var(--hair); border-radius: 14px; overflow: hidden; background: #0c0a12; }
   .shot { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; }
-  .shot img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease, filter .3s ease; }
-  .card:hover .shot img { transform: scale(1.015); filter: brightness(1.06); }
-  .badge {
-    position: absolute; top: 10px; left: 10px; z-index: 2;
-    display: flex; align-items: center; gap: 7px;
-    padding: 4px 9px 4px 7px; border-radius: 999px;
-    background: rgba(8, 6, 12, .72); border: 1px solid rgba(255, 255, 255, .14);
-    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: #d9d2e4;
-    backdrop-filter: blur(6px);
-  }
-  .badge b { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--accent); color: #16070b; font-size: 10.5px; letter-spacing: 0; }
-  .zoom {
-    position: absolute; right: 10px; bottom: 10px; z-index: 2;
-    padding: 4px 9px; border-radius: 8px; font-size: 10.5px; letter-spacing: .08em;
-    background: rgba(8, 6, 12, .72); border: 1px solid rgba(255, 255, 255, .14);
-    color: #cfc8d8; opacity: 0; transition: .2s ease;
-  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; transition: filter .3s ease; }
+  .card:hover .shot img { filter: brightness(1.15); }
+  .badge { position: absolute; top: 10px; left: 10px; z-index: 2; display: flex; align-items: center; gap: 7px;
+    padding: 4px 9px 4px 7px; border-radius: 999px; background: rgba(8, 6, 12, .72);
+    border: 1px solid rgba(255, 255, 255, .14); font-size: 10.5px; letter-spacing: .16em;
+    text-transform: uppercase; color: #d9d2e4; backdrop-filter: blur(6px); }
+  .badge b { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%;
+    background: var(--accent); color: #16070b; font-size: 10.5px; letter-spacing: 0; }
+  .zoom { position: absolute; right: 10px; bottom: 10px; z-index: 2; padding: 4px 9px; border-radius: 8px;
+    font-size: 10.5px; background: rgba(8, 6, 12, .72); border: 1px solid rgba(255, 255, 255, .14);
+    color: #cfc8d8; opacity: 0; transition: .2s ease; }
   .card:hover .zoom { opacity: 1; }
 
   .meta { padding: 13px 15px 15px; }
@@ -84,16 +69,9 @@
   .meta p { margin: 6px 0 0; font-size: 12.3px; line-height: 1.6; color: var(--ink-2); }
   .meta p em { color: #8d8399; font-style: normal; }
   .refs { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 5px; }
-  .refs span {
-    font-size: 10px; letter-spacing: .04em; padding: 3px 7px; border-radius: 6px;
-    color: #b3a9c1; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .07);
-  }
-  .refs span::before { content: "ref · "; color: #6f6579; }
-
-  .pend { border: 1px dashed rgba(255, 255, 255, .16); border-radius: 14px; display: grid; place-items: center; min-height: 250px; background: rgba(255, 255, 255, .015); }
-  .pend div { text-align: center; padding: 20px; }
-  .pend b { display: block; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
-  .pend small { display: block; margin-top: 8px; font-size: 12px; color: #554d5f; line-height: 1.6; }
+  .refs span { font-size: 10px; letter-spacing: .04em; padding: 3px 7px; border-radius: 6px;
+    color: #b3a9c1; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .07); }
+  .refs span::before { content: "asset · "; color: #6f6579; }
 
   footer { max-width: 1440px; margin: 0 auto; padding: 0 32px 70px; font-size: 11.5px; line-height: 1.8; color: #574f61; }
   @media (max-width: 720px) { h1 { font-size: 28px; } .top, main, .bar, footer { padding-left: 18px; padding-right: 18px; } }
@@ -102,30 +80,28 @@
 <body>
 
 <header class="top">
-  <div class="word">forever exiled · plate directions · second pass</div>
-  <h1>Real Path of Exile 1 items, three directions each</h1>
+  <div class="word">forever exiled · plates · assets only</div>
+  <h1>Nothing painted: real Path of Exile 1 art, composited</h1>
   <p class="sub">
-    Rebuilt to your two rules: <b>every artefact in these pictures is a real Path of Exile 1 item</b>,
-    described from its own in-game icon and reproduced to that design — and <b>every reference fed in is
-    Path of Exile 1 art</b>. The Path of Exile 2 assets from the first pass (the Voices jewel render,
-    the PoE2 key art, the PoE2 amulet set) are gone, and so is every invented piece of gear: each
-    picture now carries one named item from the game and nothing else.
+    Rebuilt the way you asked. <b>No generated imagery at all</b> — every plate is a real PoE1 painting
+    from the gallery's own `assets/splash/` with real PoE1 item art layered on it. The invented orb,
+    the invented staging and the cinematic light are all gone: no glowing seals, no plinths, no
+    floating objects, no embers, no spotlights, no rim light.
   </p>
   <div class="rule">
-    <b>What is in each picture, exactly.</b> Watcher's Eye: the bronze-and-silver serpent ring around a
-    fiery orange-red eye — <em>not</em> the ice-blue one I used before; I had the jewel's colour wrong.
-    Rare Items: the gold band with a <b>blue sapphire and an amber topaz</b> side by side, the black
-    onyx teardrop amulet on its chain, and PoE1's rare leather-and-steel gloves. Economy: the <b>Exalted
-    Orb</b> — plaited-gold bearded face with a second profile merging round the side, with the <b>Divine
-    Orb</b>, the <b>Chaos Orb</b> and the <b>Mirror of Kalandra</b> — and <em>no coins anywhere</em>, only
-    real game currency. Flasks: the
-    <b>Divine Life Flask</b> (tall ruby bottle, gold cap and corner plates), the <b>Granite Flask</b>
-    (stone in green glass) and the <b>Diamond Flask</b> (crystal in green glass).
+    <b>What is actually in the pixels.</b> Field: <em>bleed_graveyard.jpg</em>, the real PoE1 painting,
+    cropped into its quietest window and graded to the same darkness as the plate the gallery already
+    ships. Items, all real, all from GGG's own art: the <b>Watcher's Eye</b> jewel (78 px source), the
+    <b>Two-Stone Ring</b> (78), the <b>Onyx Amulet</b> (78), PoE1 <b>rare gauntlets</b> (156), the
+    <b>Exalted Orb</b> (300), the <b>Mirror of Kalandra</b> (300), the <b>Divine Life Flask</b> (78×156),
+    the <b>Granite Flask</b> and the <b>Diamond Flask</b>. The only thing the build adds is a soft
+    contact shadow; there is no other pixel that is not GGG's.
   </div>
   <p class="hint">
-    All files are true <b>1920 × 1080</b> JPEGs. Click a picture to open it full size. Same three
-    constructions per tab: <b>A</b> an object in a place, <b>B</b> a centred poster on a carved seal,
-    <b>C</b> the item in its world.
+    <b>The honest limit:</b> GGG ships a jewel at 78 px, so an item is used at <b>2×–3×</b> its own size
+    (156–234 px on a 1920 px plate) and never more — past that the resample invents detail that is not
+    in the game, which is the thing you rejected. That is why these read as small, sharp objects rather
+    than as subjects filling the frame. Click any plate for full size; all files are 1920 × 1080.
   </p>
 </header>
 
@@ -143,44 +119,44 @@
   <section class="set on" id="set-watchers">
     <div class="grid">
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/watchers-a.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>A</b> in a place</span>
-          <img src="../../assets/plates/v3/watchers-a.jpg" alt="Watcher's Eye on volcanic stone" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/watchers-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> 3× · centre</span>
+          <img src="../../assets/plates/assets/watchers-a.jpg" alt="Watcher's Eye plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The eye on the rock</h2>
-          <p>The real jewel on wet volcanic stone with a few loose coins: silver-green serpent coils,
-          fanged heads curling out, the fiery eye lit from inside. The most dramatic of the three.</p>
-          <div class="refs"><span>Watcher's Eye icon</span><span>Grand Spectrum jewel</span><span>grove painting</span></div>
+          <h2>The jewel at 3×</h2>
+          <p>The largest size the 78 px source supports without inventing detail — 234 px in the middle
+          of the open band, where the frame's mask is strongest.</p>
+          <div class="refs"><span>Watcher's Eye icon 78 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/watchers-b.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>B</b> centred poster</span>
-          <img src="../../assets/plates/v3/watchers-b.jpg" alt="Watcher's Eye on a carved seal" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/watchers-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> 2× · left</span>
+          <img src="../../assets/plates/assets/watchers-b.jpg" alt="Watcher's Eye plate, left" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>Eye on the seal</h2>
-          <p>Dead centre on a carved plinth, smoke and embers rising, cold key light against the orange
-          eye. Symmetrical, so it survives the frame's mask and the panel over it.</p>
-          <div class="refs"><span>Watcher's Eye icon</span><span>Grand Spectrum jewel</span><span>graveyard painting</span></div>
+          <h2>The jewel at 2×</h2>
+          <p>The safest upscale — 156 px, sharp everywhere, sitting left of the title. Reads as an
+          object in the scene rather than as a picture.</p>
+          <div class="refs"><span>Watcher's Eye icon 78 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/watchers-c.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>C</b> in its world</span>
-          <img src="../../assets/plates/v3/watchers-c.jpg" alt="Jeweller's mat with the jewel and green jewels" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/watchers-c.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>C</b> 3× · right</span>
+          <img src="../../assets/plates/assets/watchers-c.jpg" alt="Watcher's Eye plate, right" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The jeweller's mat</h2>
-          <p>Dark leather, a brass loupe, three green Grand Spectrum jewels and one candle. Warm and
-          quiet, and the eye still holds the centre — the best of the three as a background.</p>
-          <div class="refs"><span>Watcher's Eye icon</span><span>Grand Spectrum jewel</span><span>grove painting</span></div>
+          <h2>The jewel at 3×, right</h2>
+          <p>Same size as A, moved out of the title's way. For a frame whose text runs down the left,
+          this is the placement that collides least.</p>
+          <div class="refs"><span>Watcher's Eye icon 78 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
     </div>
@@ -189,44 +165,44 @@
   <section class="set" id="set-rare">
     <div class="grid">
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/rare-a.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>A</b> in a place</span>
-          <img src="../../assets/plates/v3/rare-a.jpg" alt="Ring, onyx amulet and gloves on slate" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/rare-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> ring only</span>
+          <img src="../../assets/plates/assets/rare-a.jpg" alt="Two-Stone Ring plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>Loot on slate</h2>
-          <p>The two-stone ring with its blue and amber stones, the onyx pendant on its chain, and a
-          pair of PoE1's rare gauntlets, on wet black slate. Reads as a haul, not one item.</p>
-          <div class="refs"><span>Two-Stone Ring icon</span><span>Onyx Amulet icon</span><span>rare gloves icon</span><span>graveyard painting</span></div>
+          <h2>One ring</h2>
+          <p>The real Two-Stone Ring at 3× — both stones still visible, blue and amber, exactly as GGG
+          drew it. The plainest of the three.</p>
+          <div class="refs"><span>Two-Stone Ring 78 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/rare-b.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>B</b> centred poster</span>
-          <img src="../../assets/plates/v3/rare-b.jpg" alt="Gold ring on a carved plinth" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/rare-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> ring + amulet</span>
+          <img src="../../assets/plates/assets/rare-b.jpg" alt="Ring and onyx amulet plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The ring on the seal</h2>
-          <p>The cleanest of the set — one band, one plinth, one light. <em>Weaker on accuracy: only the
-          amber stone reads clearly; the sapphire is lost behind the band.</em></p>
-          <div class="refs"><span>Two-Stone Ring icon</span><span>grove painting</span></div>
+          <h2>Ring and amulet</h2>
+          <p>Two real rare bases side by side at 3× each — the ring with its two stones, the black onyx
+          teardrop. Says "Rare Items" more clearly than a single ring.</p>
+          <div class="refs"><span>Two-Stone Ring 78 px</span><span>Onyx Amulet 78 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/rare-c.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>C</b> in its world</span>
-          <img src="../../assets/plates/v3/rare-c.jpg" alt="Ring and amulet on a dungeon floor" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/rare-c.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>C</b> the haul</span>
+          <img src="../../assets/plates/assets/rare-c.jpg" alt="Ring, amulet and gloves plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The drop</h2>
-          <p>Ring and pendant on cracked wet flagstones, one hard shaft of light from a broken ceiling.
-          A "this just dropped" moment — atmospheric, but the items are small in the frame.</p>
-          <div class="refs"><span>Two-Stone Ring icon</span><span>Onyx Amulet icon</span><span>graveyard painting</span></div>
+          <h2>Ring, amulet, gauntlets</h2>
+          <p>Three real bases at once, the gloves at 1.5× because their source is 156 px. The fullest
+          statement of "rare items" — and the busiest.</p>
+          <div class="refs"><span>Two-Stone Ring</span><span>Onyx Amulet</span><span>rare gloves 156 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
     </div>
@@ -235,45 +211,44 @@
   <section class="set" id="set-economy">
     <div class="grid">
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/economy-a.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>A</b> in a place</span>
-          <img src="../../assets/plates/v3/economy-a.jpg" alt="Four Path of Exile 1 currency orbs on stone" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/economy-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> exalted</span>
+          <img src="../../assets/plates/assets/economy-a.jpg" alt="Exalted Orb plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>Four orbs, bare stone</h2>
-          <p>The four real orbs laid out side by side: Exalted with its bearded gold face, Divine with a
-          serene one, Chaos split open and molten, the Mirror of Kalandra flat on its back. Nothing else
-          in the frame — no coins.</p>
-          <div class="refs"><span>Exalted Orb art 2000 px</span><span>Divine Orb render</span><span>Mirror of Kalandra</span><span>graveyard painting</span></div>
+          <h2>The Exalted Orb</h2>
+          <p>The real orb at 2× of its 300 px source — 600 px, sharp, the plaited faces all readable.
+          The currency the app cares about most.</p>
+          <div class="refs"><span>Exalted Orb 300 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/economy-b.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>B</b> centred poster</span>
-          <img src="../../assets/plates/v3/economy-b.jpg" alt="Exalted Orb floating above a plinth with three smaller orbs" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/economy-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> exalted + mirror</span>
+          <img src="../../assets/plates/assets/economy-b.jpg" alt="Exalted Orb and Mirror of Kalandra plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The face</h2>
-          <p>The Exalted Orb floating over a carved seal, with a Divine, a Chaos and a Mirror below it.
-          The strongest single subject of the twelve — it reads as currency at thumbnail size.</p>
-          <div class="refs"><span>Exalted Orb art 2000 px</span><span>Divine Orb render</span><span>Mirror of Kalandra</span><span>grove painting</span></div>
+          <h2>Orb and mirror</h2>
+          <p>Two real currencies at 2× each: the Exalted Orb and the Mirror of Kalandra. Both are in the
+          game; neither is imagined.</p>
+          <div class="refs"><span>Exalted Orb 300 px</span><span>Mirror of Kalandra 300 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/economy-c.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>C</b> in its world</span>
-          <img src="../../assets/plates/v3/economy-c.jpg" alt="Vault counting table with rows of currency orbs" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/economy-c.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>C</b> mirror only</span>
+          <img src="../../assets/plates/assets/economy-c.jpg" alt="Mirror of Kalandra plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The counting table</h2>
-          <p>Rows of orbs on a vault table — Exalted, Divine, clusters of Chaos, one Mirror — with brass
-          scales behind, a lantern left and cold light from a slit window. The richest of the three.</p>
-          <div class="refs"><span>Exalted Orb art 2000 px</span><span>Divine Orb render</span><span>Mirror of Kalandra</span><span>graveyard painting</span></div>
+          <h2>The Mirror of Kalandra</h2>
+          <p>At 2.5× — the largest honest size for its 300 px art — the rarest currency there is, and
+          the only one whose art is silver rather than gold.</p>
+          <div class="refs"><span>Mirror of Kalandra 300 px</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
     </div>
@@ -282,44 +257,44 @@
   <section class="set" id="set-flasks">
     <div class="grid">
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/flasks-a.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>A</b> in a place</span>
-          <img src="../../assets/plates/v3/flasks-a.jpg" alt="Three Path of Exile 1 flasks on a bench" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/flasks-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> life flask</span>
+          <img src="../../assets/plates/assets/flasks-a.jpg" alt="Divine Life Flask plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The bench</h2>
-          <p>The three real flasks side by side: the Divine Life Flask's ruby body and gold corner
-          plates, the Granite's stone, the Diamond's crystal. Backlit, warm, brick wall behind.</p>
-          <div class="refs"><span>Divine Life Flask icon</span><span>Granite Flask icon</span><span>Diamond Flask icon</span><span>graveyard painting</span></div>
+          <h2>The life flask</h2>
+          <p>The real Divine Life Flask at 2× (156×312), ruby body and gold corner plates. One bottle,
+          unmistakably the red one.</p>
+          <div class="refs"><span>Divine Life Flask 78×156</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/flasks-b.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>B</b> centred poster</span>
-          <img src="../../assets/plates/v3/flasks-b.jpg" alt="Divine Life Flask on a plinth" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/flasks-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> three flasks</span>
+          <img src="../../assets/plates/assets/flasks-b.jpg" alt="Three flasks plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The lantern</h2>
-          <p>The life flask alone, lit from behind so the ruby liquid burns, gold crest on the cap, a
-          lit ring on the plinth. The most legible at small size.</p>
-          <div class="refs"><span>Divine Life Flask icon</span><span>Granite Flask icon</span><span>grove painting</span></div>
+          <h2>Life, granite, diamond</h2>
+          <p>Three real flasks at 2×: the red life flask, and the two green utility flasks with their
+          stone and their crystal. Says "flasks" at a glance.</p>
+          <div class="refs"><span>Divine Life Flask</span><span>Granite Flask</span><span>Diamond Flask</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
 
       <article class="card">
-        <a class="shot" href="../../assets/plates/v3/flasks-c.jpg" target="_blank" rel="noopener">
-          <span class="badge"><b>C</b> in its world</span>
-          <img src="../../assets/plates/v3/flasks-c.jpg" alt="Expedition belt hung with flasks" loading="lazy">
+        <a class="shot" href="../../assets/plates/assets/flasks-c.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>C</b> three at 2.5×</span>
+          <img src="../../assets/plates/assets/flasks-c.jpg" alt="Three flasks, larger plate" loading="lazy">
           <span class="zoom">1920 × 1080 ↗</span>
         </a>
         <div class="meta">
-          <h2>The belt</h2>
-          <p>Stained leather over a crate, hung with the life flask, two stone-and-crystal green flasks,
-          a silvery one and a half-empty one. The only one of the three that reads as gear you carry.</p>
-          <div class="refs"><span>Divine Life Flask icon</span><span>Granite Flask icon</span><span>Diamond Flask icon</span><span>graveyard painting</span></div>
+          <h2>The same three, larger</h2>
+          <p>Pushed to 2.5× for the frame's masked band. Visible softness in the glass edges — the
+          trade-off for size, shown deliberately so you can call it.</p>
+          <div class="refs"><span>Divine Life Flask</span><span>Granite Flask</span><span>Diamond Flask</span><span>bleed_graveyard.jpg</span></div>
         </div>
       </article>
     </div>
@@ -328,10 +303,11 @@
 </main>
 
 <footer>
-  Subjects: Grinding Gear Games' Path of Exile 1 inventory art and currency art. References used to
-  paint them: the same PoE1 icons and renders, plus this gallery's own PoE1 splash paintings. No
-  Path of Exile 2 art and no invented items. Local design proposal only; nothing here ships without
-  GGG's blessing.
+  Every pixel is Grinding Gear Games' Path of Exile 1 art: the paintings already in
+  <code>assets/splash/</code> and the item art in <code>assets/splash/src/</code> and
+  <code>image-search/</code>. Built by <code>tools/make_asset_plates.py</code> — rebuild with
+  <code>python tools/make_asset_plates.py</code>. Local design proposal only; nothing here ships
+  without GGG's blessing.
 </footer>
 
 <script>
