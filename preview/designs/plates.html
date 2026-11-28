@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forever Exiled — plate directions, 1920 × 1080</title>
+<style>
+  :root {
+    --page: #07060b;
+    --ink: #ece7f2;
+    --ink-2: #a89fb6;
+    --ink-3: #6f6579;
+    --hair: rgba(255, 255, 255, .09);
+    --accent: #ff4d5e;
+    --gold: #f2c94c;
+    --ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--ui); }
+  body { -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .top { max-width: 1440px; margin: 0 auto; padding: 46px 32px 0; }
+  .word { font-size: 12px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 12px 0 0; font-size: 38px; line-height: 1.08; letter-spacing: -.025em; font-weight: 600; }
+  .sub { margin: 14px 0 0; max-width: 860px; font-size: 14.5px; line-height: 1.7; color: var(--ink-2); }
+  .sub b { color: var(--ink); font-weight: 600; }
+  .sub i { color: var(--gold); font-style: normal; }
+  .hint { margin: 12px 0 0; max-width: 900px; font-size: 12.5px; line-height: 1.7; color: var(--ink-3); }
+  .hint b { color: var(--ink-2); font-weight: 600; }
+
+  .bar {
+    position: sticky; top: 0; z-index: 5;
+    margin: 26px 0 0; padding: 12px 32px;
+    background: linear-gradient(180deg, rgba(7, 6, 11, .96), rgba(7, 6, 11, .82) 70%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .bar-in { max-width: 1440px; margin: 0 auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tab {
+    padding: 9px 16px; border-radius: 999px; border: 1px solid var(--hair);
+    font-size: 13px; color: var(--ink-2); transition: .18s ease; letter-spacing: .01em;
+  }
+  .tab:hover { color: var(--ink); border-color: rgba(255, 255, 255, .2); }
+  .tab[aria-selected="true"] {
+    color: #12060a; background: linear-gradient(180deg, #ff7b88, var(--accent));
+    border-color: transparent; font-weight: 600;
+    box-shadow: 0 6px 22px -8px rgba(255, 77, 94, .9);
+  }
+  .tab .n { opacity: .55; font-variant-numeric: tabular-nums; margin-left: 6px; font-size: 11.5px; }
+  .tab[aria-selected="true"] .n { opacity: .7; }
+
+  main { max-width: 1440px; margin: 0 auto; padding: 22px 32px 90px; }
+  .set { display: none; }
+  .set.on { display: block; animation: fade .28s ease both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; }
+  .card { position: relative; border: 1px solid var(--hair); border-radius: 14px; overflow: hidden; background: #0c0a12; }
+  .shot { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease, filter .3s ease; }
+  .card:hover .shot img { transform: scale(1.015); filter: brightness(1.06); }
+  .badge {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 9px 4px 7px; border-radius: 999px;
+    background: rgba(8, 6, 12, .72); border: 1px solid rgba(255, 255, 255, .14);
+    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: #d9d2e4;
+    backdrop-filter: blur(6px);
+  }
+  .badge b { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--accent); color: #16070b; font-size: 10.5px; letter-spacing: 0; }
+  .zoom {
+    position: absolute; right: 10px; bottom: 10px; z-index: 2;
+    padding: 4px 9px; border-radius: 8px; font-size: 10.5px; letter-spacing: .08em;
+    background: rgba(8, 6, 12, .72); border: 1px solid rgba(255, 255, 255, .14);
+    color: #cfc8d8; opacity: 0; transition: .2s ease;
+  }
+  .card:hover .zoom { opacity: 1; }
+
+  .meta { padding: 13px 15px 15px; }
+  .meta h2 { margin: 0; font-size: 14.5px; font-weight: 600; letter-spacing: -.005em; }
+  .meta p { margin: 6px 0 0; font-size: 12.3px; line-height: 1.6; color: var(--ink-2); }
+  .refs { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 5px; }
+  .refs span {
+    font-size: 10px; letter-spacing: .04em; padding: 3px 7px; border-radius: 6px;
+    color: #b3a9c1; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .07);
+  }
+  .refs span::before { content: "ref · "; color: #6f6579; }
+
+  .pend { border: 1px dashed rgba(255, 255, 255, .16); border-radius: 14px; display: grid; place-items: center; aspect-ratio: auto; min-height: 240px; background: rgba(255, 255, 255, .015); }
+  .pend div { text-align: center; padding: 20px; }
+  .pend b { display: block; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+  .pend small { display: block; margin-top: 8px; font-size: 12px; color: #554d5f; line-height: 1.6; }
+
+  footer { max-width: 1440px; margin: 0 auto; padding: 0 32px 70px; font-size: 11.5px; line-height: 1.8; color: #574f61; }
+  @media (max-width: 720px) { h1 { font-size: 28px; } .top, main, .bar, footer { padding-left: 18px; padding-right: 18px; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="word">forever exiled · plate directions</div>
+  <h1>Three directions per destination, 1920 × 1080</h1>
+  <p class="sub">
+    Twelve pictures, three per tab, built the way you asked: <b>each one generated from several pieces
+    of real Path of Exile art at once</b> — the inventory icon for the artefact itself, plus other real
+    assets for material, palette and style — not traced and not redrawn. Three constructions, the same
+    three per tab: <i>A</i> a naturalistic still life, <i>B</i> a centred poster on an engraved seal,
+    <i>C</i> the artefact inside its world. Pick what you like per tab and I will rebuild that one at
+    full fidelity.
+  </p>
+  <p class="hint">
+    Every file is a true <b>1920 × 1080</b> JPEG. Click a picture to open it at full size. The chips
+    under each one list the real game art that fed it.
+  </p>
+</header>
+
+<div class="bar">
+  <div class="bar-in" role="tablist">
+    <button class="tab" role="tab" data-set="watchers" aria-selected="true">Watcher's Eye<span class="n">3</span></button>
+    <button class="tab" role="tab" data-set="rare" aria-selected="false">Rare Items<span class="n">3</span></button>
+    <button class="tab" role="tab" data-set="economy" aria-selected="false">Economy<span class="n">2</span></button>
+    <button class="tab" role="tab" data-set="flasks" aria-selected="false">Flasks<span class="n">2</span></button>
+  </div>
+</div>
+
+<main>
+
+  <section class="set on" id="set-watchers">
+    <div class="grid">
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/watchers-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> still life</span>
+          <img src="../../assets/plates/v2/watchers-a.jpg" alt="Watcher's Eye on volcanic rock" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The eye on the rock</h2>
+          <p>Macro object study: the serpent-wrapped jewel on black volcanic stone, one warm rim light,
+          amber iris lit from inside, smoke. The most dramatic of the three, the least "inventory".</p>
+          <div class="refs"><span>Watcher's Eye icon</span><span>Voices jewel render</span><span>Samurai's Eye card art</span><span>PoE2 key art</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/watchers-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> centred poster</span>
+          <img src="../../assets/plates/v2/watchers-b.jpg" alt="Watcher's Eye on a seal" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>Eye on the seal</h2>
+          <p>The game's own colour — pale ice-blue iris, coiled bronze serpents — on a carved altar with
+          a lit sigil. Dead centre, symmetrical, so it survives a mask and a panel over it.</p>
+          <div class="refs"><span>Watcher's Eye icon</span><span>Samurai's Eye card art</span><span>Voices jewel render</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/watchers-c.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>C</b> in its world</span>
+          <img src="../../assets/plates/v2/watchers-c.jpg" alt="Jeweller's bench with jewels" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The jeweller's bench</h2>
+          <p>Violet cloth, spilled cut gems, tools, one candle and one shuttered window — the eye jewel
+          is the largest piece in the spill, but it is off-centre and small in the frame.</p>
+          <div class="refs"><span>Watcher's Eye icon</span><span>Voices jewel render</span><span>PoE2 key art</span><span>jewel splash</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="set" id="set-rare">
+    <div class="grid">
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/rare-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> still life</span>
+          <img src="../../assets/plates/v2/rare-a.jpg" alt="Ring, amulet and gauntlets on slate" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>Loot on slate</h2>
+          <p>A gold two-stone ring with sapphire and topaz, a bronze amulet, steel gauntlets, wet black
+          slate, raking light. Reads as "a haul" rather than one item — closest to a Rare drop.</p>
+          <div class="refs"><span>Two-Stone Ring icon</span><span>unique gauntlets</span><span>Marble Amulet</span><span>Stellar Amulet</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/rare-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> centred poster</span>
+          <img src="../../assets/plates/v2/rare-b.jpg" alt="Gold ring standing on a plinth" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The ring on the seal</h2>
+          <p>The ring standing upright, engraved band, two cabochons, on a black plinth with a lit
+          circle. The cleanest of the twelve — one object, one light, nothing competing.</p>
+          <div class="refs"><span>Two-Stone Ring icon</span><span>rare ring icon</span><span>GlovesStr5</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/rare-c.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>C</b> in its world</span>
+          <img src="../../assets/plates/v2/rare-c.jpg" alt="Loot on a dungeon floor" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The drop</h2>
+          <p>The same loot on cracked wet flagstones, one hard shaft of light from a broken ceiling,
+          gold cloth, cold seep on the walls. A "rare item dropped" moment rather than an object.</p>
+          <div class="refs"><span>Two-Stone Ring icon</span><span>Marble Amulet</span><span>Meginord's Vise</span><span>PoE2 key art</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="set" id="set-economy">
+    <div class="grid">
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/economy-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> still life</span>
+          <img src="../../assets/plates/v2/economy-a.jpg" alt="Hoard of currency orbs" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The hoard</h2>
+          <p>Orbs on a vault floor: the gold face-engraved orb, a pale ivory one, a cracked crimson one,
+          chaos orbs and coins, one shaft of light. Busy, rich, reads as wealth at a glance.</p>
+          <div class="refs"><span>Exalted Orb icon</span><span>Divine Orb card</span><span>orb art 2000 px</span><span>chaos/exalt art</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/economy-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> centred poster</span>
+          <img src="../../assets/plates/v2/economy-b.jpg" alt="Exalted orb floating above a plinth" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The face</h2>
+          <p>One orb, hovering, lit gold, its engraved faces catching the key light, two smaller orbs at
+          the base. The strongest single subject of the twelve.</p>
+          <div class="refs"><span>Exalted Orb icon</span><span>orb art 2000 px</span><span>Divine Orb card</span></div>
+        </div>
+      </article>
+
+      <article class="pend">
+        <div>
+          <b>C — in its world</b>
+          <small>Queued: the vault counting table.<br>Generating next turn (image cap).</small>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="set" id="set-flasks">
+    <div class="grid">
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/flasks-a.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>A</b> still life</span>
+          <img src="../../assets/plates/v2/flasks-a.jpg" alt="Flasks on an alchemist bench" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The bench</h2>
+          <p>Three flasks in a row on scarred wood — ruby life flask with a gold filigree cap, murky
+          green, amber — backlit so the liquid glows, a brass still behind. Warmest of the set.</p>
+          <div class="refs"><span>Divine Life Flask icon</span><span>flask art 600 px</span><span>alchemy lab art</span><span>alchemy still</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="shot" href="../../assets/plates/v2/flasks-b.jpg" target="_blank" rel="noopener">
+          <span class="badge"><b>B</b> centred poster</span>
+          <img src="../../assets/plates/v2/flasks-b.jpg" alt="Ruby life flask on a plinth" loading="lazy">
+          <span class="zoom">1920 × 1080 ↗</span>
+        </a>
+        <div class="meta">
+          <h2>The lantern</h2>
+          <p>One flask, lit from behind so the ruby liquid burns, condensation, gold mounts, a lit ring
+          on the plinth. Reads instantly as a life flask, even at thumbnail size.</p>
+          <div class="refs"><span>Divine Life Flask icon</span><span>life flask icon</span><span>alchemy still</span></div>
+        </div>
+      </article>
+
+      <article class="pend">
+        <div>
+          <b>C — in its world</b>
+          <small>Queued: the flask belt.<br>Generating next turn (image cap).</small>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Generated from Grinding Gear Games' own art as reference — inventory icons, jewel and orb renders,
+  key art and card art. Local design proposal only; nothing here ships without GGG's blessing.
+</footer>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (o) { o.setAttribute('aria-selected', String(o === t)); });
+        Array.prototype.forEach.call(document.querySelectorAll('.set'), function (s) {
+          s.classList.toggle('on', s.id === 'set-' + t.dataset.set);
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

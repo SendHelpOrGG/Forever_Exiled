@@ -294,3 +294,15 @@ represents the combination (`representative` on each combo, kept by the analysis
 rarity colour, base type, passive count, enchant, item level and flags, with each notable
 followed by its stat lines and reminder text from `assets/notables.json`. It is positioned against the cursor, flips sides near the window
 edge, and disappears on scroll, resize, blur or mouse-leave.
+
+### Plate directions (`plates.html`)
+
+A separate review page for the per-tab backgrounds, kept apart from the gallery while directions are
+being chosen: **`/designs/plates.html`** — four destinations, three constructions each (a naturalistic
+still life, a centred poster on an engraved seal, the artefact inside its world), every file a true
+1920 × 1080 JPEG in `assets/plates/v2/`. Each picture was generated from several pieces of real
+Path of Exile art at once — the inventory icon for the artefact itself plus other real assets for
+material, palette and style (the Voices jewel render, the Samurai's Eye card, the 2000 px orb art, the
+alchemy-lab and dungeon paintings) — rather than traced or redrawn. The chips under every card list
+the references that fed it, so a direction can be repeated. Nothing here is wired into the gallery or
+the app; the five `tab_*.jpg` plates still drive `designs/index.html`.
