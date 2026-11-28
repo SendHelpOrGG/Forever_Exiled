@@ -93,9 +93,10 @@ const stat = (label, value) => `<div class="stat"><em>${label}</em><b class="num
    the game's wordmark — the one panel that is about the app rather than about a feature.
    All six are 16:9 and 1440 x 810, so the frame never crops them; the five composed plates are built
    by tools/make_tab_plates.py with the artefact on the mask's centre (52 % / 40 %), the grove is the
-   painting the frame shipped with. Watcher's Eyes and Rare Items no longer come from that builder: their
-   art is supplied, and tools/make_tab_plates_art.py crops each one onto the same 52 % / 40 % core and
-   saturation-boosts it to survive the grayscale(.86) the stylesheet grades every plate with. */
+   painting the frame shipped with. Watcher's Eyes, Rare Items and Flasks no longer come from that
+   builder: their art is supplied, and tools/make_tab_plates_art.py crops each one onto the same
+   52 % / 40 % core and saturation-boosts it to survive the grayscale(.86) the stylesheet grades every
+   plate with. */
 const PLATES = [
   ['clusters', 'bleed_grove.jpg'],
   ['watchers', 'tab_watchers_eye.jpg'],

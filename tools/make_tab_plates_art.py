@@ -39,10 +39,12 @@ VIGNETTE = 0.85           # how far the corners fall toward the page background
 PLATES = [
     ('watchers', TABS / 'watchers.jpg',                 (0.0568, 0.1870, 0.6818, 0.6815)),
     ('rare',     TABS / 'src' / 'rare-items.png',       (0.0000, 0.3150, 1.0000, 0.5625)),
+    ('flasks',   TABS / 'flasks.jpg',                   (0.0000, 0.0000, 1.0000, 1.0000)),
 ]
 OUT = {
     'watchers': SPLASH / 'tab_watchers_eye.jpg',
     'rare': SPLASH / 'tab_rare_items.jpg',
+    'flasks': SPLASH / 'tab_flasks.jpg',
 }
 
 
